@@ -41,8 +41,7 @@ import { useI18n } from "@/i18n/provider";
 const PAGE_SIZE = 10;
 
 export default function DoctorFacilitiesPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
   const { toast } = useToast();
   const { facility, facilityQuery, saveMutation, isAwaitingData } =
     useDoctorFacility();
@@ -96,16 +95,10 @@ export default function DoctorFacilitiesPage() {
 
   const openCreate = () => {
     if (!canCreate) {
-      toast(
-        tr(
-          "يمكنك امتلاك منشأة واحدة فقط. عدّل المنشأة الحالية بدلًا من إنشاء أخرى.",
-          "You can only own one facility. Edit the current facility instead of creating another.",
-        ),
-        {
-          title: tr("منشأة موجودة", "Facility already exists"),
-          variant: "error",
-        },
-      );
+      toast(t("doctor.facilities.oneFacilityOnly"), {
+        title: t("doctor.facilities.facilityExists"),
+        variant: "error",
+      });
       return;
     }
 
@@ -116,16 +109,10 @@ export default function DoctorFacilitiesPage() {
 
   const openEdit = (target: DoctorFacility) => {
     if (target.isOwned === false) {
-      toast(
-        tr(
-          "هذه منشأة مرتبطة بحسابك ولا تملكها. لا يمكن تعديل بياناتها من هنا.",
-          "This facility is linked to your account but you do not own it. Its data cannot be edited from here.",
-        ),
-        {
-          title: tr("تعديل غير متاح", "Editing unavailable"),
-          variant: "error",
-        },
-      );
+      toast(t("doctor.facilities.cannotEditLinked"), {
+        title: t("doctor.facilities.editingUnavailable"),
+        variant: "error",
+      });
       return;
     }
 
@@ -137,17 +124,16 @@ export default function DoctorFacilitiesPage() {
   const handleUnlink = async (target: DoctorFacility) => {
     if (
       !window.confirm(
-        tr(
-          `إلغاء ربط منشأة "${target.name}"؟ يمكنك ربط منشأة أخرى لاحقًا.`,
-          `Unlink the facility "${target.name}"? You can link another facility later.`,
-        ),
+        locale === "ar"
+          ? `إلغاء ربط منشأة "${target.name}"؟ يمكنك ربط منشأة أخرى لاحقًا.`
+          : `Unlink the facility "${target.name}"? You can link another facility later.`,
       )
     ) {
       return;
     }
     try {
       await linkMutation.mutateAsync({ facilityId: null });
-      toast(tr("تم إلغاء ربط المنشأة.", "The facility was unlinked."), { variant: "success" });
+      toast(t("doctor.facilities.unlinked"), { variant: "success" });
     } catch (error) {
       const { title, message } = getDoctorFacilityLinkErrorToast(error);
       toast(message, { title, variant: "error" });
@@ -163,10 +149,13 @@ export default function DoctorFacilitiesPage() {
 
       toast(
         dialogMode === "edit"
-          ? tr("تم حفظ تعديلات المنشأة.", "The facility changes were saved.")
-          : tr("تمت إضافة المنشأة بنجاح.", "The facility was added successfully."),
+          ? t("doctor.facilities.changesSaved")
+          : t("doctor.facilities.addedSuccessfully"),
         {
-          title: dialogMode === "edit" ? tr("تم التحديث", "Updated") : tr("تمت الإضافة", "Added"),
+          title:
+            dialogMode === "edit"
+              ? t("doctor.facilities.updated")
+              : t("doctor.facilities.added"),
           variant: "success",
         },
       );
@@ -199,8 +188,8 @@ export default function DoctorFacilitiesPage() {
   }) => {
     try {
       await linkMutation.mutateAsync(payload);
-      toast(tr("تم ربط حسابك بالمنشأة بنجاح.", "Your account was linked to the facility successfully."), {
-        title: tr("تم الربط", "Linked"),
+      toast(t("doctor.facilities.linkedSuccessfully"), {
+        title: t("doctor.facilities.linked"),
         variant: "success",
       });
       setLinkDialogOpen(false);
@@ -216,8 +205,8 @@ export default function DoctorFacilitiesPage() {
   const handleSuggestSubmit = async (payload: SuggestFacilityPayload) => {
     try {
       await suggestMutation.mutateAsync(payload);
-      toast(tr("تم إرسال اقتراح المنشأة وسيتم مراجعته من الإدارة.", "The facility suggestion was submitted and will be reviewed by admin."), {
-        title: tr("تم إرسال الاقتراح", "Suggestion sent"),
+      toast(t("doctor.facilities.suggestionSubmitted"), {
+        title: t("doctor.facilities.suggestionSent"),
         variant: "success",
       });
       setSuggestDialogOpen(false);
@@ -235,7 +224,7 @@ export default function DoctorFacilitiesPage() {
     return (
       <>
         <Helmet>
-          <title>{tr("المنشآت • LMJ Health", "Facilities • LMJ Health")}</title>
+          <title>{t("doctor.facilities.pageTitle")}</title>
         </Helmet>
         <div
           dir={dir}
@@ -244,7 +233,7 @@ export default function DoctorFacilitiesPage() {
         >
           <div className="flex items-center gap-3 font-cairo text-[14px] font-semibold text-[#667085]">
             <Loader2 className="h-5 w-5 animate-spin text-primary" />
-            {tr("جاري تحميل المنشآت...", "Loading facilities...")}
+            {t("doctor.facilities.loading")}
           </div>
         </div>
       </>
@@ -255,10 +244,10 @@ export default function DoctorFacilitiesPage() {
     return (
       <>
         <Helmet>
-          <title>{tr("المنشآت • LMJ Health", "Facilities • LMJ Health")}</title>
+          <title>{t("doctor.facilities.pageTitle")}</title>
         </Helmet>
         <DoctorListErrorState
-          title={tr("تعذّر تحميل المنشآت", "Failed to load facilities")}
+          title={t("doctor.facilities.loadFailed")}
           brief={getUserFacingRequestErrorMessage(facilityQuery.error)}
           onRetry={() => void retryFacility()}
           retrying={retryingFacility}
@@ -270,12 +259,12 @@ export default function DoctorFacilitiesPage() {
   return (
     <>
       <Helmet>
-        <title>{tr("المنشآت • LMJ Health", "Facilities • LMJ Health")}</title>
+        <title>{t("doctor.facilities.pageTitle")}</title>
       </Helmet>
 
       <div dir={dir} lang={locale}>
         <ClinicAccountsBanner
-          title={tr("المنشآت", "Facilities")}
+          title={t("doctor.facilities.title")}
           icon={<Building2 className="h-7 w-7 text-white sm:h-8 sm:w-8" />}
           action={
             <div className="flex flex-col items-stretch justify-end gap-3 sm:flex-row sm:flex-wrap sm:items-center">
@@ -287,31 +276,38 @@ export default function DoctorFacilitiesPage() {
                   className="inline-flex h-[44px] items-center gap-2 rounded-[10px] border border-primary/30 bg-[#E6F4F3] px-4 font-cairo text-[13px] font-extrabold text-primary shadow-sm transition hover:border-primary/50 hover:bg-[#DDF0EF] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Link2 className="h-4 w-4" aria-hidden />
-                  {tr("ربط منشأة موجودة", "Link existing facility")}
+                  {t("doctor.facilities.linkExisting")}
                 </button>
               ) : null}
               <button
                 type="button"
                 onClick={openCreate}
                 disabled={!canCreate || saveMutation.isPending}
+                title={!canCreate ? t("doctor.facilities.oneFacilityOnly") : undefined}
                 className="inline-flex h-[44px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-extrabold text-primary shadow-sm transition hover:border-primary/30 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Plus className="h-4 w-4" aria-hidden />
-                {tr("إضافة منشأة", "Add facility")}
+                {t("doctor.facilities.addFacility")}
               </button>
             </div>
           }
         />
 
+        {!canCreate ? (
+          <p className="-mt-1 mb-4 font-cairo text-[12px] font-semibold text-[#98A2B3]">
+            {t("doctor.facilities.oneFacilityOnly")}
+          </p>
+        ) : null}
+
         <ClinicAccountsSearchRow
           value={search}
           onChange={setSearch}
-          placeholder={tr("ابحث عن منشأة...", "Search facilities...")}
+          placeholder={t("doctor.facilities.searchPlaceholder")}
           onValueChangeExtra={() => setPage(1)}
           trailing={
             <ClinicAccountsSearchCount
               count={filtered.length}
-              label={tr("منشأة", "facility")}
+              label={t("doctor.facilities.facilityLabel")}
             />
           }
         />
@@ -338,7 +334,11 @@ export default function DoctorFacilitiesPage() {
           />
         ) : (
           <>
-            <FacilitiesTable rows={pageRows} onEdit={openEdit} onUnlink={handleUnlink} />
+            <FacilitiesTable
+              rows={pageRows}
+              onEdit={openEdit}
+              onUnlink={handleUnlink}
+            />
 
             {filtered.length > PAGE_SIZE ? (
               <DoctorTablePagination
@@ -348,10 +348,11 @@ export default function DoctorFacilitiesPage() {
                 totalPages={totalPages}
                 pageSize={PAGE_SIZE}
                 pageSizeOptions={[10, 20]}
-                summaryLabel={tr(
-                  `عرض ${rangeStart}-${rangeEnd} من أصل ${filtered.length} منشأة`,
-                  `Showing ${rangeStart}-${rangeEnd} of ${filtered.length} facilities`,
-                )}
+                summaryLabel={
+                  locale === "ar"
+                    ? `عرض ${rangeStart}-${rangeEnd} من أصل ${filtered.length} منشأة`
+                    : `Showing ${rangeStart}-${rangeEnd} of ${filtered.length} facilities`
+                }
                 onPageChange={setPage}
                 onPageSizeChange={() => setPage(1)}
               />

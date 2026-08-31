@@ -66,8 +66,7 @@ export default function BookAppointmentPanel({
   doctorId?: string;
   submitDisabledReason?: string | null;
 }) {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, dir, locale } = useI18n();
   const selectOutletRef = useRef<HTMLDivElement>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const {
@@ -159,13 +158,10 @@ export default function BookAppointmentPanel({
 
         <div className="relative max-w-[620px] text-start">
           <h1 className="font-cairo text-[24px] font-black leading-[30px]">
-            {tr("حجز موعد جديد", "Book new appointment")}
+            {t("secretary.appointments.book.title")}
           </h1>
           <p className="mt-2 font-cairo text-[13px] font-semibold leading-6 text-white/85">
-            {tr(
-              "اختر المريض والتاريخ والوقت المناسب، ثم أكد الحجز ليتم إنشاء الموعد مباشرة في جدول الطبيب.",
-              "Choose the patient, date, and time, then confirm to create the appointment on the doctor's schedule.",
-            )}
+            {t("secretary.appointments.book.subtitle")}
           </p>
         </div>
       </div>
@@ -194,7 +190,7 @@ export default function BookAppointmentPanel({
               <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-[#DC2626]" />
               <div>
                 <div className="font-cairo text-[13px] font-extrabold text-[#991B1B]">
-                  {tr("تعذر إتمام الحجز", "Could not complete booking")}
+                  {t("secretary.appointments.book.error.title")}
                 </div>
                 <div className="mt-1 font-cairo text-[12px] font-semibold leading-6 text-[#B42318]">
                   {submitError}
@@ -208,7 +204,7 @@ export default function BookAppointmentPanel({
               <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-[#B54708]" />
               <div>
                 <div className="font-cairo text-[13px] font-extrabold text-[#93370D]">
-                  {tr("الحجز غير جاهز بعد", "Booking is not ready yet")}
+                  {t("secretary.appointments.book.notReady.title")}
                 </div>
                 <div className="mt-1 font-cairo text-[12px] font-semibold leading-6 text-[#B54708]">
                   {submitDisabledReason}
@@ -220,7 +216,7 @@ export default function BookAppointmentPanel({
           <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
             <div className="lg:col-span-1">
               <div className="mb-2 text-start font-cairo text-[14px] font-extrabold text-[#111827]">
-                {tr("اختر المريض", "Select patient")}
+                {t("secretary.appointments.book.selectPatient")}
               </div>
               <Controller
                 name="patientId"
@@ -235,15 +231,13 @@ export default function BookAppointmentPanel({
                     value={field.value}
                     onChange={field.onChange}
                     onBlur={field.onBlur}
-                    placeholder={tr("اختر...", "Select...")}
+                    placeholder={t("secretary.appointments.book.select")}
                     error={Boolean(errors.patientId)}
-                    emptyTriggerLabel={tr(
-                      "لا يوجد مرضى في القائمة",
-                      "No patients in the list",
+                    emptyTriggerLabel={t(
+                      "secretary.appointments.book.noPatients",
                     )}
-                    emptyState={tr(
-                      "لا يوجد مرضى متاحين للاختيار.",
-                      "No patients available to select.",
+                    emptyState={t(
+                      "secretary.appointments.book.noPatientsAvailable",
                     )}
                   />
                 )}
@@ -257,7 +251,7 @@ export default function BookAppointmentPanel({
 
             <div className="lg:col-span-1">
               <div className="mb-2 text-start font-cairo text-[14px] font-extrabold text-[#111827]">
-                {tr("التاريخ", "Date")}
+                {t("secretary.appointments.book.date")}
               </div>
               <input
                 type="date"
@@ -277,13 +271,13 @@ export default function BookAppointmentPanel({
             <div className="lg:col-span-1">
               <div className="flex gap-3 justify-between items-center mb-2">
                 <div className="text-start font-cairo text-[14px] font-extrabold text-[#111827]">
-                  {tr("الوقت المتاح", "Available time")}
+                  {t("secretary.appointments.book.availableTime")}
                 </div>
                 {selectedDate ? (
                   <div className="font-cairo text-[11px] font-bold text-[#667085]">
                     {isAwaitingSlots
-                      ? tr("جارٍ تحميل الفترات...", "Loading slots...")
-                      : `${totalFreeSlots} ${tr("فترات متاحة", "available slots")}`}
+                      ? t("secretary.appointments.book.loadingSlots")
+                      : `${totalFreeSlots} ${t("secretary.appointments.book.availableSlots")}`}
                   </div>
                 ) : null}
               </div>
@@ -297,10 +291,7 @@ export default function BookAppointmentPanel({
                   } bg-white p-3`}
                 >
                   <div className="rounded-[12px] bg-[#F9FAFB] px-4 py-4 text-start font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                    {tr(
-                      "اختر التاريخ أولاً حتى تظهر لك المواعيد المتاحة فقط.",
-                      "Select a date first to see available appointments only.",
-                    )}
+                    {t("secretary.appointments.book.selectDateFirst")}
                   </div>
                 </div>
               ) : isAwaitingSlots ? (
@@ -312,10 +303,7 @@ export default function BookAppointmentPanel({
                   } bg-white p-3`}
                 >
                   <div className="rounded-[12px] bg-[#F9FAFB] px-4 py-4 text-start font-cairo text-[12px] font-semibold text-[#667085]">
-                    {tr(
-                      "جارٍ تحميل الأوقات المتاحة...",
-                      "Loading available times...",
-                    )}
+                    {t("secretary.appointments.book.loadingTimes")}
                   </div>
                 </div>
               ) : slotsError ? (
@@ -327,10 +315,7 @@ export default function BookAppointmentPanel({
                   } bg-white p-3`}
                 >
                   <div className="rounded-[12px] bg-[#FEF2F2] px-4 py-4 text-start font-cairo text-[12px] font-semibold text-[#B42318]">
-                    {tr(
-                      "تعذر تحميل الأوقات المتاحة لهذا التاريخ.",
-                      "Could not load available times for this date.",
-                    )}
+                    {t("secretary.appointments.book.loadTimesError")}
                   </div>
                 </div>
               ) : availableTimes.length === 0 ? (
@@ -342,10 +327,7 @@ export default function BookAppointmentPanel({
                   } bg-white p-3`}
                 >
                   <div className="rounded-[12px] bg-[#FFF7ED] px-4 py-4 text-start font-cairo text-[12px] font-semibold text-[#C2410C]">
-                    {tr(
-                      "لا توجد أوقات متاحة في هذا التاريخ. اختر تاريخاً آخر.",
-                      "No available times on this date. Choose another date.",
-                    )}
+                    {t("secretary.appointments.book.noAvailableTimes")}
                   </div>
                 </div>
               ) : (
@@ -363,23 +345,24 @@ export default function BookAppointmentPanel({
                       value={field.value}
                       onChange={field.onChange}
                       onBlur={field.onBlur}
-                      placeholder={tr(
-                        "اختر وقتاً متاحاً...",
-                        "Select an available time...",
+                      placeholder={t(
+                        "secretary.appointments.book.selectAvailableTime",
                       )}
                       error={Boolean(errors.time || !isSelectedTimeAvailable)}
                       dropdownResetKey={selectedDate}
-                      listboxAriaLabel={tr("الأوقات المتاحة", "Available times")}
-                      chevronAriaLabelClose={tr(
-                        "فتح قائمة الأوقات المتاحة",
-                        "Open available times list",
+                      listboxAriaLabel={t(
+                        "secretary.appointments.book.availableTimes",
                       )}
-                      chevronAriaLabelOpen={tr(
-                        "إغلاق قائمة الأوقات المتاحة",
-                        "Close available times list",
+                      chevronAriaLabelClose={t(
+                        "secretary.appointments.book.openTimesList",
+                      )}
+                      chevronAriaLabelOpen={t(
+                        "secretary.appointments.book.closeTimesList",
                       )}
                       renderOptionTrailing={(_, isSelected) =>
-                        isSelected ? tr("محدد", "Selected") : tr("متاح", "Available")
+                        isSelected
+                          ? t("secretary.appointments.book.selected")
+                          : t("secretary.appointments.book.available")
                       }
                     />
                   )}
@@ -392,17 +375,11 @@ export default function BookAppointmentPanel({
                 </div>
               ) : !isSelectedTimeAvailable ? (
                 <div className="mt-2 text-start font-cairo text-[12px] font-bold text-[#D92D20]">
-                  {tr(
-                    "الوقت المحدد لم يعد متاحاً. اختر وقتاً من الأوقات المتاحة.",
-                    "Selected time is no longer available. Choose another available time.",
-                  )}
+                  {t("secretary.appointments.book.timeNotAvailable")}
                 </div>
               ) : (
                 <div className="mt-2 text-start font-cairo text-[11px] font-semibold text-[#98A2B3]">
-                  {tr(
-                    "تظهر لك فقط الأوقات المتاحة حسب جدول الطبيب.",
-                    "Only available times from the doctor's schedule are shown.",
-                  )}
+                  {t("secretary.appointments.book.onlyAvailableTimes")}
                 </div>
               )}
             </div>
@@ -412,7 +389,7 @@ export default function BookAppointmentPanel({
             {appointmentTypes.length > 0 ? (
               <div className="lg:col-span-1">
                 <div className="mb-2 text-start font-cairo text-[14px] font-extrabold text-[#111827]">
-                  {tr("نوع الموعد", "Appointment type")}
+                  {t("secretary.appointments.book.appointmentType")}
                 </div>
                 <Controller
                   name="appointmentTypeId"
@@ -423,7 +400,9 @@ export default function BookAppointmentPanel({
                       options={[
                         {
                           value: "",
-                          label: tr("بدون تحديد نوع", "No type selected"),
+                          label: t(
+                            "secretary.appointments.book.noTypeSelected",
+                          ),
                         },
                         ...appointmentTypes.map((type) => ({
                           value: type._id,
@@ -438,24 +417,29 @@ export default function BookAppointmentPanel({
                       onChange={field.onChange}
                       onBlur={field.onBlur}
                       disabled={isAwaitingTypes}
-                      placeholder={tr("بدون تحديد نوع", "No type selected")}
-                      listboxAriaLabel={tr("نوع الموعد", "Appointment type")}
+                      placeholder={t(
+                        "secretary.appointments.book.noTypeSelected",
+                      )}
+                      listboxAriaLabel={t(
+                        "secretary.appointments.book.appointmentType",
+                      )}
                     />
                   )}
                 />
               </div>
             ) : null}
 
-            <div className={appointmentTypes.length > 0 ? "lg:col-span-2" : "lg:col-span-3"}>
+            <div
+              className={
+                appointmentTypes.length > 0 ? "lg:col-span-2" : "lg:col-span-3"
+              }
+            >
               <div className="mb-2 text-start font-cairo text-[14px] font-extrabold text-[#111827]">
-                {tr("ملاحظات", "Notes")}
+                {t("secretary.appointments.book.notes")}
               </div>
               <textarea
                 {...register("notes")}
-                placeholder={tr(
-                  "أضف ملاحظات داخلية للطبيب أو السكرتيرة...",
-                  "Add internal notes for the doctor or secretary...",
-                )}
+                placeholder={t("secretary.appointments.book.notesPlaceholder")}
                 className={`min-h-[104px] w-full resize-none rounded-[16px] border-[1.82px] ${
                   errors.notes ? "border-[#F04438]" : "border-primary/60"
                 } bg-white px-4 py-3 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3]`}
@@ -473,7 +457,7 @@ export default function BookAppointmentPanel({
           <div className="rounded-[21px] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(255,255,255,0.65))] px-4 py-5 sm:px-5">
             <div className="mb-4 flex items-center gap-3">
               <div className="text-start font-cairo text-[13px] font-black text-[#0f766e]">
-                {tr("ملخص الحجز", "Booking summary")}
+                {t("secretary.appointments.book.bookingSummary")}
               </div>
               <div className="h-px flex-1 bg-gradient-to-l from-transparent via-primary/28 to-primary/10" />
             </div>
@@ -481,19 +465,20 @@ export default function BookAppointmentPanel({
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <div className="rounded-2xl border border-white/70 bg-white/85 px-4 py-3.5 shadow-[0_14px_32px_rgba(15,23,42,0.06)] backdrop-blur-sm transition-transform duration-200 hover:-translate-y-0.5">
                 <div className="flex items-center justify-end gap-2 font-cairo text-[11px] font-bold text-[#667085]">
-                  <span>{tr("المريض", "Patient")}</span>
+                  <span>{t("secretary.appointments.book.patient")}</span>
                   <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#0f8f8b18,#14b8a612)]">
                     <UserRound className="h-3.5 w-3.5 text-primary" />
                   </span>
                 </div>
                 <div className="mt-2 truncate font-cairo text-[14px] font-extrabold text-[#111827]">
-                  {selectedPatient?.name ?? tr("غير محدد", "Not specified")}
+                  {selectedPatient?.name ??
+                    t("secretary.appointments.book.notSpecified")}
                 </div>
               </div>
 
               <div className="rounded-2xl border border-white/70 bg-white/85 px-4 py-3.5 shadow-[0_14px_32px_rgba(15,23,42,0.06)] backdrop-blur-sm transition-transform duration-200 hover:-translate-y-0.5">
                 <div className="flex items-center justify-end gap-2 font-cairo text-[11px] font-bold text-[#667085]">
-                  <span>{tr("التاريخ", "Date")}</span>
+                  <span>{t("secretary.appointments.book.date")}</span>
                   <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#0f8f8b18,#14b8a612)]">
                     <CalendarDays className="h-3.5 w-3.5 text-primary" />
                   </span>
@@ -505,7 +490,7 @@ export default function BookAppointmentPanel({
 
               <div className="rounded-2xl border border-white/70 bg-white/85 px-4 py-3.5 shadow-[0_14px_32px_rgba(15,23,42,0.06)] backdrop-blur-sm transition-transform duration-200 hover:-translate-y-0.5">
                 <div className="flex items-center justify-end gap-2 font-cairo text-[11px] font-bold text-[#667085]">
-                  <span>{tr("الوقت", "Time")}</span>
+                  <span>{t("secretary.appointments.book.time")}</span>
                   <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#0f8f8b18,#14b8a612)]">
                     <Clock3 className="h-3.5 w-3.5 text-primary" />
                   </span>
@@ -525,7 +510,7 @@ export default function BookAppointmentPanel({
             onClick={onCancel}
             className="h-[50px] w-full rounded-[16px] border border-[#D0D5DD] bg-[#F9FAFB] font-cairo text-[14px] font-extrabold text-[#344054] transition hover:bg-[#F2F4F7] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {tr("إلغاء", "Cancel")}
+            {t("secretary.appointments.book.cancel")}
           </button>
 
           <button
@@ -534,10 +519,10 @@ export default function BookAppointmentPanel({
             className="h-[50px] w-full rounded-[16px] bg-[linear-gradient(135deg,#0f8f8b_0%,#14b8a6_100%)] font-cairo text-[14px] font-extrabold text-white shadow-[0_18px_30px_rgba(15,143,139,0.28)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {submitDisabledReason
-              ? tr("أكمل المتطلبات أولاً", "Complete prerequisites first")
+              ? t("secretary.appointments.book.completePrerequisites")
               : isSubmitting
-              ? tr("جارٍ إنشاء الموعد...", "Creating appointment...")
-              : tr("تأكيد الحجز", "Confirm booking")}
+                ? t("secretary.appointments.book.creatingAppointment")
+                : t("secretary.appointments.book.confirmBooking")}
           </button>
         </div>
       </form>

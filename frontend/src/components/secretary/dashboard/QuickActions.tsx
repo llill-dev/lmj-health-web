@@ -13,18 +13,17 @@ interface QuickActionsProps {
 }
 
 export default function QuickActions({ actions }: QuickActionsProps) {
-  const { locale } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t } = useI18n();
   return (
     <div>
       <h3 className="font-cairo text-lg font-bold text-[#0f172a] mb-4">
-        {tr("أزرار سريعة", "Quick actions")}
+        {t("secretary.dashboard.quickActions.title")}
       </h3>
       <div className="flex flex-wrap gap-3">
         {actions.map((action, index) => {
           const Icon = action.icon;
           const isPrimary = action.variant === "primary";
-          
+
           return (
             <button
               key={index}

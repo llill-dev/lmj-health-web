@@ -26,8 +26,7 @@ const TEAL = "#108B8B";
 
 export default function AdminDoctorsPage() {
   const navigate = useNavigate();
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
   const [searchParams] = useSearchParams();
   const specializationParam = searchParams.get("specialization") ?? "";
 
@@ -117,49 +116,49 @@ export default function AdminDoctorsPage() {
       ...(offboardedCount > 0
         ? [
             {
-              title: tr("موقوف", "Offboarded"),
+              title: t("admin.doctors.kpi.offboarded"),
               value: offboardedCount,
               icon: UserX,
             },
           ]
         : []),
       {
-        title: tr("مرفوض", "Rejected"),
+        title: t("admin.doctors.kpi.rejected"),
         value: rejectedCount,
         icon: Ban,
       },
       {
-        title: tr("معلّق", "Pending"),
+        title: t("admin.doctors.kpi.pending"),
         value: pendingCount,
         icon: Clock,
       },
       {
-        title: tr("مقبول", "Approved"),
+        title: t("admin.doctors.kpi.approved"),
         value: approvedCount,
         icon: CheckCircle2,
       },
       {
-        title: tr("إجمالي الأطباء", "Total doctors"),
+        title: t("admin.doctors.kpi.total"),
         value: total,
         icon: Stethoscope,
       },
     ];
-  }, [doctors, total, locale]);
+  }, [doctors, total, t]);
 
   const hasActiveFilters = Boolean(
     filters.search ||
-      filters.specialization ||
-      filters.status ||
-      filters.city ||
-      filters.country ||
-      filters.from ||
-      filters.to,
+    filters.specialization ||
+    filters.status ||
+    filters.city ||
+    filters.country ||
+    filters.from ||
+    filters.to,
   );
 
   return (
     <>
       <Helmet>
-        <title>{tr("إدارة الأطباء", "Doctors")} • LMJ Health</title>
+        <title>{t("admin.doctors.page.title")} • LMJ Health</title>
       </Helmet>
 
       <div
@@ -170,11 +169,8 @@ export default function AdminDoctorsPage() {
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title={tr("إدارة الأطباء", "Doctors management")}
-          subtitle={tr(
-            "عرض ومتابعة بيانات الأطباء",
-            "View and monitor doctor records",
-          )}
+          title={t("admin.doctors.page.title")}
+          subtitle={t("admin.doctors.page.subtitle")}
           headerIcon={<Stethoscope className="h-8 w-8 text-white" />}
           kpiColumns={4}
           kpis={stats.map((c) => {
@@ -191,25 +187,25 @@ export default function AdminDoctorsPage() {
         <div className="mt-4 flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
           <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
-            {tr(
-              "هذه الصفحة مخصّصة لفرز ملفات الأطباء ومتابعة حالات القبول والرفض والانتقال إلى التفاصيل. مراجعة التحقق، دراسة الملف الكامل، وأي قرار إداري فعلي يتم من صفحة تفاصيل الطبيب أو من طلبات التحقق المرتبطة به.",
-              "This page is for triaging doctor records, tracking approval states, and navigating to details. Verification review, full profile inspection, and any real admin decision are handled from the doctor details page or its linked verification requests.",
-            )}
+            {t("admin.doctors.disclaimer")}
           </div>
         </div>
 
         <AdminSearchFiltersBar
-          queryPlaceholder={tr("ابحث عن طبيب...", "Search for a doctor...")}
-          specialtyPlaceholder={tr("الاختصاص", "Specialty")}
+          queryPlaceholder={t("admin.doctors.searchPlaceholder")}
+          specialtyPlaceholder={t("admin.doctors.specialtyPlaceholder")}
           specialtyOptions={[
-            { label: tr("طب الأطفال", "Pediatrics"), value: "pediatrics" },
-            { label: tr("طب الأسرة", "Family medicine"), value: "family" },
+            {
+              label: t("admin.doctors.specialty.pediatrics"),
+              value: "pediatrics",
+            },
+            { label: t("admin.doctors.specialty.family"), value: "family" },
           ]}
-          statusPlaceholder={tr("الحالة", "Status")}
+          statusPlaceholder={t("admin.doctors.statusPlaceholder")}
           statusOptions={[
-            { label: tr("مقبول", "Approved"), value: "approved" },
-            { label: tr("معلّق", "Pending"), value: "pending" },
-            { label: tr("مرفوض", "Rejected"), value: "rejected" },
+            { label: t("admin.doctors.kpi.approved"), value: "approved" },
+            { label: t("admin.doctors.kpi.pending"), value: "pending" },
+            { label: t("admin.doctors.kpi.rejected"), value: "rejected" },
           ]}
           filtersLeading={
             <div className="flex w-full min-w-0 flex-wrap content-stretch items-center gap-2 sm:gap-3">
@@ -222,7 +218,7 @@ export default function AdminDoctorsPage() {
                     page: 1,
                   }))
                 }
-                placeholder={tr("المدينة", "City")}
+                placeholder={t("admin.doctors.cityPlaceholder")}
                 className="h-[42px] min-w-0 flex-1 rounded-[10px] border border-[#E5E7EB] bg-white px-3 text-start font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3] sm:min-w-[120px] sm:flex-none sm:w-[140px] sm:px-4"
               />
               <input
@@ -234,7 +230,7 @@ export default function AdminDoctorsPage() {
                     page: 1,
                   }))
                 }
-                placeholder={tr("الدولة", "Country")}
+                placeholder={t("admin.doctors.countryPlaceholder")}
                 className="h-[42px] min-w-0 flex-1 rounded-[10px] border border-[#E5E7EB] bg-white px-3 text-start font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3] sm:min-w-[120px] sm:flex-none sm:w-[140px] sm:px-4"
               />
               <input
@@ -283,7 +279,8 @@ export default function AdminDoctorsPage() {
                 aria-hidden
               />
               <div className="truncate font-cairo text-sm font-black text-[#1F2937] sm:text-[16px]">
-                {tr("قائمة الأطباء", "Doctors list")} ({isAwaitingData ? "—" : results})
+                {t("admin.doctors.listTitle")} ({isAwaitingData ? "—" : results}
+                )
               </div>
             </div>
             <button
@@ -292,17 +289,19 @@ export default function AdminDoctorsPage() {
               disabled={isRefetching}
               className="inline-flex h-[36px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <RefreshCw className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`}
+              />
               {isRefetching
-                ? tr("جارٍ التحديث...", "Refreshing...")
-                : tr("تحديث", "Refresh")}
+                ? t("admin.doctors.refreshing")
+                : t("admin.doctors.refresh")}
             </button>
           </div>
 
           <div className="space-y-3 p-3 sm:space-y-4 sm:p-5">
             {isRefetching && !isAwaitingData ? (
               <div className="rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-4 py-3 font-cairo text-[12px] font-bold text-[#047857]">
-                {tr("جارٍ تحديث قائمة الأطباء...", "Refreshing doctors list...")}
+                {t("admin.doctors.refreshingList")}
               </div>
             ) : null}
             {isAwaitingData ? (
@@ -314,10 +313,7 @@ export default function AdminDoctorsPage() {
             ) : error ? (
               <div className="rounded-[10px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-10 text-center">
                 <div className="font-cairo text-[13px] font-semibold text-[#B42318]">
-                  {userFacingErrorMessage(
-                    error,
-                    tr("فشل تحميل قائمة الأطباء", "Failed to load doctors list"),
-                  )}
+                  {userFacingErrorMessage(error, t("admin.doctors.loadError"))}
                 </div>
                 <button
                   type="button"
@@ -325,17 +321,14 @@ export default function AdminDoctorsPage() {
                   className="mt-3 inline-flex h-[36px] items-center gap-2 rounded-[10px] border border-[#FCA5A5] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#B42318] hover:bg-[#FFF5F5]"
                 >
                   <RefreshCw className="h-4 w-4" />
-                  {tr("إعادة المحاولة", "Retry")}
+                  {t("admin.doctors.retry")}
                 </button>
               </div>
             ) : doctors.length === 0 ? (
               <div className="rounded-[10px] border border-[#E8ECEF] bg-white px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085]">
                 {hasActiveFilters
-                  ? tr(
-                      "لا يوجد أطباء مطابقون لخيارات البحث الحالية.",
-                      "No doctors match the current filters.",
-                    )
-                  : tr("لا يوجد أطباء حالياً.", "No doctors yet.")}
+                  ? t("admin.doctors.noMatching")
+                  : t("admin.doctors.noDoctors")}
               </div>
             ) : (
               doctors.map((d) => {
@@ -361,7 +354,8 @@ export default function AdminDoctorsPage() {
 
         <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <div className="text-center font-cairo text-[11px] font-semibold text-[#667085] sm:text-start sm:text-[12px]">
-            {tr("الصفحة", "Page")} {filters.page} {tr("من", "of")} {totalPages}
+            {t("admin.doctors.page")} {filters.page} {t("admin.doctors.of")}{" "}
+            {totalPages}
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-end sm:gap-3">
@@ -381,21 +375,18 @@ export default function AdminDoctorsPage() {
               options={[
                 {
                   value: "20",
-                  label: tr("20 / صفحة", "20 / page"),
+                  label: t("admin.doctors.perPage").replace("/", "20 / "),
                 },
                 {
                   value: "50",
-                  label: tr("50 / صفحة", "50 / page"),
+                  label: t("admin.doctors.perPage").replace("/", "50 / "),
                 },
                 {
                   value: "100",
-                  label: tr("100 / صفحة", "100 / page"),
+                  label: t("admin.doctors.perPage").replace("/", "100 / "),
                 },
               ]}
-              listboxAriaLabel={tr(
-                "عدد النتائج في الصفحة",
-                "Results per page",
-              )}
+              listboxAriaLabel={t("admin.doctors.resultsPerPage")}
             />
 
             <button
@@ -413,7 +404,7 @@ export default function AdminDoctorsPage() {
                   : "h-[38px] flex-1 rounded-[10px] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827] shadow-[0_10px_20px_rgba(0,0,0,0.06)] sm:flex-none"
               }
             >
-              {tr("السابق", "Previous")}
+              {t("admin.doctors.previousPage")}
             </button>
             <button
               type="button"
@@ -430,7 +421,7 @@ export default function AdminDoctorsPage() {
                   : "h-[38px] flex-1 rounded-[10px] bg-primary px-4 font-cairo text-[12px] font-bold text-white shadow-[0_10px_20px_rgba(15,143,139,0.25)] sm:flex-none"
               }
             >
-              {tr("التالي", "Next")}
+              {t("admin.doctors.nextPage")}
             </button>
           </div>
         </div>

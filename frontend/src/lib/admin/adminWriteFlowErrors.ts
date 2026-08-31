@@ -1,4 +1,6 @@
 import { ApiError, getUserFacingRequestErrorMessage } from "@/lib/api";
+import { getTranslationValue } from "@/i18n/translations";
+import { getCurrentLocale } from "@/i18n/runtime";
 
 type SupportedLocale = "ar" | "en";
 
@@ -27,6 +29,12 @@ export function extractFieldValidationErrors(
 }
 
 function tr(locale: SupportedLocale, ar: string, en: string): string {
+  // Use centralized translation system with fallback to local strings
+  const key = locale === "ar" ? ar : en;
+  const translated = getTranslationValue(locale, key);
+  if (translated) return translated;
+
+  // Fallback to local strings
   return locale === "ar" ? ar : en;
 }
 
@@ -38,32 +46,24 @@ export function getAdminReboardErrorMessage(
     if (error.status === 401) {
       return tr(
         locale,
-        "انتهت الجلسة. سجّل الدخول من جديد ثم أعد المحاولة.",
-        "Your session expired. Sign in again and try once more.",
+        "admin.reboard.sessionExpired",
+        "admin.reboard.sessionExpiredEn",
       );
     }
 
     if (error.status === 403) {
-      return tr(
-        locale,
-        "هذا الحساب لا يملك صلاحية إعادة تفعيل هذا المستخدم حالياً.",
-        "This account is not allowed to reactivate this user right now.",
-      );
+      return tr(locale, "admin.reboard.forbidden", "admin.reboard.forbiddenEn");
     }
 
     if (error.status === 404) {
-      return tr(
-        locale,
-        "الحساب المطلوب غير موجود أو لم يعد متاحاً لإعادة التفعيل.",
-        "The requested account was not found or is no longer available for reactivation.",
-      );
+      return tr(locale, "admin.reboard.notFound", "admin.reboard.notFoundEn");
     }
 
     if (error.status === 422) {
       return tr(
         locale,
-        "تعذّر إعادة تفعيل الحساب. راجع البيانات ثم أعد المحاولة.",
-        "Could not reactivate the account. Review the request data and try again.",
+        "admin.reboard.validationError",
+        "admin.reboard.validationErrorEn",
       );
     }
   }
@@ -80,8 +80,8 @@ export function getAdminServiceProviderMutationErrorMessage(
     if (error.status === 401) {
       return tr(
         locale,
-        "انتهت الجلسة. سجّل الدخول من جديد ثم أعد المحاولة.",
-        "Your session expired. Sign in again and try once more.",
+        "admin.serviceProvider.sessionExpired",
+        "admin.serviceProvider.sessionExpiredEn",
       );
     }
 
@@ -89,11 +89,11 @@ export function getAdminServiceProviderMutationErrorMessage(
       return tr(
         locale,
         action === "status"
-          ? "هذا الحساب لا يملك صلاحية تغيير حالة مزود الخدمة حالياً."
-          : "هذا الحساب لا يملك صلاحية إنشاء أو تعديل مزود الخدمة حالياً.",
+          ? "admin.serviceProvider.statusForbidden"
+          : "admin.serviceProvider.createEditForbidden",
         action === "status"
-          ? "This account is not allowed to change the service provider status right now."
-          : "This account is not allowed to create or edit this service provider right now.",
+          ? "admin.serviceProvider.statusForbiddenEn"
+          : "admin.serviceProvider.createEditForbiddenEn",
       );
     }
 
@@ -101,11 +101,11 @@ export function getAdminServiceProviderMutationErrorMessage(
       return tr(
         locale,
         action === "create"
-          ? "نوع الخدمة المطلوب غير موجود."
-          : "مزود الخدمة المطلوب غير موجود أو لم يعد متاحاً لهذا التعديل.",
+          ? "admin.serviceProvider.typeNotFound"
+          : "admin.serviceProvider.notFound",
         action === "create"
-          ? "The selected service type was not found."
-          : "The requested service provider was not found or is no longer available for this change.",
+          ? "admin.serviceProvider.typeNotFoundEn"
+          : "admin.serviceProvider.notFoundEn",
       );
     }
 
@@ -113,15 +113,15 @@ export function getAdminServiceProviderMutationErrorMessage(
       return tr(
         locale,
         action === "status"
-          ? "تعذّر تحديث الحالة. راجع القيمة المحددة ثم أعد المحاولة."
+          ? "admin.serviceProvider.statusValidationError"
           : action === "create"
-            ? "تعذّر إنشاء مزود الخدمة. راجع النوع والاسم والموقع ثم أعد المحاولة."
-            : "تعذّر حفظ مزود الخدمة. راجع الاسم والموقع والحالة ثم أعد المحاولة.",
+            ? "admin.serviceProvider.createValidationError"
+            : "admin.serviceProvider.updateValidationError",
         action === "status"
-          ? "Could not update the status. Review the selected value and try again."
+          ? "admin.serviceProvider.statusValidationErrorEn"
           : action === "create"
-            ? "Could not create the service provider. Review the type, name, and location and try again."
-            : "Could not save the service provider. Review the name, location, and status and try again.",
+            ? "admin.serviceProvider.createValidationErrorEn"
+            : "admin.serviceProvider.updateValidationErrorEn",
       );
     }
   }

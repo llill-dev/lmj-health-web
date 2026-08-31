@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from "react";
 import {
   CheckCircle2,
   Clock3,
@@ -9,16 +9,16 @@ import {
   Navigation,
   Search,
   XCircle,
-} from 'lucide-react';
-import { Helmet } from 'react-helmet-async';
-import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
-import { DoctorProfilePageLoading } from '@/components/doctor/profile-settings/doctor-profile-page-states';
-import { useToast } from '@/components/ui/ToastProvider';
-import { useDoctorClinicLocation } from '@/hooks';
-import { getUserFacingRequestErrorMessage } from '@/lib/api';
-import { useRetryAction } from '@/lib/query/useRetryAction';
-import { useI18n } from '@/i18n/provider';
-import { geocodeAddress } from '@/lib/doctor/clinicLocation/geocode';
+} from "lucide-react";
+import { Helmet } from "react-helmet-async";
+import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
+import { DoctorProfilePageLoading } from "@/components/doctor/profile-settings/doctor-profile-page-states";
+import { useToast } from "@/components/ui/ToastProvider";
+import { useDoctorClinicLocation } from "@/hooks";
+import { getUserFacingRequestErrorMessage } from "@/lib/api";
+import { useRetryAction } from "@/lib/query/useRetryAction";
+import { useI18n } from "@/i18n/provider";
+import { geocodeAddress } from "@/lib/doctor/clinicLocation/geocode";
 import {
   buildOpenStreetMapEmbedUrl,
   clinicVerificationLabel,
@@ -27,32 +27,31 @@ import {
   validateClinicLocationForm,
   type ClinicLocationFormValues,
   type ClinicVerificationStatus,
-} from '@/lib/doctor/clinicLocation/utils';
-import { cn } from '@/lib/utils/utils';
+} from "@/lib/doctor/clinicLocation/utils";
+import { cn } from "@/lib/utils/utils";
 
 function statusBadgeClassName(status: ClinicVerificationStatus) {
-  if (status === 'verified') {
-    return 'bg-[#DCFCE7] text-[#166534]';
+  if (status === "verified") {
+    return "bg-[#DCFCE7] text-[#166534]";
   }
-  if (status === 'pending') {
-    return 'bg-[#FEF3C7] text-[#92400E]';
+  if (status === "pending") {
+    return "bg-[#FEF3C7] text-[#92400E]";
   }
-  return 'bg-[#99A1AF] text-[#FFFFFF]';
+  return "bg-[#99A1AF] text-[#FFFFFF]";
 }
 
 function statusIcon(status: ClinicVerificationStatus) {
-  if (status === 'verified') {
+  if (status === "verified") {
     return <CheckCircle2 className="h-4 w-4" aria-hidden />;
   }
-  if (status === 'pending') {
+  if (status === "pending") {
     return <Clock3 className="h-4 w-4" aria-hidden />;
   }
   return <XCircle className="h-4 w-4" aria-hidden />;
 }
 
 export default function DoctorClinicLocationPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const { t, locale, dir } = useI18n();
   const { toast } = useToast();
   const {
     doctor,
@@ -70,7 +69,7 @@ export default function DoctorClinicLocationPage() {
     () => profileQuery.refetch(),
   );
 
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [form, setForm] = useState<ClinicLocationFormValues>(initialValues);
   const [geoLoading, setGeoLoading] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -82,7 +81,7 @@ export default function DoctorClinicLocationPage() {
     }
   }, [initialValues, dirty]);
 
-  const statusLabel = clinicVerificationLabel(verificationStatus, tr);
+  const statusLabel = clinicVerificationLabel(verificationStatus, t);
 
   const parsedCoords = useMemo(() => {
     const lat = Number(form.lat);
@@ -118,9 +117,9 @@ export default function DoctorClinicLocationPage() {
 
   const handleUseCurrentLocation = () => {
     if (!navigator.geolocation) {
-      toast(tr('المتصفح لا يدعم تحديد الموقع الجغرافي.', 'The browser does not support geolocation.'), {
-        title: tr('غير متاح', 'Unavailable'),
-        variant: 'error',
+      toast(t("doctor.clinicLocation.error.geolocationNotSupported"), {
+        title: t("doctor.clinicLocation.error.unavailable"),
+        variant: "error",
       });
       return;
     }
@@ -128,28 +127,19 @@ export default function DoctorClinicLocationPage() {
     setGeoLoading(true);
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        applyCoordinates(
-          position.coords.latitude,
-          position.coords.longitude,
-        );
+        applyCoordinates(position.coords.latitude, position.coords.longitude);
         setGeoLoading(false);
-        toast(tr('تم تحديد موقعك الحالي على الخريطة.', 'Your current location was pinned on the map.'), {
-          title: tr('تم التحديد', 'Located'),
-          variant: 'success',
+        toast(t("doctor.clinicLocation.success.locationPinned"), {
+          title: t("doctor.clinicLocation.success.located"),
+          variant: "success",
         });
       },
       () => {
         setGeoLoading(false);
-        toast(
-          tr(
-            'تعذّر الحصول على موقعك. تحقق من أذونات المتصفح.',
-            'Could not get your location. Check your browser permissions.',
-          ),
-          {
-            title: tr('فشل تحديد الموقع', 'Failed to locate'),
-            variant: 'error',
-          },
-        );
+        toast(t("doctor.clinicLocation.error.locationFailed"), {
+          title: t("doctor.clinicLocation.error.failedToLocate"),
+          variant: "error",
+        });
       },
       { enableHighAccuracy: true, timeout: 15000 },
     );
@@ -158,9 +148,9 @@ export default function DoctorClinicLocationPage() {
   const handleSearchAddress = async () => {
     const trimmed = query.trim();
     if (!trimmed) {
-      toast(tr('اكتب عنواناً للبحث أولاً.', 'Type an address to search first.'), {
-        title: tr('بحث فارغ', 'Empty search'),
-        variant: 'error',
+      toast(t("doctor.clinicLocation.error.emptySearch"), {
+        title: t("doctor.clinicLocation.error.emptySearchTitle"),
+        variant: "error",
       });
       return;
     }
@@ -169,28 +159,22 @@ export default function DoctorClinicLocationPage() {
     try {
       const result = await geocodeAddress(trimmed);
       if (!result) {
-        toast(tr('لم نجد نتيجة مطابقة لهذا العنوان.', 'No matching result was found for this address.'), {
-          title: tr('لا توجد نتائج', 'No results'),
-          variant: 'error',
+        toast(t("doctor.clinicLocation.error.noResults"), {
+          title: t("doctor.clinicLocation.error.noResultsTitle"),
+          variant: "error",
         });
         return;
       }
       applyCoordinates(result.lat, result.lng, result.displayName);
-      toast(tr('تم تحديد الموقع من نتيجة البحث.', 'The location was set from the search result.'), {
-        title: tr('تم العثور على العنوان', 'Address found'),
-        variant: 'success',
+      toast(t("doctor.clinicLocation.success.locationSet"), {
+        title: t("doctor.clinicLocation.success.addressFound"),
+        variant: "success",
       });
     } catch {
-      toast(
-        tr(
-          'تعذّر البحث عن العنوان حالياً. حاول مرة أخرى.',
-          'Could not search for the address right now. Please try again.',
-        ),
-        {
-          title: tr('خطأ في البحث', 'Search error'),
-          variant: 'error',
-        },
-      );
+      toast(t("doctor.clinicLocation.error.searchError"), {
+        title: t("doctor.clinicLocation.error.searchErrorTitle"),
+        variant: "error",
+      });
     } finally {
       setSearchLoading(false);
     }
@@ -199,17 +183,20 @@ export default function DoctorClinicLocationPage() {
   const handleSubmitReview = async () => {
     if (!doctor) return;
 
-    const validationError = validateClinicLocationForm(form, tr);
+    const validationError = validateClinicLocationForm(form, t);
     if (validationError) {
-      toast(validationError, { title: tr('تحقق من البيانات', 'Check the data'), variant: 'error' });
+      toast(validationError, {
+        title: t("doctor.clinicLocation.error.checkData"),
+        variant: "error",
+      });
       return;
     }
 
     const items = buildChangeItems(doctor, form);
     if (!items.length) {
-      toast(tr('لم يتم تغيير الموقع أو العنوان.', 'The location or address was not changed.'), {
-        title: tr('لا توجد تغييرات', 'No changes'),
-        variant: 'error',
+      toast(t("doctor.clinicLocation.error.noChanges"), {
+        title: t("doctor.clinicLocation.error.noChangesTitle"),
+        variant: "error",
       });
       return;
     }
@@ -217,22 +204,22 @@ export default function DoctorClinicLocationPage() {
     try {
       await submitLocationChange({
         items,
-        reason: tr('طلب تحديث موقع العيادة', 'Request to update the clinic location'),
+        reason: t("doctor.clinicLocation.changeRequestReason"),
       });
       setDirty(false);
       toast(
         hasPendingLocationRequest
-          ? tr('تم تحديث طلب المراجعة الحالي.', 'The current review request was updated.')
-          : tr('تم إرسال موقع العيادة للمراجعة. ستُحدَّث حالة التوثيق بعد موافقة الإدارة.', 'The clinic location was submitted for review. Its verification status will update after admin approval.'),
+          ? t("doctor.clinicLocation.success.requestUpdated")
+          : t("doctor.clinicLocation.success.requestSubmitted"),
         {
-          title: tr('تم الإرسال', 'Submitted'),
-          variant: 'success',
+          title: t("doctor.clinicLocation.success.submitted"),
+          variant: "success",
         },
       );
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
-        title: tr('تعذّر إرسال الطلب', 'Could not submit the request'),
-        variant: 'error',
+        title: t("doctor.clinicLocation.error.submitFailed"),
+        variant: "error",
       });
     }
   };
@@ -241,9 +228,7 @@ export default function DoctorClinicLocationPage() {
     return (
       <>
         <Helmet>
-          <title>
-            {tr('موقع العيادة • LMJ Health', 'Clinic Location • LMJ Health')}
-          </title>
+          <title>{t("doctor.clinicLocation.page.title")}</title>
         </Helmet>
         <DoctorProfilePageLoading />
       </>
@@ -254,16 +239,11 @@ export default function DoctorClinicLocationPage() {
     return (
       <>
         <Helmet>
-          <title>
-            {tr('موقع العيادة • LMJ Health', 'Clinic Location • LMJ Health')}
-          </title>
+          <title>{t("doctor.clinicLocation.page.title")}</title>
         </Helmet>
         <DoctorListErrorState
-          title={tr('تعذّر تحميل موقع العيادة', 'Failed to load clinic location')}
-          brief={tr(
-            'حدث خطأ أثناء جلب بيانات الملف الشخصي.',
-            'An error occurred while fetching profile data.',
-          )}
+          title={t("doctor.clinicLocation.error.loadFailed")}
+          brief={t("doctor.clinicLocation.error.loadFailedBrief")}
           onRetry={() => void retryProfile()}
           retrying={retryingProfile}
         />
@@ -274,9 +254,7 @@ export default function DoctorClinicLocationPage() {
   return (
     <>
       <Helmet>
-        <title>
-          {tr('موقع العيادة • LMJ Health', 'Clinic Location • LMJ Health')}
-        </title>
+        <title>{t("doctor.clinicLocation.page.title")}</title>
       </Helmet>
 
       <div dir={dir} lang={locale} className="pb-8 sm:pb-10">
@@ -286,47 +264,41 @@ export default function DoctorClinicLocationPage() {
               <button
                 type="button"
                 className="flex h-[36px] w-[36px] items-center justify-center rounded-[6px] bg-primary text-white"
-                aria-label={tr('موقع', 'Location')}
+                aria-label={t("doctor.clinicLocation.aria.location")}
               >
                 <MapPin className="h-4 w-4" />
               </button>
               <div className="text-start">
                 <div className="font-cairo text-[16px] font-extrabold text-[#111827]">
-                  {tr('موقع العيادة', 'Clinic location')}
+                  {t("doctor.clinicLocation.title")}
                 </div>
                 <div className="mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                  {tr(
-                    'حدد موقع عيادتك بدقة على الخريطة',
-                    'Pin your clinic location accurately on the map',
-                  )}
+                  {t("doctor.clinicLocation.subtitle")}
                 </div>
               </div>
             </div>
 
             <span
               className={cn(
-                'flex h-[22px] items-center justify-center gap-2 rounded-full px-3 font-cairo text-[12px] font-semibold',
+                "flex h-[22px] items-center justify-center gap-2 rounded-full px-3 font-cairo text-[12px] font-semibold",
                 statusBadgeClassName(verificationStatus),
               )}
             >
-              {statusLabel}
+              {clinicVerificationLabel(verificationStatus, t)}
               {statusIcon(verificationStatus)}
             </span>
           </div>
 
           {hasPendingLocationRequest ? (
             <div className="mt-4 rounded-[10px] border border-[#FDE68A] bg-[#FFFBEB] px-4 py-3 font-cairo text-[12px] font-semibold text-[#92400E]">
-              {tr(
-                'لديك طلب موقع قيد المراجعة. يمكنك تعديل الإحداثيات وإعادة الإرسال لتحديث الطلب قبل موافقة الإدارة.',
-                'You have a location request under review. You can edit the coordinates and resubmit to update the request before admin approval.',
-              )}
+              {t("doctor.clinicLocation.pendingRequest")}
             </div>
           ) : null}
 
           {profileQuery.isRefetching ? (
             <div className="mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]">
               <Loader2 className="h-4 w-4 animate-spin" />
-              {tr('جارٍ تحديث بيانات موقع العيادة...', 'Updating clinic location data...')}
+              {t("doctor.clinicLocation.updating")}
             </div>
           ) : null}
         </section>
@@ -340,12 +312,12 @@ export default function DoctorClinicLocationPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === "Enter") {
                   e.preventDefault();
                   void handleSearchAddress();
                 }
               }}
-              placeholder={tr('ابحث عن عنوان...', 'Search for an address...')}
+              placeholder={t("doctor.clinicLocation.searchPlaceholder")}
               className="h-[44px] w-full rounded-[6px] border border-[#E5E7EB] bg-white ps-4 pe-10 font-cairo text-[13px] font-semibold text-[#111827] outline-none transition focus:border-primary placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3]"
             />
           </div>
@@ -362,7 +334,7 @@ export default function DoctorClinicLocationPage() {
               ) : (
                 <Search className="h-4 w-4 text-primary" />
               )}
-              {tr('بحث عن العنوان', 'Search for address')}
+              {t("doctor.clinicLocation.searchButton")}
             </button>
 
             <button
@@ -376,7 +348,7 @@ export default function DoctorClinicLocationPage() {
               ) : (
                 <Locate className="h-4 w-4" />
               )}
-              {tr('الحصول على موقعي الحالي', 'Get my current location')}
+              {t("doctor.clinicLocation.getCurrentLocation")}
             </button>
           </div>
         </section>
@@ -384,7 +356,7 @@ export default function DoctorClinicLocationPage() {
         <section className="mt-5 overflow-hidden rounded-[6px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)]">
           <div className="relative h-[340px] bg-[#F3F4F6]">
             <iframe
-              title={tr('خريطة موقع العيادة', 'Clinic location map')}
+              title={t("doctor.clinicLocation.mapTitle")}
               src={mapUrl}
               className="absolute inset-0 h-full w-full border-0"
               loading="lazy"
@@ -395,7 +367,7 @@ export default function DoctorClinicLocationPage() {
               <div className="rounded-full bg-white/90 px-4 py-2 shadow-sm">
                 <div className="flex items-center gap-2 font-cairo text-[12px] font-semibold text-[#667085]">
                   <MapIcon className="h-4 w-4 text-primary" />
-                  {tr('عدّل الإحداثيات أدناه لتحديث المؤشر', 'Edit the coordinates below to update the marker')}
+                  {t("doctor.clinicLocation.editCoordinates")}
                 </div>
               </div>
             </div>
@@ -403,18 +375,18 @@ export default function DoctorClinicLocationPage() {
             <div className="absolute bottom-0 start-0 end-0 grid grid-cols-1 gap-3 bg-white/95 px-4 py-4 backdrop-blur-sm sm:grid-cols-2 sm:px-5">
               <div className="text-start">
                 <div className="font-cairo text-[11px] font-semibold text-[#98A2B3]">
-                  {tr('خط العرض', 'Latitude')}
+                  {t("doctor.clinicLocation.latitude")}
                 </div>
                 <div className="mt-1 font-cairo text-[12px] font-extrabold tabular-nums text-[#111827]">
-                  {form.lat || '—'}
+                  {form.lat || "—"}
                 </div>
               </div>
               <div className="text-start">
                 <div className="font-cairo text-[11px] font-semibold text-[#98A2B3]">
-                  {tr('خط الطول', 'Longitude')}
+                  {t("doctor.clinicLocation.longitude")}
                 </div>
                 <div className="mt-1 font-cairo text-[12px] font-extrabold tabular-nums text-[#111827]">
-                  {form.lng || '—'}
+                  {form.lng || "—"}
                 </div>
               </div>
             </div>
@@ -428,7 +400,7 @@ export default function DoctorClinicLocationPage() {
                 <Navigation className="h-4 w-4" />
               </div>
               <div className="font-cairo text-[14px] font-extrabold text-[#111827]">
-                {tr('تفاصيل الموقع', 'Location details')}
+                {t("doctor.clinicLocation.locationDetails")}
               </div>
             </div>
           </div>
@@ -436,22 +408,22 @@ export default function DoctorClinicLocationPage() {
           <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <div className="mb-2 text-start font-cairo text-[12px] font-extrabold text-[#111827]">
-                {tr('خط العرض (Latitude)', 'Latitude')}
+                {t("doctor.clinicLocation.latitude")}
               </div>
               <input
                 value={form.lat}
-                onChange={(e) => updateField('lat', e.target.value)}
+                onChange={(e) => updateField("lat", e.target.value)}
                 inputMode="decimal"
                 className="h-[44px] w-full rounded-[6px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-semibold tabular-nums text-[#111827] outline-none transition focus:border-primary"
               />
             </div>
             <div>
               <div className="mb-2 text-start font-cairo text-[12px] font-extrabold text-[#111827]">
-                {tr('خط الطول (Longitude)', 'Longitude')}
+                {t("doctor.clinicLocation.longitude")}
               </div>
               <input
                 value={form.lng}
-                onChange={(e) => updateField('lng', e.target.value)}
+                onChange={(e) => updateField("lng", e.target.value)}
                 inputMode="decimal"
                 className="h-[44px] w-full rounded-[6px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-semibold tabular-nums text-[#111827] outline-none transition focus:border-primary"
               />
@@ -460,11 +432,11 @@ export default function DoctorClinicLocationPage() {
 
           <div className="mt-4">
             <div className="mb-2 text-start font-cairo text-[12px] font-extrabold text-[#111827]">
-              {tr('عنوان العيادة', 'Clinic address')}
+              {t("doctor.clinicLocation.clinicAddress")}
             </div>
             <input
               value={form.address}
-              onChange={(e) => updateField('address', e.target.value)}
+              onChange={(e) => updateField("address", e.target.value)}
               className="h-[44px] w-full rounded-[6px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-semibold text-[#111827] outline-none transition focus:border-primary"
             />
           </div>
@@ -472,16 +444,17 @@ export default function DoctorClinicLocationPage() {
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-start">
               <div className="font-cairo text-[12px] font-extrabold text-[#111827]">
-                {tr('حالة التحقق', 'Verification status')}
+                {t("doctor.clinicLocation.verificationStatus")}
               </div>
             </div>
             <span
               className={cn(
-                'inline-flex h-[22px] items-center justify-center rounded-full px-3 font-cairo text-[11px] font-extrabold',
+                "inline-flex h-[22px] items-center justify-center rounded-full px-3 font-cairo text-[11px] font-extrabold",
                 statusBadgeClassName(verificationStatus),
               )}
             >
-              {statusLabel}
+              {clinicVerificationLabel(verificationStatus, t)}
+              {statusIcon(verificationStatus)}
             </span>
           </div>
 
@@ -496,7 +469,7 @@ export default function DoctorClinicLocationPage() {
             ) : (
               <Navigation className="h-4 w-4" />
             )}
-            {tr('إرسال المراجعة', 'Submit for review')}
+            {t("doctor.clinicLocation.submitReview")}
           </button>
         </section>
 
@@ -507,7 +480,7 @@ export default function DoctorClinicLocationPage() {
                 <MapPin className="h-4 w-4" />
               </div>
               <div className="font-cairo text-[14px] font-extrabold text-[#111827]">
-                {tr('تعليمات التحديد', 'Pinning instructions')}
+                {t("doctor.clinicLocation.pinningInstructions")}
               </div>
             </div>
           </div>
@@ -515,11 +488,11 @@ export default function DoctorClinicLocationPage() {
           <div className="mt-5 rounded-[16px] bg-[#F8FAFC]">
             <ol className="space-y-3 p-4">
               {[
-                tr('انقر على "الحصول على موقعي الحالي" لتحديد تلقائي', 'Click "Get my current location" for automatic detection'),
-                tr('ابحث عن العنوان أو عدّل الإحداثيات يدوياً لتحديث المؤشر على الخريطة', 'Search for the address or manually edit the coordinates to update the marker on the map'),
-                tr('اكتب عنوان العيادة الكامل في الحقل المخصص', 'Type the full clinic address in the dedicated field'),
-                tr('اضغط على "إرسال المراجعة" لإرسال التعديلات عبر طلب تغيير الملف', 'Click "Submit for review" to send the changes via a profile change request'),
-                tr('بعد موافقة الإدارة يُحدَّث الموقع وتصبح حالة التوثيق «موثق»', 'Once approved by admin, the location is updated and the verification status becomes "Verified"'),
+                t("doctor.clinicLocation.instruction1"),
+                t("doctor.clinicLocation.instruction2"),
+                t("doctor.clinicLocation.instruction3"),
+                t("doctor.clinicLocation.instruction4"),
+                t("doctor.clinicLocation.instruction5"),
               ].map((text, idx) => (
                 <li key={text} className="flex items-start gap-3">
                   <div className="mt-[1px] flex h-[24px] w-[24px] items-center justify-center rounded-full bg-primary font-cairo text-[12px] font-extrabold text-[#E9FFFE]">

@@ -35,15 +35,24 @@ import { useBillingAccess } from "@/hooks/billing/useBillingAccess";
 type InvoiceFilter = "all" | InvoiceStatus;
 
 function buildFilterOptions(
-  tr: (ar: string, en: string) => string,
+  t: (key: string) => string,
 ): Array<{ id: InvoiceFilter; label: string }> {
   return [
-    { id: "all", label: tr("الكل", "All") },
-    { id: "paid", label: tr("مدفوعة", "Paid") },
-    { id: "unpaid", label: tr("غير مدفوعة", "Unpaid") },
-    { id: "partial", label: tr("مدفوعة جزئياً", "Partially paid") },
-    { id: "overdue", label: tr("متأخرة", "Overdue") },
-    { id: "cancelled", label: tr("ملغاة", "Cancelled") },
+    { id: "all", label: t("doctor.clinicAccounts.invoices.filter.all") },
+    { id: "paid", label: t("doctor.clinicAccounts.invoices.filter.paid") },
+    { id: "unpaid", label: t("doctor.clinicAccounts.invoices.filter.unpaid") },
+    {
+      id: "partial",
+      label: t("doctor.clinicAccounts.invoices.filter.partial"),
+    },
+    {
+      id: "overdue",
+      label: t("doctor.clinicAccounts.invoices.filter.overdue"),
+    },
+    {
+      id: "cancelled",
+      label: t("doctor.clinicAccounts.invoices.filter.cancelled"),
+    },
   ];
 }
 
@@ -57,9 +66,8 @@ function pickStatusCount(
 }
 
 export default function DoctorClinicInvoicesPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
-  const filterOptions = buildFilterOptions(tr);
+  const { t, locale, dir } = useI18n();
+  const filterOptions = buildFilterOptions(t);
   const navigate = useNavigate();
   const {
     basePath,
@@ -67,13 +75,14 @@ export default function DoctorClinicInvoicesPage() {
     canViewDashboard,
     canViewSettings,
     isSecretary,
-  } =
-    useBillingAccess();
+  } = useBillingAccess();
   const [filter, setFilter] = useState<InvoiceFilter>("all");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(
+    null,
+  );
   const [detailsOpen, setDetailsOpen] = useState(false);
 
   const settingsQuery = useBillingSettings(!isSecretary || canViewSettings);
@@ -96,7 +105,8 @@ export default function DoctorClinicInvoicesPage() {
     Boolean(selectedInvoiceId),
   );
 
-  const invoiceStatusRows = dashboardQuery.dashboard?.charts?.invoiceTotalsByStatus;
+  const invoiceStatusRows =
+    dashboardQuery.dashboard?.charts?.invoiceTotalsByStatus;
 
   const stats = useMemo(
     () => ({
@@ -123,7 +133,7 @@ export default function DoctorClinicInvoicesPage() {
   return (
     <>
       <Helmet>
-        <title>{tr("الفواتير • LMJ Health", "Invoices • LMJ Health")}</title>
+        <title>{t("doctor.clinicAccounts.invoices.page.title")}</title>
       </Helmet>
 
       <div dir={dir} lang={locale}>
@@ -132,21 +142,25 @@ export default function DoctorClinicInvoicesPage() {
           surface="mint"
           kpiColumns={3}
           headerIcon={<BookOpen className="h-8 w-8 text-white" />}
-          title={tr("الفواتير", "Invoices")}
+          title={t("doctor.clinicAccounts.invoices.title")}
           subtitle={
             <span>
               <span className="font-extrabold text-primary">
                 {listQuery.isAwaitingData ? "—" : listQuery.total}
               </span>
               <span className="text-primary/90">
-                {tr(" — إجمالي الفواتير", " — total invoices")}
+                {t("doctor.clinicAccounts.invoices.subtitle")}
               </span>
             </span>
           }
           actionLabel={
-            canManageInvoices ? tr("فاتورة جديدة", "New invoice") : undefined
+            canManageInvoices
+              ? t("doctor.clinicAccounts.invoices.newInvoice")
+              : undefined
           }
-          actionIcon={canManageInvoices ? <Plus className="h-4 w-4" /> : undefined}
+          actionIcon={
+            canManageInvoices ? <Plus className="h-4 w-4" /> : undefined
+          }
           onActionClick={
             canManageInvoices
               ? () => navigate(`${basePath}/invoices/new`)
@@ -162,7 +176,7 @@ export default function DoctorClinicInvoicesPage() {
                     ? "—"
                     : stats.paid
                   : "—",
-              label: tr("مدفوعة", "Paid"),
+              label: t("doctor.clinicAccounts.invoices.filter.paid"),
             },
             {
               key: "unpaid",
@@ -173,7 +187,7 @@ export default function DoctorClinicInvoicesPage() {
                     ? "—"
                     : stats.unpaid
                   : "—",
-              label: tr("غير مدفوعة", "Unpaid"),
+              label: t("doctor.clinicAccounts.invoices.filter.unpaid"),
             },
             {
               key: "overdue",
@@ -184,7 +198,7 @@ export default function DoctorClinicInvoicesPage() {
                     ? "—"
                     : stats.overdue
                   : "—",
-              label: tr("متأخرة", "Overdue"),
+              label: t("doctor.clinicAccounts.invoices.filter.overdue"),
             },
           ]}
         />
@@ -204,14 +218,17 @@ export default function DoctorClinicInvoicesPage() {
           value={search}
           onChange={setSearch}
           onValueChangeExtra={() => setPage(1)}
-          placeholder={tr("بحث بالاسم أو رقم الفاتورة...", "Search by name or invoice number...")}
+          placeholder={t("doctor.clinicAccounts.invoices.searchPlaceholder")}
           onClear={() => {
-            setSearch('');
-            setFilter('all');
+            setSearch("");
+            setFilter("all");
             setPage(1);
           }}
           trailing={
-            <ClinicAccountsSearchCount count={listQuery.total} label={tr("فاتورة", "invoice")} />
+            <ClinicAccountsSearchCount
+              count={listQuery.total}
+              label={t("doctor.clinicAccounts.invoices.searchCountLabel")}
+            />
           }
         />
 
@@ -219,7 +236,7 @@ export default function DoctorClinicInvoicesPage() {
           <DoctorTableSkeleton rows={6} columns={1} />
         ) : listQuery.isError ? (
           <DoctorListErrorState
-            title={tr("تعذّر تحميل الفواتير", "Failed to load invoices")}
+            title={t("doctor.clinicAccounts.invoices.loadFailed")}
             brief={getUserFacingRequestErrorMessage(listQuery.error)}
             retrying={retryingList}
             onRetry={() => void retryList()}
@@ -230,22 +247,28 @@ export default function DoctorClinicInvoicesPage() {
             imageSrc="/images/photo-not-found_appotemint.png"
             imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.1)]"
             title={
-              search.trim() || filter !== 'all'
-                ? tr('لا توجد فواتير تطابق البحث أو الفلتر الحالي', 'No invoices match the current search or filter')
-                : tr('لا توجد فواتير صادرة بعد', 'No invoices issued yet')
+              search.trim() || filter !== "all"
+                ? t("doctor.clinicAccounts.invoices.empty.matching")
+                : t("doctor.clinicAccounts.invoices.empty.none")
             }
             subtitle={
-              search.trim() || filter !== 'all'
-                ? tr('جرّب تعديل كلمات البحث أو إعادة ضبط الفلاتر لعرض النتائج', 'Try adjusting the search terms or resetting the filters to see results')
-                : tr('أنشئ فواتير للمرضى وتتبع المدفوعات والمبالغ المستحقة', 'Create invoices for patients and track payments and amounts due')
+              search.trim() || filter !== "all"
+                ? t("doctor.clinicAccounts.invoices.empty.matchingSubtitle")
+                : t("doctor.clinicAccounts.invoices.empty.noneSubtitle")
             }
-            actionLabel={canManageInvoices ? tr("فاتورة جديدة", "New invoice") : undefined}
+            actionLabel={
+              canManageInvoices
+                ? t("doctor.clinicAccounts.invoices.newInvoice")
+                : undefined
+            }
             onAction={
               canManageInvoices
                 ? () => navigate(`${basePath}/invoices/new`)
                 : undefined
             }
-            actionIcon={canManageInvoices ? <Plus className="h-4 w-4" /> : undefined}
+            actionIcon={
+              canManageInvoices ? <Plus className="h-4 w-4" /> : undefined
+            }
           />
         ) : (
           <div className="space-y-3">

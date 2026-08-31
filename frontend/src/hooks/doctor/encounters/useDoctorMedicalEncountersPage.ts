@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
+import { useI18n } from "@/i18n/provider";
+import type { AppLocale } from "@/i18n/runtime";
 import type {
   EncountersFiltersState,
   MedicalVisitCardData,
@@ -39,30 +41,33 @@ function formatLinkedAppointmentDate(value?: string | null): string {
   return `${year}-${month}-${day}`;
 }
 
-function formatVisitDate(value?: string | null): string {
+function formatVisitDate(value?: string | null, locale: AppLocale = "ar"): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString("ar-SA", {
+  return date.toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
   });
 }
 
-function formatVisitTime(value?: string | null): string {
+function formatVisitTime(value?: string | null, locale: AppLocale = "ar"): string {
   if (!value) return "-";
   if (/^\d{1,2}:\d{2}/.test(value)) return value.slice(0, 5);
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleTimeString("ar-SA", {
+  return date.toLocaleTimeString(locale === "ar" ? "ar-SA" : "en-US", {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
   });
 }
 
-function formatArabicTimeWithPeriod(value?: string | null): {
+function formatTimeWithPeriod(
+  value?: string | null,
+  locale: AppLocale = "ar",
+): {
   time: string;
   period: string;
 } {
@@ -84,13 +89,34 @@ function formatArabicTimeWithPeriod(value?: string | null): {
     minutes = date.getMinutes();
   }
 
-  const period = hours < 12 ? "صباحًا" : "مساءً";
+  const period =
+    locale === "ar"
+      ? hours < 12
+        ? "صباحًا"
+        : "مساءً"
+      : hours < 12
+        ? "AM"
+        : "PM";
   const displayHour = hours % 12 === 0 ? 12 : hours % 12;
   const time = `${String(displayHour).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
   return { time, period };
 }
 
-function originToVisitType(origin?: string): string {
+function originToVisitType(origin: string | undefined, locale: AppLocale): string {
+  if (locale === "en") {
+    switch (origin) {
+      case "appointment":
+        return "Scheduled visit";
+      case "walk_in":
+        return "Walk-in visit";
+      case "follow_up":
+        return "Follow-up";
+      case "manual":
+        return "Manual visit";
+      default:
+        return "Medical visit";
+    }
+  }
   switch (origin) {
     case "appointment":
       return "فحص دوري";
@@ -105,6 +131,10 @@ function originToVisitType(origin?: string): string {
   }
 }
 
+function fallbackPatientName(locale: AppLocale): string {
+  return locale === "ar" ? "مريض" : "Patient";
+}
+
 function isDraftPrescription(rx: EncounterPrescription) {
   const status = (rx.status ?? "").toLowerCase();
   return !status.includes("final") && !rx.finalizedAt;
@@ -112,6 +142,7 @@ function isDraftPrescription(rx: EncounterPrescription) {
 
 function buildVisitDrafts(
   encounter: DoctorEncounterSummary,
+  locale: AppLocale,
   clinical?: {
     prescriptions?: EncounterPrescription[];
     orders?: EncounterOrder[];
@@ -134,7 +165,7 @@ function buildVisitDrafts(
     {
       id: `${encounter._id}-draft`,
       code: `ENC-${encounter._id.slice(-6).toUpperCase()}`,
-      updatedAtLabel: formatVisitDate(encounter.createdAt),
+      updatedAtLabel: formatVisitDate(encounter.createdAt, locale),
       prescriptionsCount,
       labTestsCount,
       imagingCount,
@@ -144,6 +175,7 @@ function buildVisitDrafts(
 
 function mapEncounterToMedicalVisit(
   encounter: DoctorEncounterSummary,
+  locale: AppLocale,
   clinical?: {
     prescriptions?: EncounterPrescription[];
     orders?: EncounterOrder[];
@@ -158,28 +190,28 @@ function mapEncounterToMedicalVisit(
   const apptTime = encounter.appointment?.startTime;
   const listTimeSource = apptTime ?? started;
   const { time: listTimeLabel, period: listTimePeriodLabel } =
-    formatArabicTimeWithPeriod(listTimeSource);
+    formatTimeWithPeriod(listTimeSource, locale);
 
   return {
     id: encounter._id,
     patientId,
-    patientName: patient?.user?.fullName ?? "مريض",
+    patientName: patient?.user?.fullName ?? fallbackPatientName(locale),
     patientAge: patient?.age ?? null,
     fileNumber: patient?.publicId
       ? `#${patient.publicId}`
       : patientId
         ? `#${patientId.slice(-6)}`
         : "#—",
-    visitTypeLabel: originToVisitType(encounter.origin),
+    visitTypeLabel: originToVisitType(encounter.origin, locale),
     status,
     origin: encounter.origin,
     notes: encounter.notes,
-    startedAtLabel: formatVisitDate(started),
-    closedAtLabel: formatVisitDate(encounter.closedAt),
+    startedAtLabel: formatVisitDate(started, locale),
+    closedAtLabel: formatVisitDate(encounter.closedAt, locale),
     appointmentAtLabel: apptTime
-      ? `${formatVisitDate(apptDate)} ${formatVisitTime(apptTime)}`.trim()
-      : formatVisitDate(apptDate),
-    listDateLabel: formatVisitDate(started),
+      ? `${formatVisitDate(apptDate, locale)} ${formatVisitTime(apptTime, locale)}`.trim()
+      : formatVisitDate(apptDate, locale),
+    listDateLabel: formatVisitDate(started, locale),
     listTimeLabel,
     listTimePeriodLabel,
     appointmentTypeName:
@@ -194,24 +226,26 @@ function mapEncounterToMedicalVisit(
                 ? formatLinkedAppointmentDate(apptDate)
                 : "—",
             time:
-              apptTime && formatVisitTime(apptTime) !== "-"
-                ? formatVisitTime(apptTime)
+              apptTime && formatVisitTime(apptTime, locale) !== "-"
+                ? formatVisitTime(apptTime, locale)
                 : "—",
           }
         : null,
-    drafts: buildVisitDrafts(encounter, clinical),
+    drafts: buildVisitDrafts(encounter, locale, clinical),
   };
 }
 
 function mergeListVisitWithEncounterDetail(
   visit: MedicalVisitCardData,
   encounter: DoctorEncounterSummary,
+  locale: AppLocale,
   clinical?: {
     prescriptions?: EncounterPrescription[];
     orders?: EncounterOrder[];
   },
 ): MedicalVisitCardData {
-  const mapped = mapEncounterToMedicalVisit(encounter, clinical);
+  const mapped = mapEncounterToMedicalVisit(encounter, locale, clinical);
+  const fallback = fallbackPatientName(locale);
 
   return {
     ...visit,
@@ -219,7 +253,7 @@ function mergeListVisitWithEncounterDetail(
     id: visit.id,
     patientId: mapped.patientId || visit.patientId,
     patientName:
-      mapped.patientName !== "مريض" ? mapped.patientName : visit.patientName,
+      mapped.patientName !== fallback ? mapped.patientName : visit.patientName,
     patientAge: mapped.patientAge ?? visit.patientAge,
   };
 }
@@ -248,6 +282,7 @@ export function useDoctorMedicalEncountersPage(
   doctorId: string,
   filters: EncountersFiltersState,
 ) {
+  const { locale } = useI18n();
   const listParams = useMemo(
     () => ({
       status: filters.status === "all" ? undefined : filters.status,
@@ -276,8 +311,10 @@ export function useDoctorMedicalEncountersPage(
 
   const apiVisits = useMemo(() => {
     const encounters = encountersQuery.data?.encounters ?? [];
-    return encounters.map((encounter) => mapEncounterToMedicalVisit(encounter));
-  }, [encountersQuery.data?.encounters]);
+    return encounters.map((encounter) =>
+      mapEncounterToMedicalVisit(encounter, locale),
+    );
+  }, [encountersQuery.data?.encounters, locale]);
 
   const visits = useMemo(() => {
     return apiVisits
@@ -312,6 +349,7 @@ export function useDoctorEncounterCardExpandDetail(
   visit: MedicalVisitCardData | null,
   expanded: boolean,
 ) {
+  const { locale } = useI18n();
   const patientId = visit?.patientId ?? "";
   const encounterId = visit?.id ?? "";
   const enabled =
@@ -384,9 +422,10 @@ export function useDoctorEncounterCardExpandDetail(
     return mergeListVisitWithEncounterDetail(
       visit,
       encounterQuery.encounter,
+      locale,
       clinical,
     );
-  }, [clinical, encounterQuery.encounter, visit]);
+  }, [clinical, encounterQuery.encounter, locale, visit]);
 
   const clinicalAwaiting =
     enabled &&
@@ -412,10 +451,11 @@ export function useDoctorEncounterDetailsView(
     orders?: EncounterOrder[];
   },
 ) {
+  const { locale } = useI18n();
   return useMemo(() => {
     if (!visit || !encounter) return visit;
-    return mergeListVisitWithEncounterDetail(visit, encounter, clinical);
-  }, [clinical, encounter, visit]);
+    return mergeListVisitWithEncounterDetail(visit, encounter, locale, clinical);
+  }, [clinical, encounter, locale, visit]);
 }
 
 export const useDoctorMedicalVisitsPage = useDoctorMedicalEncountersPage;

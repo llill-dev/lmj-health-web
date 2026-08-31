@@ -14,6 +14,7 @@ import { EncounterWorkspacePatientCard } from '@/components/doctor/encounters/wo
 import { mapEncounterWorkspacePatient } from '@/components/doctor/encounters/workspace/map-encounter-workspace';
 import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
 import { useToast } from '@/components/ui/ToastProvider';
+import { useI18n } from '@/i18n/provider';
 import type { useEncounterReferralWorkspace } from '@/hooks/doctor/encounters/useEncounterReferralWorkspace';
 import { REFERRAL_WORKSPACE_CONFIG } from './encounter-order-config';
 import { ReferralCreateForm } from './referral-create-form';
@@ -32,6 +33,7 @@ export function ReferralWorkspaceShell({
   onNavigate: (path: string, options?: { replace?: boolean }) => void;
 }) {
   const config = REFERRAL_WORKSPACE_CONFIG;
+  const { locale } = useI18n();
   const { toast } = useToast();
   const [finalizeOpen, setFinalizeOpen] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<ReferralFormFieldMessages>({});
@@ -71,6 +73,7 @@ export function ReferralWorkspaceShell({
         workspace.encounter,
         undefined,
         publicId,
+        locale,
       )
     : null;
 

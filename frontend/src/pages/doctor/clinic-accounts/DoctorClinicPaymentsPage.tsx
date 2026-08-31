@@ -25,26 +25,36 @@ import type { ApiBillingPaymentMethod } from "@/lib/doctor/billing/apiTypes";
 type PaymentMethodFilter = "all" | ApiBillingPaymentMethod;
 
 function buildMethodOptions(
-  tr: (ar: string, en: string) => string,
+  t: (key: string) => string,
 ): Array<{ id: PaymentMethodFilter; label: string }> {
   return [
-    { id: "all", label: tr("الكل", "All") },
-    { id: "cash", label: tr("نقدي", "Cash") },
-    { id: "card", label: tr("بطاقة", "Card") },
-    { id: "bank_transfer", label: tr("تحويل بنكي", "Bank transfer") },
-    { id: "insurance", label: tr("تأمين", "Insurance") },
+    { id: "all", label: t("doctor.clinicAccounts.payments.filter.all") },
+    { id: "cash", label: t("doctor.clinicAccounts.payments.filter.cash") },
+    { id: "card", label: t("doctor.clinicAccounts.payments.filter.card") },
+    {
+      id: "bank_transfer",
+      label: t("doctor.clinicAccounts.payments.filter.bankTransfer"),
+    },
+    {
+      id: "insurance",
+      label: t("doctor.clinicAccounts.payments.filter.insurance"),
+    },
   ];
 }
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
 export default function DoctorClinicPaymentsPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
   const navigate = useNavigate();
-  const { basePath, canManagePayments, canViewPayments, canViewSettings, isSecretary } =
-    useBillingAccess();
-  const methodOptions = buildMethodOptions(tr);
+  const {
+    basePath,
+    canManagePayments,
+    canViewPayments,
+    canViewSettings,
+    isSecretary,
+  } = useBillingAccess();
+  const methodOptions = buildMethodOptions(t);
 
   const [method, setMethod] = useState<PaymentMethodFilter>("all");
   const [dateFrom, setDateFrom] = useState("");
@@ -75,7 +85,7 @@ export default function DoctorClinicPaymentsPage() {
   return (
     <>
       <Helmet>
-        <title>{tr("المدفوعات • LMJ Health", "Payments • LMJ Health")}</title>
+        <title>{t("doctor.clinicAccounts.payments.page.title")}</title>
       </Helmet>
 
       <div dir={dir} lang={locale}>
@@ -84,21 +94,29 @@ export default function DoctorClinicPaymentsPage() {
           surface="mint"
           kpiColumns={3}
           headerIcon={<CreditCard className="h-8 w-8 text-white" />}
-          title={tr("المدفوعات", "Payments")}
+          title={t("doctor.clinicAccounts.payments.title")}
           subtitle={
             <span>
               <span className="font-extrabold text-primary">
                 {listQuery.isAwaitingData ? "—" : listQuery.total}
               </span>
               <span className="text-primary/90">
-                {tr(" — إجمالي المدفوعات", " — total payments")}
+                {t("doctor.clinicAccounts.payments.subtitle")}
               </span>
             </span>
           }
-          actionLabel={canManagePayments ? tr("تسجيل دفعة", "Record payment") : undefined}
-          actionIcon={canManagePayments ? <Plus className="h-4 w-4" /> : undefined}
+          actionLabel={
+            canManagePayments
+              ? t("doctor.clinicAccounts.payments.recordPayment")
+              : undefined
+          }
+          actionIcon={
+            canManagePayments ? <Plus className="h-4 w-4" /> : undefined
+          }
           onActionClick={
-            canManagePayments ? () => navigate(`${basePath}/payments/new`) : undefined
+            canManagePayments
+              ? () => navigate(`${basePath}/payments/new`)
+              : undefined
           }
         />
 
@@ -106,10 +124,7 @@ export default function DoctorClinicPaymentsPage() {
 
         {!canViewPayments ? (
           <p className="py-10 text-center font-cairo text-[15px] font-semibold text-[#64748B]">
-            {tr(
-              "ليست لديك صلاحية عرض المدفوعات.",
-              "You do not have permission to view payments.",
-            )}
+            {t("doctor.clinicAccounts.payments.noPermission")}
           </p>
         ) : (
           <>
@@ -130,7 +145,7 @@ export default function DoctorClinicPaymentsPage() {
                   setDateFrom(event.target.value);
                   setPage(1);
                 }}
-                aria-label={tr("من تاريخ", "From date")}
+                aria-label={t("doctor.clinicAccounts.payments.fromDate")}
                 className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white px-3 font-cairo text-[13px] font-bold text-[#111827] outline-none focus:border-primary sm:w-[180px]"
               />
               <input
@@ -140,11 +155,14 @@ export default function DoctorClinicPaymentsPage() {
                   setDateTo(event.target.value);
                   setPage(1);
                 }}
-                aria-label={tr("إلى تاريخ", "To date")}
+                aria-label={t("doctor.clinicAccounts.payments.toDate")}
                 className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white px-3 font-cairo text-[13px] font-bold text-[#111827] outline-none focus:border-primary sm:w-[180px]"
               />
               <div className="sm:ms-auto">
-                <ClinicAccountsSearchCount count={listQuery.total} label={tr("دفعة", "payment")} />
+                <ClinicAccountsSearchCount
+                  count={listQuery.total}
+                  label={t("doctor.clinicAccounts.payments.searchCountLabel")}
+                />
               </div>
             </div>
 
@@ -152,7 +170,7 @@ export default function DoctorClinicPaymentsPage() {
               <DoctorTableSkeleton rows={6} columns={1} />
             ) : listQuery.isError ? (
               <DoctorListErrorState
-                title={tr("تعذّر تحميل المدفوعات", "Failed to load payments")}
+                title={t("doctor.clinicAccounts.payments.loadFailed")}
                 brief={getUserFacingRequestErrorMessage(listQuery.error)}
                 retrying={retryingList}
                 onRetry={() => void retryList()}
@@ -164,30 +182,27 @@ export default function DoctorClinicPaymentsPage() {
                 imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.1)]"
                 title={
                   method !== "all" || dateFrom || dateTo
-                    ? tr(
-                        "لا توجد مدفوعات تطابق الفلتر الحالي",
-                        "No payments match the current filter",
-                      )
-                    : tr("لا توجد مدفوعات مسجلة بعد", "No payments recorded yet")
+                    ? t("doctor.clinicAccounts.payments.empty.matching")
+                    : t("doctor.clinicAccounts.payments.empty.none")
                 }
                 subtitle={
                   method !== "all" || dateFrom || dateTo
-                    ? tr(
-                        "جرّب إعادة ضبط الفلاتر لعرض النتائج",
-                        "Try resetting the filters to see results",
-                      )
-                    : tr(
-                        "سجّل دفعة لفاتورة لعرضها هنا",
-                        "Record a payment against an invoice to see it here",
-                      )
+                    ? t("doctor.clinicAccounts.payments.empty.matchingSubtitle")
+                    : t("doctor.clinicAccounts.payments.empty.noneSubtitle")
                 }
-                actionLabel={canManagePayments ? tr("تسجيل دفعة", "Record payment") : undefined}
+                actionLabel={
+                  canManagePayments
+                    ? t("doctor.clinicAccounts.payments.recordPayment")
+                    : undefined
+                }
                 onAction={
                   canManagePayments
                     ? () => navigate(`${basePath}/payments/new`)
                     : undefined
                 }
-                actionIcon={canManagePayments ? <Plus className="h-4 w-4" /> : undefined}
+                actionIcon={
+                  canManagePayments ? <Plus className="h-4 w-4" /> : undefined
+                }
               />
             ) : (
               <div className="space-y-3">

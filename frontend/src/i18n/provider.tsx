@@ -21,8 +21,22 @@ type I18nContextValue = {
   locale: AppLocale;
   dir: AppDirection;
   setLocale: (next: AppLocale) => void;
-  t: (key: string, fallback?: string) => string;
+  /**
+   * الوسيط الثاني إمّا نص احتياطي (fallback) عند غياب المفتاح، أو كائن قيم
+   * يُستبدل مكان {placeholders} داخل نص الترجمة (مثال: "{count} طلب").
+   */
+  t: (key: string, paramsOrFallback?: Record<string, unknown> | string) => string;
 };
+
+function interpolateTranslation(
+  template: string,
+  params: Record<string, unknown>,
+): string {
+  return template.replace(/\{(\w+)\}/g, (match, name: string) => {
+    const value = params[name];
+    return value != null ? String(value) : match;
+  });
+}
 
 const I18nContext = createContext<I18nContextValue | null>(null);
 
@@ -43,8 +57,16 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const t = useCallback(
-    (key: string, fallback?: string) =>
-      getTranslationValue(locale, key) ?? fallback ?? key,
+    (key: string, paramsOrFallback?: Record<string, unknown> | string) => {
+      const raw = getTranslationValue(locale, key);
+      if (typeof paramsOrFallback === "string") {
+        return raw ?? paramsOrFallback;
+      }
+      const template = raw ?? key;
+      return paramsOrFallback
+        ? interpolateTranslation(template, paramsOrFallback)
+        : template;
+    },
     [locale],
   );
 

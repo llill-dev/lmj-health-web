@@ -10,6 +10,7 @@ import {
 import { mapRadiologyPreviewVm } from '@/components/doctor/radiology/preview/map-radiology-preview';
 import { doctorApi, doctorPatientsQueryKeys } from '@/lib/doctor/client';
 import { loadEncounterOrderForPreview } from '@/lib/doctor/encounters/encounterOrderLoad';
+import { useI18n } from '@/i18n/provider';
 
 export function useEncounterOrderPreviewPage(
   category: CatalogOrderCategory,
@@ -18,6 +19,7 @@ export function useEncounterOrderPreviewPage(
   encounterId: string,
   enabled = true,
 ) {
+  const { locale } = useI18n();
   const isEnabled =
     enabled && Boolean(doctorId) && Boolean(patientId) && Boolean(encounterId);
 
@@ -78,11 +80,13 @@ export function useEncounterOrderPreviewPage(
       order: orderQuery.data,
       encounter: encounterQuery.data?.encounter,
       publicProfile: publicProfileQuery.data?.patient,
+      locale,
     });
   }, [
     orderQuery.data,
     encounterQuery.data?.encounter,
     publicProfileQuery.data?.patient,
+    locale,
   ]);
 
   const isAwaitingData = isAwaitingAnyInitialQueryData([

@@ -1,29 +1,29 @@
-'use client';
+"use client";
 
-import { BookOpen, Plus, Save } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { useToast } from '@/components/ui/ToastProvider';
-import StyledSelect from '@/components/ui/styled-select';
+import { BookOpen, Plus, Save } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Helmet } from "react-helmet-async";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { motion } from "framer-motion";
+import { useToast } from "@/components/ui/ToastProvider";
+import StyledSelect from "@/components/ui/styled-select";
 import {
   ClinicAccountsBanner,
   ClinicAccountsSubNav,
   InvoiceSummaryCard,
-} from '@/components/doctor/clinic-accounts';
+} from "@/components/doctor/clinic-accounts";
 import {
   useBillingSettings,
   useBillingInvoicePrefill,
   useCreateBillingInvoice,
-} from '@/hooks/doctor/billing';
-import { useDoctorPatients } from '@/hooks/doctor';
-import { getUserFacingRequestErrorMessage } from '@/lib/api';
-import { formatBillingAmount } from '@/lib/doctor/billing/format';
-import { BILLING_DISCOUNT_PRESET_OPTIONS } from '@/lib/doctor/billing/settingsUi';
-import { useBillingAccess } from '@/hooks/billing/useBillingAccess';
-import { useSecretaryPermissions } from '@/hooks/secretary/useSecretaryPermissions';
-import { useI18n } from '@/i18n/provider';
+} from "@/hooks/doctor/billing";
+import { useDoctorPatients } from "@/hooks/doctor";
+import { getUserFacingRequestErrorMessage } from "@/lib/api";
+import { formatBillingAmount } from "@/lib/doctor/billing/format";
+import { BILLING_DISCOUNT_PRESET_OPTIONS } from "@/lib/doctor/billing/settingsUi";
+import { useBillingAccess } from "@/hooks/billing/useBillingAccess";
+import { useSecretaryPermissions } from "@/hooks/secretary/useSecretaryPermissions";
+import { useI18n } from "@/i18n/provider";
 
 type LineItem = {
   id: string;
@@ -33,26 +33,29 @@ type LineItem = {
 };
 
 export default function DoctorClinicCreateInvoicePage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const { t, locale, dir } = useI18n();
   const navigate = useNavigate();
   const { basePath, canViewSettings, isSecretary } = useBillingAccess();
   const { hasPermission: hasSecretaryPermission } = useSecretaryPermissions();
-  const canViewPatients = !isSecretary || hasSecretaryPermission('patients:view');
+  const canViewPatients =
+    !isSecretary || hasSecretaryPermission("patients:view");
   const [searchParams] = useSearchParams();
-  const appointmentId = searchParams.get('appointmentId');
+  const appointmentId = searchParams.get("appointmentId");
   const { toast } = useToast();
   const settingsQuery = useBillingSettings(!isSecretary || canViewSettings);
   const prefillQuery = useBillingInvoicePrefill(appointmentId);
   const createInvoice = useCreateBillingInvoice();
-  const patientsQuery = useDoctorPatients({ page: 1, limit: 100 }, canViewPatients);
+  const patientsQuery = useDoctorPatients(
+    { page: 1, limit: 100 },
+    canViewPatients,
+  );
 
-  const [patientId, setPatientId] = useState('');
+  const [patientId, setPatientId] = useState("");
   const [discountPercent, setDiscountPercent] = useState(0);
-  const [customDiscount, setCustomDiscount] = useState('0');
-  const [dueDate, setDueDate] = useState('');
+  const [customDiscount, setCustomDiscount] = useState("0");
+  const [dueDate, setDueDate] = useState("");
   const [items, setItems] = useState<LineItem[]>([
-    { id: '1', service: '', quantity: 1, price: 0 },
+    { id: "1", service: "", quantity: 1, price: 0 },
   ]);
   const [prefillApplied, setPrefillApplied] = useState(false);
 
@@ -70,7 +73,8 @@ export default function DoctorClinicCreateInvoicePage() {
       setItems(
         prefill.items.map((item, index) => ({
           id: String(index + 1),
-          service: item.serviceNameSnapshot?.trim() || item.description?.trim() || '',
+          service:
+            item.serviceNameSnapshot?.trim() || item.description?.trim() || "",
           quantity: item.quantity ?? 1,
           price: item.unitPrice ?? 0,
         })),
@@ -118,7 +122,7 @@ export default function DoctorClinicCreateInvoicePage() {
   const addItem = () => {
     setItems((prev) => [
       ...prev,
-      { id: String(Date.now()), service: '', quantity: 1, price: 0 },
+      { id: String(Date.now()), service: "", quantity: 1, price: 0 },
     ]);
   };
 
@@ -128,11 +132,13 @@ export default function DoctorClinicCreateInvoicePage() {
     );
   };
 
-  const submitInvoice = async (status: 'draft' | 'issued') => {
+  const submitInvoice = async (status: "draft" | "issued") => {
     if (!patientId) {
-      toast(tr('يرجى اختيار مريض من قائمة مرضاك.', 'Please select a patient from your patient list.'), {
-        title: tr('مريض مطلوب', 'Patient required'),
-        variant: 'error',
+      toast(t("doctor.clinicAccounts.createInvoice.error.patientRequired"), {
+        title: t(
+          "doctor.clinicAccounts.createInvoice.error.patientRequiredTitle",
+        ),
+        variant: "error",
       });
       return;
     }
@@ -141,9 +147,9 @@ export default function DoctorClinicCreateInvoicePage() {
       (item) => item.service.trim() && item.quantity > 0 && item.price > 0,
     );
     if (!validItems.length) {
-      toast(tr('أضف بنداً واحداً على الأقل مع اسم الخدمة والسعر.', 'Add at least one item with a service name and price.'), {
-        title: tr('بنود ناقصة', 'Missing items'),
-        variant: 'error',
+      toast(t("doctor.clinicAccounts.createInvoice.error.missingItems"), {
+        title: t("doctor.clinicAccounts.createInvoice.error.missingItemsTitle"),
+        variant: "error",
       });
       return;
     }
@@ -151,7 +157,7 @@ export default function DoctorClinicCreateInvoicePage() {
     try {
       await createInvoice.mutateAsync({
         patientId,
-        sourceType: appointmentId ? 'visit' : 'manual',
+        sourceType: appointmentId ? "visit" : "manual",
         appointmentId: appointmentId ?? undefined,
         status,
         discountPercent,
@@ -164,19 +170,22 @@ export default function DoctorClinicCreateInvoicePage() {
       });
 
       toast(
-        status === 'issued'
-          ? tr('تم إصدار الفاتورة بنجاح.', 'The invoice was issued successfully.')
-          : tr('تم حفظ المسودة.', 'The draft was saved.'),
+        status === "issued"
+          ? t("doctor.clinicAccounts.createInvoice.success.issued")
+          : t("doctor.clinicAccounts.createInvoice.success.draft"),
         {
-          title: status === 'issued' ? tr('تم الإصدار', 'Issued') : tr('مسودة', 'Draft'),
-          variant: 'success',
+          title:
+            status === "issued"
+              ? t("doctor.clinicAccounts.createInvoice.success.issuedTitle")
+              : t("doctor.clinicAccounts.createInvoice.success.draftTitle"),
+          variant: "success",
         },
       );
       navigate(`${basePath}/invoices`);
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
-        title: tr('تعذّر إنشاء الفاتورة', 'Could not create the invoice'),
-        variant: 'error',
+        title: t("doctor.clinicAccounts.createInvoice.error.createFailed"),
+        variant: "error",
       });
     }
   };
@@ -184,18 +193,13 @@ export default function DoctorClinicCreateInvoicePage() {
   return (
     <>
       <Helmet>
-        <title>
-          {tr('إنشاء فاتورة • LMJ Health', 'Create Invoice • LMJ Health')}
-        </title>
+        <title>{t("doctor.clinicAccounts.createInvoice.page.title")}</title>
       </Helmet>
 
       <div dir={dir} lang={locale}>
         <ClinicAccountsBanner
-          title={tr('إنشاء فاتورة', 'Create invoice')}
-          subtitle={tr(
-            'إصدار فاتورة جديدة للمريض',
-            'Issue a new invoice for the patient',
-          )}
+          title={t("doctor.clinicAccounts.createInvoice.title")}
+          subtitle={t("doctor.clinicAccounts.createInvoice.subtitle")}
           icon={<BookOpen className="w-7 h-7 text-white sm:h-8 sm:w-8" />}
         />
 
@@ -204,13 +208,12 @@ export default function DoctorClinicCreateInvoicePage() {
         <div className="space-y-5">
           <section className="rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-start font-cairo text-[15px] font-extrabold text-[#111827]">
-              {tr('المريض', 'Patient')}
+              {t("doctor.clinicAccounts.createInvoice.patient")}
             </h2>
             {!canViewPatients ? (
               <p className="rounded-[10px] border border-dashed border-[#FDA29B] bg-[#FEF3F2] px-4 py-3 text-start font-cairo text-[12px] font-semibold text-[#B42318]">
-                {tr(
-                  'يتطلب اختيار مريض صلاحية عرض المرضى (patients:view)، وهي غير مفعّلة على حسابك حالياً.',
-                  'Selecting a patient requires the view-patients permission (patients:view), which is not enabled on your account currently.',
+                {t(
+                  "doctor.clinicAccounts.createInvoice.patientPermissionRequired",
                 )}
               </p>
             ) : (
@@ -219,17 +222,21 @@ export default function DoctorClinicCreateInvoicePage() {
                   options={patientOptions}
                   value={patientId}
                   onChange={setPatientId}
-                  placeholder={tr('اختر المريض', 'Choose the patient')}
-                  emptyTriggerLabel={tr('لا يوجد مرضى في القائمة', 'No patients in the list')}
-                  emptyState={tr(
-                    'لا يوجد مرضى مرتبطون بحسابك. أضف مريضاً من صفحة المرضى أولاً.',
-                    'No patients are linked to your account. Add a patient from the patients page first.',
+                  placeholder={t(
+                    "doctor.clinicAccounts.createInvoice.choosePatient",
+                  )}
+                  emptyTriggerLabel={t(
+                    "doctor.clinicAccounts.createInvoice.noPatients",
+                  )}
+                  emptyState={t(
+                    "doctor.clinicAccounts.createInvoice.noPatientsLinked",
                   )}
                   disabled={patientsQuery.isAwaitingData}
                 />
                 {selectedPatient ? (
                   <p className="mt-2 text-start font-cairo text-[12px] font-semibold text-[#667085]">
-                    {tr('المريض المختار:', 'Selected patient:')} {selectedPatient.user?.fullName}
+                    {t("doctor.clinicAccounts.createInvoice.selectedPatient")}{" "}
+                    {selectedPatient.user?.fullName}
                   </p>
                 ) : null}
               </>
@@ -238,14 +245,11 @@ export default function DoctorClinicCreateInvoicePage() {
 
           <section className="rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-start font-cairo text-[15px] font-extrabold text-[#111827]">
-              {tr('الخصم وتاريخ الاستحقاق', 'Discount and due date')}
+              {t("doctor.clinicAccounts.createInvoice.discountAndDueDate")}
             </h2>
             {settingsQuery.isError || (isSecretary && !canViewSettings) ? (
               <p className="mb-4 rounded-[10px] border border-dashed border-[#FDA29B] bg-[#FEF3F2] px-4 py-3 text-start font-cairo text-[12px] font-semibold text-[#B42318]">
-                {tr(
-                  'تعذّر تحميل إعدادات الفوترة الفعلية (العملة، الضريبة، الخصومات) — القيم أدناه افتراضية ولا تعكس بالضرورة إعدادات الطبيب.',
-                  "Could not load the actual billing settings (currency, tax, discounts) — the values below are defaults and may not reflect the doctor's actual settings.",
-                )}
+                {t("doctor.clinicAccounts.createInvoice.settingsLoadFailed")}
               </p>
             ) : null}
             <div className="flex flex-wrap gap-2 justify-start mb-4">
@@ -275,10 +279,15 @@ export default function DoctorClinicCreateInvoicePage() {
                 value={customDiscount}
                 onChange={(e) => {
                   setCustomDiscount(e.target.value);
-                  const clamped = Math.min(100, Math.max(0, Number(e.target.value) || 0));
+                  const clamped = Math.min(
+                    100,
+                    Math.max(0, Number(e.target.value) || 0),
+                  );
                   setDiscountPercent(clamped);
                 }}
-                placeholder={tr('خصم مخصص (%)', 'Custom discount (%)')}
+                placeholder={t(
+                  "doctor.clinicAccounts.createInvoice.customDiscount",
+                )}
                 className="h-[44px] w-full rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-semibold outline-none focus:border-primary"
               />
               <input
@@ -291,9 +300,9 @@ export default function DoctorClinicCreateInvoicePage() {
           </section>
 
           <section className="rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
-            <div className='flex justify-between items-center mb-4'>
+            <div className="flex justify-between items-center mb-4">
               <h2 className="mb-4 text-start font-cairo text-[15px] font-extrabold text-[#111827]">
-                {tr('البنود', 'Items')}
+                {t("doctor.clinicAccounts.createInvoice.items")}
               </h2>
               <div className="flex justify-end mt-4">
                 <button
@@ -302,7 +311,7 @@ export default function DoctorClinicCreateInvoicePage() {
                   className="inline-flex items-center gap-2 rounded-[10px] border border-primary px-4 py-2 font-cairo text-[12px] font-extrabold text-primary"
                 >
                   <Plus className="w-4 h-4" aria-hidden />
-                  {tr('إضافة بند', 'Add item')}
+                  {t("doctor.clinicAccounts.createInvoice.addItem")}
                 </button>
               </div>
             </div>
@@ -319,7 +328,7 @@ export default function DoctorClinicCreateInvoicePage() {
                   <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                     <div className="md:col-span-3">
                       <label className="mb-2 block text-start font-cairo text-[12px] font-bold text-[#667085]">
-                        {tr('الخدمة', 'Service')}
+                        {t("doctor.clinicAccounts.createInvoice.service")}
                       </label>
                       <input
                         value={item.service}
@@ -331,7 +340,7 @@ export default function DoctorClinicCreateInvoicePage() {
                     </div>
                     <div>
                       <label className="mb-2 block text-start font-cairo text-[12px] font-bold text-[#667085]">
-                        {tr('الكمية', 'Quantity')}
+                        {t("doctor.clinicAccounts.createInvoice.quantity")}
                       </label>
                       <input
                         type="number"
@@ -347,7 +356,7 @@ export default function DoctorClinicCreateInvoicePage() {
                     </div>
                     <div>
                       <label className="mb-2 block text-start font-cairo text-[12px] font-bold text-[#667085]">
-                        {tr('السعر', 'Price')}
+                        {t("doctor.clinicAccounts.createInvoice.price")}
                       </label>
                       <input
                         type="number"
@@ -364,7 +373,7 @@ export default function DoctorClinicCreateInvoicePage() {
                     </div>
                     <div className="flex justify-end items-end">
                       <p className="font-cairo text-[13px] font-extrabold text-primary">
-                        {tr('الإجمالي:', 'Total:')}{" "}
+                        {t("doctor.clinicAccounts.createInvoice.total")}{" "}
                         {formatBillingAmount(
                           item.quantity * item.price,
                           currency,
@@ -394,7 +403,7 @@ export default function DoctorClinicCreateInvoicePage() {
               className="inline-flex h-[52px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
             >
               <BookOpen className="w-4 h-4" aria-hidden />
-              {tr('إصدار الفاتورة', 'Issue invoice')}
+              {t("doctor.clinicAccounts.createInvoice.issueInvoice")}
             </button>
             <button
               type="button"
@@ -403,7 +412,7 @@ export default function DoctorClinicCreateInvoicePage() {
               className="inline-flex h-[52px] items-center justify-center gap-2 rounded-[12px] border border-primary bg-white font-cairo text-[14px] font-extrabold text-primary disabled:opacity-60"
             >
               <Save className="w-4 h-4" aria-hidden />
-              {tr('حفظ كمسودة', 'Save as draft')}
+              {t("doctor.clinicAccounts.createInvoice.saveAsDraft")}
             </button>
           </div>
 
@@ -411,7 +420,7 @@ export default function DoctorClinicCreateInvoicePage() {
             to={`${basePath}/invoices`}
             className="inline-block font-cairo text-[13px] font-extrabold text-[#667085]"
           >
-            {tr('الرجوع إلى الفواتير ←', 'Back to invoices ←')}
+            {t("doctor.clinicAccounts.createInvoice.backToInvoices")}
           </Link>
         </div>
       </div>

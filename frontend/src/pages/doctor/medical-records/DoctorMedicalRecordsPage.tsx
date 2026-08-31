@@ -1,5 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { Activity, CheckCircle, FileDown, FileText, Files, X } from "lucide-react";
+import {
+  Activity,
+  CheckCircle,
+  FileDown,
+  FileText,
+  Files,
+  X,
+} from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import DoctorDashboardOverview from "@/components/doctor/dashboard/doctor-dashboard-overview";
@@ -28,31 +35,38 @@ import { readAuthUser } from "@/lib/cookies";
 import { useToast } from "@/components/ui/ToastProvider";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import { useRetryAction } from "@/lib/query/useRetryAction";
-import { generateDoctorDocumentPdf, openPdfBlobInNewTab } from "@/lib/doctor/orders/doctorOrderDocuments";
+import {
+  generateDoctorDocumentPdf,
+  openPdfBlobInNewTab,
+} from "@/lib/doctor/orders/doctorOrderDocuments";
 import { useI18n } from "@/i18n/provider";
 
-function formatLocaleDate(value: string | null | undefined, locale: string) {
-  if (!value) return locale === "ar" ? "غير محدد" : "Not set";
+function formatLocaleDate(
+  value: string | null | undefined,
+  t: (key: string) => string,
+) {
+  if (!value) return t("doctor.medicalRecords.notSet");
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US");
+  return date.toLocaleDateString("ar-SA");
 }
 
 function mapRecordToDetails(
   record: NonNullable<ReturnType<typeof useDoctorMedicalRecord>["record"]>,
   patientName: string,
-  locale: string,
+  t: (key: string, params?: Record<string, unknown>) => string,
 ): MedicalRecordDetails {
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   return {
     id: record._id,
     patientName,
-    date: formatLocaleDate(record.date || record.createdAt, locale),
+    date: formatLocaleDate(record.date || record.createdAt, t),
     diagnosisSubtitle:
-      record.diagnosis || record.title || tr("بدون تشخيص", "No diagnosis"),
+      record.diagnosis ||
+      record.title ||
+      t("doctor.medicalRecords.noDiagnosis"),
     symptoms: record.title
       ? [record.title]
-      : [tr("لا توجد أعراض موثقة", "No documented symptoms")],
+      : [t("doctor.medicalRecords.noSymptoms")],
     vitals: [],
     medicinesCount: record.prescriptions?.length ?? 0,
     prescriptions: (record.prescriptions ?? []).map((item) => ({
@@ -63,21 +77,19 @@ function mapRecordToDetails(
       notes: "",
     })),
     followUpDate: record.followUpRequired
-      ? tr("تحتاج متابعة", "Follow-up needed")
-      : tr("لا توجد متابعة", "No follow-up"),
+      ? t("doctor.medicalRecords.followUpNeeded")
+      : t("doctor.medicalRecords.noFollowUp"),
     additionalNotes:
       record.attachments && record.attachments.length > 0
-        ? tr(
-            `المرفقات: ${record.attachments.join("، ")}`,
-            `Attachments: ${record.attachments.join(", ")}`,
-          )
-        : tr("لا توجد ملاحظات إضافية.", "No additional notes."),
+        ? t("doctor.medicalRecords.attachments", {
+            attachments: record.attachments.join("، "),
+          })
+        : t("doctor.medicalRecords.noAdditionalNotes"),
   };
 }
 
 export default function DoctorMedicalRecordsPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
   const { toast } = useToast();
   const doctorId = readAuthUser()?.actorIds?.doctorId ?? "";
   const [search, setSearch] = useState("");
@@ -137,10 +149,10 @@ export default function DoctorMedicalRecordsPage() {
       mapRecordToDetails(
         recordDetailsQuery.record,
         selectedPatient.user.fullName,
-        locale,
+        t,
       ),
     );
-  }, [recordDetailsQuery.record, selectedPatient, locale]);
+  }, [recordDetailsQuery.record, selectedPatient, t]);
 
   const openDetails = (row: MedicalRecordRowVm) => {
     setDetailsRecord(null);
@@ -152,13 +164,13 @@ export default function DoctorMedicalRecordsPage() {
   const openEdit = (row: MedicalRecordRowVm) => {
     setSelectedPatientId(row.patientId);
     setSelectedRecordId(row.id);
-    setMode('edit');
+    setMode("edit");
   };
 
   const handleDownloadPdf = async (row: MedicalRecordRowVm) => {
     try {
-      toast(tr("جارٍ إنشاء ملف PDF...", "Generating PDF..."), {
-        title: tr("تحميل التقرير", "Download report"),
+      toast(t("doctor.medicalRecords.generatingPdf"), {
+        title: t("doctor.medicalRecords.downloadReport"),
         variant: "info",
       });
       const blob = await generateDoctorDocumentPdf({
@@ -167,13 +179,13 @@ export default function DoctorMedicalRecordsPage() {
       });
       const filename = `medical-record-${row.systemId}-${row.id.slice(-6)}.pdf`;
       openPdfBlobInNewTab(blob, filename);
-      toast(tr("تم إنشاء ملف PDF بنجاح", "PDF created successfully"), {
-        title: tr("نجح التحميل", "Download succeeded"),
+      toast(t("doctor.medicalRecords.pdfCreated"), {
+        title: t("doctor.medicalRecords.downloadSucceeded"),
         variant: "success",
       });
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
-        title: tr("فشل إنشاء ملف PDF", "Failed to create PDF"),
+        title: t("doctor.medicalRecords.pdfFailed"),
         variant: "error",
       });
     }
@@ -182,9 +194,7 @@ export default function DoctorMedicalRecordsPage() {
   return (
     <>
       <Helmet>
-        <title>
-          {tr("السجلات الطبية • LMJ Health", "Medical Records • LMJ Health")}
-        </title>
+        <title>{t("doctor.medicalRecords.page.title")}</title>
       </Helmet>
 
       <div dir={dir} lang={locale} className="w-full pb-8 sm:pb-10">
@@ -204,44 +214,44 @@ export default function DoctorMedicalRecordsPage() {
           variant="medical-records"
           surface="mint"
           kpiColumns={4}
-          title={tr("السجلات الطبية", "Medical Records")}
+          title={t("doctor.medicalRecords.title")}
           subtitle={
             <span>
               <span className="font-extrabold text-primary">
                 {list.isAwaitingData ? "—" : list.stats.totalRecords}
               </span>
               <span className="text-primary/90">
-                {tr(" — إجمالي السجلات", " — total records")}
+                {t("doctor.medicalRecords.subtitle")}
               </span>
             </span>
           }
           mode={mode === "edit" ? "create" : mode}
-          actionLabel={tr("إضافة سجل جديد", "Add new record")}
+          actionLabel={t("doctor.medicalRecords.addNew")}
           onActionClick={() => setMode("create")}
           kpis={[
             {
               key: "totalRecords",
               icon: <Files className="h-5 w-5 shrink-0" />,
               value: list.isAwaitingData ? "—" : list.stats.totalRecords,
-              label: tr("إجمالي السجلات", "Total records"),
+              label: t("doctor.medicalRecords.kpi.total"),
             },
             {
               key: "prescriptions",
               icon: <FileText className="h-5 w-5 shrink-0" />,
               value: list.isAwaitingData ? "—" : list.stats.prescriptions,
-              label: tr("الوصفات المسجلة", "Prescriptions"),
+              label: t("doctor.medicalRecords.kpi.prescriptions"),
             },
             {
               key: "needsFollowUp",
               icon: <Activity className="h-5 w-5 shrink-0" />,
               value: list.isAwaitingData ? "—" : list.stats.needsFollowUp,
-              label: tr("تحتاج متابعة", "Needs follow-up"),
+              label: t("doctor.medicalRecords.kpi.needsFollowUp"),
             },
             {
               key: "active",
               icon: <CheckCircle className="h-5 w-5 shrink-0" />,
               value: list.isAwaitingData ? "—" : list.stats.active,
-              label: tr("سجلات نشطة", "Active records"),
+              label: t("doctor.medicalRecords.kpi.active"),
             },
           ]}
           overlay={
@@ -250,7 +260,7 @@ export default function DoctorMedicalRecordsPage() {
                 type="button"
                 onClick={() => setMode("list")}
                 className="absolute start-4 top-4 flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-white shadow-[0_14px_24px_rgba(0,0,0,0.16)] sm:start-[24px] sm:top-[24px]"
-                aria-label={tr("إغلاق", "Close")}
+                aria-label={t("doctor.medicalRecords.close")}
               >
                 <X className="h-5 w-5 text-[#0F8F8B]" />
               </motion.button>
@@ -273,21 +283,19 @@ export default function DoctorMedicalRecordsPage() {
                 }))}
                 title={
                   mode === "edit"
-                    ? tr("تعديل السجل الطبي", "Edit medical record")
-                    : tr("إنشاء سجل طبي جديد", "Create new medical record")
+                    ? t("doctor.medicalRecords.edit")
+                    : t("doctor.medicalRecords.create")
                 }
                 description={
                   mode === "edit"
-                    ? tr(
-                        "يمكنك تعديل الحقول التي يدعمها الـ API الحالي ثم حفظ التغييرات.",
-                        "You can edit the fields supported by the current API, then save the changes.",
-                      )
-                    : tr(
-                        "سيتم حفظ العنوان والتشخيص والوصفات النصية وحالة المتابعة فقط في هذا الإصدار.",
-                        "Only the title, diagnosis, text prescriptions, and follow-up status will be saved in this version.",
-                      )
+                    ? t("doctor.medicalRecords.editDescription")
+                    : t("doctor.medicalRecords.createDescription")
                 }
-                submitLabel={mode === "edit" ? tr("حفظ التعديلات", "Save changes") : tr("حفظ السجل", "Save record")}
+                submitLabel={
+                  mode === "edit"
+                    ? t("doctor.medicalRecords.saveChanges")
+                    : t("doctor.medicalRecords.saveRecord")
+                }
                 patientLocked={mode === "edit"}
                 initialValues={
                   mode === "edit" && editingRecord
@@ -317,8 +325,8 @@ export default function DoctorMedicalRecordsPage() {
                             : undefined,
                         followUpRequired: payload.followUpRequired,
                       });
-                      toast(tr("تم تحديث السجل الطبي بنجاح", "The medical record was updated successfully"), {
-                        title: tr("تم الحفظ", "Saved"),
+                      toast(t("doctor.medicalRecords.updated"), {
+                        title: t("doctor.medicalRecords.saved"),
                         variant: "success",
                       });
                     } else {
@@ -334,8 +342,8 @@ export default function DoctorMedicalRecordsPage() {
                           followUpRequired: payload.followUpRequired,
                         },
                       });
-                      toast(tr("تم إنشاء السجل الطبي بنجاح", "The medical record was created successfully"), {
-                        title: tr("تم الحفظ", "Saved"),
+                      toast(t("doctor.medicalRecords.created"), {
+                        title: t("doctor.medicalRecords.saved"),
                         variant: "success",
                       });
                     }
@@ -345,7 +353,7 @@ export default function DoctorMedicalRecordsPage() {
                     void list.refetch();
                   } catch (error) {
                     toast(getUserFacingRequestErrorMessage(error), {
-                      title: tr("فشلت العملية", "Operation failed"),
+                      title: t("doctor.medicalRecords.operationFailed"),
                       variant: "error",
                     });
                   }
@@ -363,7 +371,7 @@ export default function DoctorMedicalRecordsPage() {
                 <MedicalRecordsToolbar
                   search={search}
                   onSearchChange={setSearch}
-                  onClear={() => setSearch('')}
+                  onClear={() => setSearch("")}
                 />
 
                 <div className="mt-5 sm:mt-6">
@@ -374,7 +382,7 @@ export default function DoctorMedicalRecordsPage() {
                     </div>
                   ) : list.isError ? (
                     <DoctorListErrorState
-                      title={tr("تعذّر تحميل السجلات الطبية", "Failed to load medical records")}
+                      title={t("doctor.medicalRecords.loadFailed")}
                       brief={getUserFacingRequestErrorMessage(list.error)}
                       retrying={retryingList}
                       onRetry={() => void retryList()}
@@ -386,10 +394,10 @@ export default function DoctorMedicalRecordsPage() {
                       onEdit={openEdit}
                       onDownloadPdf={handleDownloadPdf}
                       onAddNew={() => {
-                        setMode('create');
-                        setSelectedPatientId('');
+                        setMode("create");
+                        setSelectedPatientId("");
                       }}
-                      isFiltered={search.trim() !== ''}
+                      isFiltered={search.trim() !== ""}
                     />
                   )}
                 </div>

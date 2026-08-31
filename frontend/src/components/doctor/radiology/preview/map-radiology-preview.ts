@@ -1,5 +1,6 @@
 import type { DoctorEncounterSummary } from '@/lib/doctor/types';
 import type { EncounterOrder } from '@/lib/doctor/encounters/encounterClinicalTypes';
+import { isFinalizedEncounterOrder } from '@/lib/doctor/encounters/encounterOrderCategories';
 import {
   formatRadiologyOrderCode,
   mapOrderToClinicalForm,
@@ -28,13 +29,15 @@ export function mapRadiologyPreviewVm({
   order,
   encounter,
   publicProfile,
+  locale = 'ar',
 }: {
   order: EncounterOrder;
   encounter?: DoctorEncounterSummary | null;
   publicProfile?: { user?: { fullName?: string } } | null;
+  locale?: 'ar' | 'en';
 }): RadiologyPreviewVm {
   const items = mapRadiologyItemsToUi(order);
-  const status = resolveRadiologyStatusLabel(order);
+  const status = resolveRadiologyStatusLabel(order, locale);
 
   return {
     orderId: order._id,
@@ -47,7 +50,7 @@ export function mapRadiologyPreviewVm({
     statusLabel: status,
     clinical: mapOrderToClinicalForm(order),
     items,
-    canFinalize: !status.includes('معتمد') && items.length > 0,
+    canFinalize: !isFinalizedEncounterOrder(order) && items.length > 0,
     raw: order,
   };
 }

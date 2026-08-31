@@ -23,10 +23,10 @@ export function MedicalRequestUpdateStatusDialog({
   busy?: boolean;
   onConfirm: (statusCode: string) => Promise<void>;
 }) {
-  const { dir } = useI18n();
+  const { dir, locale } = useI18n();
   const options = useMemo(
-    () => buildDoctorOrderStatusUpdateOptions(currentStatusCode),
-    [currentStatusCode],
+    () => buildDoctorOrderStatusUpdateOptions(currentStatusCode, locale),
+    [currentStatusCode, locale],
   );
   const [nextStatus, setNextStatus] = useState(options[0]?.value ?? '');
 

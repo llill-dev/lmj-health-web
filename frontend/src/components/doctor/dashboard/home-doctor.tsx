@@ -104,8 +104,7 @@ function SurfaceSection({
 }
 
 export default function HomeDoctor() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
   const [selectedDate] = useState(new Date().toISOString().split("T")[0]);
   const patientsSearch = useDashboardPatientsSearch();
 
@@ -155,9 +154,9 @@ export default function HomeDoctor() {
     () => [
       {
         key: "today",
-        label: tr("مواعيد اليوم", "Today's appointments"),
+        label: t("doctor.home.todayAppointments"),
         value: snapshot?.counts?.appointments ?? stats?.todayAppointments ?? 0,
-        delta: `${snapshot?.counts?.appointments ?? 0} ${tr("مجدول", "scheduled")}`,
+        delta: `${snapshot?.counts?.appointments ?? 0} ${t("doctor.home.scheduled")}`,
         icon: Calendar,
         accent: "#129A98",
         soft: "#E9F7F6",
@@ -165,9 +164,9 @@ export default function HomeDoctor() {
       },
       {
         key: "consultations",
-        label: tr("استشارات تحتاج متابعة", "Consultations needing follow-up"),
+        label: t("doctor.home.consultationsNeedingFollowUp"),
         value: snapshot?.counts?.consultations ?? 0,
-        delta: `${snapshot?.counts?.consultations ?? 0} ${tr("نشطة", "active")}`,
+        delta: `${snapshot?.counts?.consultations ?? 0} ${t("doctor.home.active")}`,
         icon: Users,
         accent: "#2D74F5",
         soft: "#EAF1FF",
@@ -175,9 +174,9 @@ export default function HomeDoctor() {
       },
       {
         key: "waitlist",
-        label: tr("قائمة الانتظار", "Waitlist"),
+        label: t("doctor.home.waitlist"),
         value: snapshot?.counts?.waitlist ?? 0,
-        delta: `${snapshot?.counts?.waitlist ?? 0} ${tr("طلب", "requests")}`,
+        delta: `${snapshot?.counts?.waitlist ?? 0} ${t("doctor.home.requests")}`,
         icon: Check,
         accent: "#22C55E",
         soft: "#EAFBF0",
@@ -185,9 +184,9 @@ export default function HomeDoctor() {
       },
       {
         key: "access",
-        label: tr("طلبات وصول معلّقة", "Pending access requests"),
+        label: t("doctor.home.pendingAccessRequests"),
         value: snapshot?.pendingAccessRequestAlert?.count ?? 0,
-        delta: `${snapshot?.pendingAccessRequestAlert?.count ?? 0} ${tr("جديد", "new")}`,
+        delta: `${snapshot?.pendingAccessRequestAlert?.count ?? 0} ${t("doctor.home.new")}`,
         icon: Clock,
         accent: "#FF6A00",
         soft: "#FFF2E8",
@@ -208,10 +207,10 @@ export default function HomeDoctor() {
     () =>
       appointments.slice(0, 2).map((row) => ({
         time: row.startTime ?? "—",
-        name: row.patient?.userId?.fullName ?? tr("مريض", "Patient"),
+        name: row.patient?.userId?.fullName ?? t("doctor.home.patient"),
         mode: "clinic",
         initial: (
-          row.patient?.userId?.fullName ?? tr("مريض", "Patient")
+          row.patient?.userId?.fullName ?? t("doctor.home.patient")
         ).charAt(0),
       })),
     [appointments, locale],
@@ -241,17 +240,13 @@ export default function HomeDoctor() {
         <div className="text-center">
           <AlertCircle className="mx-auto h-12 w-12 text-red-500" />
           <p className="mt-2 font-cairo text-[14px] font-semibold text-red-600">
-            {message ||
-              tr(
-                "فشل تحميل بيانات لوحة التحكم",
-                "Failed to load dashboard data",
-              )}
+            {message || t("doctor.home.dashboardLoadError")}
           </p>
           <button
             onClick={() => refetch()}
             className="mt-3 rounded-[8px] bg-primary px-4 py-2 font-cairo text-[13px] font-extrabold text-white hover:bg-primary/90"
           >
-            {tr("إعادة المحاولة", "Retry")}
+            {t("doctor.home.retry")}
           </button>
         </div>
       </div>
@@ -259,7 +254,11 @@ export default function HomeDoctor() {
   }
 
   return (
-    <div dir={dir} lang={locale} className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
+    <div
+      dir={dir}
+      lang={locale}
+      className="space-y-6 pb-6 sm:space-y-7 sm:pb-8"
+    >
       <section className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4 xl:gap-8">
         {kpis.map((card) => (
           <KpiStatCard
@@ -293,7 +292,7 @@ export default function HomeDoctor() {
 
       <section className="grid gap-6 xl:grid-cols-2">
         <DiagnosisAnalyticsSection />
-        <SurfaceSection title={tr("مواعيد اليوم", "Today's appointments")}>
+        <SurfaceSection title={t("doctor.home.todayAppointments")}>
           <div className="space-y-4 px-4 py-5 sm:px-5 sm:py-6">
             {todayRows.length > 0 ? (
               todayRows.map((row) => (
@@ -321,17 +320,14 @@ export default function HomeDoctor() {
                       {row.time}
                     </div>
                     <div className="mt-2 inline-flex rounded-[8px] bg-[#DDF4F1] px-3 py-1 font-cairo text-[13px] font-black text-primary">
-                      {tr("مجدول", "Scheduled")}
+                      {t("doctor.home.scheduledBadge")}
                     </div>
                   </div>
                 </article>
               ))
             ) : (
               <div className="flex min-h-[250px] items-center justify-center rounded-[18px] border border-dashed border-[#D8E2EE] bg-[#FBFDFE] px-6 text-center font-cairo text-[15px] font-semibold leading-7 text-[#8A94A6]">
-                {tr(
-                  "لا توجد مواعيد مجدولة لهذا اليوم بعد.",
-                  "No appointments scheduled for today yet.",
-                )}
+                {t("doctor.home.noAppointmentsToday")}
               </div>
             )}
           </div>
@@ -345,21 +341,21 @@ export default function HomeDoctor() {
         {[
           {
             key: "rating",
-            label: tr("التقييم", "Rating"),
+            label: t("doctor.home.rating"),
             value: ratingValue,
             icon: TrendingUp,
             iconClass: "bg-[#ECFDF3] text-[#22C55E]",
           },
           {
             key: "attendance",
-            label: tr("نسبة الحضور", "Attendance rate"),
+            label: t("doctor.home.attendanceRate"),
             value: attendanceValue,
             icon: Activity,
             iconClass: "bg-[#F4EBFF] text-[#A855F7]",
           },
           {
             key: "records",
-            label: tr("السجلات الطبية", "Medical records"),
+            label: t("doctor.home.medicalRecords"),
             value: `${stats?.totalMedicalRecords ?? 0}`,
             icon: FileText,
             iconClass: "bg-[#EAF1FF] text-[#3B82F6]",

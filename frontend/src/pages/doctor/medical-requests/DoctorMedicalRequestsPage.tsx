@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
+import { useNavigate } from "react-router-dom";
 import {
   LabResultDialog,
   MedicalRequestDetailsDialog,
@@ -15,31 +15,30 @@ import {
   mapDoctorOrderToDetail,
   resolveMedicalRequestReorderPath,
   type MedicalRequestRowVm,
-} from '@/components/doctor/medical-requests';
-import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
+} from "@/components/doctor/medical-requests";
+import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
 import {
   DoctorTableSkeleton,
   DoctorToolbarSkeleton,
-} from '@/components/doctor/shared/skeletons';
-import { useToast } from '@/components/ui/ToastProvider';
+} from "@/components/doctor/shared/skeletons";
+import { useToast } from "@/components/ui/ToastProvider";
 import {
   useDoctorMedicalRequestDetails,
   useDoctorMedicalRequestStats,
   useDoctorMedicalRequests,
   useDoctorOrderMutations,
-} from '@/hooks/doctor';
-import { getUserFacingRequestErrorMessage } from '@/lib/api';
-import { useRetryAction } from '@/lib/query/useRetryAction';
-import type { DoctorOrderCategory } from '@/lib/doctor/orders/doctorOrderTypes';
-import { useI18n } from '@/i18n/provider';
+} from "@/hooks/doctor";
+import { getUserFacingRequestErrorMessage } from "@/lib/api";
+import { useRetryAction } from "@/lib/query/useRetryAction";
+import type { DoctorOrderCategory } from "@/lib/doctor/orders/doctorOrderTypes";
+import { useI18n } from "@/i18n/provider";
 
 export default function DoctorMedicalRequestsPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const { t, locale, dir } = useI18n();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [tab, setTab] = useState<Exclude<DoctorOrderCategory, 'all'>>('lab');
-  const [search, setSearch] = useState('');
+  const [tab, setTab] = useState<Exclude<DoctorOrderCategory, "all">>("lab");
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(8);
 
@@ -67,7 +66,7 @@ export default function DoctorMedicalRequestsPage() {
 
   const activeVm =
     detailsQuery.vm ??
-    (selectedRow ? mapDoctorOrderToDetail(selectedRow.raw) : null);
+    (selectedRow ? mapDoctorOrderToDetail(selectedRow.raw, locale) : null);
 
   useEffect(() => {
     setPage(1);
@@ -98,13 +97,7 @@ export default function DoctorMedicalRequestsPage() {
     if (!activeVm?.raw) return;
     const path = resolveMedicalRequestReorderPath(activeVm.raw);
     if (!path) {
-      toast(
-        tr(
-          'تعذّر تحديد مسار إعادة الطلب لهذا المريض.',
-          'Could not resolve reorder path for this patient.',
-        ),
-        { variant: 'error' },
-      );
+      toast(t("doctor.medicalRequests.reorderFailed"), { variant: "error" });
       return;
     }
     setDetailsOpen(false);
@@ -118,13 +111,13 @@ export default function DoctorMedicalRequestsPage() {
         orderId: activeVm.id,
         statusCode,
       });
-      toast(tr('تم تحديث حالة الطلب.', 'Request status updated.'), {
-        variant: 'success',
+      toast(t("doctor.medicalRequests.statusUpdated"), {
+        variant: "success",
       });
       setStatusOpen(false);
       await detailsQuery.refetch();
     } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), { variant: 'error' });
+      toast(getUserFacingRequestErrorMessage(error), { variant: "error" });
     }
   };
 
@@ -142,20 +135,18 @@ export default function DoctorMedicalRequestsPage() {
           isFinal: input.isFinal,
         },
       });
-      toast(tr('تمت إضافة النتيجة.', 'Result added.'), { variant: 'success' });
+      toast(t("doctor.medicalRequests.resultAdded"), { variant: "success" });
       setUploadResultOpen(false);
       await detailsQuery.refetch();
     } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), { variant: 'error' });
+      toast(getUserFacingRequestErrorMessage(error), { variant: "error" });
     }
   };
 
   return (
     <>
       <Helmet>
-        <title>
-          {tr('الطلبات الطبية • LMJ Health', 'Medical Requests • LMJ Health')}
-        </title>
+        <title>{t("doctor.medicalRequests.pageTitle")}</title>
       </Helmet>
 
       <div dir={dir} lang={locale} className="w-full pb-8 sm:pb-10">
@@ -175,10 +166,7 @@ export default function DoctorMedicalRequestsPage() {
 
         {list.isDemo ? (
           <p className="mb-4 rounded-[10px] border border-[#FEF3C7] bg-[#FFFBEB] px-4 py-2 text-start font-cairo text-[12px] font-semibold text-[#92400E]">
-            {tr(
-              'وضع الواجهة فقط (VITE_UI_ONLY) مفعّل — بيانات تجريبية محلية.',
-              'UI-only mode (VITE_UI_ONLY) is enabled — local demo data.',
-            )}
+            {t("doctor.medicalRequests.demoMode")}
           </p>
         ) : null}
 
@@ -198,10 +186,7 @@ export default function DoctorMedicalRequestsPage() {
               </div>
             ) : list.isError ? (
               <DoctorListErrorState
-                title={tr(
-                  'تعذّر تحميل الطلبات الطبية',
-                  'Failed to load medical requests',
-                )}
+                title={t("doctor.medicalRequests.loadFailed")}
                 brief={getUserFacingRequestErrorMessage(list.error)}
                 retrying={retryingList}
                 onRetry={() => void retryList()}
@@ -256,7 +241,7 @@ export default function DoctorMedicalRequestsPage() {
         <MedicalRequestUploadResultDialog
           open={uploadResultOpen}
           onClose={() => setUploadResultOpen(false)}
-          patientName={activeVm?.patientName ?? '—'}
+          patientName={activeVm?.patientName ?? "—"}
           busy={orderMutations.isAppendingResults}
           onConfirm={handleUploadResult}
         />
@@ -264,9 +249,9 @@ export default function DoctorMedicalRequestsPage() {
         <MedicalRequestUpdateStatusDialog
           open={statusOpen}
           onClose={() => setStatusOpen(false)}
-          currentStatusCode={activeVm?.statusCode ?? ''}
-          currentStatusLabel={activeVm?.statusLabel ?? '—'}
-          patientName={activeVm?.patientName ?? '—'}
+          currentStatusCode={activeVm?.statusCode ?? ""}
+          currentStatusLabel={activeVm?.statusLabel ?? "—"}
+          patientName={activeVm?.patientName ?? "—"}
           busy={orderMutations.isUpdatingStatus}
           onConfirm={handleStatusUpdate}
         />
@@ -283,10 +268,14 @@ export default function DoctorMedicalRequestsPage() {
           vm={activeVm}
         />
 
-        {(detailsOpen || labOpen || radiologyOpen || statusOpen || uploadResultOpen) &&
+        {(detailsOpen ||
+          labOpen ||
+          radiologyOpen ||
+          statusOpen ||
+          uploadResultOpen) &&
         detailsQuery.isAwaitingData ? (
           <div className="pointer-events-none fixed bottom-6 start-1/2 z-[70] -translate-x-1/2 rounded-full bg-[#111827] px-4 py-2 font-cairo text-[12px] font-bold text-white shadow-lg">
-            {tr('جارٍ تحميل التفاصيل...', 'Loading details...')}
+            {t("doctor.medicalRequests.loadingDetails")}
           </div>
         ) : null}
       </div>

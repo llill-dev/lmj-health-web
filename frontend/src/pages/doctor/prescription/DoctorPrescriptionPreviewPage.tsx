@@ -1,39 +1,38 @@
-import { useMemo, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import ConfirmActionDialog from '@/components/doctor/confirm-action-dialog';
+import { useMemo, useState } from "react";
+import { Helmet } from "react-helmet-async";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import ConfirmActionDialog from "@/components/doctor/confirm-action-dialog";
 import {
   PrescriptionPreviewActions,
   PrescriptionPreviewBanner,
   PrescriptionPreviewDocument,
-} from '@/components/doctor/prescription/preview';
-import DoctorPrescriptionHubPage from '@/pages/doctor/prescription/DoctorPrescriptionHubPage';
-import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
-import { DoctorDocumentPreviewSkeleton } from '@/components/doctor/shared/skeletons';
-import { useToast } from '@/components/ui/ToastProvider';
+} from "@/components/doctor/prescription/preview";
+import DoctorPrescriptionHubPage from "@/pages/doctor/prescription/DoctorPrescriptionHubPage";
+import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
+import { DoctorDocumentPreviewSkeleton } from "@/components/doctor/shared/skeletons";
+import { useToast } from "@/components/ui/ToastProvider";
 import {
   useEncounterPrescriptionWorkspace,
   usePrescriptionPreviewPage,
-} from '@/hooks/doctor';
-import { readAuthUser } from '@/lib/cookies';
-import { getUserFacingRequestErrorMessage } from '@/lib/api';
-import { useRetryAction } from '@/lib/query/useRetryAction';
+} from "@/hooks/doctor";
+import { readAuthUser } from "@/lib/cookies";
+import { getUserFacingRequestErrorMessage } from "@/lib/api";
+import { useRetryAction } from "@/lib/query/useRetryAction";
 import {
   generateDoctorDocumentPdf,
   openPdfBlobInNewTab,
-} from '@/lib/doctor/orders/doctorOrderDocuments';
-import { useI18n } from '@/i18n/provider';
+} from "@/lib/doctor/orders/doctorOrderDocuments";
+import { useI18n } from "@/i18n/provider";
 
 export default function DoctorPrescriptionPreviewPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const { t, locale, dir } = useI18n();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
-  const doctorId = readAuthUser()?.actorIds?.doctorId ?? '';
+  const doctorId = readAuthUser()?.actorIds?.doctorId ?? "";
 
-  const patientId = searchParams.get('patientId') ?? '';
-  const encounterId = searchParams.get('encounterId') ?? '';
+  const patientId = searchParams.get("patientId") ?? "";
+  const encounterId = searchParams.get("encounterId") ?? "";
 
   const preview = usePrescriptionPreviewPage(doctorId, patientId, encounterId);
   const { retry: retryPreview, retrying: retryingPreview } = useRetryAction(
@@ -64,14 +63,14 @@ export default function DoctorPrescriptionPreviewPage() {
     setBusy(true);
     try {
       const blob = await generateDoctorDocumentPdf({
-        sourceType: 'prescription',
+        sourceType: "prescription",
         sourceId: prescriptionId,
       });
       openPdfBlobInNewTab(blob, `prescription-${prescriptionId}.pdf`);
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
-        title: tr('تعذّر إنشاء PDF', 'Could not create PDF'),
-        variant: 'error',
+        title: t("doctor.prescriptionPreview.createPdfError"),
+        variant: "error",
       });
     } finally {
       setBusy(false);
@@ -83,8 +82,10 @@ export default function DoctorPrescriptionPreviewPage() {
       <Helmet>
         <title>
           {preview.previewVm?.patientName
-            ? tr(`معاينة وصفة ${preview.previewVm.patientName}`, `Prescription preview — ${preview.previewVm.patientName}`)
-            : tr('معاينة الوصفة الطبية', 'Prescription preview')}{' '}
+            ? locale === "ar"
+              ? `معاينة وصفة ${preview.previewVm.patientName}`
+              : `Prescription preview — ${preview.previewVm.patientName}`
+            : t("doctor.prescriptionPreview.pageTitle")}{" "}
           • LMJ Health
         </title>
       </Helmet>
@@ -101,7 +102,7 @@ export default function DoctorPrescriptionPreviewPage() {
           <DoctorDocumentPreviewSkeleton />
         ) : preview.isError || !preview.previewVm ? (
           <DoctorListErrorState
-            title={tr('تعذّر تحميل معاينة الوصفة', 'Failed to load the prescription preview')}
+            title={t("doctor.prescriptionPreview.loadFailed")}
             brief={getUserFacingRequestErrorMessage(preview.error)}
             retrying={retryingPreview}
             onRetry={() => void retryPreview()}
@@ -123,29 +124,33 @@ export default function DoctorPrescriptionPreviewPage() {
         <ConfirmActionDialog
           open={finalizeOpen}
           onOpenChange={setFinalizeOpen}
-          title={tr('اعتماد نهائي', 'Finalize')}
+          title={t("doctor.prescriptionPreview.finalizeTitle")}
           description={
             <div className="space-y-2 text-start font-cairo text-[14px] font-semibold text-[#344054]">
-              <p>{tr('هل تريد اعتماد الوصفة وإرسالها للمريض؟', 'Do you want to finalize the prescription and send it to the patient?')}</p>
+              <p>{t("doctor.prescriptionPreview.finalizeDescription")}</p>
               <p>
-                {tr('المريض:', 'Patient:')} <strong>{preview.previewVm?.patientName}</strong>
+                {t("doctor.prescriptionPreview.patient")}{" "}
+                <strong>{preview.previewVm?.patientName}</strong>
               </p>
               <p>
-                {tr('رقم الوصفة:', 'Prescription number:')}{' '}
+                {t("doctor.prescriptionPreview.prescriptionNumber")}{" "}
                 <strong>{preview.previewVm?.prescriptionCode}</strong>
               </p>
             </div>
           }
-          confirmLabel={tr('تأكيد الاعتماد', 'Confirm finalization')}
+          confirmLabel={t("doctor.prescriptionPreview.confirmFinalization")}
           confirmDisabled={busy || workspace.isBusy}
           onConfirm={async () => {
             setBusy(true);
             try {
               const response = await workspace.finalize();
-              toast(response.message ?? tr('تم اعتماد الوصفة نهائياً.', 'The prescription was finalized.'), {
-                title: tr('اعتماد نهائي', 'Finalized'),
-                variant: 'success',
-              });
+              toast(
+                response.message ?? t("doctor.prescriptionPreview.finalized"),
+                {
+                  title: t("doctor.prescriptionPreview.finalizedTitle"),
+                  variant: "success",
+                },
+              );
               setFinalizeOpen(false);
               navigate(
                 `/doctor/encounters/${patientId}/${encounterId}/summary`,
@@ -153,8 +158,8 @@ export default function DoctorPrescriptionPreviewPage() {
               );
             } catch (error) {
               toast(getUserFacingRequestErrorMessage(error), {
-                title: tr('تعذّر الاعتماد', 'Could not finalize'),
-                variant: 'error',
+                title: t("doctor.prescriptionPreview.finalizeError"),
+                variant: "error",
               });
             } finally {
               setBusy(false);

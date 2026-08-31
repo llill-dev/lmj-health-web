@@ -41,15 +41,14 @@ function hasMissingAccessRequestIdentity(request: any) {
 export default function AdminAccessRequestsPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { locale, dir, t } = useI18n();
   const dateLocale = locale === "ar" ? "ar-SY" : "en-US";
 
   const statusLabels: Record<RequestStatus, string> = {
-    pending: tr("معلّقة", "Pending"),
-    approved: tr("مقبولة", "Approved"),
-    rejected: tr("مرفوضة", "Rejected"),
-    all: tr("كل الحالات", "All statuses"),
+    pending: t("admin.accessRequests.status.pending"),
+    approved: t("admin.accessRequests.status.approved"),
+    rejected: t("admin.accessRequests.status.rejected"),
+    all: t("admin.accessRequests.status.all"),
   };
 
   const statusColors: Record<RequestStatus, string> = {
@@ -145,7 +144,7 @@ export default function AdminAccessRequestsPage() {
   const stats = useMemo(
     () => [
       {
-        title: tr("طلبات معلّقة", "Pending requests"),
+        title: t("admin.accessRequests.stats.pending"),
         value: isAwaitingData ? "—" : String(statusCounts.pending),
         icon: Clock,
         tone: {
@@ -157,7 +156,7 @@ export default function AdminAccessRequestsPage() {
         },
       },
       {
-        title: tr("طلبات مقبولة", "Approved requests"),
+        title: t("admin.accessRequests.stats.approved"),
         value: isAwaitingData ? "—" : String(statusCounts.approved),
         icon: CheckCircle,
         tone: {
@@ -169,7 +168,7 @@ export default function AdminAccessRequestsPage() {
         },
       },
       {
-        title: tr("طلبات مرفوضة", "Rejected requests"),
+        title: t("admin.accessRequests.stats.rejected"),
         value: isAwaitingData ? "—" : String(statusCounts.rejected),
         icon: XCircle,
         tone: {
@@ -181,7 +180,7 @@ export default function AdminAccessRequestsPage() {
         },
       },
       {
-        title: tr("إجمالي الطلبات", "Total requests"),
+        title: t("admin.accessRequests.stats.total"),
         value: isAwaitingData ? "—" : String(total),
         icon: UserCheck,
         tone: {
@@ -194,12 +193,12 @@ export default function AdminAccessRequestsPage() {
       },
     ],
     [
+      t,
       statusCounts.pending,
       statusCounts.approved,
       statusCounts.rejected,
       total,
       isAwaitingData,
-      locale,
     ],
   );
 
@@ -211,18 +210,15 @@ export default function AdminAccessRequestsPage() {
   return (
     <>
       <Helmet>
-        <title>{tr("إدارة طلبات الوصول", "Access requests")} • LMJ Health</title>
+        <title>{t("admin.accessRequests.page.title")} • LMJ Health</title>
       </Helmet>
 
       <div dir={dir} lang={locale} className="min-h-full text-[#111827]">
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title={tr("إدارة طلبات الوصول", "Access requests")}
-          subtitle={tr(
-            "مراجعة وإدارة طلبات الوصول إلى بيانات المرضى",
-            "Review and manage patient data access requests",
-          )}
+          title={t("admin.accessRequests.page.title")}
+          subtitle={t("admin.accessRequests.page.subtitle")}
           headerIcon={<UserCheck className="h-8 w-8 text-white" />}
           kpiColumns={4}
           kpis={stats.map((s) => {
@@ -239,10 +235,7 @@ export default function AdminAccessRequestsPage() {
         <div className="mt-4 flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
           <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
-            {tr(
-              "هذه الصفحة لفرز طلبات الوصول ومراجعة اكتمال البيانات قبل فتح التفاصيل. القرار النهائي بالموافقة أو الرفض يتم من نافذة التفاصيل حتى يبقى الطلب وسياقه ومبرراته في مكان واحد.",
-              "This page is for triaging access requests and checking data completeness before opening details. The final approve or reject decision is handled from the details dialog so the request, its context, and justification stay in one place.",
-            )}
+            {t("admin.accessRequests.disclaimer")}
           </div>
         </div>
 
@@ -252,10 +245,7 @@ export default function AdminAccessRequestsPage() {
             <div className="flex flex-1 items-center gap-3">
               <div className="relative flex-1">
                 <input
-                  placeholder={tr(
-                    "بحث بالطبيب أو المريض...",
-                    "Search by doctor or patient...",
-                  )}
+                  placeholder={t("admin.accessRequests.searchPlaceholder")}
                   className="h-[42px] w-full rounded-[10px] border border-[#E5E7EB] bg-white pe-12 ps-4 text-start font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]"
                   value={filters.search}
                   disabled={isAwaitingData}
@@ -291,13 +281,13 @@ export default function AdminAccessRequestsPage() {
                     { value: "rejected", label: statusLabels.rejected },
                     { value: "all", label: statusLabels.all },
                   ]}
-                  listboxAriaLabel={tr("حالة الطلب", "Request status")}
+                  listboxAriaLabel={t("admin.accessRequests.statusAriaLabel")}
                 />
               </div>
 
               <label className="flex h-[42px] shrink-0 items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-3">
                 <span className="shrink-0 font-cairo text-[11px] font-extrabold text-[#667085]">
-                  {tr("من", "From")}
+                  {t("admin.accessRequests.from")}
                 </span>
                 <input
                   type="date"
@@ -311,7 +301,7 @@ export default function AdminAccessRequestsPage() {
               </label>
               <label className="flex h-[42px] shrink-0 items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-3">
                 <span className="shrink-0 font-cairo text-[11px] font-extrabold text-[#667085]">
-                  {tr("إلى", "To")}
+                  {t("admin.accessRequests.to")}
                 </span>
                 <input
                   type="date"
@@ -348,7 +338,7 @@ export default function AdminAccessRequestsPage() {
                   className="inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054] hover:bg-[#F9FAFB]"
                 >
                   <FilterX className="h-4 w-4" />
-                  {tr("مسح الفلاتر", "Clear filters")}
+                  {t("admin.accessRequests.clearFilters")}
                 </button>
               ) : null}
               <button
@@ -359,11 +349,11 @@ export default function AdminAccessRequestsPage() {
               >
                 <RefreshCw className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} />
                 {isRefetching
-                  ? tr("جارٍ التحديث...", "Refreshing...")
-                  : tr("تحديث", "Refresh")}
+                  ? t("admin.accessRequests.refreshing")
+                  : t("admin.accessRequests.refresh")}
               </button>
               <div className="font-cairo text-[12px] font-bold text-[#667085]">
-                {isAwaitingData ? "—" : total} {tr("نتيجة", "results")}
+                {isAwaitingData ? "—" : total} {t("admin.accessRequests.results")}
               </div>
             </div>
           </div>
@@ -373,19 +363,19 @@ export default function AdminAccessRequestsPage() {
           <div className="mt-3 inline-flex items-center gap-2 rounded-[10px] border border-[#D1E9FF] bg-[#F5FAFF] px-3 py-2 font-cairo text-[12px] font-bold text-[#175CD3]">
             <User className="h-4 w-4" />
             {doctorIdFilter
-              ? tr(
-                  `تُعرض طلبات طبيب واحد محدَّد (${doctorIdFilter})`,
-                  `Showing requests for one specific doctor (${doctorIdFilter})`,
+              ? t("admin.accessRequests.showingOneDoctor").replace(
+                  "{id}",
+                  doctorIdFilter,
                 )
-              : tr(
-                  `تُعرض طلبات مريض واحد محدَّد (${patientIdFilter})`,
-                  `Showing requests for one specific patient (${patientIdFilter})`,
+              : t("admin.accessRequests.showingOnePatient").replace(
+                  "{id}",
+                  patientIdFilter,
                 )}
             <button
               type="button"
               onClick={clearIdentityFilters}
               className="inline-flex h-6 w-6 items-center justify-center rounded-full hover:bg-[#E0EEFF]"
-              aria-label={tr("إزالة الفلتر", "Clear filter")}
+              aria-label={t("admin.accessRequests.clearFilter")}
             >
               <FilterX className="h-3.5 w-3.5" />
             </button>
@@ -405,10 +395,7 @@ export default function AdminAccessRequestsPage() {
               <div className="font-cairo text-[12px] font-semibold text-[#B42318]">
                 {userFacingErrorMessage(
                   error,
-                  tr(
-                    "تعذّر تحميل طلبات الوصول.",
-                    "Failed to load access requests.",
-                  ),
+                  t("admin.accessRequests.loadError"),
                 )}
               </div>
               <button
@@ -417,7 +404,7 @@ export default function AdminAccessRequestsPage() {
                 className="mt-3 inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#FCA5A5] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#B42318] hover:bg-[#FFF5F5]"
               >
                 <RefreshCw className="h-4 w-4" />
-                {tr("إعادة المحاولة", "Retry")}
+                {t("admin.accessRequests.retry")}
               </button>
             </div>
           ) : filteredRequests.length === 0 ? (
@@ -427,25 +414,13 @@ export default function AdminAccessRequestsPage() {
               </div>
               <div className="mt-3 font-cairo text-[13px] font-extrabold text-[#344054]">
                 {filters.search || filters.status !== "all"
-                  ? tr(
-                      "لا توجد طلبات وصول مطابقة للبحث أو الحالة المحددة.",
-                      "No access requests match the current search or status.",
-                    )
-                  : tr(
-                      "لا توجد طلبات وصول حتى الآن.",
-                      "No access requests yet.",
-                    )}
+                  ? t("admin.accessRequests.emptyFiltered")
+                  : t("admin.accessRequests.emptyAll")}
               </div>
               <div className="mt-1 font-cairo text-[12px] font-semibold text-[#667085]">
                 {filters.search || filters.status !== "all"
-                  ? tr(
-                      "جرّب توسيع البحث أو مسح الفلاتر لعرض طلبات أكثر.",
-                      "Try broadening the search or clearing filters to show more requests.",
-                    )
-                  : tr(
-                      "ستظهر هنا الطلبات فور وصولها من الأطباء مع بيانات المريض المرتبطة بها.",
-                      "Requests will appear here once they are submitted with their linked patient data.",
-                    )}
+                  ? t("admin.accessRequests.emptyFilteredHint")
+                  : t("admin.accessRequests.emptyAllHint")}
               </div>
             </div>
           ) : (
@@ -463,7 +438,7 @@ export default function AdminAccessRequestsPage() {
                       <div className="flex-1">
                         <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-[#D5E8E6] bg-[#F8FFFE] px-3 py-1 font-cairo text-[10px] font-extrabold text-primary">
                           <FileText className="h-3.5 w-3.5" />
-                          {tr("طلب وصول لبيانات مريض", "Patient data access request")}
+                          {t("admin.accessRequests.cardBadge")}
                         </div>
                         <div className="flex items-center gap-3">
                           <div className="font-cairo text-[14px] font-black text-[#111827]">
@@ -478,7 +453,7 @@ export default function AdminAccessRequestsPage() {
                           </span>
                         </div>
                         <div className="mt-2 font-cairo text-[12px] font-bold text-[#98A2B3]">
-                          {tr("طلب الوصول:", "Access request:")}{" "}
+                          {t("admin.accessRequests.requestIdLabel")}{" "}
                           {request._id || request.id}
                         </div>
                       </div>
@@ -490,20 +465,20 @@ export default function AdminAccessRequestsPage() {
                         className="inline-flex h-[32px] items-center gap-2 rounded-[10px] bg-[#F2F4F7] px-4 font-cairo text-[12px] font-extrabold text-[#4B5563] hover:bg-[#E5E7EB]"
                       >
                         <Eye className="h-4 w-4" />
-                        {tr("عرض التفاصيل", "View details")}
+                        {t("admin.accessRequests.viewDetails")}
                       </button>
                     </div>
 
                     <div className="space-y-2">
                       <div className="font-cairo text-[10px] font-extrabold uppercase tracking-wide text-[#98A2B3]">
-                        {tr("الطبيب مقدّم الطلب", "Requesting doctor")}
+                        {t("admin.accessRequests.requestingDoctor")}
                       </div>
                       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                         <div className="flex items-center gap-2 rounded-[8px] border border-[#EEF2F6] bg-[#FAFAFA] px-3 py-2">
                           <User className="h-4 w-4 text-primary" />
                           <div className="min-w-0 flex-1">
                             <div className="font-cairo text-[10px] font-semibold text-[#98A2B3]">
-                              {tr("الاسم", "Name")}
+                              {t("admin.accessRequests.field.name")}
                             </div>
                             <div className="truncate font-cairo text-[11px] font-bold text-[#111827]">
                               {request.doctor?.fullName || request.doctorName || "—"}
@@ -514,7 +489,7 @@ export default function AdminAccessRequestsPage() {
                           <Mail className="h-4 w-4 text-primary" />
                           <div className="min-w-0 flex-1">
                             <div className="font-cairo text-[10px] font-semibold text-[#98A2B3]">
-                              {tr("البريد الإلكتروني", "Email")}
+                              {t("admin.accessRequests.field.email")}
                             </div>
                             <div className="truncate font-cairo text-[11px] font-bold text-[#111827]">
                               {request.doctor?.email || request.doctorEmail || "—"}
@@ -525,7 +500,7 @@ export default function AdminAccessRequestsPage() {
                           <Phone className="h-4 w-4 text-primary" />
                           <div className="min-w-0 flex-1">
                             <div className="font-cairo text-[10px] font-semibold text-[#98A2B3]">
-                              {tr("الهاتف", "Phone")}
+                              {t("admin.accessRequests.field.phone")}
                             </div>
                             <div className="truncate font-cairo text-[11px] font-bold text-[#111827]">
                               {request.doctor?.phone || request.doctorPhone || "—"}
@@ -537,14 +512,14 @@ export default function AdminAccessRequestsPage() {
 
                     <div className="space-y-2">
                       <div className="font-cairo text-[10px] font-extrabold uppercase tracking-wide text-[#98A2B3]">
-                        {tr("المريض المطلوب الوصول لملفه", "Patient whose data is requested")}
+                        {t("admin.accessRequests.requestedPatient")}
                       </div>
                       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                         <div className="flex items-center gap-2 rounded-[8px] border border-[#EEF2F6] bg-[#FAFAFA] px-3 py-2">
                           <User className="h-4 w-4 text-primary" />
                           <div className="min-w-0 flex-1">
                             <div className="font-cairo text-[10px] font-semibold text-[#98A2B3]">
-                              {tr("الاسم", "Name")}
+                              {t("admin.accessRequests.field.name")}
                             </div>
                             <div className="truncate font-cairo text-[11px] font-bold text-[#111827]">
                               {request.patient?.fullName || request.patientName || "—"}
@@ -555,7 +530,7 @@ export default function AdminAccessRequestsPage() {
                           <FileText className="h-4 w-4 text-primary" />
                           <div className="min-w-0 flex-1">
                             <div className="font-cairo text-[10px] font-semibold text-[#98A2B3]">
-                              {tr("المعرّف", "Public ID")}
+                              {t("admin.accessRequests.field.publicId")}
                             </div>
                             <div className="truncate font-cairo text-[11px] font-bold text-[#111827]">
                               {request.patient?.publicId || "—"}
@@ -566,7 +541,7 @@ export default function AdminAccessRequestsPage() {
                           <Mail className="h-4 w-4 text-primary" />
                           <div className="min-w-0 flex-1">
                             <div className="font-cairo text-[10px] font-semibold text-[#98A2B3]">
-                              {tr("البريد الإلكتروني", "Email")}
+                              {t("admin.accessRequests.field.email")}
                             </div>
                             <div className="truncate font-cairo text-[11px] font-bold text-[#111827]">
                               {request.patient?.email || "—"}
@@ -577,7 +552,7 @@ export default function AdminAccessRequestsPage() {
                           <Phone className="h-4 w-4 text-primary" />
                           <div className="min-w-0 flex-1">
                             <div className="font-cairo text-[10px] font-semibold text-[#98A2B3]">
-                              {tr("الهاتف", "Phone")}
+                              {t("admin.accessRequests.field.phone")}
                             </div>
                             <div className="truncate font-cairo text-[11px] font-bold text-[#111827]">
                               {request.patient?.phone || "—"}
@@ -591,7 +566,7 @@ export default function AdminAccessRequestsPage() {
                       <Calendar className="h-4 w-4 text-primary" />
                       <div className="min-w-0 flex-1">
                         <div className="font-cairo text-[10px] font-semibold text-[#98A2B3]">
-                          {tr("تاريخ الطلب", "Request date")}
+                          {t("admin.accessRequests.field.requestDate")}
                         </div>
                         <div className="truncate font-cairo text-[11px] font-bold text-[#111827]">
                           {request.createdAt
@@ -604,22 +579,13 @@ export default function AdminAccessRequestsPage() {
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="inline-flex items-center rounded-[999px] bg-[#F8FAFC] px-3 py-1 font-cairo text-[11px] font-bold text-[#475467]">
                         {request.status === "pending"
-                          ? tr(
-                              "الإجراء المتاح: مراجعة القرار من التفاصيل",
-                              "Available action: review decision in details",
-                            )
+                          ? t("admin.accessRequests.actionPending")
                           : request.status === "approved"
-                            ? tr(
-                                "الحالة النهائية: تم قبول الطلب",
-                                "Final state: request approved",
-                              )
-                            : tr(
-                                "الحالة النهائية: تم رفض الطلب",
-                                "Final state: request rejected",
-                              )}
+                            ? t("admin.accessRequests.actionApproved")
+                            : t("admin.accessRequests.actionRejected")}
                       </span>
                       <span className="inline-flex items-center rounded-[999px] bg-[#F8FAFC] px-3 py-1 font-cairo text-[11px] font-bold text-[#667085]">
-                        {tr("الجهة الطالبة:", "Requester:")}{" "}
+                        {t("admin.accessRequests.requester")}{" "}
                         {request.doctor?.fullName || request.doctorName || "—"}
                       </span>
                     </div>
@@ -629,10 +595,7 @@ export default function AdminAccessRequestsPage() {
                         <div className="flex items-start gap-2">
                           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#D97706]" />
                           <div className="font-cairo text-[11px] font-bold leading-5 text-[#92400E]">
-                            {tr(
-                              "بعض بيانات الطبيب أو المريض غير مكتملة في الاستجابة الحالية. يمكنك فتح التفاصيل لرؤية القيم المتاحة ومراجعة الطلب دون افتراض حقول مفقودة.",
-                              "Some doctor or patient fields are missing in the current response. Open details to review the available values without assuming missing fields.",
-                            )}
+                            {t("admin.accessRequests.missingIdentityWarning")}
                           </div>
                         </div>
                       </div>
@@ -648,7 +611,8 @@ export default function AdminAccessRequestsPage() {
         {!isAwaitingData && !error && filteredRequests.length > 0 ? (
           <section className="mt-5 flex items-center justify-between rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
             <div className="font-cairo text-[12px] font-bold text-[#667085]">
-              {tr("الصفحة", "Page")} {filters.page} {tr("من", "of")} {totalPages}
+              {t("admin.accessRequests.page")} {filters.page}{" "}
+              {t("admin.accessRequests.of")} {totalPages}
             </div>
 
             <div className="flex items-center gap-3">
@@ -669,10 +633,7 @@ export default function AdminAccessRequestsPage() {
                     value: String(v),
                     label: String(v),
                   }))}
-                  listboxAriaLabel={tr(
-                    "عدد العناصر في الصفحة",
-                    "Items per page",
-                  )}
+                  listboxAriaLabel={t("admin.accessRequests.itemsPerPage")}
                 />
               </div>
 
@@ -687,7 +648,7 @@ export default function AdminAccessRequestsPage() {
                 disabled={filters.page <= 1}
                 className="inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {tr("السابق", "Previous")}
+                {t("admin.accessRequests.previous")}
               </button>
 
               <button
@@ -701,7 +662,7 @@ export default function AdminAccessRequestsPage() {
                 disabled={filters.page >= totalPages}
                 className="inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {tr("التالي", "Next")}
+                {t("admin.accessRequests.next")}
               </button>
             </div>
           </section>

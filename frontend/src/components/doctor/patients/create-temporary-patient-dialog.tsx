@@ -199,9 +199,9 @@ export default function CreateTemporaryPatientDialog({
                       <Dialog.Title className="font-cairo text-[clamp(1.15rem,2.8vw,1.45rem)] font-black tracking-tight text-[#101828]">
                         {t("secretary.temporaryPatient.title")}
                       </Dialog.Title>
-                      <p className="mt-1.5 font-cairo text-[12.5px] font-semibold leading-relaxed text-[#667085]">
+                      <Dialog.Description className="mt-1.5 font-cairo text-[12.5px] font-semibold leading-relaxed text-[#667085]">
                         {t("secretary.temporaryPatient.description")}
-                      </p>
+                      </Dialog.Description>
                     </div>
                   </div>
                 </div>

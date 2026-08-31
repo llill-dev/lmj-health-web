@@ -62,8 +62,7 @@ const TEAL = "#0F8F8B";
 
 export default function AdminDashboardPage() {
   const navigate = useNavigate();
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { locale, dir, t } = useI18n();
   const archiveContent = useArchiveContent();
   const [archiveTarget, setArchiveTarget] = useState<AdminContentItem | null>(
     null,
@@ -145,7 +144,7 @@ export default function AdminDashboardPage() {
   const secondaryCards = useMemo(
     () => [
       {
-        title: tr("إشعارات غير مقروءة", "Unread notifications"),
+        title: t("admin.dashboard.kpi.unreadNotifications"),
         value: formatKpi(
           unreadNotifications.data,
           unreadNotifications.isAwaitingData,
@@ -156,7 +155,7 @@ export default function AdminDashboardPage() {
         iconColor: "text-[#EF4444]",
       },
       {
-        title: tr("محتوى منشور", "Published content"),
+        title: t("admin.dashboard.kpi.publishedContent"),
         value: formatKpi(contentCounts.published, contentCounts.isAwaitingData),
         icon: FileText,
         tone: "border-[#CFFAFE] bg-white text-[#111827]",
@@ -164,7 +163,7 @@ export default function AdminDashboardPage() {
         iconColor: "text-primary",
       },
       {
-        title: tr("طلبات تحقق معلّقة", "Pending verifications"),
+        title: t("admin.dashboard.kpi.pendingVerifications"),
         value: formatKpi(stats.pendingVerifications, statsAwaiting),
         icon: ClipboardList,
         tone: "border-[#CFFAFE] bg-white text-[#111827]",
@@ -173,6 +172,7 @@ export default function AdminDashboardPage() {
       },
     ],
     [
+      t,
       formatKpi,
       unreadNotifications.data,
       unreadNotifications.isAwaitingData,
@@ -180,25 +180,21 @@ export default function AdminDashboardPage() {
       contentCounts.isAwaitingData,
       stats.pendingVerifications,
       statsAwaiting,
-      locale,
     ],
   );
 
   return (
     <>
       <Helmet>
-        <title>{tr("لوحة المشرف", "Admin Dashboard")} • LMJ Health</title>
+        <title>{t("admin.dashboard.page.title")} • LMJ Health</title>
       </Helmet>
 
       <div dir={dir} lang={locale} className="min-h-full text-[#111827]">
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title={tr("لوحة التحكم الرئيسية", "Main dashboard")}
-          subtitle={tr(
-            "نظرة عامة شاملة على النظام وإدارة النشاط",
-            "System overview and activity management",
-          )}
+          title={t("admin.dashboard.overview.title")}
+          subtitle={t("admin.dashboard.overview.subtitle")}
           headerIcon={<ClipboardList className="h-8 w-8 text-white" />}
           kpiColumns={4}
           kpis={[
@@ -209,25 +205,25 @@ export default function AdminDashboardPage() {
                 pendingAccessQuery.data?.total,
                 mainKpisAwaiting,
               ),
-              label: tr("طلبات الوصول المعلّقة", "Pending access requests"),
+              label: t("admin.dashboard.kpi.pendingAccessRequests"),
             },
             {
               key: "appointments",
               icon: <CalendarDays className="h-5 w-5 shrink-0" />,
               value: formatKpi(stats.totalAppointments, mainKpisAwaiting),
-              label: tr("إجمالي المواعيد", "Total appointments"),
+              label: t("admin.dashboard.kpi.totalAppointments"),
             },
             {
               key: "doctors",
               icon: <Stethoscope className="h-5 w-5 shrink-0" />,
               value: formatKpi(stats.totalDoctors, mainKpisAwaiting),
-              label: tr("إجمالي الأطباء", "Total doctors"),
+              label: t("admin.dashboard.kpi.totalDoctors"),
             },
             {
               key: "patients",
               icon: <Users className="h-5 w-5 shrink-0" />,
               value: formatKpi(stats.totalPatients, mainKpisAwaiting),
-              label: tr("إجمالي المرضى", "Total patients"),
+              label: t("admin.dashboard.kpi.totalPatients"),
             },
           ]}
         />
@@ -235,10 +231,7 @@ export default function AdminDashboardPage() {
         <div className="mt-4 flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
           <div className="font-cairo text-sm font-semibold leading-6 text-[#175CD3]">
-            {tr(
-              "هذه اللوحة نقطة متابعة سريعة للحالة العامة فقط. البطاقات والأقسام هنا تعطي مؤشرات مختصرة وروابط انتقال، بينما تتم المراجعة التفصيلية واتخاذ الإجراء الفعلي من صفحات الطلبات والسجلات والمحتوى المرتبطة.",
-              "This dashboard is a quick overview point for the system’s overall state only. The cards and sections here provide short signals and navigation links, while detailed review and real actions are handled in the related request, log, and content pages.",
-            )}
+            {t("admin.dashboard.disclaimer")}
           </div>
         </div>
 
@@ -248,7 +241,7 @@ export default function AdminDashboardPage() {
             className="inline-flex h-[36px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] hover:bg-[#F9FAFB]"
           >
             <UserCheck className="h-4 w-4" />
-            {tr("إدارة طلبات الوصول", "Manage access requests")}
+            {t("admin.dashboard.manageAccessRequests")}
           </Link>
         </section>
 
@@ -284,14 +277,14 @@ export default function AdminDashboardPage() {
           <div className="flex flex-col gap-3 border-b border-[#EEF2F6] px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-start">
               <div className="font-cairo text-[16px] font-extrabold text-[#111827]">
-                {tr("آخر الأنشطة", "Recent activity")}
+                {t("admin.dashboard.recentActivity.title")}
               </div>
             </div>
             <Link
               to="/admin/system-logs"
               className="inline-flex h-[34px] shrink-0 items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-primary transition hover:bg-[#F0FDFC]"
             >
-              {tr("عرض سجل النظام", "View system logs")}
+              {t("admin.dashboard.recentActivity.viewLogs")}
             </Link>
           </div>
 
@@ -304,17 +297,11 @@ export default function AdminDashboardPage() {
               </>
             ) : activityQuery.isError ? (
               <div className="px-6 py-10 text-center font-cairo text-[13px] font-semibold text-red-600">
-                {tr(
-                  "تعذر تحميل سجل الأنشطة. تحقق من الصلاحيات أو الشبكة.",
-                  "Failed to load activity log. Check permissions or network.",
-                )}
+                {t("admin.dashboard.recentActivity.error")}
               </div>
             ) : activityLogs.length === 0 ? (
               <div className="px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-                {tr(
-                  "لا توجد أحداث مسجّلة في الصفحة الحالية.",
-                  "No events recorded on this page.",
-                )}
+                {t("admin.dashboard.recentActivity.empty")}
               </div>
             ) : (
               activityLogs.map((log) => {
@@ -357,7 +344,7 @@ export default function AdminDashboardPage() {
         {/* آخر الشكاوي — مطابق تخطيط المرجع: شريط فيزيائي، أيقونة، شارة، تفاصيل */}
         <section className="mt-5">
           <h2 className="mb-3 text-start font-cairo text-[16px] font-extrabold text-[#111827]">
-            {tr("آخر الشكاوي", "Latest complaints")}
+            {t("admin.dashboard.complaints.title")}
           </h2>
           <div className="overflow-hidden rounded-[12px] border border-[#E8EDF2] bg-white p-4 shadow-[0_10px_24px_rgba(0,0,0,0.06)] sm:p-5">
             {complaintsAwaiting ? (
@@ -368,11 +355,11 @@ export default function AdminDashboardPage() {
               </>
             ) : complaintsQuery.isError ? (
               <div className="py-12 text-center font-cairo text-[13px] font-semibold text-red-600">
-                {tr("تعذر تحميل الشكاوى.", "Failed to load complaints.")}
+                {t("admin.dashboard.complaints.error")}
               </div>
             ) : complaints.length === 0 ? (
               <div className="py-12 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-                {tr("لا توجد شكاوى لعرضها.", "No complaints to show.")}
+                {t("admin.dashboard.complaints.empty")}
               </div>
             ) : (
               <ul className="flex flex-col gap-3">
@@ -407,7 +394,7 @@ export default function AdminDashboardPage() {
                             </div>
                             <div className="mt-1.5 font-cairo text-[13px] font-semibold text-[#374151]">
                               <span className="text-[#98A2B3]">
-                                {tr("نوع الشكوى : ", "Complaint type: ")}
+                                {t("admin.dashboard.complaints.typeLabel")}
                               </span>
                               {complaintTypeLabel(row.type, locale)}
                             </div>
@@ -423,10 +410,7 @@ export default function AdminDashboardPage() {
                           to={`/admin/complaints/${row._id}`}
                           className="flex w-[52px] shrink-0 items-center justify-center text-white transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                           style={{ backgroundColor: TEAL }}
-                          aria-label={tr(
-                            "عرض تفاصيل الشكوى",
-                            "View complaint details",
-                          )}
+                          aria-label={t("admin.dashboard.complaints.viewDetails")}
                         >
                           <ChevronLeft className="w-6 h-6" strokeWidth={2.5} />
                         </Link>
@@ -442,7 +426,7 @@ export default function AdminDashboardPage() {
         {/* آخر الأخبار / المحتوى — شارة حالة، صف بيانات، أيقونات إجراءات يسار الصف */}
         <section className="mt-5 mb-2">
           <h2 className="mb-3 text-start font-cairo text-[16px] font-extrabold text-[#111827]">
-            {tr("آخر الأخبار", "Latest news")}
+            {t("admin.dashboard.news.title")}
           </h2>
           <div className="overflow-hidden rounded-[12px] border border-[#E8EDF2] bg-white p-4 shadow-[0_10px_24px_rgba(0,0,0,0.06)] sm:p-5">
             {contentQuery.isAwaitingData ? (
@@ -453,11 +437,11 @@ export default function AdminDashboardPage() {
               </>
             ) : contentQuery.isError ? (
               <div className="py-12 text-center font-cairo text-[13px] font-semibold text-red-600">
-                {tr("تعذر تحميل الأخبار.", "Failed to load news.")}
+                {t("admin.dashboard.news.error")}
               </div>
             ) : contentRows.length === 0 ? (
               <div className="py-12 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-                {tr("لا توجد عناصر لعرضها.", "No items to show.")}
+                {t("admin.dashboard.news.empty")}
               </div>
             ) : (
               <ul className="flex flex-col gap-3">
@@ -487,16 +471,16 @@ export default function AdminDashboardPage() {
                               </span>
                               <span className="inline-flex gap-1.5 items-center">
                                 <User className="h-3.5 w-3.5 shrink-0 text-[#9CA3AF]" />
-                                {tr("الكاتب: ", "Author: ")}
+                                {t("admin.dashboard.news.authorLabel")}
                                 {authorName(item.createdBy)}
                               </span>
                               <span className="inline-flex gap-1.5 items-center">
                                 <Eye className="h-3.5 w-3.5 shrink-0 text-[#9CA3AF]" />
-                                {views} {tr("مشاهدة", "views")}
+                                {views} {t("admin.dashboard.news.views")}
                               </span>
                               <span className="inline-flex gap-1.5 items-center">
                                 <CalendarClock className="h-3.5 w-3.5 shrink-0 text-[#9CA3AF]" />
-                                {tr("آخر تحديث: ", "Last updated: ")}
+                                {t("admin.dashboard.news.lastUpdated")}
                                 {formatShortDate(item.updatedAt, locale)}
                               </span>
                             </div>
@@ -507,18 +491,12 @@ export default function AdminDashboardPage() {
                               disabled={!canArchive || archiveContent.isPending}
                               title={
                                 canArchive
-                                  ? tr(
-                                      "أرشفة (للمحتوى المنشور فقط)",
-                                      "Archive (published content only)",
-                                    )
-                                  : tr(
-                                      "الأرشفة متاحة للعناصر ذات حالة «منشور» فقط",
-                                      "Archive is available for published items only",
-                                    )
+                                  ? t("admin.dashboard.news.archiveTitle")
+                                  : t("admin.dashboard.news.archiveDisabledTitle")
                               }
                               onClick={() => handleArchive(item)}
                               className="flex h-10 w-10 items-center justify-center rounded-full border border-[#FECACA] bg-white text-[#EF4444] transition hover:bg-[#FEF2F2] disabled:opacity-50"
-                              aria-label={tr("أرشفة", "Archive")}
+                              aria-label={t("admin.dashboard.news.archive")}
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -527,7 +505,7 @@ export default function AdminDashboardPage() {
                               onClick={() => handleEditContent(item)}
                               className="flex h-10 w-10 items-center justify-center rounded-full border border-[#A5E3E1] bg-white text-primary transition hover:bg-[#F0FDFC]"
                               style={{ color: TEAL, borderColor: "#A5E3E1" }}
-                              aria-label={tr("تعديل", "Edit")}
+                              aria-label={t("admin.dashboard.news.edit")}
                             >
                               <Pencil className="w-4 h-4" />
                             </button>
@@ -535,7 +513,7 @@ export default function AdminDashboardPage() {
                               type="button"
                               onClick={() => handleViewContent(item)}
                               className="flex h-10 w-10 items-center justify-center rounded-full border border-[#BFDBFE] bg-white text-[#2563EB] transition hover:bg-[#EFF6FF]"
-                              aria-label={tr("عرض", "View")}
+                              aria-label={t("admin.dashboard.news.view")}
                             >
                               <Eye className="w-4 h-4" />
                             </button>
@@ -559,32 +537,26 @@ export default function AdminDashboardPage() {
           if (!next) setArchiveTarget(null);
         }}
         variant="destructive"
-        title={tr("تأكيد الأرشفة", "Confirm archive")}
+        title={t("admin.dashboard.archiveDialog.title")}
         icon={<Archive className="w-6 h-6" strokeWidth={2} />}
         description={
           <>
-            {tr("هل تريد أرشفة العنصر «", 'Archive item "')}
+            {t("admin.dashboard.archiveDialog.descriptionBefore")}
             <span className="font-extrabold text-[#344054]">
               {archiveTarget ? asPlainText(archiveTarget.title) || "—" : "—"}
             </span>
-            {tr(
-              "»؟ سيتم إزالته من القوائم النشطة ويمكن متابعته لاحقاً من أرشيف المحتوى إن وُجد.",
-              '"? It will be removed from active lists and can be followed later from the content archive if available.',
-            )}
+            {t("admin.dashboard.archiveDialog.descriptionAfter")}
           </>
         }
-        confirmLabel={tr("أرشفة", "Archive")}
+        confirmLabel={t("admin.dashboard.archiveDialog.confirm")}
         confirmDisabled={archiveContent.isPending}
         onConfirm={async () => {
           if (!archiveTarget) return;
           await archiveContent.mutateAsync(archiveTarget._id);
         }}
         successToast={{
-          title: tr("تمت الأرشفة", "Archived"),
-          message: tr(
-            "أُرشف المحتوى ويُتاح من أرشيف المحتوى عند التوفّر.",
-            "Content was archived and is available from the content archive when present.",
-          ),
+          title: t("admin.dashboard.archiveDialog.successTitle"),
+          message: t("admin.dashboard.archiveDialog.successMessage"),
           variant: "success",
         }}
       />

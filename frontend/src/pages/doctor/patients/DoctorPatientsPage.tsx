@@ -72,51 +72,37 @@ type PendingAccessState = Record<
 
 function getPatientsListErrorMessage(
   error: unknown,
-  tr: (ar: string, en: string) => string,
+  t: (key: string) => string,
 ): string {
   if (!(error instanceof ApiError)) {
     return getUserFacingRequestErrorMessage(error);
   }
 
   if (error.messageKey === "errors.doctor.notApproved") {
-    return tr(
-      "حساب الطبيب الحالي غير مُعتمد بعد، لذلك لا يمكن تحميل قائمة المرضى.",
-      "The current doctor account is not approved yet, so the patient list cannot be loaded.",
-    );
+    return t("doctor.patients.error.notApproved");
   }
 
   if (error.status === 401) {
-    return tr(
-      "انتهت صلاحية جلسة الدخول أو لم يتم التحقق من الهوية. سجّل الدخول من جديد.",
-      "Your session has expired or your identity could not be verified. Please sign in again.",
-    );
+    return t("doctor.patients.error.sessionExpired");
   }
 
   if (error.status === 403) {
-    return (
-      error.message ||
-      tr(
-        "لا تملك صلاحية عرض مرضى الطبيب بهذا الحساب.",
-        "You do not have permission to view the doctor's patients with this account.",
-      )
-    );
+    return error.message || t("doctor.patients.error.noPermission");
   }
 
-  return (
-    error.message || getUserFacingRequestErrorMessage(error)
-  );
+  return error.message || getUserFacingRequestErrorMessage(error);
 }
 
 function summarizePatientsListError(
   error: unknown,
-  tr: (ar: string, en: string) => string,
+  t: (key: string) => string,
 ): {
   title: string;
   brief: string;
   detail: string;
   showTechnicalDetail: boolean;
 } {
-  const detail = getPatientsListErrorMessage(error, tr);
+  const detail = getPatientsListErrorMessage(error, t);
   const verbose =
     detail.length > 160 ||
     detail.includes("لم نتمكن من إتمام الطلب") ||
@@ -126,15 +112,10 @@ function summarizePatientsListError(
     detail.includes("We could not complete the request") ||
     detail.includes("firewall") ||
     detail.includes("incorrect time");
-  const brief = verbose
-    ? tr(
-        "لم نتمكن من جلب قائمة المرضى في هذه المحاولة. تحقق من اتصالك بالإنترنت ثم أعد المحاولة، أو انتظر قليلًا إن كانت الخدمة مشغولة.",
-        "We could not fetch the patient list this time. Check your internet connection and try again, or wait a moment if the service is busy.",
-      )
-    : detail;
+  const brief = verbose ? t("doctor.patients.error.fetchFailed") : detail;
 
   return {
-    title: tr("تعذّر تحميل مرضى الطبيب", "Failed to load the doctor's patients"),
+    title: t("doctor.patients.error.loadFailed"),
     brief,
     detail,
     showTechnicalDetail: verbose,
@@ -144,9 +125,9 @@ function summarizePatientsListError(
 function formatIsoDate(
   value: string | null | undefined,
   locale: "ar" | "en",
-  tr: (ar: string, en: string) => string,
+  t: (key: string) => string,
 ): string {
-  if (!value) return tr("لا توجد زيارات", "No visits");
+  if (!value) return t("doctor.patients.noVisits");
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US");
@@ -168,14 +149,14 @@ function toCardData(
     isTemporary?: boolean;
   },
   locale: "ar" | "en",
-  tr: (ar: string, en: string) => string,
+  t: (key: string) => string,
 ): Omit<DoctorPatientExpandableCardData, "relationshipState"> {
   const accountStatusLabel =
     patient.user.accountStatus === "temporary"
-      ? tr("مؤقت", "Temporary")
+      ? t("doctor.patients.status.temporary")
       : patient.user.accountStatus === "suspended"
-        ? tr("معلّق", "Suspended")
-        : tr("نشط", "Active");
+        ? t("doctor.patients.status.suspended")
+        : t("doctor.patients.status.active");
 
   return {
     id: patient._id,
@@ -186,10 +167,10 @@ function toCardData(
     isTemporary:
       patient.isTemporary ?? patient.user.accountStatus === "temporary",
     phone: patient.user.phone ?? "—",
-    lastVisit: formatIsoDate(patient.lastVisitAt, locale, tr),
+    lastVisit: formatIsoDate(patient.lastVisitAt, locale, t),
     allergies: patient.allergies ?? [],
     medicalConditions: patient.medicalConditions ?? [],
-    bloodType: patient.bloodType ?? tr("غير محدد", "Not specified"),
+    bloodType: patient.bloodType ?? t("doctor.patients.notSpecified"),
     heightLabel: "—",
     weightLabel: "—",
     measurementUnitLabel: "—",
@@ -208,8 +189,7 @@ type DoctorPatientsFiltersState = {
 };
 
 export default function DoctorPatientsPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
   const { toast } = useToast();
   const navigate = useNavigate();
   const authUser = readAuthUser();
@@ -237,17 +217,20 @@ export default function DoctorPatientsPage() {
   const [tempPatientOpen, setTempPatientOpen] = useState(false);
   const [pendingAccessByPatient, setPendingAccessByPatient] =
     useState<PendingAccessState>({});
-  const [accessResolutionByPatientId, setAccessResolutionByPatientId] = useState<
-    Record<
-      string,
-      {
-        accessRequired: boolean;
-        accessPending: boolean;
-        pendingRequestId: string | null;
-      }
-    >
-  >({});
-  const [patientFileActionKey, setPatientFileActionKey] = useState<string | null>(null);
+  const [accessResolutionByPatientId, setAccessResolutionByPatientId] =
+    useState<
+      Record<
+        string,
+        {
+          accessRequired: boolean;
+          accessPending: boolean;
+          pendingRequestId: string | null;
+        }
+      >
+    >({});
+  const [patientFileActionKey, setPatientFileActionKey] = useState<
+    string | null
+  >(null);
 
   const listQuery = useDoctorPatients({
     search: filters.search || undefined,
@@ -281,7 +264,7 @@ export default function DoctorPatientsPage() {
   );
   const expandedPatientIsTemporary = Boolean(
     expandedListPatient?.isTemporary ||
-      expandedListPatient?.user.accountStatus === "temporary",
+    expandedListPatient?.user.accountStatus === "temporary",
   );
 
   const publicProfileQuery = useDoctorPatientPublicProfile(
@@ -305,8 +288,12 @@ export default function DoctorPatientsPage() {
 
   const createTempMutation = useCreateTemporaryDoctorPatient();
   const requestAccessMutation = useRequestDoctorPatientAccess(doctorId);
-  const uploadPatientFileMutation = useUploadDoctorPatientFile(expandedId ?? "");
-  const deletePatientFileMutation = useDeleteDoctorPatientFile(expandedId ?? "");
+  const uploadPatientFileMutation = useUploadDoctorPatientFile(
+    expandedId ?? "",
+  );
+  const deletePatientFileMutation = useDeleteDoctorPatientFile(
+    expandedId ?? "",
+  );
 
   const totalPages = useMemo(() => {
     const safeLimit = Math.max(1, filters.limit);
@@ -320,8 +307,8 @@ export default function DoctorPatientsPage() {
   const { retry: retryPatientsList, retrying: retryingPatientsList } =
     useRetryAction(() => listQuery.refetch());
   const patientsLoadErrorPresentation = useMemo(
-    () => summarizePatientsListError(listQuery.error, tr),
-    [listQuery.error, tr],
+    () => summarizePatientsListError(listQuery.error, t),
+    [listQuery.error, t],
   );
 
   const hasActiveFilters = useMemo(() => {
@@ -355,43 +342,44 @@ export default function DoctorPatientsPage() {
         orders: [],
       }
     : fullProfileQuery.patient
-    ? {
-        medicalHistory: (fullProfileQuery.patient.medicalHistory ?? []).map(
-          (record) => ({
-            id: record._id,
-            title: record.title ?? tr("سجل طبي", "Medical record"),
-            diagnosis: record.diagnosis ?? "—",
-            date: formatIsoDate(record.date ?? record.createdAt, locale, tr),
-          }),
-        ),
-        medications: (fullProfileQuery.patient.medications ?? []).map(
-          (medication, index) => ({
-            id: medication._id ?? `med-${index}`,
-            name: medication.name ?? tr("دواء", "Medication"),
-            dosage: medication.dosage ?? "—",
-            frequency: medication.frequency ?? "—",
-          }),
-        ),
-        files: (
-          patientFilesQuery.files.length
+      ? {
+          medicalHistory: (fullProfileQuery.patient.medicalHistory ?? []).map(
+            (record) => ({
+              id: record._id,
+              title: record.title ?? t("doctor.patients.medicalRecord"),
+              diagnosis: record.diagnosis ?? "—",
+              date: formatIsoDate(record.date ?? record.createdAt, locale, t),
+            }),
+          ),
+          medications: (fullProfileQuery.patient.medications ?? []).map(
+            (medication, index) => ({
+              id: medication._id ?? `med-${index}`,
+              name: medication.name ?? t("doctor.patients.medication"),
+              dosage: medication.dosage ?? "—",
+              frequency: medication.frequency ?? "—",
+            }),
+          ),
+          files: (patientFilesQuery.files.length
             ? patientFilesQuery.files
             : (fullProfileQuery.patient.files ?? [])
-        ).map((file) => ({
-          id: file._id,
-          name: file.originalName ?? tr("ملف", "File"),
-          createdAt: formatIsoDate(file.createdAt, locale, tr),
-        })),
-        orders: (fullProfileQuery.patient.orders ?? []).map((order, index) => ({
-          id: order._id ?? `order-${index}`,
-          title:
-            order.orderTitle ??
-            order.orderName ??
-            order.orderType ??
-            tr("طلب", "Order"),
-          status: order.status ?? order.statusCode ?? "—",
-        })),
-      }
-    : null;
+          ).map((file) => ({
+            id: file._id,
+            name: file.originalName ?? t("doctor.patients.file"),
+            createdAt: formatIsoDate(file.createdAt, locale, t),
+          })),
+          orders: (fullProfileQuery.patient.orders ?? []).map(
+            (order, index) => ({
+              id: order._id ?? `order-${index}`,
+              title:
+                order.orderTitle ??
+                order.orderName ??
+                order.orderType ??
+                t("doctor.patients.order"),
+              status: order.status ?? order.statusCode ?? "—",
+            }),
+          ),
+        }
+      : null;
 
   const accessError =
     fullProfileQuery.deniedError instanceof ApiError
@@ -454,11 +442,7 @@ export default function DoctorPatientsPage() {
       return;
     }
 
-    if (
-      fullProfileQuery.deniedError ||
-      accessRequired ||
-      accessPending
-    ) {
+    if (fullProfileQuery.deniedError || accessRequired || accessPending) {
       setAccessResolutionByPatientId((prev) => ({
         ...prev,
         [pid]: {
@@ -512,7 +496,7 @@ export default function DoctorPatientsPage() {
     };
 
     const enhancedPatients = listQuery.patients.map((patient) => {
-      const base = toCardData(patient, locale, tr);
+      const base = toCardData(patient, locale, t);
       const relationshipState = buildRelationshipState(base, patient._id);
 
       if (
@@ -529,14 +513,14 @@ export default function DoctorPatientsPage() {
             base.medicalConditions,
           bloodType: publicProfileQuery.patient.bloodType ?? base.bloodType,
           heightLabel: publicProfileQuery.patient.heightCm
-            ? `${publicProfileQuery.patient.heightCm} ${tr("سم", "cm")}`
+            ? `${publicProfileQuery.patient.heightCm} ${t("doctor.patients.unit.cm")}`
             : "—",
           weightLabel: publicProfileQuery.patient.weightKg
-            ? `${publicProfileQuery.patient.weightKg} ${tr("كغ", "kg")}`
+            ? `${publicProfileQuery.patient.weightKg} ${t("doctor.patients.unit.kg")}`
             : "—",
           measurementUnitLabel:
             publicProfileQuery.patient.measurementUnit === "metric"
-              ? tr("متري", "Metric")
+              ? t("doctor.patients.unit.metric")
               : (publicProfileQuery.patient.measurementUnit ?? "—"),
         };
       }
@@ -558,7 +542,7 @@ export default function DoctorPatientsPage() {
     publicProfileQuery.patient,
     filters.relationship,
     locale,
-    tr,
+    t,
   ]);
 
   const patientFilesLoading =
@@ -581,7 +565,7 @@ export default function DoctorPatientsPage() {
       window.open(fileUrl, "_blank", "noopener,noreferrer");
     } catch (error) {
       toast(getPatientFileAccessErrorMessage(error, "open"), {
-        title: tr("تعذر فتح الملف", "Could not open the file"),
+        title: t("doctor.patients.file.openFailed"),
         variant: "error",
       });
     } finally {
@@ -589,7 +573,10 @@ export default function DoctorPatientsPage() {
     }
   };
 
-  const handlePatientFileDownload = async (patientId: string, fileId: string) => {
+  const handlePatientFileDownload = async (
+    patientId: string,
+    fileId: string,
+  ) => {
     if (!doctorId) return;
     setPatientFileActionKey(fileId);
     try {
@@ -605,7 +592,7 @@ export default function DoctorPatientsPage() {
       );
     } catch (error) {
       toast(getPatientFileAccessErrorMessage(error, "download"), {
-        title: tr("تعذر تحميل الملف", "Could not download the file"),
+        title: t("doctor.patients.file.downloadFailed"),
         variant: "error",
       });
     } finally {
@@ -618,16 +605,13 @@ export default function DoctorPatientsPage() {
     setPatientFileActionKey(fileId);
     try {
       const response = await deletePatientFileMutation.mutateAsync(fileId);
-      toast(
-        response.message ?? tr("تم حذف الملف بنجاح.", "The file was deleted successfully."),
-        {
-          title: tr("نجاح", "Success"),
-          variant: "success",
-        },
-      );
+      toast(response.message ?? t("doctor.patients.file.deleteSuccess"), {
+        title: t("doctor.patients.success"),
+        variant: "success",
+      });
     } catch (error) {
       toast(getPatientFileMutationErrorMessage(error, "delete"), {
-        title: tr("تعذر حذف الملف", "Could not delete the file"),
+        title: t("doctor.patients.file.deleteFailed"),
         variant: "error",
       });
     } finally {
@@ -635,22 +619,21 @@ export default function DoctorPatientsPage() {
     }
   };
 
-  const handlePatientFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+  const handlePatientFileUpload = async (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
     if (!file || !expandedId) return;
     setPatientFileActionKey("upload");
     try {
       const response = await uploadPatientFileMutation.mutateAsync({ file });
-      toast(
-        response.message ?? tr("تم رفع الملف بنجاح.", "The file was uploaded successfully."),
-        {
-          title: tr("نجاح", "Success"),
-          variant: "success",
-        },
-      );
+      toast(response.message ?? t("doctor.patients.file.uploadSuccess"), {
+        title: t("doctor.patients.success"),
+        variant: "success",
+      });
     } catch (error) {
       toast(getPatientFileMutationErrorMessage(error, "upload"), {
-        title: tr("تعذر رفع الملف", "Could not upload the file"),
+        title: t("doctor.patients.file.uploadFailed"),
         variant: "error",
       });
     } finally {
@@ -668,7 +651,7 @@ export default function DoctorPatientsPage() {
         onChange={handlePatientFileUpload}
       />
       <Helmet>
-        <title>{tr("المرضى • LMJ Health", "Patients • LMJ Health")}</title>
+        <title>{t("doctor.patients.page.title")}</title>
       </Helmet>
       {/* Overview section */}
       <div dir={dir} lang={locale}>
@@ -676,7 +659,7 @@ export default function DoctorPatientsPage() {
         <DoctorDashboardOverview
           variant="patients"
           surface="mint"
-          title={tr("إجمالي مرضى الطبيب", "Total doctor patients")}
+          title={t("doctor.patients.title")}
           subtitle={
             <span>
               <span className="font-extrabold text-primary">
@@ -684,65 +667,58 @@ export default function DoctorPatientsPage() {
               </span>
               <span className="text-primary/90">
                 {" "}
-                {tr("— إجمالي المرضى حسب الحالة", "— total patients by status")}
+                {t("doctor.patients.subtitle")}
               </span>
             </span>
           }
           onActionClick={() => setTempPatientOpen(true)}
-          actionLabel={tr("إضافة مريض مؤقت", "Add temporary patient")}
+          actionLabel={t("doctor.patients.addTemporary")}
           kpis={[
             {
               key: "active",
               icon: <UserCheck className="w-5 h-5 shrink-0" />,
               value: statusCounts.loading ? "—" : statusCounts.active,
-              label: tr("نشط", "Active"),
+              label: t("doctor.patients.kpi.active"),
             },
             {
               key: "temporary",
               icon: <UserRoundPlus className="w-5 h-5 shrink-0" />,
               value: statusCounts.loading ? "—" : statusCounts.temporary,
-              label: tr("مؤقت", "Temporary"),
+              label: t("doctor.patients.kpi.temporary"),
             },
             {
               key: "suspended",
               icon: <UserMinus className="w-5 h-5 shrink-0" />,
               value: statusCounts.loading ? "—" : statusCounts.suspended,
-              label: tr("معلّق", "Suspended"),
+              label: t("doctor.patients.kpi.suspended"),
             },
           ]}
         />
         {/* Create temporary patient dialog */}
         <Suspense fallback={null}>
-        <CreateTemporaryPatientDialog
-          open={tempPatientOpen}
-          onOpenChange={setTempPatientOpen}
-          busy={createTempMutation.isPending}
-          onSubmit={async (values) => {
-            try {
-              const response = await createTempMutation.mutateAsync(values);
-              toast(
-                response.message ??
-                  tr(
-                    "تم إنشاء وربط المريض المؤقت.",
-                    "Temporary patient was created and linked.",
-                  ),
-                {
-                title: tr("نجاح", "Success"),
-                variant: "success",
-              },
-              );
-            } catch (error) {
-              toast(getCreateTemporaryPatientErrorMessage(error), {
-                title: tr(
-                  "تعذّر إنشاء المريض المؤقت",
-                  "Could not create temporary patient",
-                ),
-                variant: "error",
-              });
-              throw error;
-            }
-          }}
-        />
+          <CreateTemporaryPatientDialog
+            open={tempPatientOpen}
+            onOpenChange={setTempPatientOpen}
+            busy={createTempMutation.isPending}
+            onSubmit={async (values) => {
+              try {
+                const response = await createTempMutation.mutateAsync(values);
+                toast(
+                  response.message ?? t("doctor.patients.tempPatientCreated"),
+                  {
+                    title: t("doctor.patients.success"),
+                    variant: "success",
+                  },
+                );
+              } catch (error) {
+                toast(getCreateTemporaryPatientErrorMessage(error), {
+                  title: t("doctor.patients.tempPatientCreateFailed"),
+                  variant: "error",
+                });
+                throw error;
+              }
+            }}
+          />
         </Suspense>
         <Suspense fallback={<DoctorTableSkeleton rows={4} columns={3} />}>
           <DoctorPatientsFiltersSection
@@ -797,239 +773,255 @@ export default function DoctorPatientsPage() {
         </Suspense>
         {/* شريط تصفية احترافي — البحث الرئيسي ~50% على الشاشات الواسعة */}
         {false && (
-        <section
-          className="my-5 overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_20px_50px_rgba(15,143,139,0.08),0_2px_8px_rgba(0,0,0,0.04)]"
-          aria-label="تصفية قائمة المرضى"
-        >
-          <div className="border-b border-[#EEF2F6] bg-gradient-to-l from-primary/[0.07] via-[#F8FAFC] to-white px-5 py-4 sm:px-6">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div className="flex gap-3 items-start sm:items-center">
-                <div
-                  className="flex justify-center items-center w-11 h-11 bg-gradient-to-br rounded-xl border shadow-sm shrink-0 border-primary/25 from-primary/15 to-primary/5 text-primary"
-                  aria-hidden
-                >
-                  <Filter className="h-[18px] w-[18px]" strokeWidth={2.25} />
+          <section
+            className="my-5 overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_20px_50px_rgba(15,143,139,0.08),0_2px_8px_rgba(0,0,0,0.04)]"
+            aria-label="تصفية قائمة المرضى"
+          >
+            <div className="border-b border-[#EEF2F6] bg-gradient-to-l from-primary/[0.07] via-[#F8FAFC] to-white px-5 py-4 sm:px-6">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="flex gap-3 items-start sm:items-center">
+                  <div
+                    className="flex justify-center items-center w-11 h-11 bg-gradient-to-br rounded-xl border shadow-sm shrink-0 border-primary/25 from-primary/15 to-primary/5 text-primary"
+                    aria-hidden
+                  >
+                    <Filter className="h-[18px] w-[18px]" strokeWidth={2.25} />
+                  </div>
+                  <div className="min-w-0 text-start">
+                    <h2 className="font-cairo text-[16px] font-black leading-tight text-[#111827] sm:text-[17px]">
+                      تصفية قائمة المرضى
+                    </h2>
+                  </div>
                 </div>
-                <div className="min-w-0 text-start">
-                  <h2 className="font-cairo text-[16px] font-black leading-tight text-[#111827] sm:text-[17px]">
-                    تصفية قائمة المرضى
-                  </h2>
+
+                <div className="flex flex-wrap gap-2 justify-end items-center">
+                  <button
+                    type="button"
+                    disabled={!hasActiveFilters}
+                    onClick={() => setFilters({ ...defaultFilters })}
+                    className={
+                      !hasActiveFilters
+                        ? "inline-flex h-[40px] min-w-[132px] cursor-not-allowed items-center justify-center rounded-xl border border-[#E5E7EB] bg-[#F2F4F7] px-4 font-cairo text-[12px] font-extrabold text-[#98A2B3]"
+                        : "inline-flex h-[40px] min-w-[132px] items-center justify-center rounded-xl border border-primary/30 bg-white px-4 font-cairo text-[12px] font-extrabold text-primary shadow-[0_1px_2px_rgba(15,143,139,0.12)] transition-all hover:bg-primary/[0.06] hover:shadow-[0_4px_14px_rgba(15,143,139,0.15)] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                    }
+                  >
+                    مسح الفلاتر
+                  </button>
+
+                  <output
+                    className="inline-flex h-[40px] min-w-[100px] items-center justify-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-black text-[#344054] shadow-sm tabular-nums"
+                    aria-live="polite"
+                  >
+                    <span className="text-primary">
+                      {patientsListFailed ? "—" : listQuery.total || 0}
+                    </span>
+                    <span className="font-extrabold text-[#667085]">نتيجة</span>
+                  </output>
                 </div>
-              </div>
-
-              <div className="flex flex-wrap gap-2 justify-end items-center">
-                <button
-                  type="button"
-                  disabled={!hasActiveFilters}
-                  onClick={() => setFilters({ ...defaultFilters })}
-                  className={
-                    !hasActiveFilters
-                      ? "inline-flex h-[40px] min-w-[132px] cursor-not-allowed items-center justify-center rounded-xl border border-[#E5E7EB] bg-[#F2F4F7] px-4 font-cairo text-[12px] font-extrabold text-[#98A2B3]"
-                      : "inline-flex h-[40px] min-w-[132px] items-center justify-center rounded-xl border border-primary/30 bg-white px-4 font-cairo text-[12px] font-extrabold text-primary shadow-[0_1px_2px_rgba(15,143,139,0.12)] transition-all hover:bg-primary/[0.06] hover:shadow-[0_4px_14px_rgba(15,143,139,0.15)] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
-                  }
-                >
-                  مسح الفلاتر
-                </button>
-
-                <output
-                  className="inline-flex h-[40px] min-w-[100px] items-center justify-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-black text-[#344054] shadow-sm tabular-nums"
-                  aria-live="polite"
-                >
-                  <span className="text-primary">
-                    {patientsListFailed ? "—" : listQuery.total || 0}
-                  </span>
-                  <span className="font-extrabold text-[#667085]">نتيجة</span>
-                </output>
               </div>
             </div>
-          </div>
 
-          <div className="px-5 py-5 space-y-5 sm:px-6 sm:py-6">
-            <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:gap-6">
-              {/* بحث رئيسي: نصف عرض الحاوية على xl */}
-              <div className="w-full flex-[0_0_auto] xl:w-1/2 xl:max-w-[50%]">
-                <label
-                  htmlFor="doctor-patients-search"
-                  className="flex gap-2 justify-between items-center mb-2"
-                >
-                  <span className="inline-flex items-center gap-1.5 font-cairo text-[12px] font-extrabold text-[#111827]">
-                    <Users className="h-3.5 w-3.5 text-primary" aria-hidden />
-                    البحث عن المريض
-                  </span>
-                  <span className="hidden font-cairo text-[10px] font-bold uppercase tracking-wider text-[#98A2B3] sm:inline">
-                    الاسم · البريد · الهاتف · الرقم العام
-                  </span>
-                </label>
-                <div className="relative group">
-                  <input
-                    id="doctor-patients-search"
-                    type="search"
-                    enterKeyHint="search"
-                    autoComplete="off"
-                    placeholder="ابدأ بالكتابة: الاسم، البريد، الهاتف، أو الرقم العام..."
-                    className="h-[48px] w-full rounded-xl border-2 border-[#E8ECF3] bg-gradient-to-b from-[#FBFCFD] to-white pe-12 ps-4 font-cairo text-[13px] font-bold text-[#111827] shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)] outline-none transition-[border-color,box-shadow,background] placeholder:text-[#98A2B3] hover:border-[#D0D8E6] focus:border-primary focus:bg-white focus:shadow-[0_0_0_4px_rgba(15,143,139,0.12),inset_0_1px_2px_rgba(0,0,0,0.02)]"
-                    value={filters.search}
-                    onChange={(e) =>
-                      setFilters((prev) => ({
-                        ...prev,
-                        search: e.target.value,
-                        page: 1,
-                      }))
-                    }
-                  />
-                  <div className="pointer-events-none absolute start-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-focus-within:bg-primary/[0.14]">
-                    <Search className="h-[18px] w-[18px]" strokeWidth={2.25} />
+            <div className="px-5 py-5 space-y-5 sm:px-6 sm:py-6">
+              <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:gap-6">
+                {/* بحث رئيسي: نصف عرض الحاوية على xl */}
+                <div className="w-full flex-[0_0_auto] xl:w-1/2 xl:max-w-[50%]">
+                  <label
+                    htmlFor="doctor-patients-search"
+                    className="flex gap-2 justify-between items-center mb-2"
+                  >
+                    <span className="inline-flex items-center gap-1.5 font-cairo text-[12px] font-extrabold text-[#111827]">
+                      <Users className="h-3.5 w-3.5 text-primary" aria-hidden />
+                      البحث عن المريض
+                    </span>
+                    <span className="hidden font-cairo text-[10px] font-bold uppercase tracking-wider text-[#98A2B3] sm:inline">
+                      الاسم · البريد · الهاتف · الرقم العام
+                    </span>
+                  </label>
+                  <div className="relative group">
+                    <input
+                      id="doctor-patients-search"
+                      type="search"
+                      enterKeyHint="search"
+                      autoComplete="off"
+                      placeholder="ابدأ بالكتابة: الاسم، البريد، الهاتف، أو الرقم العام..."
+                      className="h-[48px] w-full rounded-xl border-2 border-[#E8ECF3] bg-gradient-to-b from-[#FBFCFD] to-white pe-12 ps-4 font-cairo text-[13px] font-bold text-[#111827] shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)] outline-none transition-[border-color,box-shadow,background] placeholder:text-[#98A2B3] hover:border-[#D0D8E6] focus:border-primary focus:bg-white focus:shadow-[0_0_0_4px_rgba(15,143,139,0.12),inset_0_1px_2px_rgba(0,0,0,0.02)]"
+                      value={filters.search}
+                      onChange={(e) =>
+                        setFilters((prev) => ({
+                          ...prev,
+                          search: e.target.value,
+                          page: 1,
+                        }))
+                      }
+                    />
+                    <div className="pointer-events-none absolute start-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-focus-within:bg-primary/[0.14]">
+                      <Search
+                        className="h-[18px] w-[18px]"
+                        strokeWidth={2.25}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* فلاتر ثانوية في شبكة مدمجة */}
+                <div className="grid flex-1 grid-cols-1 gap-3 min-w-0 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="min-w-0 sm:col-span-2 lg:col-span-1">
+                    <label
+                      htmlFor="doctor-patients-diagnosis"
+                      className="mb-2 flex items-center gap-1.5 font-cairo text-[11px] font-extrabold text-[#667085]"
+                    >
+                      <Stethoscope
+                        className="h-3.5 w-3.5 text-primary/80 shrink-0"
+                        aria-hidden
+                      />
+                      التشخيص / الملاحظات
+                    </label>
+                    <input
+                      id="doctor-patients-diagnosis"
+                      type="text"
+                      placeholder="كلمة في التشخيص..."
+                      value={filters.diagnosis}
+                      onChange={(e) =>
+                        setFilters((prev) => ({
+                          ...prev,
+                          diagnosis: e.target.value,
+                          page: 1,
+                        }))
+                      }
+                      className="h-[42px] w-full rounded-xl border border-[#E5E7EB] bg-white px-3.5 text-start font-cairo text-[12px] font-bold text-[#111827] shadow-sm outline-none transition-all placeholder:text-[#98A2B3] hover:border-[#D0D5DD] focus:border-primary/45 focus:ring-2 focus:ring-primary/12"
+                    />
+                  </div>
+
+                  <div className="relative min-w-0">
+                    <label
+                      htmlFor="doctor-patients-account-status"
+                      className="mb-2 block font-cairo text-[11px] font-extrabold text-[#667085]"
+                    >
+                      حالة الحساب
+                    </label>
+                    <StyledSelect
+                      id="doctor-patients-account-status"
+                      size="sm"
+                      tone="muted"
+                      value={filters.account_status}
+                      onChange={(v) =>
+                        setFilters((prev) => ({
+                          ...prev,
+                          account_status: (v as FilterStatus) || "all",
+                          page: 1,
+                        }))
+                      }
+                      options={[
+                        { value: "all", label: "جميع الحالات" },
+                        { value: "active", label: "نشط" },
+                        { value: "temporary", label: "مؤقت" },
+                        { value: "suspended", label: "معلق" },
+                      ]}
+                      listboxAriaLabel="حالة الحساب"
+                    />
+                  </div>
+
+                  <div className="relative min-w-0 sm:col-span-2 lg:col-span-1">
+                    <label
+                      htmlFor="doctor-patients-relationship"
+                      className="mb-2 block font-cairo text-[11px] font-extrabold text-[#667085]"
+                    >
+                      {locale === "ar"
+                        ? "علاقة الوصول (ضمن نتائج هذه الصفحة فقط)"
+                        : "Access relationship (current page results only)"}
+                    </label>
+                    <StyledSelect
+                      id="doctor-patients-relationship"
+                      size="sm"
+                      tone="muted"
+                      value={filters.relationship}
+                      onChange={(v) =>
+                        setFilters((prev) => ({
+                          ...prev,
+                          relationship: (v as RelationshipFilter) || "all",
+                          page: 1,
+                        }))
+                      }
+                      className="lg:min-w-0"
+                      options={[
+                        { value: "all", label: "كل العلاقات" },
+                        { value: "full-access", label: "وصول كامل" },
+                        { value: "linked-only", label: "مرتبط فقط" },
+                        { value: "temporary", label: "مؤقت" },
+                        { value: "access-pending", label: "قيد الانتظار" },
+                        { value: "active-encounter", label: "زيارة جارية" },
+                        { value: "restricted", label: "محجوب" },
+                        {
+                          value: "relationship-indeterminate",
+                          label: "لم تُعرَف بعد (وسِّع البطاقة)",
+                        },
+                      ]}
+                      listboxAriaLabel="علاقة الوصول"
+                    />
+                    <p className="mt-1.5 font-cairo text-[10px] font-semibold text-[#98A2B3]">
+                      {locale === "ar"
+                        ? "يُطبَّق هذا الفلتر فقط على المرضى المعروضين حاليًا، وليس على كامل القائمة."
+                        : "This filter only applies to the patients currently shown, not the full list."}
+                    </p>
                   </div>
                 </div>
               </div>
 
-              {/* فلاتر ثانوية في شبكة مدمجة */}
-              <div className="grid flex-1 grid-cols-1 gap-3 min-w-0 sm:grid-cols-2 lg:grid-cols-3">
-                <div className="min-w-0 sm:col-span-2 lg:col-span-1">
-                  <label
-                    htmlFor="doctor-patients-diagnosis"
-                    className="mb-2 flex items-center gap-1.5 font-cairo text-[11px] font-extrabold text-[#667085]"
-                  >
-                    <Stethoscope className="h-3.5 w-3.5 text-primary/80 shrink-0" aria-hidden />
-                    التشخيص / الملاحظات
-                  </label>
-                  <input
-                    id="doctor-patients-diagnosis"
-                    type="text"
-                    placeholder="كلمة في التشخيص..."
-                    value={filters.diagnosis}
-                    onChange={(e) =>
-                      setFilters((prev) => ({
-                        ...prev,
-                        diagnosis: e.target.value,
-                        page: 1,
-                      }))
-                    }
-                    className="h-[42px] w-full rounded-xl border border-[#E5E7EB] bg-white px-3.5 text-start font-cairo text-[12px] font-bold text-[#111827] shadow-sm outline-none transition-all placeholder:text-[#98A2B3] hover:border-[#D0D5DD] focus:border-primary/45 focus:ring-2 focus:ring-primary/12"
+              {/* فترة آخر زيارة — شريط زمني متماسك */}
+              <div className="rounded-xl border border-dashed border-[#E5E7EB] bg-[#FAFBFC]/90 px-4 py-4 sm:px-5">
+                <div className="flex flex-wrap gap-2 items-center mb-3 text-start">
+                  <Calendar
+                    className="w-4 h-4 text-primary shrink-0"
+                    aria-hidden
                   />
+                  <span className="font-cairo text-[12px] font-extrabold text-[#344054]">
+                    نطاق تاريخ آخر زيارة
+                  </span>
                 </div>
-
-                <div className="relative min-w-0">
-                  <label
-                    htmlFor="doctor-patients-account-status"
-                    className="mb-2 block font-cairo text-[11px] font-extrabold text-[#667085]"
+                <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:gap-5">
+                  <div className="flex min-w-[200px] flex-1 flex-col gap-1.5 sm:max-w-xs">
+                    <span className="font-cairo text-[10px] font-extrabold uppercase tracking-wide text-[#667085]">
+                      من تاريخ
+                    </span>
+                    <input
+                      type="date"
+                      value={filters.from}
+                      onChange={(e) =>
+                        setFilters((prev) => ({
+                          ...prev,
+                          from: e.target.value,
+                          page: 1,
+                        }))
+                      }
+                      className="h-[40px] w-full rounded-xl border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-semibold text-[#111827] shadow-sm outline-none transition-all focus:border-primary/45 focus:ring-2 focus:ring-primary/12"
+                    />
+                  </div>
+                  <span
+                    className="hidden shrink-0 pb-2 font-cairo text-[11px] font-bold text-[#D0D5DD] sm:inline sm:self-end"
+                    aria-hidden
                   >
-                    حالة الحساب
-                  </label>
-                  <StyledSelect
-                    id="doctor-patients-account-status"
-                    size="sm"
-                    tone="muted"
-                    value={filters.account_status}
-                    onChange={(v) =>
-                      setFilters((prev) => ({
-                        ...prev,
-                        account_status: (v as FilterStatus) || "all",
-                        page: 1,
-                      }))
-                    }
-                    options={[
-                      { value: "all", label: "جميع الحالات" },
-                      { value: "active", label: "نشط" },
-                      { value: "temporary", label: "مؤقت" },
-                      { value: "suspended", label: "معلق" },
-                    ]}
-                    listboxAriaLabel="حالة الحساب"
-                  />
-                </div>
-
-                <div className="relative min-w-0 sm:col-span-2 lg:col-span-1">
-                  <label
-                    htmlFor="doctor-patients-relationship"
-                    className="mb-2 block font-cairo text-[11px] font-extrabold text-[#667085]"
-                  >
-                    علاقة الوصول
-                  </label>
-                  <StyledSelect
-                    id="doctor-patients-relationship"
-                    size="sm"
-                    tone="muted"
-                    value={filters.relationship}
-                    onChange={(v) =>
-                      setFilters((prev) => ({
-                        ...prev,
-                        relationship: (v as RelationshipFilter) || "all",
-                        page: 1,
-                      }))
-                    }
-                    className="lg:min-w-0"
-                    options={[
-                      { value: "all", label: "كل العلاقات" },
-                      { value: "full-access", label: "وصول كامل" },
-                      { value: "linked-only", label: "مرتبط فقط" },
-                      { value: "temporary", label: "مؤقت" },
-                      { value: "access-pending", label: "قيد الانتظار" },
-                      { value: "active-encounter", label: "زيارة جارية" },
-                      { value: "restricted", label: "محجوب" },
-                      {
-                        value: "relationship-indeterminate",
-                        label: "لم تُعرَف بعد (وسِّع البطاقة)",
-                      },
-                    ]}
-                    listboxAriaLabel="علاقة الوصول"
-                  />
+                    ···
+                  </span>
+                  <div className="flex min-w-[200px] flex-1 flex-col gap-1.5 sm:max-w-xs">
+                    <span className="font-cairo text-[10px] font-extrabold uppercase tracking-wide text-[#667085]">
+                      إلى تاريخ
+                    </span>
+                    <input
+                      type="date"
+                      value={filters.to}
+                      onChange={(e) =>
+                        setFilters((prev) => ({
+                          ...prev,
+                          to: e.target.value,
+                          page: 1,
+                        }))
+                      }
+                      className="h-[40px] w-full rounded-xl border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-semibold text-[#111827] shadow-sm outline-none transition-all focus:border-primary/45 focus:ring-2 focus:ring-primary/12"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-
-            {/* فترة آخر زيارة — شريط زمني متماسك */}
-            <div className="rounded-xl border border-dashed border-[#E5E7EB] bg-[#FAFBFC]/90 px-4 py-4 sm:px-5">
-              <div className="flex flex-wrap gap-2 items-center mb-3 text-start">
-                <Calendar className="w-4 h-4 text-primary shrink-0" aria-hidden />
-                <span className="font-cairo text-[12px] font-extrabold text-[#344054]">
-                  نطاق تاريخ آخر زيارة
-                </span>
-              </div>
-              <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:gap-5">
-                <div className="flex min-w-[200px] flex-1 flex-col gap-1.5 sm:max-w-xs">
-                  <span className="font-cairo text-[10px] font-extrabold uppercase tracking-wide text-[#667085]">
-                    من تاريخ
-                  </span>
-                  <input
-                    type="date"
-                    value={filters.from}
-                    onChange={(e) =>
-                      setFilters((prev) => ({
-                        ...prev,
-                        from: e.target.value,
-                        page: 1,
-                      }))
-                    }
-                    className="h-[40px] w-full rounded-xl border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-semibold text-[#111827] shadow-sm outline-none transition-all focus:border-primary/45 focus:ring-2 focus:ring-primary/12"
-                  />
-                </div>
-                <span
-                  className="hidden shrink-0 pb-2 font-cairo text-[11px] font-bold text-[#D0D5DD] sm:inline sm:self-end"
-                  aria-hidden
-                >
-                  ···
-                </span>
-                <div className="flex min-w-[200px] flex-1 flex-col gap-1.5 sm:max-w-xs">
-                  <span className="font-cairo text-[10px] font-extrabold uppercase tracking-wide text-[#667085]">
-                    إلى تاريخ
-                  </span>
-                  <input
-                    type="date"
-                    value={filters.to}
-                    onChange={(e) =>
-                      setFilters((prev) => ({
-                        ...prev,
-                        to: e.target.value,
-                        page: 1,
-                      }))
-                    }
-                    className="h-[40px] w-full rounded-xl border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-semibold text-[#111827] shadow-sm outline-none transition-all focus:border-primary/45 focus:ring-2 focus:ring-primary/12"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+          </section>
         )}
 
         {/* Patients list section */}
@@ -1055,17 +1047,17 @@ export default function DoctorPatientsPage() {
                 aria-hidden
               />
               <div className="font-cairo text-[15px] font-extrabold text-[#B42318]">
-                {tr("تعذّر تحميل مرضى الطبيب", "Failed to load the doctor's patients")}
+                {t("doctor.patients.error.loadFailed")}
               </div>
               <p className="mt-2 font-cairo text-[13px] font-semibold leading-7 text-[#7A271A]">
-                {getPatientsListErrorMessage(listQuery.error, tr)}
+                {getPatientsListErrorMessage(listQuery.error, t)}
               </p>
               <button
                 type="button"
                 onClick={() => listQuery.refetch()}
                 className="mt-6 inline-flex h-[40px] min-w-[160px] items-center justify-center rounded-xl bg-primary px-5 font-cairo text-[13px] font-extrabold text-white shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
               >
-                {tr("إعادة المحاولة", "Retry")}
+                {t("doctor.patients.retry")}
               </button>
             </div>
           ) : patientsListPending ? (
@@ -1076,20 +1068,20 @@ export default function DoctorPatientsPage() {
                 variant="teal"
                 imageSrc="/images/photo-not-found-patient.png"
                 imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.1)]"
-                title={tr("لا يوجد مرضى مضافة بعد", "No patients added yet")}
-                subtitle={tr("قم بإضافة مريض جديد الآن", "Add a new patient now")}
-                actionLabel={tr("إضافة مريض", "Add patient")}
+                title={t("doctor.patients.empty.noPatients")}
+                subtitle={t("doctor.patients.empty.addNow")}
+                actionLabel={t("doctor.patients.empty.addPatient")}
                 onAction={() => setTempPatientOpen(true)}
                 actionIcon={<UserRoundPlus className="w-4 h-4" />}
               />
             ) : (
               <div className="rounded-2xl border border-[#E8ECF3] bg-white px-6 py-12 text-center shadow-sm">
-                <Users className="mx-auto h-12 w-12 text-[#D0D5DD]" aria-hidden />
+                <Users
+                  className="mx-auto h-12 w-12 text-[#D0D5DD]"
+                  aria-hidden
+                />
                 <p className="mt-4 font-cairo text-[14px] font-semibold leading-relaxed text-[#667085]">
-                  {tr(
-                    "لا توجد مرضى في هذه الصفحة وفقًا لعدد النتائج الإجمالي. جرّب العودة إلى صفحة سابقة أو تعديل عدد النتائج بالصفحة.",
-                    "There are no patients on this page based on the total result count. Try going back to a previous page or changing the results per page.",
-                  )}
+                  {t("doctor.patients.empty.noResults")}
                 </p>
               </div>
             )
@@ -1097,10 +1089,7 @@ export default function DoctorPatientsPage() {
             <div className="rounded-2xl border border-[#E5E7EB] bg-white px-6 py-12 text-center shadow-sm">
               <Users className="mx-auto h-12 w-12 text-[#D0D5DD]" aria-hidden />
               <p className="mt-4 font-cairo text-[14px] font-semibold text-[#667085]">
-                {tr(
-                  "لا يوجد مرضى يطابقون فلتر «علاقة الوصول» الحالي ضمن الصفحة المعروضة. جرّب اختيار «كل العلاقات» أو غيّر الفلاتر الأخرى.",
-                  "No patients match the current “access relationship” filter within the displayed page. Try selecting “All relationships” or change the other filters.",
-                )}
+                {t("doctor.patients.empty.noFilterMatch")}
               </p>
             </div>
           ) : (
@@ -1146,7 +1135,9 @@ export default function DoctorPatientsPage() {
                 onUploadFile={() =>
                   document.getElementById("doctor-patient-file-upload")?.click()
                 }
-                onOpenFile={(fileId) => handlePatientFileOpen(patient.id, fileId)}
+                onOpenFile={(fileId) =>
+                  handlePatientFileOpen(patient.id, fileId)
+                }
                 onDownloadFile={(fileId) =>
                   handlePatientFileDownload(patient.id, fileId)
                 }
@@ -1158,40 +1149,25 @@ export default function DoctorPatientsPage() {
                   });
                 }}
                 onStartConsultation={() =>
-                  toast(
-                    tr(
-                      "تدفق بدء الاستشارة يرتبط بوحدة encounters/consultations التالية.",
-                      "The start-consultation flow is linked to the next encounters/consultations module.",
-                    ),
-                    {
-                      title: tr("مرتبط بمسار آخر", "Linked to another flow"),
-                      variant: "info",
-                      durationMs: 4200,
-                    },
-                  )
+                  toast(t("doctor.patients.consultationLinked"), {
+                    title: t("doctor.patients.linkedToFlow"),
+                    variant: "info",
+                    durationMs: 4200,
+                  })
                 }
                 onRequestAccess={async () => {
                   if (!doctorId) {
-                    toast(
-                      tr(
-                        "تعذر تحديد هوية الطبيب الحالية لإنشاء طلب الوصول.",
-                        "Could not determine the current doctor's identity to create the access request.",
-                      ),
-                      {
-                        title: tr("خطأ", "Error"),
-                        variant: "error",
-                      },
-                    );
+                    toast(t("doctor.patients.doctorIdentityError"), {
+                      title: t("doctor.patients.error"),
+                      variant: "error",
+                    });
                     return;
                   }
                   try {
                     const response = await requestAccessMutation.mutateAsync({
                       patientId: patient.id,
                       body: {
-                        reason: tr(
-                          "طلب وصول للملف الطبي الكامل لمتابعة الحالة الصحية",
-                          "Requesting access to the full medical file to follow up on the health condition",
-                        ),
+                        reason: t("doctor.patients.accessRequestReason"),
                       },
                     });
 
@@ -1208,16 +1184,16 @@ export default function DoctorPatientsPage() {
 
                     toast(
                       response.message ??
-                        tr("تم إرسال طلب الوصول بنجاح.", "The access request was sent successfully."),
+                        t("doctor.patients.accessRequestSent"),
                       {
-                        title: tr("نجاح", "Success"),
+                        title: t("doctor.patients.success"),
                         variant: "success",
                         durationMs: 4000,
                       },
                     );
                   } catch (error) {
                     toast(getDoctorAccessRequestErrorMessage(error), {
-                      title: tr("تعذّر إرسال طلب الوصول", "Could not send the access request"),
+                      title: t("doctor.patients.accessRequestFailed"),
                       variant: "error",
                     });
                   }
@@ -1229,10 +1205,10 @@ export default function DoctorPatientsPage() {
         {/* Modern pagination section - Admin style */}
         <section className="mt-5 flex flex-col gap-4 rounded-[12px] border border-[#EEF2F6] bg-white px-4 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)] sm:px-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="text-start font-cairo text-[12px] font-bold text-[#667085]">
-            {tr(
-              `الصفحة ${filters.page} من ${totalPages}`,
-              `Page ${filters.page} of ${totalPages}`,
-            )}
+            {t("doctor.patients.pagination.page", {
+              page: filters.page,
+              total: totalPages,
+            })}
           </div>
 
           <div className="flex flex-wrap items-center justify-end gap-3">
@@ -1253,7 +1229,7 @@ export default function DoctorPatientsPage() {
                   value: String(v),
                   label: String(v),
                 }))}
-                listboxAriaLabel={tr("عدد العناصر في الصفحة", "Items per page")}
+                listboxAriaLabel={t("doctor.patients.pagination.itemsPerPage")}
               />
             </div>
 
@@ -1268,7 +1244,7 @@ export default function DoctorPatientsPage() {
               disabled={filters.page <= 1 || !patientsListReady}
               className="inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {tr("السابق", "Previous")}
+              {t("doctor.patients.pagination.previous")}
             </button>
 
             <button
@@ -1282,7 +1258,7 @@ export default function DoctorPatientsPage() {
               disabled={filters.page >= totalPages || !patientsListReady}
               className="inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {tr("التالي", "Next")}
+              {t("doctor.patients.pagination.next")}
             </button>
           </div>
         </section>

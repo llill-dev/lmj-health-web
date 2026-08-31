@@ -15,7 +15,10 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
-import { ConfirmActionDialog, type ConfirmSuccessToast } from "@/components/admin/dialogs";
+import {
+  ConfirmActionDialog,
+  type ConfirmSuccessToast,
+} from "@/components/admin/dialogs";
 import MedicalContentViewDialog from "@/components/admin/medical-content/dialogs/MedicalContentViewDialog";
 import { ContentRejectDialog } from "@/components/admin/medical-content";
 import { useToast } from "@/components/ui/ToastProvider";
@@ -39,41 +42,65 @@ import {
   getReviewReadinessIssueCodes,
   getReviewReadinessIssueMessage,
 } from "@/components/admin/medical-content/dialogs/medicalContentDialogHelpers";
-import type { AdminContentDetailsItem, AdminContentDetailsResponse } from "@/lib/admin/types";
+import type {
+  AdminContentDetailsItem,
+  AdminContentDetailsResponse,
+} from "@/lib/admin/types";
 import { adminApi } from "@/lib/admin/client";
-import { formatContentDate, toDisplayText, type LangFilter } from "@/components/admin/medical-content/contentListUtils";
+import {
+  formatContentDate,
+  toDisplayText,
+  type LangFilter,
+} from "@/components/admin/medical-content/contentListUtils";
 import { useI18n } from "@/i18n/provider";
 
 function extractContentDetails(
   payload?: AdminContentDetailsResponse | null,
 ): AdminContentDetailsItem | null {
   if (!payload || typeof payload !== "object") return null;
-  return payload.item ?? payload.content ?? payload.contentItem ?? payload.data ?? null;
+  return (
+    payload.item ??
+    payload.content ??
+    payload.contentItem ??
+    payload.data ??
+    null
+  );
 }
 
 /** Same lifecycle palette as AdminContentListItem's statusBadgeClass, localized bilingually here. */
 function newsStatusBadge(
   status: AdminContentDetailsItem["status"] | undefined,
-  tr: (ar: string, en: string) => string,
+  t: (key: string) => string,
 ): { label: string; className: string } {
   if (status === "PUBLISHED") {
-    return { label: tr("منشور", "Published"), className: "border-[#BBF7D0] bg-[#DCFCE7] text-[#16A34A]" };
+    return {
+      label: t("admin.medicalNewsQueue.status.published"),
+      className: "border-[#BBF7D0] bg-[#DCFCE7] text-[#16A34A]",
+    };
   }
   if (status === "IN_REVIEW") {
-    return { label: tr("قيد المراجعة", "In review"), className: "border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]" };
+    return {
+      label: t("admin.medicalNewsQueue.status.inReview"),
+      className: "border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]",
+    };
   }
   if (status === "ARCHIVED") {
-    return { label: tr("مؤرشف", "Archived"), className: "border-[#BFDBFE] bg-[#EFF6FF] text-[#1D4ED8]" };
+    return {
+      label: t("admin.medicalNewsQueue.status.archived"),
+      className: "border-[#BFDBFE] bg-[#EFF6FF] text-[#1D4ED8]",
+    };
   }
-  return { label: tr("مسودة", "Draft"), className: "border-[#E5E7EB] bg-[#F3F4F6] text-[#344054]" };
+  return {
+    label: t("admin.medicalNewsQueue.status.draft"),
+    className: "border-[#E5E7EB] bg-[#F3F4F6] text-[#344054]",
+  };
 }
 
 export default function AdminMedicalNewsQueuePage() {
   const { toast } = useToast();
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
   const numberLocale = locale === "ar" ? "ar-SA" : "en-US";
-  const [langFilter, setLangFilter] = useState<LangFilter>("الكل");
+  const [langFilter, setLangFilter] = useState<LangFilter>("all");
   const [sourceUrl, setSourceUrl] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -82,9 +109,8 @@ export default function AdminMedicalNewsQueuePage() {
   const [viewOpen, setViewOpen] = useState(false);
   const [viewingContentId, setViewingContentId] = useState<string | null>(null);
   const [rejectOpen, setRejectOpen] = useState(false);
-  const [rejectTarget, setRejectTarget] = useState<AdminContentDetailsItem | null>(
-    null,
-  );
+  const [rejectTarget, setRejectTarget] =
+    useState<AdminContentDetailsItem | null>(null);
   const [actionConfirm, setActionConfirm] = useState<{
     kind: "submitReview" | "approve" | "publish" | "archive";
     id: string;
@@ -100,7 +126,7 @@ export default function AdminMedicalNewsQueuePage() {
   const pendingNewsQuery = useAdminPendingNews({
     page,
     limit: 12,
-    ...(langFilter !== "الكل" ? { language: langFilter as "ar" | "en" } : {}),
+    ...(langFilter !== "all" ? { language: langFilter as "ar" | "en" } : {}),
     ...(sourceUrl.trim() ? { sourceUrl: sourceUrl.trim() } : {}),
     ...(dateFrom ? { dateFrom } : {}),
     ...(dateTo ? { dateTo } : {}),
@@ -127,23 +153,39 @@ export default function AdminMedicalNewsQueuePage() {
     if (!actionConfirm) return undefined;
     const { kind } = actionConfirm;
     if (kind === "submitReview") {
-      return { title: tr("تم", "Done"), message: tr("أُرسل الخبر للمراجعة.", "News item sent for review."), variant: "success" };
+      return {
+        title: t("admin.medicalNewsQueue.toast.done"),
+        message: t("admin.medicalNewsQueue.toast.submitReview"),
+        variant: "success",
+      };
     }
     if (kind === "approve") {
-      return { title: tr("تمت الموافقة", "Approved"), message: tr("يمكنك نشر الخبر متى نضج.", "You can publish it once ready."), variant: "success" };
+      return {
+        title: t("admin.medicalNewsQueue.toast.approved"),
+        message: t("admin.medicalNewsQueue.toast.approveMessage"),
+        variant: "success",
+      };
     }
     if (kind === "publish") {
-      return { title: tr("تم النشر", "Published"), message: tr("صار الخبر متاحًا للمستفيدين.", "The news item is now published."), variant: "success" };
+      return {
+        title: t("admin.medicalNewsQueue.toast.published"),
+        message: t("admin.medicalNewsQueue.toast.publishMessage"),
+        variant: "success",
+      };
     }
-    return { title: tr("تمت الأرشفة", "Archived"), message: tr("أُرشف الخبر.", "The news item was archived."), variant: "success" };
-  }, [actionConfirm, tr]);
+    return {
+      title: t("admin.medicalNewsQueue.toast.archived"),
+      message: t("admin.medicalNewsQueue.toast.archiveMessage"),
+      variant: "success",
+    };
+  }, [actionConfirm, t]);
 
   async function confirmReject(reason: string) {
     if (!rejectTarget?._id) return;
     try {
       await rejectMutation.mutateAsync({ id: rejectTarget._id, reason });
-      toast(tr("تم رفض الخبر.", "News item was rejected."), {
-        title: tr("تم", "Done"),
+      toast(t("admin.medicalNewsQueue.toast.rejected"), {
+        title: t("admin.medicalNewsQueue.toast.done"),
         variant: "success",
       });
       setRejectOpen(false);
@@ -161,10 +203,11 @@ export default function AdminMedicalNewsQueuePage() {
   const canPrev = currentPage > 1;
   const canNext = currentPage < totalPages;
   const rangeStart = pendingTotal === 0 ? 0 : (currentPage - 1) * pageSize + 1;
-  const rangeEnd = pendingTotal === 0 ? 0 : Math.min(currentPage * pageSize, pendingTotal);
+  const rangeEnd =
+    pendingTotal === 0 ? 0 : Math.min(currentPage * pageSize, pendingTotal);
   const visibleItems = useMemo(() => pendingItems, [pendingItems]);
   const hasActiveFilters =
-    langFilter !== "الكل" ||
+    langFilter !== "all" ||
     sourceUrl.trim() !== "" ||
     dateFrom !== "" ||
     dateTo !== "";
@@ -173,16 +216,10 @@ export default function AdminMedicalNewsQueuePage() {
     const normalizedSourceUrl = ingestSourceUrl.trim();
     const normalizedTitle = ingestTitle.trim();
     if (!normalizedSourceUrl || !normalizedTitle) {
-      toast(
-        tr(
-          "أدخل رابط المصدر والعنوان على الأقل.",
-          "Enter at least the source URL and title.",
-        ),
-        {
-          title: tr("بيانات ناقصة", "Missing data"),
-          variant: "error",
-        },
-      );
+      toast(t("admin.medicalNewsQueue.ingest.enterSourceUrlTitle"), {
+        title: t("admin.medicalNewsQueue.ingest.missingData"),
+        variant: "error",
+      });
       return;
     }
 
@@ -198,16 +235,10 @@ export default function AdminMedicalNewsQueuePage() {
       ],
     });
 
-    toast(
-      tr(
-        "تمت إضافة الخبر إلى طابور الأخبار المعلّقة.",
-        "News item was added to the pending queue.",
-      ),
-      {
-        title: tr("تمت الإضافة", "Added"),
-        variant: "success",
-      },
-    );
+    toast(t("admin.medicalNewsQueue.ingest.success"), {
+      title: t("admin.medicalNewsQueue.ingest.added"),
+      variant: "success",
+    });
     setIngestOpen(false);
     setIngestSourceUrl("");
     setIngestTitle("");
@@ -225,22 +256,17 @@ export default function AdminMedicalNewsQueuePage() {
   return (
     <>
       <Helmet>
-        <title>
-          {tr("طابور الأخبار الطبية", "Medical news queue")} • LMJ Health
-        </title>
+        <title>{t("admin.medicalNewsQueue.page.title")} • LMJ Health</title>
       </Helmet>
 
       <div dir={dir} lang={locale}>
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title={tr("طابور الأخبار الطبية", "Medical news queue")}
-          subtitle={tr(
-            "إدارة الأخبار المعلّقة القادمة من ingest قبل إدخالها في دورة التحرير والمراجعة",
-            "Manage pending ingest news before editorial review",
-          )}
+          title={t("admin.medicalNewsQueue.page.title")}
+          subtitle={t("admin.medicalNewsQueue.disclaimer")}
           headerIcon={<Newspaper className="h-8 w-8 text-white" />}
-          actionLabel={tr("إضافة خبر إلى الطابور", "Add news to queue")}
+          actionLabel={t("admin.medicalNewsQueue.ingestDialog.sendToQueue")}
           onActionClick={() => setIngestOpen(true)}
           kpiColumns={3}
           kpis={[
@@ -250,29 +276,28 @@ export default function AdminMedicalNewsQueuePage() {
               value: pendingNewsQuery.isAwaitingData
                 ? "…"
                 : pendingTotal.toLocaleString(numberLocale),
-              label: tr("إجمالي المعلّق", "Total pending"),
+              label: t("admin.medicalNewsQueue.kpi.pending"),
             },
             {
               key: "visible",
               icon: <Eye className="h-5 w-5 shrink-0" />,
-              value: pendingNewsQuery.isAwaitingData ? "…" : visibleItems.length,
-              label: tr("المعروض الآن", "Currently shown"),
+              value: pendingNewsQuery.isAwaitingData
+                ? "…"
+                : visibleItems.length,
+              label: t("admin.medicalNewsQueue.kpi.visible"),
             },
             {
               key: "language",
               icon: <LinkIcon className="h-5 w-5 shrink-0" />,
-              value: langFilter === "الكل" ? "AR/EN" : langFilter.toUpperCase(),
-              label: tr("نطاق اللغة", "Language scope"),
+              value: langFilter === "all" ? "AR/EN" : langFilter.toUpperCase(),
+              label: t("admin.medicalNewsQueue.kpi.languageScope"),
             },
           ]}
         />
 
         <section className="mt-4 rounded-[12px] border border-[#D6EEEC] bg-[#F3FBFA] px-6 py-4 shadow-[0_10px_24px_rgba(20,130,131,0.08)]">
           <div className="font-cairo text-[13px] font-extrabold text-[#0F766E]">
-            {tr(
-              "هذه الشاشة تمثّل مرحلة ما قبل التحرير. العناصر هنا ما تزال في طابور الانتظار قبل دخولها دورة المراجعة التحريرية والنشر، كما أن زر الإضافة يرسل الخبر إلى الطابور فقط ولا ينشره مباشرة.",
-              "This screen represents the pre-editorial stage. Items here are still waiting in the queue before entering editorial review and publishing, and the add action sends news to the queue only rather than publishing it directly.",
-            )}
+            {t("admin.medicalNewsQueue.disclaimer")}
           </div>
         </section>
 
@@ -280,13 +305,10 @@ export default function AdminMedicalNewsQueuePage() {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <div className="font-cairo text-[14px] font-extrabold text-[#111827]">
-                {tr("فلاتر الطابور", "Queue filters")}
+                {t("admin.medicalNewsQueue.filters.title")}
               </div>
               <div className="mt-1 font-cairo text-[12px] font-semibold text-[#667085]">
-                {tr(
-                  "ابحث حسب رابط المصدر أو الفترة الزمنية أو اللغة.",
-                  "Filter by source URL, date range, or language.",
-                )}
+                {t("admin.medicalNewsQueue.filters.description")}
               </div>
             </div>
 
@@ -299,7 +321,7 @@ export default function AdminMedicalNewsQueuePage() {
               <RefreshCw
                 className={`h-4 w-4 ${pendingNewsQuery.isFetching ? "animate-spin" : ""}`}
               />
-              {tr("تحديث", "Refresh")}
+              {t("admin.medicalNewsQueue.refresh")}
             </button>
           </div>
 
@@ -311,9 +333,9 @@ export default function AdminMedicalNewsQueuePage() {
               <input
                 value={sourceUrl}
                 onChange={(e) => {
-                    setSourceUrl(e.target.value);
-                    setPage(1);
-                  }}
+                  setSourceUrl(e.target.value);
+                  setPage(1);
+                }}
                 placeholder="https://example.com/news/..."
                 dir="ltr"
                 className="h-[42px] w-full rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-semibold text-[#111827] placeholder:text-[#98A2B3]"
@@ -321,29 +343,29 @@ export default function AdminMedicalNewsQueuePage() {
             </label>
             <label className="flex min-w-[160px] flex-1 flex-col gap-1 text-start">
               <span className="font-cairo text-[11px] font-extrabold text-[#667085]">
-                {tr("من تاريخ", "From date")}
+                {t("admin.medicalNewsQueue.fromDate")}
               </span>
               <input
                 type="date"
                 value={dateFrom}
                 onChange={(e) => {
-                    setDateFrom(e.target.value);
-                    setPage(1);
-                  }}
+                  setDateFrom(e.target.value);
+                  setPage(1);
+                }}
                 className="h-[42px] w-full rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-semibold text-[#111827]"
               />
             </label>
             <label className="flex min-w-[160px] flex-1 flex-col gap-1 text-start">
               <span className="font-cairo text-[11px] font-extrabold text-[#667085]">
-                {tr("إلى تاريخ", "To date")}
+                {t("admin.medicalNewsQueue.toDate")}
               </span>
               <input
                 type="date"
                 value={dateTo}
                 onChange={(e) => {
-                    setDateTo(e.target.value);
-                    setPage(1);
-                  }}
+                  setDateTo(e.target.value);
+                  setPage(1);
+                }}
                 className="h-[42px] w-full rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-semibold text-[#111827]"
               />
             </label>
@@ -362,25 +384,19 @@ export default function AdminMedicalNewsQueuePage() {
         {pendingNewsQuery.isRefetching && !pendingNewsQuery.isAwaitingData ? (
           <div className="mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]">
             <RefreshCw className="h-4 w-4 animate-spin" />
-            {tr("جارٍ تحديث طابور الأخبار...", "Refreshing news queue...")}
+            {t("admin.medicalNewsQueue.refreshingQueue")}
           </div>
         ) : null}
 
         <section className="mt-5 space-y-3">
           {pendingNewsQuery.isAwaitingData ? (
             <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-8 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-              {tr(
-                "جاري تحميل الأخبار المعلّقة...",
-                "Loading pending news...",
-              )}
+              {t("admin.medicalNewsQueue.loading")}
             </div>
           ) : pendingNewsQuery.isError ? (
             <div className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-8 text-center">
               <div className="font-cairo text-[13px] font-semibold text-[#B42318]">
-                {tr(
-                  "تعذر تحميل طابور الأخبار.",
-                  "Failed to load news queue.",
-                )}
+                {t("admin.medicalNewsQueue.loadError")}
               </div>
               <button
                 type="button"
@@ -392,28 +408,25 @@ export default function AdminMedicalNewsQueuePage() {
                   className={`h-4 w-4 ${pendingNewsQuery.isRefetching ? "animate-spin" : ""}`}
                 />
                 {pendingNewsQuery.isRefetching
-                  ? tr("جارٍ إعادة المحاولة...", "Retrying...")
-                  : tr("إعادة المحاولة", "Retry")}
+                  ? t("admin.medicalNewsQueue.retrying")
+                  : t("admin.medicalNewsQueue.retry")}
               </button>
             </div>
           ) : visibleItems.length === 0 ? (
             <div className="rounded-[12px] border border-dashed border-[#D0D5DD] bg-white px-6 py-8 text-center font-cairo text-[13px] font-semibold text-[#667085]">
               {hasActiveFilters
-                ? tr(
-                    "لا توجد عناصر مطابقة للفلاتر الحالية في طابور الأخبار.",
-                    "No news items match the current filters.",
-                  )
-                : tr(
-                    "لا توجد عناصر معلّقة حالياً في طابور الأخبار.",
-                    "There are no pending news items right now.",
-                  )}
+                ? t("admin.medicalNewsQueue.noMatches")
+                : t("admin.medicalNewsQueue.noPending")}
             </div>
           ) : (
             visibleItems.map((item) => {
-              const statusBadge = newsStatusBadge(item.status, tr);
+              const statusBadge = newsStatusBadge(item.status, t);
               return (
                 <article
-                  key={item._id ?? `${item.slug ?? toDisplayText(item.title) ?? "pending"}-${item.updatedAt ?? ""}`}
+                  key={
+                    item._id ??
+                    `${item.slug ?? toDisplayText(item.title) ?? "pending"}-${item.updatedAt ?? ""}`
+                  }
                   className="rounded-[14px] border border-[#EAECF0] bg-white p-4 shadow-[0_1px_2px_rgba(16,24,40,0.04)] transition hover:border-[#D0D5DD] hover:shadow-[0_6px_16px_rgba(16,24,40,0.08)] sm:p-5"
                 >
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -422,7 +435,11 @@ export default function AdminMedicalNewsQueuePage() {
                         <div className="hidden shrink-0 overflow-hidden rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] sm:block sm:w-[140px] lg:w-[160px]">
                           <img
                             src={item.coverImage}
-                            alt={toDisplayText(item.title) || item.originalTitle || "news cover"}
+                            alt={
+                              toDisplayText(item.title) ||
+                              item.originalTitle ||
+                              "news cover"
+                            }
                             className="h-[100px] w-full object-cover"
                             loading="lazy"
                           />
@@ -444,16 +461,17 @@ export default function AdminMedicalNewsQueuePage() {
                         <div className="mt-2.5 truncate font-cairo text-[15px] font-black text-[#101828]">
                           {toDisplayText(item.title) || "—"}
                         </div>
-                        {item.originalTitle && item.originalTitle !== toDisplayText(item.title) ? (
+                        {item.originalTitle &&
+                        item.originalTitle !== toDisplayText(item.title) ? (
                           <div className="mt-1 truncate font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                            {tr("العنوان الأصلي:", "Original title:")}{" "}
+                            {t("admin.medicalNewsQueue.originalTitle")}{" "}
                             {item.originalTitle}
                           </div>
                         ) : null}
                         <div className="mt-1.5 line-clamp-2 font-cairo text-[12px] font-semibold leading-6 text-[#667085]">
                           {item.summary ??
                             item.aiSummary ??
-                            tr("لا يوجد ملخص.", "No summary.")}
+                            t("admin.medicalNewsQueue.noSummary")}
                         </div>
 
                         <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 border-t border-dashed border-[#EEF2F6] pt-3 font-cairo text-[11.5px] font-bold text-[#667085]">
@@ -465,18 +483,23 @@ export default function AdminMedicalNewsQueuePage() {
                           ) : null}
                           <span className="inline-flex items-center gap-1.5">
                             <RefreshCw className="h-3.5 w-3.5 shrink-0 text-[#98A2B3]" />
-                            {tr("آخر تحديث:", "Last updated:")}{" "}
-                            {formatContentDate(item.updatedAt ?? item.createdAt, locale)}
+                            {t("admin.medicalNewsQueue.lastUpdated")}{" "}
+                            {formatContentDate(
+                              item.updatedAt ?? item.createdAt,
+                              locale,
+                            )}
                           </span>
                           {item.publishedAt ? (
                             <span className="inline-flex items-center gap-1.5">
                               <ClipboardCheck className="h-3.5 w-3.5 shrink-0 text-[#98A2B3]" />
-                              {tr("نُشر أصلًا:", "Originally published:")}{" "}
+                              {t("admin.medicalNewsQueue.originallyPublished")}{" "}
                               {formatContentDate(item.publishedAt, locale)}
                             </span>
                           ) : null}
                           {item.pageVersion ? (
-                            <span className="text-[#98A2B3]">v{item.pageVersion}</span>
+                            <span className="text-[#98A2B3]">
+                              v{item.pageVersion}
+                            </span>
                           ) : null}
                         </div>
 
@@ -511,7 +534,7 @@ export default function AdminMedicalNewsQueuePage() {
                           className="inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] px-3 font-cairo text-[12px] font-extrabold text-[#475467] transition hover:bg-[#F9FAFB] disabled:opacity-50"
                         >
                           <ClipboardCheck className="h-4 w-4" />
-                          {tr("إرسال للمراجعة", "Send for review")}
+                          {t("admin.medicalNewsQueue.sendForReview")}
                         </button>
                       ) : null}
                       {item.status === "IN_REVIEW" && item._id ? (
@@ -529,7 +552,7 @@ export default function AdminMedicalNewsQueuePage() {
                             className="inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#BBF7D0] bg-[#F6FEF9] px-3 font-cairo text-[12px] font-extrabold text-[#16A34A] transition hover:bg-[#ECFDF3] disabled:opacity-50"
                           >
                             <Check className="h-4 w-4" />
-                            {tr("موافقة", "Approve")}
+                            {t("admin.medicalNewsQueue.approve")}
                           </button>
                           <button
                             type="button"
@@ -541,7 +564,7 @@ export default function AdminMedicalNewsQueuePage() {
                             className="inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#FECACA] bg-[#FFFBFA] px-3 font-cairo text-[12px] font-extrabold text-[#EF4444] transition hover:bg-[#FEF2F2] disabled:opacity-50"
                           >
                             <X className="h-4 w-4" />
-                            {tr("رفض", "Reject")}
+                            {t("admin.medicalNewsQueue.reject")}
                           </button>
                           <button
                             type="button"
@@ -556,7 +579,7 @@ export default function AdminMedicalNewsQueuePage() {
                             className="inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#67E8F9] bg-[#F0FDFF] px-3 font-cairo text-[12px] font-extrabold text-[#0891B2] transition hover:bg-[#ECFEFF] disabled:opacity-50"
                           >
                             <ShieldCheck className="h-4 w-4" />
-                            {tr("نشر", "Publish")}
+                            {t("admin.medicalNewsQueue.publish")}
                           </button>
                         </>
                       ) : null}
@@ -574,7 +597,7 @@ export default function AdminMedicalNewsQueuePage() {
                           className="inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#BFDBFE] bg-[#F5FAFF] px-3 font-cairo text-[12px] font-extrabold text-[#1D4ED8] transition hover:bg-[#EFF6FF] disabled:opacity-50"
                         >
                           <Archive className="h-4 w-4" />
-                          {tr("أرشفة", "Archive")}
+                          {t("admin.medicalNewsQueue.archive")}
                         </button>
                       ) : null}
 
@@ -585,8 +608,8 @@ export default function AdminMedicalNewsQueuePage() {
                           type="button"
                           onClick={() => openPreview(item)}
                           className="flex h-[32px] w-[32px] items-center justify-center rounded-[10px] text-[#1D4ED8] transition hover:bg-[#EFF6FF]"
-                          aria-label={tr("معاينة", "Preview")}
-                          title={tr("معاينة", "Preview")}
+                          aria-label={t("admin.medicalNewsQueue.preview")}
+                          title={t("admin.medicalNewsQueue.preview")}
                         >
                           <Eye className="h-4 w-4" />
                         </button>
@@ -595,8 +618,8 @@ export default function AdminMedicalNewsQueuePage() {
                         type="button"
                         onClick={() => setIngestOpen(true)}
                         className="flex h-[32px] w-[32px] items-center justify-center rounded-[10px] text-[#15803D] transition hover:bg-[#ECFDF3]"
-                        aria-label={tr("ingest جديد", "New ingest")}
-                        title={tr("ingest جديد", "New ingest")}
+                        aria-label={t("admin.medicalNewsQueue.newIngest")}
+                        title={t("admin.medicalNewsQueue.newIngest")}
                       >
                         <Plus className="h-4 w-4" />
                       </button>
@@ -608,16 +631,21 @@ export default function AdminMedicalNewsQueuePage() {
           )}
         </section>
 
-        {!pendingNewsQuery.isAwaitingData && !pendingNewsQuery.isError && pendingTotal > 0 ? (
+        {!pendingNewsQuery.isAwaitingData &&
+        !pendingNewsQuery.isError &&
+        pendingTotal > 0 ? (
           <section className="mt-4">
             <div className="flex flex-col gap-3 rounded-[12px] border border-[#E4E7EC] bg-white px-4 py-3 md:flex-row md:items-center md:justify-between">
               <div className="text-start font-cairo text-[12px] font-semibold text-[#667085]">
-                {tr("عرض", "Showing")}{" "}
+                {t("admin.medicalNewsQueue.pagination.showing")}{" "}
                 {rangeStart.toLocaleString(numberLocale)}–
-                {rangeEnd.toLocaleString(numberLocale)} {tr("من", "of")}{" "}
-                {pendingTotal.toLocaleString(numberLocale)} {tr("خبر", "news")}{" "}
-                · {tr("صفحة", "Page")} {currentPage.toLocaleString(numberLocale)}{" "}
-                / {totalPages.toLocaleString(numberLocale)}
+                {rangeEnd.toLocaleString(numberLocale)}{" "}
+                {t("admin.medicalNewsQueue.pagination.of")}{" "}
+                {pendingTotal.toLocaleString(numberLocale)}{" "}
+                {t("admin.medicalNewsQueue.pagination.news")} ·{" "}
+                {t("admin.medicalNewsQueue.pagination.page")}{" "}
+                {currentPage.toLocaleString(numberLocale)} /{" "}
+                {totalPages.toLocaleString(numberLocale)}
               </div>
               <div className="flex items-center justify-end gap-2">
                 <button
@@ -629,17 +657,18 @@ export default function AdminMedicalNewsQueuePage() {
                   className="inline-flex h-[34px] items-center gap-1 rounded-[8px] border border-[#EAECF0] bg-white px-3 font-cairo text-[12px] font-bold text-[#344054] disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <ChevronRight className="h-4 w-4" />
-                  {tr("السابق", "Previous")}
+                  {t("admin.medicalNewsQueue.pagination.previous")}
                 </button>
                 <button
                   type="button"
                   onClick={() => {
-                    if (canNext) setPage((prev) => Math.min(totalPages, prev + 1));
+                    if (canNext)
+                      setPage((prev) => Math.min(totalPages, prev + 1));
                   }}
                   disabled={!canNext || pendingNewsQuery.isFetching}
                   className="inline-flex h-[34px] items-center gap-1 rounded-[8px] border border-[#EAECF0] bg-white px-3 font-cairo text-[12px] font-bold text-[#344054] disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  {tr("التالي", "Next")}
+                  {t("admin.medicalNewsQueue.pagination.next")}
                   <ChevronLeft className="h-4 w-4" />
                 </button>
               </div>
@@ -663,7 +692,7 @@ export default function AdminMedicalNewsQueuePage() {
             if (!ingestNewsMutation.isPending) setIngestOpen(open);
           }}
           variant="primary"
-          title={tr("إضافة خبر إلى طابور ingest", "Add news to ingest queue")}
+          title={t("admin.medicalNewsQueue.ingestDialog.title")}
           description={
             <div className="grid grid-cols-1 gap-3 text-start">
               <label className="flex flex-col gap-1">
@@ -680,31 +709,35 @@ export default function AdminMedicalNewsQueuePage() {
               </label>
               <label className="flex flex-col gap-1">
                 <span className="font-cairo text-[11px] font-extrabold text-[#667085]">
-                  {tr("العنوان", "Title")}
+                  {t("admin.medicalNewsQueue.ingestDialog.titleLabel")}
                 </span>
                 <input
                   value={ingestTitle}
                   onChange={(e) => setIngestTitle(e.target.value)}
-                  placeholder={tr("عنوان الخبر", "News title")}
+                  placeholder={t(
+                    "admin.medicalNewsQueue.ingestDialog.newsTitle",
+                  )}
                   className="h-[42px] rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-semibold text-[#111827] placeholder:text-[#98A2B3]"
                 />
               </label>
               <label className="flex flex-col gap-1">
                 <span className="font-cairo text-[11px] font-extrabold text-[#667085]">
-                  {tr("الملخص", "Summary")}
+                  {t("admin.medicalNewsQueue.ingestDialog.summary")}
                 </span>
                 <textarea
                   value={ingestSummary}
                   onChange={(e) => setIngestSummary(e.target.value)}
                   rows={3}
-                  placeholder={tr("ملخص مختصر اختياري", "Optional short summary")}
+                  placeholder={t(
+                    "admin.medicalNewsQueue.ingestDialog.optionalSummary",
+                  )}
                   className="rounded-[10px] border border-[#E5E7EB] bg-white px-3 py-2 font-cairo text-[12px] font-semibold text-[#111827] placeholder:text-[#98A2B3]"
                 />
               </label>
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <label className="flex flex-col gap-1">
                   <span className="font-cairo text-[11px] font-extrabold text-[#667085]">
-                    {tr("اللغة", "Language")}
+                    {t("admin.medicalNewsQueue.ingestDialog.language")}
                   </span>
                   <select
                     value={ingestLanguage}
@@ -719,7 +752,7 @@ export default function AdminMedicalNewsQueuePage() {
                 </label>
                 <label className="flex flex-col gap-1">
                   <span className="font-cairo text-[11px] font-extrabold text-[#667085]">
-                    {tr("تاريخ النشر", "Publish date")}
+                    {t("admin.medicalNewsQueue.ingestDialog.publishDate")}
                   </span>
                   <input
                     type="datetime-local"
@@ -733,8 +766,8 @@ export default function AdminMedicalNewsQueuePage() {
           }
           confirmLabel={
             ingestNewsMutation.isPending
-              ? tr("جارٍ الإدخال...", "Submitting...")
-              : tr("إرسال إلى الطابور", "Send to queue")
+              ? t("admin.medicalNewsQueue.ingestDialog.submitting")
+              : t("admin.medicalNewsQueue.ingestDialog.sendToQueue")
           }
           confirmDisabled={ingestNewsMutation.isPending}
           onConfirm={submitNewsIngest}
@@ -745,17 +778,19 @@ export default function AdminMedicalNewsQueuePage() {
           onOpenChange={(open) => {
             if (!open) setActionConfirm(null);
           }}
-          variant={actionConfirm?.kind === "archive" ? "destructive" : "primary"}
+          variant={
+            actionConfirm?.kind === "archive" ? "destructive" : "primary"
+          }
           title={
             !actionConfirm
               ? "—"
               : actionConfirm.kind === "submitReview"
-                ? tr("تأكيد إرسال الخبر للمراجعة", "Confirm sending news for review")
+                ? t("admin.medicalNewsQueue.confirmDialog.submitReview")
                 : actionConfirm.kind === "approve"
-                  ? tr("تأكيد موافقة الخبر", "Confirm approving news")
+                  ? t("admin.medicalNewsQueue.confirmDialog.approve")
                   : actionConfirm.kind === "publish"
-                    ? tr("تأكيد نشر الخبر", "Confirm publishing news")
-                    : tr("تأكيد أرشفة الخبر", "Confirm archiving news")
+                    ? t("admin.medicalNewsQueue.confirmDialog.publish")
+                    : t("admin.medicalNewsQueue.confirmDialog.archive")
           }
           icon={
             actionConfirm ? (
@@ -766,14 +801,18 @@ export default function AdminMedicalNewsQueuePage() {
               ) : actionConfirm.kind === "approve" ? (
                 <Check className="h-6 w-6" strokeWidth={2} aria-hidden />
               ) : (
-                <ClipboardCheck className="h-6 w-6" strokeWidth={2} aria-hidden />
+                <ClipboardCheck
+                  className="h-6 w-6"
+                  strokeWidth={2}
+                  aria-hidden
+                />
               )
             ) : undefined
           }
           description={
             actionConfirm ? (
               <>
-                {tr("العنوان:", "Title:")} «
+                {t("admin.medicalNewsQueue.confirmDialog.title")} «
                 <span className="font-extrabold text-[#344054]">
                   {actionConfirm.title}
                 </span>
@@ -787,19 +826,21 @@ export default function AdminMedicalNewsQueuePage() {
             !actionConfirm
               ? "—"
               : actionConfirm.kind === "submitReview"
-                ? tr("إرسال", "Send")
+                ? t("admin.medicalNewsQueue.confirmDialog.send")
                 : actionConfirm.kind === "approve"
-                  ? tr("موافقة", "Approve")
+                  ? t("admin.medicalNewsQueue.confirmDialog.approveButton")
                   : actionConfirm.kind === "publish"
-                    ? tr("نشر", "Publish")
-                    : tr("أرشفة", "Archive")
+                    ? t("admin.medicalNewsQueue.confirmDialog.publishButton")
+                    : t("admin.medicalNewsQueue.confirmDialog.archiveButton")
           }
           confirmDisabled={actionBusy}
           onConfirm={async () => {
             if (!actionConfirm) return;
             const { kind, id } = actionConfirm;
             if (kind === "submitReview") {
-              const details = extractContentDetails(await adminApi.content.getById(id));
+              const details = extractContentDetails(
+                await adminApi.content.getById(id),
+              );
               const issueCodes = getReviewReadinessIssueCodes(details);
               if (issueCodes.length > 0) {
                 const language = locale === "en" ? "en" : "ar";
@@ -808,12 +849,12 @@ export default function AdminMedicalNewsQueuePage() {
                 );
                 setActionConfirm(null);
                 toast(
-                  tr(
-                    `تعذّر إرسال الخبر للمراجعة قبل استكمال:\n- ${blockingMessages.join("\n- ")}`,
-                    `Cannot send for review before completing:\n- ${blockingMessages.join("\n- ")}`,
+                  t("admin.medicalNewsQueue.reviewReadinessError").replace(
+                    "{messages}",
+                    blockingMessages.join("\n- "),
                   ),
                   {
-                    title: tr("متطلبات الحوكمة غير مكتملة", "Governance requirements missing"),
+                    title: t("admin.medicalNewsQueue.governanceMissing"),
                     variant: "error",
                   },
                 );
@@ -822,33 +863,38 @@ export default function AdminMedicalNewsQueuePage() {
               }
               await submitReviewMutation.mutateAsync({
                 id,
-                reviewNotes: tr(
-                  "تم إرسال الخبر للمراجعة من طابور الأخبار.",
-                  "News item sent for review from the news queue.",
-                ),
+                reviewNotes: t("admin.medicalNewsQueue.sentFromQueue"),
               });
             } else if (kind === "approve" || kind === "publish") {
-              const details = extractContentDetails(await adminApi.content.getById(id));
-              const snapshot = buildReleaseAcceptanceFromDetails(details, "admin");
+              const details = extractContentDetails(
+                await adminApi.content.getById(id),
+              );
+              const snapshot = buildReleaseAcceptanceFromDetails(
+                details,
+                "admin",
+              );
               if (!snapshot || !isApprovePublishPathReady(snapshot)) {
-                const incomplete = snapshot ? getIncompleteAcceptanceChecks(snapshot) : [];
+                const incomplete = snapshot
+                  ? getIncompleteAcceptanceChecks(snapshot)
+                  : [];
                 const language = locale === "en" ? "en" : "ar";
                 const blockingMessages = incomplete.length
-                  ? incomplete.map((item) => localizeAcceptanceCopy(item.label, language))
-                  : [
-                      tr(
-                        "تعذّر التحقق من جاهزية الإطلاق لهذا الخبر.",
-                        "Could not verify release acceptance readiness for this news item.",
-                      ),
-                    ];
+                  ? incomplete.map((item) =>
+                      localizeAcceptanceCopy(item.label, language),
+                    )
+                  : [t("admin.medicalNewsQueue.releaseAcceptanceError")];
                 setActionConfirm(null);
                 toast(
-                  tr(
-                    `تعذّر ${kind === "approve" ? "الموافقة" : "النشر"} قبل استكمال جاهزية الإطلاق:\n- ${blockingMessages.join("\n- ")}`,
-                    `Cannot ${kind === "approve" ? "approve" : "publish"} before release acceptance is ready:\n- ${blockingMessages.join("\n- ")}`,
-                  ),
+                  t("admin.medicalNewsQueue.approvePublishError")
+                    .replace(
+                      "{action}",
+                      kind === "approve"
+                        ? t("admin.medicalNewsQueue.approve")
+                        : t("admin.medicalNewsQueue.publish"),
+                    )
+                    .replace("{messages}", blockingMessages.join("\n- ")),
                   {
-                    title: tr("بوابة الاعتماد غير مكتملة", "Approval gate incomplete"),
+                    title: t("admin.medicalNewsQueue.approvalGateIncomplete"),
                     variant: "error",
                   },
                 );

@@ -1,35 +1,31 @@
-import { useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useState } from "react";
+import { Helmet } from "react-helmet-async";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   EncounterSummaryActions,
   EncounterSummaryBody,
-  EncounterSummaryFinishDialog,
   EncounterSummaryHeader,
-} from '@/components/doctor/encounters/summary';
-import { EncounterDocumentsPanel } from '@/components/doctor/encounters/summary/encounter-documents-panel';
-import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
-import { DoctorSummaryPageSkeleton } from '@/components/doctor/shared/skeletons';
-import { useToast } from '@/components/ui/ToastProvider';
-import { useDoctorEncounterSummary } from '@/hooks/doctor';
-import { readAuthUser } from '@/lib/cookies';
-import { getUserFacingRequestErrorMessage } from '@/lib/api';
+} from "@/components/doctor/encounters/summary";
+import { EncounterDocumentsPanel } from "@/components/doctor/encounters/summary/encounter-documents-panel";
+import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
+import { DoctorSummaryPageSkeleton } from "@/components/doctor/shared/skeletons";
+import { useToast } from "@/components/ui/ToastProvider";
+import { useDoctorEncounterSummary } from "@/hooks/doctor";
+import { readAuthUser } from "@/lib/cookies";
+import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import {
   generateDoctorDocumentPdf,
   openPdfBlobInNewTab,
-} from '@/lib/doctor/orders/doctorOrderDocuments';
-import { useRetryAction } from '@/lib/query/useRetryAction';
-import { useI18n } from '@/i18n/provider';
+} from "@/lib/doctor/orders/doctorOrderDocuments";
+import { useRetryAction } from "@/lib/query/useRetryAction";
+import { useI18n } from "@/i18n/provider";
 
 export default function DoctorEncounterSummaryPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const { t, locale, dir } = useI18n();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { patientId = '', encounterId = '' } = useParams();
-  const doctorId = readAuthUser()?.actorIds?.doctorId ?? '';
-  const [finishConfirmOpen, setFinishConfirmOpen] = useState(false);
-  const [finishing, setFinishing] = useState(false);
+  const { patientId = "", encounterId = "" } = useParams();
+  const doctorId = readAuthUser()?.actorIds?.doctorId ?? "";
   const [exportingPdf, setExportingPdf] = useState(false);
 
   const {
@@ -49,13 +45,10 @@ export default function DoctorEncounterSummaryPage() {
 
   const handleExportPdf = async () => {
     if (!exportPdfSource) {
-      toast(
-        tr(
-          'لا توجد وصفة أو طلب معتمد لتصديره. اعتماد الوصفة أو الطلبات يفعّل التصدير.',
-          'There is no finalized prescription or order to export. Finalizing the prescription or orders enables export.',
-        ),
-        { title: tr('تصدير PDF', 'Export PDF'), variant: 'info' },
-      );
+      toast(t("doctor.encounter.summary.noExportSource"), {
+        title: t("doctor.encounter.summary.exportPdf"),
+        variant: "info",
+      });
       return;
     }
     setExportingPdf(true);
@@ -67,34 +60,24 @@ export default function DoctorEncounterSummaryPage() {
       );
     } catch (requestError) {
       toast(getUserFacingRequestErrorMessage(requestError), {
-        title: tr('تعذّر تصدير PDF', 'Could not export PDF'),
-        variant: 'error',
+        title: t("doctor.encounter.summary.exportFailed"),
+        variant: "error",
       });
     } finally {
       setExportingPdf(false);
     }
   };
 
-  const handleFinishConfirm = async () => {
-    setFinishing(true);
-    try {
-      toast(tr('تم حفظ مراجعة ملخص الزيارة.', 'The encounter summary review was saved.'), {
-        title: tr('إنهاء الزيارة', 'Finish encounter'),
-        variant: 'success',
-      });
-      setFinishConfirmOpen(false);
-      navigate('/doctor/encounters', { replace: true });
-    } finally {
-      setFinishing(false);
-    }
+  const handleBackToEncounters = () => {
+    navigate("/doctor/encounters", { replace: true });
   };
 
   if (!patientId || !encounterId) {
     return (
       <DoctorListErrorState
-        title={tr('رابط غير صالح', 'Invalid link')}
-        brief={tr('معرّف المريض أو الزيارة مفقود.', 'The patient or encounter ID is missing.')}
-        onRetry={() => navigate('/doctor/encounters')}
+        title={t("doctor.encounter.summary.invalidLink")}
+        brief={t("doctor.encounter.summary.missingId")}
+        onRetry={() => navigate("/doctor/encounters")}
       />
     );
   }
@@ -102,7 +85,7 @@ export default function DoctorEncounterSummaryPage() {
   return (
     <>
       <Helmet>
-        <title>{tr('ملخص الزيارة الطبية', 'Encounter summary')} • LMJ Health</title>
+        <title>{t("doctor.encounter.summary.pageTitle")} • LMJ Health</title>
       </Helmet>
 
       <div dir={dir} lang={locale} className="w-full pb-8 sm:pb-10">
@@ -112,7 +95,7 @@ export default function DoctorEncounterSummaryPage() {
           <DoctorSummaryPageSkeleton />
         ) : isError || !summary || !encounter ? (
           <DoctorListErrorState
-            title={tr('تعذّر تحميل ملخص الزيارة', 'Failed to load the encounter summary')}
+            title={t("doctor.encounter.summary.loadFailed")}
             brief={getUserFacingRequestErrorMessage(error)}
             retrying={retryingSummary}
             onRetry={() => void retrySummary()}
@@ -121,23 +104,18 @@ export default function DoctorEncounterSummaryPage() {
           <>
             {profileDenied ? (
               <div className="mb-4 rounded-[12px] border border-[#FED7AA] bg-[#FFF7ED] px-4 py-3 text-start font-cairo text-[12px] font-semibold text-[#B45309]">
-                {tr(
-                  'بعض بيانات الملف الكامل غير متاحة؛ يُعرض الملخص من بيانات الزيارة والملف العام.',
-                  'Some full-profile data is not available; the summary is shown from encounter and public profile data.',
-                )}
+                {t("doctor.encounter.summary.profileDenied")}
               </div>
             ) : null}
 
-            {encounter.status !== 'closed' ? (
+            {encounter.status !== "closed" ? (
               <div className="mb-4 rounded-[12px] border border-[#BFDBFE] bg-[#EFF6FF] px-4 py-3 text-start font-cairo text-[12px] font-semibold text-[#1D4ED8]">
-                {tr(
-                  'هذه الزيارة ما زالت مفتوحة. الملخص يعرض التوثيق الحالي قبل الإغلاق النهائي.',
-                  'This encounter is still open. The summary shows the current documentation before final closure.',
-                )}
+                {t("doctor.encounter.summary.encounterOpen")}
               </div>
             ) : summary.closedAtLabel ? (
               <div className="mb-4 rounded-[12px] border border-[#BFEDEC] bg-[#E6F4F3] px-4 py-3 text-start font-cairo text-[12px] font-semibold text-primary">
-                {tr('تم إغلاق الزيارة:', 'Encounter closed:')} {summary.closedAtLabel}
+                {t("doctor.encounter.summary.encounterClosed")}{" "}
+                {summary.closedAtLabel}
               </div>
             ) : null}
 
@@ -152,18 +130,8 @@ export default function DoctorEncounterSummaryPage() {
             </div>
             <EncounterSummaryActions
               onExportPdf={() => void handleExportPdf()}
-              onFinish={() => setFinishConfirmOpen(true)}
-              finishing={finishing}
+              onBack={handleBackToEncounters}
               exportingPdf={exportingPdf}
-            />
-
-            <EncounterSummaryFinishDialog
-              open={finishConfirmOpen}
-              onOpenChange={setFinishConfirmOpen}
-              summary={summary}
-              encounterStatus={encounter.status}
-              confirmDisabled={finishing}
-              onConfirm={handleFinishConfirm}
             />
           </>
         )}

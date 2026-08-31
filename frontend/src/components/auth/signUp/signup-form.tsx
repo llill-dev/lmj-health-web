@@ -136,7 +136,7 @@ export default function SignUpForm({
 
   /** يُستدعى بعد الموافقة على المستندات القانونية (الخطوة ٥ فقط). */
   const submitSignupAfterLegalConsent = () => {
-    const parsed = signUpSchema.safeParse(draft);
+    const parsed = signUpSchema(locale).safeParse(draft);
     if (!parsed.success) {
       setStep(1);
       return;

@@ -96,58 +96,39 @@ function extractContentDetails(
 }
 
 function getSubmitReviewBlockingMessages(
-  tr: (ar: string, en: string) => string,
+  t: (key: string) => string,
   issueCodes: ReviewReadinessIssueCode[],
 ): string[] {
   return issueCodes.map((code) => {
     if (code === "sources_required") {
-      return tr(
-        "أضف مصدرًا واحدًا موثوقًا على الأقل.",
-        "Add at least one trusted source.",
-      );
+      return t("admin.medicalContent.validation.sourcesRequired");
     }
     if (code === "disclaimer_required") {
-      return tr(
-        "حدّد إصدار التنبيه الطبي (Disclaimer Version).",
-        "Set the disclaimer version.",
-      );
+      return t("admin.medicalContent.validation.disclaimerRequired");
     }
     if (code === "seek_help_required") {
-      return tr(
-        "فعّل Seek Help Block لأن النوع حالة أو عرض.",
-        "Enable Seek Help Block for condition/symptom content.",
-      );
+      return t("admin.medicalContent.validation.seekHelpRequired");
     }
     if (code === "blocks_required") {
-      return tr(
-        "أضف بلوك محتوى فعلي واحدًا على الأقل.",
-        "Add at least one meaningful content block.",
-      );
+      return t("admin.medicalContent.validation.blocksRequired");
     }
     if (code === "news_source_url_required") {
-      return tr(
-        "أضف رابط مصدر الخبر (news.sourceUrl).",
-        "Add the NEWS source URL (news.sourceUrl).",
-      );
+      return t("admin.medicalContent.validation.newsSourceUrlRequired");
     }
-    return tr(
-      "حدّد تاريخ نشر الخبر (news.publishedAt).",
-      "Set the NEWS published date (news.publishedAt).",
-    );
+    return t("admin.medicalContent.validation.newsPublishedAtRequired");
   });
 }
 
 export default function AdminMedicalContentPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
   const numberLocale = locale === "ar" ? "ar-SA" : "en-US";
 
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState("");
   const [showMineOnly, setShowMineOnly] = useState(false);
-  const [activeStatus, setActiveStatus] = useState<UiContentStatus>("الكل");
-  const [langFilter, setLangFilter] = useState<LangFilter>("الكل");
+  const [activeStatus, setActiveStatus] = useState<UiContentStatus>("all");
+  const [langFilter, setLangFilter] = useState<LangFilter>("all");
 
   const activeType = useMemo(
     () => parseTypeQueryParam(searchParams.get("type")),
@@ -155,11 +136,11 @@ export default function AdminMedicalContentPage() {
   );
 
   const setTypeFilter = useCallback(
-    (next: "الكل" | AdminContentType) => {
+    (next: "all" | AdminContentType) => {
       setSearchParams(
         (prev) => {
           const p = new URLSearchParams(prev);
-          if (next === "الكل") p.delete("type");
+          if (next === "all") p.delete("type");
           else p.set("type", next);
           return p;
         },
@@ -191,47 +172,35 @@ export default function AdminMedicalContentPage() {
     const { kind } = actionConfirm;
     if (kind === "submitReview") {
       return {
-        title: tr("تم", "Done"),
-        message: tr(
-          "أُرسل المحتوى للمراجعة.",
-          "Content has been sent for review.",
-        ),
+        title: t("admin.medicalContent.toast.done"),
+        message: t("admin.medicalContent.toast.submitReview"),
         variant: "success",
       };
     }
     if (kind === "approve") {
       return {
-        title: tr("تمت الموافقة", "Approved"),
-        message: tr(
-          "يمكنك نشر المحتوى متى نضج.",
-          "You can publish the content whenever it's ready.",
-        ),
+        title: t("admin.medicalContent.toast.approved"),
+        message: t("admin.medicalContent.toast.approveMessage"),
         variant: "success",
       };
     }
     if (kind === "publish") {
       return {
-        title: tr("تم النشر", "Published"),
-        message: tr(
-          "صار المحتوى متاحاً للمستفيدين حسب قواعد العرض.",
-          "The content is now available to users according to display rules.",
-        ),
+        title: t("admin.medicalContent.toast.published"),
+        message: t("admin.medicalContent.toast.publishMessage"),
         variant: "success",
       };
     }
     return {
-      title: tr("تمت الأرشفة", "Archived"),
-      message: tr(
-        "أُرشف العنصر ويُنقل لأرشيف المحتوى.",
-        "The item has been archived and moved to the content archive.",
-      ),
+      title: t("admin.medicalContent.toast.archived"),
+      message: t("admin.medicalContent.toast.archiveMessage"),
       variant: "success",
     };
-  }, [actionConfirm, tr]);
+  }, [actionConfirm, t]);
 
   useEffect(() => {
     if (searchParams.get("queue") === "review") {
-      setActiveStatus("قيد المراجعة");
+      setActiveStatus("in_review");
     }
   }, [searchParams]);
 
@@ -239,10 +208,10 @@ export default function AdminMedicalContentPage() {
     Partial<Record<UiContentStatus, AdminContentStatus>>
   >(
     () => ({
-      منشور: "PUBLISHED",
-      "قيد المراجعة": "IN_REVIEW",
-      مسودة: "DRAFT",
-      مؤرشف: "ARCHIVED",
+      published: "PUBLISHED",
+      in_review: "IN_REVIEW",
+      draft: "DRAFT",
+      archived: "ARCHIVED",
     }),
     [],
   );
@@ -251,11 +220,11 @@ export default function AdminMedicalContentPage() {
     () => ({
       page,
       limit: PAGE_SIZE,
-      ...(activeType !== "الكل" ? { type: activeType } : {}),
-      ...(activeStatus !== "الكل"
+      ...(activeType !== "all" ? { type: activeType } : {}),
+      ...(activeStatus !== "all"
         ? { status: statusToApi[activeStatus] as AdminContentStatus }
         : {}),
-      ...(langFilter !== "الكل" ? { language: langFilter as "ar" | "en" } : {}),
+      ...(langFilter !== "all" ? { language: langFilter as "ar" | "en" } : {}),
     }),
     [page, activeType, activeStatus, langFilter, statusToApi],
   );
@@ -264,7 +233,7 @@ export default function AdminMedicalContentPage() {
     () => ({
       page,
       limit: PAGE_SIZE,
-      ...(activeStatus !== "الكل" && isMineStatusFilter(activeStatus)
+      ...(activeStatus !== "all" && isMineStatusFilter(activeStatus)
         ? { status: statusToApi[activeStatus] as AdminContentStatus }
         : {}),
     }),
@@ -289,12 +258,12 @@ export default function AdminMedicalContentPage() {
 
   /** تصفية لغة داخل الصفحة إذا أعاد السيرفر قيماً غير متوافقة مع ar/en */
   const itemsByType = useMemo(() => {
-    if (activeType === "الكل") return items;
+    if (activeType === "all") return items;
     return items.filter((it) => it.type === activeType);
   }, [items, activeType]);
 
   const itemsByLang = useMemo(() => {
-    if (langFilter === "الكل") return itemsByType;
+    if (langFilter === "all") return itemsByType;
     return itemsByType.filter(
       (it) => normalizeItemLanguage(it.language) === langFilter,
     );
@@ -365,7 +334,7 @@ export default function AdminMedicalContentPage() {
 
   useEffect(() => {
     if (showMineOnly && !isMineStatusFilter(activeStatus)) {
-      setActiveStatus("الكل");
+      setActiveStatus("all");
     }
   }, [showMineOnly, activeStatus]);
 
@@ -373,16 +342,10 @@ export default function AdminMedicalContentPage() {
     if (!rejectTarget) return;
     try {
       await rejectMutation.mutateAsync({ id: rejectTarget._id, reason });
-      toast(
-        tr(
-          "تم رفض المحتوى ويُرسل الملاحظة إلى الفريق عند اكتمال الربط.",
-          "Content was rejected and the note will be sent to the team when integration is completed.",
-        ),
-        {
-          title: tr("تم", "Done"),
-          variant: "success",
-        },
-      );
+      toast(t("admin.medicalContent.toast.rejected"), {
+        title: t("admin.medicalContent.toast.done"),
+        variant: "success",
+      });
       setRejectOpen(false);
       setRejectTarget(null);
     } catch {
@@ -397,19 +360,60 @@ export default function AdminMedicalContentPage() {
     publishMutation.isPending ||
     archiveMutation.isPending;
 
+  function handleSubmitReview(item: AdminContentItem) {
+    setActionConfirm({
+      kind: "submitReview",
+      id: item._id,
+      title: toDisplayText(item.title) || "—",
+    });
+  }
+
+  function handleApprove(item: AdminContentItem) {
+    setActionConfirm({
+      kind: "approve",
+      id: item._id,
+      title: toDisplayText(item.title) || "—",
+    });
+  }
+
+  function handlePublish(item: AdminContentItem) {
+    setActionConfirm({
+      kind: "publish",
+      id: item._id,
+      title: toDisplayText(item.title) || "—",
+    });
+  }
+
+  function handleArchive(item: AdminContentItem) {
+    setActionConfirm({
+      kind: "archive",
+      id: item._id,
+      title: toDisplayText(item.title) || "—",
+    });
+  }
+
+  function handleReject(item: AdminContentItem) {
+    setRejectTarget(item);
+    setRejectOpen(true);
+  }
+
+  function handleEdit(item: AdminContentItem) {
+    setEditingContentId(item._id);
+    setEditOpen(true);
+  }
+
+  function handleView(item: AdminContentItem) {
+    setViewingContentId(item._id);
+    setViewOpen(true);
+  }
+
   return (
     <>
       <Helmet>
         <title>
           {activeType === "NEWS"
-            ? tr(
-                "الأخبار الطبية — إدارة المحتوى • LMJ Health",
-                "Medical news — content management • LMJ Health",
-              )
-            : tr(
-                "إدارة المحتوى الطبي • LMJ Health",
-                "Medical content management • LMJ Health",
-              )}
+            ? t("admin.medicalContent.page.title.news")
+            : t("admin.medicalContent.page.title.content")}
         </title>
       </Helmet>
 
@@ -417,20 +421,14 @@ export default function AdminMedicalContentPage() {
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title={tr("إدارة المحتوى الطبي", "Medical content management")}
+          title={t("admin.medicalContent.page.title")}
           subtitle={
             activeType === "NEWS"
-              ? tr(
-                  "عرض وإدارة أخبار المنصة (مسودة → مراجعة → نشر)",
-                  "View and manage platform news (draft → review → publish)",
-                )
-              : tr(
-                  "قائمة، فلاتر، ومراجعة لدورة حياة المحتوى",
-                  "List, filters, and review for content lifecycle",
-                )
+              ? t("admin.medicalContent.subtitle.news")
+              : t("admin.medicalContent.subtitle.content")
           }
           headerIcon={<BookOpen className="h-8 w-8 text-white" />}
-          actionLabel={tr("إضافة محتوى جديد", "Add new content")}
+          actionLabel={t("admin.medicalContent.actionLabel")}
           onActionClick={() => setCreateOpen(true)}
           kpiColumns={5}
           kpis={[
@@ -438,31 +436,31 @@ export default function AdminMedicalContentPage() {
               key: "views",
               icon: <Eye className="h-5 w-5 shrink-0" />,
               value: pageViews.toLocaleString(numberLocale),
-              label: tr("مشاهدات الصفحة", "Page views"),
+              label: t("admin.medicalContent.kpi.pageViews"),
             },
             {
               key: "draft",
               icon: <FileText className="h-5 w-5 shrink-0" />,
               value: statusCounts.isAwaitingData ? "…" : statusCounts.draft,
-              label: tr("مسودات", "Drafts"),
+              label: t("admin.medicalContent.kpi.drafts"),
             },
             {
               key: "review",
               icon: <Clock className="h-5 w-5 shrink-0" />,
               value: statusCounts.isAwaitingData ? "…" : statusCounts.inReview,
-              label: tr("قيد المراجعة", "In review"),
+              label: t("admin.medicalContent.kpi.inReview"),
             },
             {
               key: "published",
               icon: <CheckCircle2 className="h-5 w-5 shrink-0" />,
               value: statusCounts.isAwaitingData ? "…" : statusCounts.published,
-              label: tr("منشور", "Published"),
+              label: t("admin.medicalContent.kpi.published"),
             },
             {
               key: "all",
               icon: <BookOpen className="h-5 w-5 shrink-0" />,
               value: statusCounts.isAwaitingData ? "…" : statusCounts.all,
-              label: tr("إجمالي النظام", "System total"),
+              label: t("admin.medicalContent.kpi.systemTotal"),
             },
           ]}
         />
@@ -470,10 +468,7 @@ export default function AdminMedicalContentPage() {
         <div className="mt-4 flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
           <LinkIcon className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
           <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
-            {tr(
-              "هذه الصفحة تجمع بين إنشاء المحتوى، مراجعته، ونقله بين مراحل الدورة المعتمدة. استخدم بطاقات القائمة لفرز الحالة بسرعة، لكن نفّذ القبول أو الرفض أو النشر فقط بعد مراجعة المصادر واللغة والمنشئ من تفاصيل العنصر نفسه.",
-              "This page combines content creation, review, and movement across the approved lifecycle. Use the list cards to triage status quickly, but only approve, reject, or publish after reviewing sources, language, and creator context from the item’s own details.",
-            )}
+            {t("admin.medicalContent.disclaimer")}
           </div>
         </div>
 
@@ -487,10 +482,7 @@ export default function AdminMedicalContentPage() {
           <div className="flex flex-col gap-3 w-full min-w-0 lg:flex-row lg:items-center lg:justify-between">
             <div className="relative flex-1 min-w-0">
               <input
-                placeholder={tr(
-                  "بحث داخل الصفحة الحالية في العناوين والملخص…",
-                  "Search within the current page titles and summaries…",
-                )}
+                placeholder={t("admin.medicalContent.searchPlaceholder")}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 className="h-[44px] w-full rounded-[12px] border border-[#E5E7EB] bg-white ps-12 pe-4 text-start font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]"
@@ -510,53 +502,40 @@ export default function AdminMedicalContentPage() {
                     setPage(1);
                   }}
                 />
-                {tr("محتواي فقط", "My content only")}
+                {t("admin.medicalContent.myContentOnly")}
               </label>
               <LanguageModeToggle value={langFilter} onChange={setLangFilter} />
             </div>
           </div>
 
           <div className="mt-5 font-cairo text-[11px] font-extrabold text-[#98A2B3]">
-            {tr("نوع المحتوى", "Content type")}
+            {t("admin.medicalContent.contentType")}
           </div>
           <div className="mt-3 rounded-[10px] border border-[#D5E8E6] bg-[#F8FFFE] px-4 py-3">
             <div className="font-cairo text-[12px] font-extrabold text-[#0F766E]">
-              {tr(
-                showMineOnly
-                  ? "وضع محتواي: الفلترة المتاحة (مسودة، قيد المراجعة)."
-                  : "دورة العمل المعتمدة: مسودة ← قيد المراجعة ← منشور ← مؤرشف",
-                showMineOnly
-                  ? "My-content mode: available statuses are Draft and In review."
-                  : "Approved workflow: Draft → In review → Published → Archived",
-              )}
+              {showMineOnly
+                ? t("admin.medicalContent.workflow.myContentMode")
+                : t("admin.medicalContent.workflow.approvedWorkflow")}
             </div>
             <div className="mt-1 font-cairo text-[11px] font-semibold text-[#5B7B79]">
-              {tr(
-                "تحقق من المنشئ، المراجع، وحالة العنصر قبل تنفيذ القبول أو النشر أو الأرشفة.",
-                "Check the creator, reviewer, and item state before approving, publishing, or archiving.",
-              )}
+              {t("admin.medicalContent.workflow.checkCreator")}
             </div>
             <div className="mt-2 font-cairo text-[11px] font-bold text-[#0F766E]">
-              {tr(
-                "جاهزية الإطلاق (إرشادي): DRAFT→submit-review · IN_REVIEW→approve/reject/publish · PUBLISHED→archive — لا يمنع التصفح.",
-                "Release acceptance cues: DRAFT→submit-review · IN_REVIEW→approve/reject/publish · PUBLISHED→archive — browsing stays open.",
-              )}
+              {t("admin.medicalContent.workflow.releaseAcceptance")}
             </div>
           </div>
           <AdminContentTypeFilterBar
             activeType={activeType}
             onChange={setTypeFilter}
-            tr={tr}
           />
 
           <div className="mt-4 font-cairo text-[11px] font-extrabold text-[#98A2B3]">
-            {tr("حالة النشر", "Publish status")}
+            {t("admin.medicalContent.publishStatus")}
           </div>
           <AdminContentStatusFilterBar
             activeStatus={activeStatus}
             onChange={setActiveStatus}
             showMineOnly={showMineOnly}
-            tr={tr}
           />
         </section>
 
@@ -565,29 +544,28 @@ export default function AdminMedicalContentPage() {
             <div className="flex flex-wrap gap-2 items-center">
               <BookOpen className="w-4 h-4 text-primary" />
               <div className="font-cairo text-[14px] font-extrabold text-[#111827]">
-                {tr("المحتوى الطبي", "Medical content")}
+                {t("admin.medicalContent.medicalContent")}
               </div>
               <span className="rounded-full bg-[#F3F4F6] px-2.5 py-0.5 font-cairo text-[11px] font-extrabold text-[#667085]">
                 {query.trim()
-                  ? tr(
-                      `${filteredItems.length.toLocaleString(numberLocale)} مطابقة محلية`,
-                      `${filteredItems.length.toLocaleString(numberLocale)} local matches`,
-                    )
-                  : tr(
-                      `${serverTotal.toLocaleString(numberLocale)} سجل (السيرفر)`,
-                      `${serverTotal.toLocaleString(numberLocale)} records (server)`,
-                    )}
+                  ? `${filteredItems.length.toLocaleString(numberLocale)} ${t("admin.medicalContent.localMatches")}`
+                  : `${serverTotal.toLocaleString(numberLocale)} ${t("admin.medicalContent.recordsServer")}`}
                 {showPaginationBar && totalPages > 0
-                  ? tr(
-                      ` · صفحة ${currentPage.toLocaleString(numberLocale)} / ${totalPages.toLocaleString(numberLocale)}`,
-                      ` · page ${currentPage.toLocaleString(numberLocale)} / ${totalPages.toLocaleString(numberLocale)}`,
-                    )
+                  ? ` · ${t("admin.medicalContent.pageLabel")} ${currentPage.toLocaleString(numberLocale)} / ${totalPages.toLocaleString(numberLocale)}`
                   : ""}
               </span>
             </div>
           </div>
 
-          <div className={filteredItems.length > 0 && !contentQuery.isAwaitingData && !contentQuery.isError ? "flex flex-col gap-3 bg-[#FAFBFC] p-4 sm:p-5" : ""}>
+          <div
+            className={
+              filteredItems.length > 0 &&
+              !contentQuery.isAwaitingData &&
+              !contentQuery.isError
+                ? "flex flex-col gap-3 bg-[#FAFBFC] p-4 sm:p-5"
+                : ""
+            }
+          >
             {contentQuery.isAwaitingData ? (
               <SkeletonList
                 count={8}
@@ -599,16 +577,10 @@ export default function AdminMedicalContentPage() {
                   <X className="h-5 w-5" />
                 </div>
                 <p className="mt-3 font-cairo text-[13px] font-extrabold text-[#B42318]">
-                  {tr(
-                    "تعذّر تحميل المحتوى الطبي.",
-                    "Failed to load medical content.",
-                  )}
+                  {t("admin.medicalContent.loadError")}
                 </p>
                 <p className="mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                  {tr(
-                    "تحقق من الفلاتر أو الاتصال ثم أعد المحاولة.",
-                    "Check filters or connection, then try again.",
-                  )}
+                  {t("admin.medicalContent.checkFilters")}
                 </p>
                 <button
                   type="button"
@@ -618,7 +590,7 @@ export default function AdminMedicalContentPage() {
                   className="mt-4 inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#FECACA] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#B42318]"
                 >
                   <Clock className="h-4 w-4" />
-                  {tr("إعادة المحاولة", "Retry")}
+                  {t("admin.medicalContent.retry")}
                 </button>
               </div>
             ) : filteredItems.length === 0 ? (
@@ -628,40 +600,28 @@ export default function AdminMedicalContentPage() {
                 </div>
                 <p className="mt-3 font-cairo text-[13px] font-extrabold text-[#344054]">
                   {query.trim()
-                    ? tr(
-                        "لا توجد مطابقات ضمن الصفحة الحالية.",
-                        "No matches on the current page.",
-                      )
-                    : tr(
-                        "لا توجد عناصر مطابقة للفلاتر الحالية.",
-                        "No items match current filters.",
-                      )}
+                    ? t("admin.medicalContent.noMatches")
+                    : t("admin.medicalContent.noItemsMatch")}
                 </p>
                 <p className="mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]">
                   {query.trim()
-                    ? tr(
-                        "البحث يتم داخل الصفحة الحالية فقط. غيّر معايير البحث أو الفلاتر لعرض نتائج أوسع.",
-                        "The search only looks within the current page. Adjust your search or filters to see broader results.",
-                      )
-                    : tr(
-                        "غيّر معايير البحث أو امسح الفلاتر لعرض نتائج أوسع.",
-                        "Adjust search criteria or clear filters to see broader results.",
-                      )}
+                    ? t("admin.medicalContent.searchPageOnly")
+                    : t("admin.medicalContent.adjustSearch")}
                 </p>
                 <button
                   type="button"
                   onClick={() => {
                     setQuery("");
                     setShowMineOnly(false);
-                    setActiveStatus("الكل");
-                    setLangFilter("الكل");
-                    setTypeFilter("الكل");
+                    setActiveStatus("all");
+                    setLangFilter("all");
+                    setTypeFilter("all");
                     setPage(1);
                   }}
                   className="mt-4 inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#D0D5DD] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054]"
                 >
                   <X className="h-4 w-4" />
-                  {tr("مسح الفلاتر", "Clear filters")}
+                  {t("admin.medicalContent.clearFilters")}
                 </button>
               </div>
             ) : (
@@ -671,49 +631,14 @@ export default function AdminMedicalContentPage() {
                   item={it}
                   showMineOnly={showMineOnly}
                   actionBusy={actionBusy}
-                  locale={locale}
-                  tr={tr}
                   numberLocale={numberLocale}
-                  onSubmitReview={(item) =>
-                    setActionConfirm({
-                      kind: "submitReview",
-                      id: item._id,
-                      title: toDisplayText(item.title) || "—",
-                    })
-                  }
-                  onApprove={(item) =>
-                    setActionConfirm({
-                      kind: "approve",
-                      id: item._id,
-                      title: toDisplayText(item.title) || "—",
-                    })
-                  }
-                  onReject={(item) => {
-                    setRejectTarget(item);
-                    setRejectOpen(true);
-                  }}
-                  onPublish={(item) =>
-                    setActionConfirm({
-                      kind: "publish",
-                      id: item._id,
-                      title: toDisplayText(item.title) || "—",
-                    })
-                  }
-                  onArchive={(item) =>
-                    setActionConfirm({
-                      kind: "archive",
-                      id: item._id,
-                      title: toDisplayText(item.title) || "—",
-                    })
-                  }
-                  onEdit={(item) => {
-                    setEditingContentId(item._id);
-                    setEditOpen(true);
-                  }}
-                  onView={(item) => {
-                    setViewingContentId(item._id);
-                    setViewOpen(true);
-                  }}
+                  onSubmitReview={handleSubmitReview}
+                  onApprove={handleApprove}
+                  onReject={handleReject}
+                  onPublish={handlePublish}
+                  onArchive={handleArchive}
+                  onEdit={handleEdit}
+                  onView={handleView}
                 />
               ))
             )}
@@ -728,7 +653,6 @@ export default function AdminMedicalContentPage() {
               totalPages={totalPages}
               visiblePageNumbers={visiblePageNumbers}
               onPage={setPage}
-              tr={tr}
               numberLocale={numberLocale}
             />
           ) : null}
@@ -766,15 +690,12 @@ export default function AdminMedicalContentPage() {
           !actionConfirm
             ? "—"
             : actionConfirm.kind === "submitReview"
-              ? tr(
-                  "تأكيد إرسال المحتوى للمراجعة",
-                  "Confirm sending content for review",
-                )
+              ? t("admin.medicalContent.confirmSubmitReview")
               : actionConfirm.kind === "approve"
-                ? tr("تأكيد موافقة المحتوى", "Confirm approving content")
+                ? t("admin.medicalContent.confirmApprove")
                 : actionConfirm.kind === "publish"
-                  ? tr("تأكيد نشر المحتوى", "Confirm publishing content")
-                  : tr("تأكيد أرشفة المحتوى", "Confirm archiving content")
+                  ? t("admin.medicalContent.confirmPublish")
+                  : t("admin.medicalContent.confirmArchive")
         }
         icon={
           actionConfirm ? (
@@ -792,21 +713,15 @@ export default function AdminMedicalContentPage() {
         description={
           actionConfirm ? (
             <>
-              {tr("العنوان:", "Title:")} «
+              {t("admin.medicalContent.titleLabel")} «
               <span className="font-extrabold text-[#344054]">
                 {actionConfirm.title}
               </span>
               ».{" "}
               {actionConfirm.kind === "approve" ||
               actionConfirm.kind === "publish"
-                ? tr(
-                    "سيتم التحقق من مصفوفة قبول الإطلاق قبل التنفيذ. إن وُجدت نواقص ستُعاد إلى التحرير.",
-                    "Release acceptance will be verified before running. Missing items open the editor.",
-                  )
-                : tr(
-                    "سيتم تنفيذ الإجراء على الخادم ولا يمكن التراجع محلياً.",
-                    "The action runs on the server and cannot be undone locally.",
-                  )}
+                ? t("admin.medicalContent.releaseAcceptanceVerify")
+                : t("admin.medicalContent.actionServer")}
             </>
           ) : (
             "—"
@@ -816,12 +731,12 @@ export default function AdminMedicalContentPage() {
           !actionConfirm
             ? "—"
             : actionConfirm.kind === "submitReview"
-              ? tr("إرسال", "Send")
+              ? t("admin.medicalContent.send")
               : actionConfirm.kind === "approve"
-                ? tr("موافقة", "Approve")
+                ? t("admin.medicalContent.approve")
                 : actionConfirm.kind === "publish"
-                  ? tr("نشر", "Publish")
-                  : tr("أرشفة", "Archive")
+                  ? t("admin.medicalContent.publish")
+                  : t("admin.medicalContent.archive")
         }
         confirmDisabled={actionBusy}
         onConfirm={async () => {
@@ -833,15 +748,18 @@ export default function AdminMedicalContentPage() {
             );
             const issueCodes = getReviewReadinessIssueCodes(details);
             if (issueCodes.length > 0) {
-              const blockingMessages = getSubmitReviewBlockingMessages(tr, issueCodes);
+              const blockingMessages = getSubmitReviewBlockingMessages(
+                t,
+                issueCodes,
+              );
               setActionConfirm(null);
               toast(
-                tr(
-                  `تعذّر إرسال المحتوى للمراجعة قبل استكمال:\n- ${blockingMessages.join("\n- ")}`,
-                  `Cannot send for review before completing:\n- ${blockingMessages.join("\n- ")}`,
+                t("admin.medicalContent.reviewReadinessError").replace(
+                  "{messages}",
+                  blockingMessages.join("\n- "),
                 ),
                 {
-                  title: tr("متطلبات الحوكمة غير مكتملة", "Governance requirements missing"),
+                  title: t("admin.medicalContent.governanceMissing"),
                   variant: "error",
                 },
               );
@@ -851,12 +769,9 @@ export default function AdminMedicalContentPage() {
             }
             await submitReviewMutation.mutateAsync({
               id,
-              reviewNotes: tr(
-                "تم إرسال المحتوى للمراجعة من لوحة الإدارة.",
-                "Content sent for review from admin panel.",
-              ),
+              reviewNotes: t("admin.medicalContent.sentFromAdmin"),
             });
-            setActiveStatus("الكل");
+            setActiveStatus("all");
             setPage(1);
             setSearchParams(
               (prev) => {
@@ -870,7 +785,10 @@ export default function AdminMedicalContentPage() {
             const details = extractContentDetails(
               await adminApi.content.getById(id),
             );
-            const snapshot = buildReleaseAcceptanceFromDetails(details, "admin");
+            const snapshot = buildReleaseAcceptanceFromDetails(
+              details,
+              "admin",
+            );
             if (!snapshot || !isApprovePublishPathReady(snapshot)) {
               const incomplete = snapshot
                 ? getIncompleteAcceptanceChecks(snapshot)
@@ -880,23 +798,19 @@ export default function AdminMedicalContentPage() {
                 ? incomplete.map((item) =>
                     localizeAcceptanceCopy(item.label, language),
                   )
-                : [
-                    tr(
-                      "تعذّر التحقق من جاهزية الإطلاق لهذا المحتوى.",
-                      "Could not verify release acceptance readiness for this content.",
-                    ),
-                  ];
+                : [t("admin.medicalContent.releaseAcceptanceError")];
               setActionConfirm(null);
               toast(
-                tr(
-                  `تعذّر ${kind === "approve" ? "الموافقة" : "النشر"} قبل استكمال جاهزية الإطلاق:\n- ${blockingMessages.join("\n- ")}`,
-                  `Cannot ${kind === "approve" ? "approve" : "publish"} before release acceptance is ready:\n- ${blockingMessages.join("\n- ")}`,
-                ),
+                t("admin.medicalContent.approvePublishError")
+                  .replace(
+                    "{action}",
+                    kind === "approve"
+                      ? t("admin.medicalContent.approve")
+                      : t("admin.medicalContent.publish"),
+                  )
+                  .replace("{messages}", blockingMessages.join("\n- ")),
                 {
-                  title: tr(
-                    "بوابة الاعتماد غير مكتملة",
-                    "Approval gate incomplete",
-                  ),
+                  title: t("admin.medicalContent.approvalGateIncomplete"),
                   variant: "error",
                 },
               );

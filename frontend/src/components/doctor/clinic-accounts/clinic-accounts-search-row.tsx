@@ -20,8 +20,7 @@ export function ClinicAccountsSearchRow({
   onValueChangeExtra?: () => void;
   onClear?: () => void;
 }) {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, dir } = useI18n();
 
   return (
     <div
@@ -43,7 +42,7 @@ export function ClinicAccountsSearchRow({
             type="button"
             onClick={onClear}
             className="absolute start-4 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full text-[#98A2B3] transition-colors hover:bg-gray-100 hover:text-gray-600"
-            aria-label={tr("مسح البحث", "Clear search")}
+            aria-label={t("doctor.clinicAccounts.search.clearSearch")}
           >
             <X className="h-4 w-4" aria-hidden />
           </button>

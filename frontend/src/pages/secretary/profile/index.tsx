@@ -108,8 +108,7 @@ function PermissionBadge({ permission }: { permission: string }) {
 }
 
 export default function SecretaryProfilePage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { locale, dir, t } = useI18n();
   const authUser = readAuthUser();
   const assignedDoctorQuery = useSecretaryAssignedDoctor();
   const secretaryPermissions = useSecretaryPermissions();
@@ -124,33 +123,35 @@ export default function SecretaryProfilePage() {
     { page: 1, limit: 1 },
     canViewPatients,
   );
-  const secretaryName = authUser?.fullName?.trim() || tr("السكرتير", "Secretary");
+  const secretaryName =
+    authUser?.fullName?.trim() || t("secretary.profile.secretaryFallback");
   const secretaryEmail = authUser?.email?.trim() || "—";
   const secretaryPhone = authUser?.phone?.trim() || "—";
   const assignedDoctor = assignedDoctorQuery.assignedDoctor;
   const initial =
-    secretaryName.trim().charAt(0).toUpperCase() || tr("س", "S");
+    secretaryName.trim().charAt(0).toUpperCase() ||
+    t("secretary.profile.initialFallback");
 
   const contactInfo = [
-    { label: tr("البريد الإلكتروني", "Email"), value: secretaryEmail, icon: Mail },
-    { label: tr("رقم الهاتف", "Phone number"), value: secretaryPhone, icon: Phone },
-    { label: tr("العنوان", "Address"), value: "—", icon: MapPin },
+    { label: t("secretary.profile.email"), value: secretaryEmail, icon: Mail },
+    { label: t("secretary.profile.phone"), value: secretaryPhone, icon: Phone },
+    { label: t("secretary.profile.address"), value: "—", icon: MapPin },
   ];
 
   const doctorInfo = [
     {
-      label: tr("الاسم", "Name"),
+      label: t("secretary.profile.doctorName"),
       value:
         assignedDoctor?.user?.fullName ||
         assignedDoctor?.userId?.fullName ||
         "—",
     },
     {
-      label: tr("التخصص", "Specialty"),
+      label: t("secretary.profile.specialty"),
       value: assignedDoctor?.specialization || "—",
     },
     {
-      label: tr("التقييم", "Rating"),
+      label: t("secretary.profile.rating"),
       value: `${assignedDoctor?.averageRating ?? "—"}`,
     },
   ];
@@ -161,25 +162,28 @@ export default function SecretaryProfilePage() {
   // placeholder string, per manual-QA feedback.
   const stats = [
     {
-      label: tr("المواعيد", "Appointments"),
-      value: canViewAppointments ? appointmentsQuery.total ?? 0 : "—",
+      label: t("secretary.profile.appointments"),
+      value: canViewAppointments ? (appointmentsQuery.total ?? 0) : "—",
       icon: Briefcase,
     },
     {
-      label: tr("المرضى", "Patients"),
-      value: canViewPatients ? patientsQuery.total ?? 0 : "—",
+      label: t("secretary.profile.patients"),
+      value: canViewPatients ? (patientsQuery.total ?? 0) : "—",
       icon: UserRound,
     },
   ];
 
   const permissions = secretaryPermissions.permissions.map((permission) =>
-    secretaryPermissionLabel(permission, tr),
+    secretaryPermissionLabel(permission, t),
   );
   const unsupportedPermissions = secretaryPermissions.unsupportedPermissions;
 
   return (
     <div dir={dir} lang={locale} className="space-y-5 pb-8 sm:pb-10">
-      <SurfaceSection title={tr("المعلومات الشخصية", "Personal information")} icon={UserRound}>
+      <SurfaceSection
+        title={t("secretary.profile.personalInfo")}
+        icon={UserRound}
+      >
         <div className="px-4 py-5 sm:px-5 sm:py-6">
           <div className="flex items-center gap-4 rounded-[18px] bg-[#F8FAFC] p-6">
             <div className="flex h-20 w-20 items-center justify-center rounded-[16px] bg-gradient-to-br from-[#0f766e] via-[#0f8f8b] to-[#14b8a6] font-cairo text-[24px] font-black text-white shadow-[0_12px_28px_rgba(15,143,139,0.32)]">
@@ -190,13 +194,13 @@ export default function SecretaryProfilePage() {
                 {secretaryName}
               </div>
               <div className="mt-1 font-cairo text-[16px] font-semibold text-[#98A2B3]">
-                {tr("سكرتير", "Secretary")}
+                {t("secretary.profile.secretary")}
               </div>
             </div>
             <div className="text-start">
               <div className="inline-flex items-center rounded-[8px] bg-[#ECFDF3] px-3 py-1.5 font-cairo text-[13px] font-black text-[#16A34A]">
                 <ShieldCheck className="ms-2 h-4 w-4" />
-                {tr("نشط", "Active")}
+                {t("secretary.profile.active")}
               </div>
             </div>
           </div>
@@ -212,18 +216,18 @@ export default function SecretaryProfilePage() {
         ))}
       </SurfaceSection>
 
-      <SurfaceSection title={tr("الطبيب المسؤول", "Assigned doctor")} icon={Briefcase}>
+      <SurfaceSection
+        title={t("secretary.profile.assignedDoctor")}
+        icon={Briefcase}
+      >
         {assignedDoctorQuery.isLoading ? (
           <div className="px-4 py-6 text-center font-cairo text-[14px] font-semibold text-[#667085] sm:px-6 lg:px-8">
-            {tr("جاري تحميل الطبيب المسؤول...", "Loading assigned doctor...")}
+            {t("secretary.profile.loadingDoctor")}
           </div>
         ) : assignedDoctorQuery.isError || !assignedDoctor ? (
           <div className="space-y-4 px-4 py-6 text-center sm:px-6 lg:px-8">
             <div className="font-cairo text-[15px] font-bold text-[#243044]">
-              {tr(
-                "تعذر تحميل بيانات الطبيب المسؤول.",
-                "Assigned doctor details are unavailable.",
-              )}
+              {t("secretary.profile.doctorLoadError")}
             </div>
             <button
               type="button"
@@ -232,8 +236,8 @@ export default function SecretaryProfilePage() {
               className="inline-flex items-center justify-center rounded-[12px] bg-primary px-4 py-2 font-cairo text-[14px] font-bold text-white transition disabled:cursor-not-allowed disabled:opacity-60"
             >
               {assignedDoctorQuery.isRefetching
-                ? tr("جاري إعادة المحاولة...", "Retrying...")
-                : tr("إعادة المحاولة", "Retry")}
+                ? t("secretary.profile.retrying")
+                : t("secretary.profile.retry")}
             </button>
           </div>
         ) : (
@@ -243,10 +247,7 @@ export default function SecretaryProfilePage() {
             ))}
             {assignedDoctorQuery.isRefetching ? (
               <div className="border-t border-[#EEF2F6] px-4 py-4 text-center font-cairo text-[13px] font-semibold text-[#667085] sm:px-6 lg:px-8">
-                {tr(
-                  "جاري تحديث بيانات الطبيب المسؤول...",
-                  "Refreshing assigned doctor details...",
-                )}
+                {t("secretary.profile.refreshingDoctor")}
               </div>
             ) : null}
           </>
@@ -264,7 +265,10 @@ export default function SecretaryProfilePage() {
         ))}
       </div>
 
-      <SurfaceSection title={tr("الصلاحيات", "Permissions")} icon={ShieldCheck}>
+      <SurfaceSection
+        title={t("secretary.profile.permissions")}
+        icon={ShieldCheck}
+      >
         <div className="flex flex-wrap gap-3 px-4 py-5 sm:px-6 lg:px-8 lg:py-6">
           {permissions.length > 0 ? (
             permissions.map((permission) => (
@@ -272,20 +276,14 @@ export default function SecretaryProfilePage() {
             ))
           ) : (
             <span className="font-cairo text-[14px] font-semibold text-[#98A2B3]">
-              {tr(
-                "لا توجد صلاحيات مخصصة حالياً.",
-                "No custom permissions assigned yet.",
-              )}
+              {t("secretary.profile.noPermissions")}
             </span>
           )}
         </div>
         {unsupportedPermissions.length > 0 ? (
           <div className="border-t border-[#EEF2F6] px-4 py-4 sm:px-6 lg:px-8">
             <span className="font-cairo text-[13px] font-semibold text-[#B54708]">
-              {tr(
-                "توجد صلاحيات غير مدعومة حالياً في واجهة السكرتير، وتحتاج مراجعة من الإدارة.",
-                "Some assigned permissions are not currently supported in the secretary UI and need admin review.",
-              )}
+              {t("secretary.profile.unsupportedPermissions")}
             </span>
           </div>
         ) : null}

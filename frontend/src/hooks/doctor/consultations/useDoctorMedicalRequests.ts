@@ -16,6 +16,7 @@ import {
 } from '@/components/doctor/medical-requests/map-doctor-medical-requests';
 import { doctorApi, doctorOrdersQueryKeys } from '@/lib/doctor/client';
 import type { DoctorOrderCategory } from '@/lib/doctor/orders/doctorOrderTypes';
+import { useI18n } from '@/i18n/provider';
 
 export type MedicalRequestsFilters = {
   tab: Exclude<DoctorOrderCategory, 'all'>;
@@ -102,6 +103,7 @@ export function useDoctorMedicalRequestStats(search: string) {
 }
 
 export function useDoctorMedicalRequests(filters: MedicalRequestsFilters) {
+  const { locale } = useI18n();
   const listParams = buildListParams(filters);
 
   const listQuery = useQuery({
@@ -121,7 +123,7 @@ export function useDoctorMedicalRequests(filters: MedicalRequestsFilters) {
       const q = filters.search.trim().toLowerCase();
       if (q) {
         orders = orders.filter((order) => {
-          const row = mapDoctorOrderToRow(order);
+          const row = mapDoctorOrderToRow(order, locale);
           const hay = [
             row.systemId,
             row.patientName,
@@ -138,7 +140,7 @@ export function useDoctorMedicalRequests(filters: MedicalRequestsFilters) {
     }
 
     return orders;
-  }, [filters.search, filters.tab, isDemo, listQuery.data?.orders]);
+  }, [filters.search, filters.tab, isDemo, listQuery.data?.orders, locale]);
 
   const total = isDemo
     ? processed.length
@@ -149,10 +151,12 @@ export function useDoctorMedicalRequests(filters: MedicalRequestsFilters) {
   const rows: MedicalRequestRowVm[] = useMemo(() => {
     if (isDemo) {
       const start = (page - 1) * filters.limit;
-      return processed.slice(start, start + filters.limit).map(mapDoctorOrderToRow);
+      return processed
+        .slice(start, start + filters.limit)
+        .map((order) => mapDoctorOrderToRow(order, locale));
     }
-    return processed.map(mapDoctorOrderToRow);
-  }, [filters.limit, isDemo, page, processed]);
+    return processed.map((order) => mapDoctorOrderToRow(order, locale));
+  }, [filters.limit, isDemo, page, processed, locale]);
 
   const apiPage = listQuery.data?.page ?? page;
   const showingFrom = total === 0 ? 0 : (apiPage - 1) * filters.limit + 1;
@@ -187,6 +191,7 @@ export function useDoctorMedicalRequestDetails(
   enabled: boolean,
   fallback?: MedicalRequestRowVm | null,
 ) {
+  const { locale } = useI18n();
   const detailQuery = useQuery({
     queryKey: doctorOrdersQueryKeys.detail(orderId ?? ''),
     queryFn: () => doctorApi.orders.getById(orderId!),
@@ -196,13 +201,13 @@ export function useDoctorMedicalRequestDetails(
 
   const vm: MedicalRequestDetailVm | null = useMemo(() => {
     if (detailQuery.data?.order) {
-      return mapDoctorOrderToDetail(detailQuery.data.order);
+      return mapDoctorOrderToDetail(detailQuery.data.order, locale);
     }
     if (fallback?.raw) {
-      return mapDoctorOrderToDetail(fallback.raw);
+      return mapDoctorOrderToDetail(fallback.raw, locale);
     }
     return null;
-  }, [detailQuery.data?.order, fallback]);
+  }, [detailQuery.data?.order, fallback, locale]);
 
   const isAwaitingDetail =
     Boolean(orderId) &&

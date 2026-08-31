@@ -2,11 +2,11 @@ import type { UiContentStatus } from "@/components/admin/medical-content/content
 import { useI18n } from "@/i18n/provider";
 
 const STATUS_FILTER_CONFIG = [
-  { value: "الكل" as const },
-  { value: "منشور" as const, disableWhenMine: true },
-  { value: "قيد المراجعة" as const },
-  { value: "مسودة" as const },
-  { value: "مؤرشف" as const, disableWhenMine: true },
+  { value: "all" as const },
+  { value: "published" as const, disableWhenMine: true },
+  { value: "in_review" as const },
+  { value: "draft" as const },
+  { value: "archived" as const, disableWhenMine: true },
 ];
 
 export function AdminContentStatusFilterBar({
@@ -22,7 +22,7 @@ export function AdminContentStatusFilterBar({
 
   const statusFilters = STATUS_FILTER_CONFIG.map((filter) => ({
     ...filter,
-    label: t(`adminMedicalContent.status.${filter.value}`),
+    label: t(`admin.medicalContent.status.${filter.value}`),
   }));
 
   return (
@@ -50,7 +50,7 @@ export function AdminContentStatusFilterBar({
       </div>
       {showMineOnly ? (
         <div className="mt-2 font-cairo text-[11px] font-bold text-[#98A2B3]">
-          {t("adminMedicalContent.mineOnlyHint")}
+          {t("admin.medicalContent.mineOnlyHint")}
         </div>
       ) : null}
     </>

@@ -82,6 +82,11 @@ export default function PrescriptionAddMedicationDialog({
             <Dialog.Title className="font-cairo text-[18px] font-extrabold text-[#101828]">
               {title}
             </Dialog.Title>
+            <Dialog.Description className="sr-only">
+              {locale === 'ar'
+                ? 'نموذج لإدخال بيانات دواء ضمن الوصفة الطبية.'
+                : 'A form to enter medication details for the prescription.'}
+            </Dialog.Description>
             <Dialog.Close
               type="button"
               className="flex h-9 w-9 items-center justify-center rounded-[8px] text-[#667085] hover:bg-[#F2F4F7]"

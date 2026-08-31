@@ -39,6 +39,7 @@ import {
   clearDoctorTemplateDraft,
   readDoctorTemplateDraft,
 } from '@/lib/doctor/templates/templateDraftStorage';
+import { useI18n } from '@/i18n/provider';
 import {
   loadEncounterImagingOrderForWorkspace,
   loadEncounterLabOrderForWorkspace,
@@ -133,6 +134,7 @@ export function useEncounterOrderWorkspace(
   encounterId: string,
   enabled = true,
 ) {
+  const { locale } = useI18n();
   const config = ENCOUNTER_ORDER_CONFIG[category];
   const queryClient = useQueryClient();
   const toggleFavoriteMutation = useToggleOrderCatalogFavorite(category);
@@ -459,7 +461,7 @@ export function useEncounterOrderWorkspace(
     clearTemplateDraftNotice,
     catalogItems: normalizeCatalogItems(catalogQuery.data, category),
     isAwaitingCatalogData,
-    statusLabel: resolveRadiologyStatusLabel(orderQuery.data),
+    statusLabel: resolveRadiologyStatusLabel(orderQuery.data, locale),
     isAwaitingData,
     isError: encounterQuery.isError || orderQuery.isError,
     error: encounterQuery.error ?? orderQuery.error,
@@ -496,7 +498,8 @@ export function useEncounterOrderWorkspace(
       await saveDraftMutation.mutateAsync();
       return previewMutation.mutateAsync();
     },
-    getErrorMessage: getEncounterOrderRequestErrorMessage,
+    getErrorMessage: (error: unknown) =>
+      getEncounterOrderRequestErrorMessage(error, locale),
     getFieldErrors: (error: unknown) => {
       if (error instanceof OrderClinicalFormSubmitError) return error.fields;
       return resolveOrderClinicalServerFeedback(error).fields;

@@ -33,8 +33,7 @@ export default function AddExceptionDialog({
   onSubmit,
   enabledDays = [],
 }: AddExceptionDialogProps) {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
   const [date, setDate] = useState("");
   const [exceptionType, setExceptionType] =
     useState<ExceptionFormValues["exceptionType"]>("closed");
@@ -48,22 +47,22 @@ export default function AddExceptionDialog({
   const dayLabels = useMemo(
     () =>
       ({
-        Sunday: tr("الأحد", "Sunday"),
-        Monday: tr("الإثنين", "Monday"),
-        Tuesday: tr("الثلاثاء", "Tuesday"),
-        Wednesday: tr("الأربعاء", "Wednesday"),
-        Thursday: tr("الخميس", "Thursday"),
-        Friday: tr("الجمعة", "Friday"),
-        Saturday: tr("السبت", "Saturday"),
+        Sunday: t("doctor.schedule.exception.days.sunday"),
+        Monday: t("doctor.schedule.exception.days.monday"),
+        Tuesday: t("doctor.schedule.exception.days.tuesday"),
+        Wednesday: t("doctor.schedule.exception.days.wednesday"),
+        Thursday: t("doctor.schedule.exception.days.thursday"),
+        Friday: t("doctor.schedule.exception.days.friday"),
+        Saturday: t("doctor.schedule.exception.days.saturday"),
       }) as Record<ScheduleDayKey, string>,
-    [locale],
+    [t],
   );
 
   const typeLabel = useMemo(() => {
     return exceptionType === "closed"
-      ? tr("يوم مغلق", "Closed day")
-      : tr("ساعات مخصصة", "Custom hours");
-  }, [exceptionType, locale]);
+      ? t("doctor.schedule.exception.closedDay")
+      : t("doctor.schedule.exception.customHours");
+  }, [exceptionType, t]);
 
   // Add new slot
   const handleAddSlot = () => {
@@ -91,7 +90,7 @@ export default function AddExceptionDialog({
     if (!selectedDate) {
       setErrors((prev) => ({
         ...prev,
-        date: tr("يرجى اختيار التاريخ", "Please select a date"),
+        date: t("doctor.schedule.exception.validation.dateRequired"),
       }));
       return false;
     }
@@ -107,15 +106,15 @@ export default function AddExceptionDialog({
     }) as ScheduleDayKey;
 
     if (!enabledDays.includes(dayName)) {
-      const available = enabledDays.map((d) => dayLabels[d]).join(
-        locale === "ar" ? "، " : ", ",
-      );
+      const available = enabledDays
+        .map((d) => dayLabels[d])
+        .join(locale === "ar" ? "، " : ", ");
       setErrors((prev) => ({
         ...prev,
-        date: tr(
-          `لا يمكن إضافة استثناء في يوم ${dayLabels[dayName]} لأنه غير موجود في جدول العمل الأسبوعي. الأيام المتاحة: ${available}`,
-          `Cannot add an exception on ${dayLabels[dayName]} because it is not in the weekly schedule. Available days: ${available}`,
-        ),
+        date: t("doctor.schedule.exception.validation.dateNotInSchedule", {
+          day: dayLabels[dayName],
+          availableDays: available,
+        }),
       }));
       return false;
     }
@@ -139,9 +138,8 @@ export default function AddExceptionDialog({
 
     if (!startTime) {
       if (!newSlotErrors[index]) newSlotErrors[index] = {};
-      newSlotErrors[index].startTime = tr(
-        "يرجى إدخال وقت البداية",
-        "Please enter a start time",
+      newSlotErrors[index].startTime = t(
+        "doctor.schedule.exception.validation.startTimeRequired",
       );
     } else {
       if (newSlotErrors[index]) delete newSlotErrors[index].startTime;
@@ -149,9 +147,8 @@ export default function AddExceptionDialog({
 
     if (!endTime) {
       if (!newSlotErrors[index]) newSlotErrors[index] = {};
-      newSlotErrors[index].endTime = tr(
-        "يرجى إدخال وقت النهاية",
-        "Please enter an end time",
+      newSlotErrors[index].endTime = t(
+        "doctor.schedule.exception.validation.endTimeRequired",
       );
     } else {
       if (newSlotErrors[index]) delete newSlotErrors[index].endTime;
@@ -166,9 +163,8 @@ export default function AddExceptionDialog({
 
       if (endMinutes <= startMinutes) {
         if (!newSlotErrors[index]) newSlotErrors[index] = {};
-        newSlotErrors[index].endTime = tr(
-          "وقت النهاية يجب أن يكون بعد وقت البداية",
-          "End time must be after start time",
+        newSlotErrors[index].endTime = t(
+          "doctor.schedule.exception.validation.endTimeAfterStart",
         );
       } else {
         if (newSlotErrors[index]) delete newSlotErrors[index].endTime;
@@ -194,7 +190,7 @@ export default function AddExceptionDialog({
 
     // Validate date
     if (!date) {
-      newErrors.date = tr("يرجى اختيار التاريخ", "Please select a date");
+      newErrors.date = t("doctor.schedule.exception.validation.dateRequired");
       isValid = false;
     } else if (!validateDate(date)) {
       isValid = false;
@@ -209,17 +205,15 @@ export default function AddExceptionDialog({
       slots.forEach((slot, index) => {
         if (!slot.startTime) {
           if (!slotErrors[index]) slotErrors[index] = {};
-          slotErrors[index].startTime = tr(
-            "يرجى إدخال وقت البداية",
-            "Please enter a start time",
+          slotErrors[index].startTime = t(
+            "doctor.schedule.exception.validation.startTimeRequired",
           );
           isValid = false;
         }
         if (!slot.endTime) {
           if (!slotErrors[index]) slotErrors[index] = {};
-          slotErrors[index].endTime = tr(
-            "يرجى إدخال وقت النهاية",
-            "Please enter an end time",
+          slotErrors[index].endTime = t(
+            "doctor.schedule.exception.validation.endTimeRequired",
           );
           isValid = false;
         }
@@ -232,9 +226,8 @@ export default function AddExceptionDialog({
 
           if (endMinutes <= startMinutes) {
             if (!slotErrors[index]) slotErrors[index] = {};
-            slotErrors[index].endTime = tr(
-              "وقت النهاية يجب أن يكون بعد وقت البداية",
-              "End time must be after start time",
+            slotErrors[index].endTime = t(
+              "doctor.schedule.exception.validation.endTimeAfterStart",
             );
             isValid = false;
           }
@@ -341,20 +334,17 @@ export default function AddExceptionDialog({
                   <button
                     type="button"
                     className="absolute start-6 top-6 flex h-9 w-9 items-center justify-center rounded-f6l text-[#667085] hover:bg-[#F2F4F7]"
-                    aria-label={tr("إغلاق", "Close")}
+                    aria-label={t("doctor.schedule.exception.close")}
                   >
                     <X className="h-5 w-5" />
                   </button>
                 </Dialog.Close>
 
                 <Dialog.Title className="text-center font-cairo text-[20px] font-extrabold leading-[26px] text-[#111827]">
-                  {tr("إضافة استثناء جديد", "Add new exception")}
+                  {t("doctor.schedule.exception.title")}
                 </Dialog.Title>
                 <Dialog.Description className="mt-1 text-center font-cairo text-[12px] font-semibold leading-[18px] text-[#98A2B3]">
-                  {tr(
-                    "حدد تاريخ ووقت الاستثناء",
-                    "Choose the exception date and time",
-                  )}
+                  {t("doctor.schedule.exception.subtitle")}
                 </Dialog.Description>
 
                 <form
@@ -395,10 +385,7 @@ export default function AddExceptionDialog({
                         ...prev,
                         general:
                           error?.message ||
-                          tr(
-                            "حدث خطأ أثناء إضافة الاستثناء. يرجى المحاولة مرة أخرى.",
-                            "Something went wrong while adding the exception. Please try again.",
-                          ),
+                          t("doctor.schedule.exception.generalError"),
                       }));
                     } finally {
                       setIsSubmitting(false);
@@ -407,7 +394,7 @@ export default function AddExceptionDialog({
                 >
                   <div>
                     <div className="mb-2 text-start font-cairo text-[13px] font-extrabold text-[#111827]">
-                      {tr("التاريخ", "Date")}
+                      {t("doctor.schedule.exception.date")}
                     </div>
                     <input
                       type="date"
@@ -429,7 +416,7 @@ export default function AddExceptionDialog({
 
                   <div>
                     <div className="mb-2 text-start font-cairo text-[13px] font-extrabold text-[#111827]">
-                      {tr("نوع الاستثناء", "Exception type")}
+                      {t("doctor.schedule.exception.exceptionType")}
                     </div>
                     <StyledSelect
                       value={exceptionType}
@@ -446,28 +433,25 @@ export default function AddExceptionDialog({
                       options={[
                         {
                           value: "closed",
-                          label: tr(
-                            "يوم مغلق (لا توجد فترات متاحة)",
-                            "Closed day (no available slots)",
+                          label: t(
+                            "doctor.schedule.exception.closedDayDescription",
                           ),
                         },
                         {
                           value: "custom_hours",
-                          label: tr("ساعات عمل مخصصة", "Custom working hours"),
+                          label: t(
+                            "doctor.schedule.exception.customHoursDescription",
+                          ),
                         },
                       ]}
-                      listboxAriaLabel={tr("نوع الاستثناء", "Exception type")}
+                      listboxAriaLabel={t(
+                        "doctor.schedule.exception.exceptionType",
+                      )}
                     />
                     <p className="mt-2 text-start font-cairo text-[11px] font-semibold text-[#667085]">
                       {exceptionType === "closed"
-                        ? tr(
-                            "سيتم إغلاق هذا اليوم بالكامل ولن يكون متاحاً للحجز",
-                            "This day will be fully closed and unavailable for booking",
-                          )
-                        : tr(
-                            "حدد ساعات العمل المخصصة لهذا اليوم",
-                            "Set custom working hours for this day",
-                          )}
+                        ? t("doctor.schedule.exception.closedDayInfo")
+                        : t("doctor.schedule.exception.customHoursInfo")}
                     </p>
                   </div>
 
@@ -475,14 +459,14 @@ export default function AddExceptionDialog({
                     <div>
                       <div className="mb-2 flex items-center justify-between">
                         <div className="text-start font-cairo text-[13px] font-extrabold text-[#111827]">
-                          {tr("الفترات المتاحة", "Available slots")}
+                          {t("doctor.schedule.exception.timeSlots")}
                         </div>
                         <button
                           type="button"
                           onClick={handleAddSlot}
                           className="rounded-[6px] bg-primary/10 px-3 py-1 font-cairo text-[11px] font-extrabold text-primary hover:bg-primary/20"
                         >
-                          + {tr("إضافة فترة", "Add slot")}
+                          + {t("doctor.schedule.exception.addSlot")}
                         </button>
                       </div>
                       <div className="space-y-3">
@@ -534,7 +518,7 @@ export default function AddExceptionDialog({
                               </div>
 
                               <span className="font-cairo text-[12px] font-semibold text-[#667085] mt-2">
-                                {tr("إلى", "to")}
+                                {t("doctor.schedule.exception.to")}
                               </span>
 
                               {/* End Time */}
@@ -600,14 +584,13 @@ export default function AddExceptionDialog({
 
                   <div>
                     <div className="mb-2 text-start font-cairo text-[13px] font-extrabold text-[#111827]">
-                      {tr("ملاحظة (اختياري)", "Note (optional)")}
+                      {t("doctor.schedule.exception.noteOptional")}
                     </div>
                     <textarea
                       value={note}
                       onChange={(e) => setNote(e.target.value)}
-                      placeholder={tr(
-                        "مثال: إجازة رسمية - عيد الفطر",
-                        "e.g. Public holiday — Eid",
+                      placeholder={t(
+                        "doctor.schedule.exception.notePlaceholderExample",
                       )}
                       className="min-h-[88px] w-full resize-none rounded-[6px] border-[1.82px] border-primary bg-white px-4 py-3 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3]"
                     />
@@ -630,7 +613,7 @@ export default function AddExceptionDialog({
                         disabled={isSubmitting}
                         className="h-[40px] rounded-[6px] border border-[#E5E7EB] bg-white px-6 font-cairo text-[13px] font-extrabold text-[#344054] hover:bg-[#F9FAFB] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {tr("إلغاء", "Cancel")}
+                        {t("doctor.schedule.exception.cancel")}
                       </button>
                     </Dialog.Close>
 
@@ -661,10 +644,10 @@ export default function AddExceptionDialog({
                               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                             ></path>
                           </svg>
-                          {tr("جارِ الحفظ...", "Saving...")}
+                          {t("doctor.schedule.exception.adding")}
                         </>
                       ) : (
-                        tr("إضافة", "Add")
+                        t("doctor.schedule.exception.add")
                       )}
                     </button>
                   </div>
@@ -679,4 +662,3 @@ export default function AddExceptionDialog({
     </Dialog.Root>
   );
 }
-

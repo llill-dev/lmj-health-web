@@ -6,6 +6,7 @@ import {
   doctorInitial,
   formatDoctorDisplayName,
 } from '@/components/doctor/profile-settings/doctor-profile-utils';
+import { useI18n } from '@/i18n/provider';
 
 export default function DoctorProfileHeroCard({
   fullName,
@@ -24,8 +25,9 @@ export default function DoctorProfileHeroCard({
   ratingCount?: number | null;
   className?: string;
 }) {
-  const displayName = formatDoctorDisplayName(fullName);
-  const initial = doctorInitial(fullName);
+  const { t, locale } = useI18n();
+  const displayName = formatDoctorDisplayName(fullName, t, locale);
+  const initial = doctorInitial(fullName, locale);
   const specialty = specialization?.trim() || '—';
   const showRating = rating != null && !Number.isNaN(rating);
 
@@ -47,7 +49,9 @@ export default function DoctorProfileHeroCard({
 
       <span className="absolute start-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 font-cairo text-[11px] font-extrabold text-primary shadow-sm">
         <BadgeCheck className="h-3.5 w-3.5" aria-hidden />
-        {isApproved ? 'حالة الحساب: نشط' : 'حالة الحساب: قيد المراجعة'}
+        {isApproved
+          ? t('doctor.profileSettings.hero.statusActive')
+          : t('doctor.profileSettings.hero.statusPending')}
       </span>
 
       <div className="relative flex flex-col items-center text-center">
@@ -78,7 +82,12 @@ export default function DoctorProfileHeroCard({
             <span>{rating.toFixed(1)}</span>
             {ratingCount != null ? (
               <span className="font-semibold text-[#667085]">
-                ({ratingCount} {ratingCount === 1 ? 'تقييم' : 'تقييمات'})
+                (
+                {ratingCount}{' '}
+                {ratingCount === 1
+                  ? t('doctor.profileSettings.hero.ratingSingular')
+                  : t('doctor.profileSettings.hero.ratingPlural')}
+                )
               </span>
             ) : null}
           </div>

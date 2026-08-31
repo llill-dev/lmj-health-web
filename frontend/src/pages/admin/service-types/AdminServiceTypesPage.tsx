@@ -32,8 +32,7 @@ import { useI18n } from "@/i18n/provider";
 type ServiceTypeStatusFilter = "all" | "active" | "inactive";
 
 export default function AdminServiceTypesPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
   const numberLocale = locale === "ar" ? "ar-SA" : "en-US";
 
   const { toast } = useToast();
@@ -83,8 +82,7 @@ export default function AdminServiceTypesPage() {
     1,
     Math.ceil(filteredServiceTypes.length / Math.max(pageSize, 1)),
   );
-  const hasActiveFilters =
-    search.trim() !== "" || statusFilter !== "all";
+  const hasActiveFilters = search.trim() !== "" || statusFilter !== "all";
   const currentPage = Math.min(page, totalPages);
   const visibleServiceTypes = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
@@ -133,29 +131,17 @@ export default function AdminServiceTypesPage() {
       body: { isActive: next },
     });
     if (next) {
-      toast(
-        tr(
-          `تم تفعيل نوع الخدمة «${label}». سيظهر في القوائم المرتبطة عند اكتمال المزامنة.`,
-          `Service type "${label}" is now active and appears in related lists after sync completes.`,
-        ),
-        {
-          title: tr("تم التفعيل", "Activated"),
-          variant: "success",
-          durationMs: 3800,
-        },
-      );
+      toast(t("admin.serviceTypes.toast.activatedMessage", { label }), {
+        title: t("admin.serviceTypes.toast.activated"),
+        variant: "success",
+        durationMs: 3800,
+      });
     } else {
-      toast(
-        tr(
-          `عُطّل نوع الخدمة «${label}». لن يُقترح للمستخدمين حتى تُعيد تفعيله.`,
-          `Service type "${label}" is disabled and will not be suggested until reactivated.`,
-        ),
-        {
-          title: tr("تم التعطيل", "Disabled"),
-          variant: "info",
-          durationMs: 4000,
-        },
-      );
+      toast(t("admin.serviceTypes.toast.disabledMessage", { label }), {
+        title: t("admin.serviceTypes.toast.disabled"),
+        variant: "info",
+        durationMs: 4000,
+      });
     }
     setConfirmOpen(false);
     setConfirmTarget(null);
@@ -164,37 +150,31 @@ export default function AdminServiceTypesPage() {
   return (
     <>
       <Helmet>
-        <title>{tr("أنواع الخدمات", "Service types")} • LMJ Health</title>
+        <title>{t("admin.serviceTypes.page.title")} • LMJ Health</title>
       </Helmet>
 
       <div dir={dir} lang={locale}>
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title={tr("أنواع الخدمات", "Service types")}
-          subtitle={tr(
-            "إدارة أنواع الخدمات والـ schema الديناميكي",
-            "Manage service types and dynamic schema",
-          )}
+          title={t("admin.serviceTypes.page.title")}
+          subtitle={t("admin.serviceTypes.overview.subtitle")}
           headerIcon={<Settings className="h-8 w-8 text-white" />}
-          actionLabel={tr("إضافة نوع خدمة", "Add service type")}
+          actionLabel={t("admin.serviceTypes.actionLabel")}
           onActionClick={openCreate}
           kpis={[
             {
               key: "total",
               icon: <Settings className="h-5 w-5 shrink-0" />,
               value: isAwaitingData ? "—" : filteredServiceTypes.length,
-              label: tr("أنواع مسجّلة", "Registered types"),
+              label: t("admin.serviceTypes.kpi.registered"),
             },
           ]}
         />
 
         <section className="mt-4 rounded-[12px] border border-[#D6EEEC] bg-[#F3FBFA] px-5 py-4 shadow-[0_10px_24px_rgba(20,130,131,0.08)]">
           <div className="font-cairo text-[13px] font-extrabold text-[#0F766E]">
-            {tr(
-              "نوع الخدمة يعرّف الاسم والـ slug والحقول الديناميكية فقط. بعد حفظ النوع يمكنك فتح قائمة مزوّديه، بينما تبقى إدارة المنشآت والخدمات الفعلية في شاشاتها المنفصلة.",
-              "A service type defines only the name, slug, and dynamic fields. After saving the type, you can open its providers list, while facilities and actual services stay managed in their separate screens.",
-            )}
+            {t("admin.serviceTypes.disclaimer")}
           </div>
         </section>
 
@@ -207,10 +187,7 @@ export default function AdminServiceTypesPage() {
                   setSearch(event.target.value);
                   setPage(1);
                 }}
-                placeholder={tr(
-                  "ابحث باسم النوع أو الـ slug...",
-                  "Search by type name or slug…",
-                )}
+                placeholder={t("admin.serviceTypes.search.placeholder")}
                 className="h-[44px] w-full rounded-[10px] border border-[#E5E7EB] bg-white ps-11 pe-4 text-start font-cairo text-[12px] font-bold text-[#111827] outline-none transition focus:border-primary placeholder:text-[#98A2B3]"
               />
               <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
@@ -224,12 +201,12 @@ export default function AdminServiceTypesPage() {
               }}
               className="h-[44px] rounded-[10px] border border-[#E5E7EB] bg-white px-3 text-start font-cairo text-[12px] font-bold text-[#111827] outline-none transition focus:border-primary"
             >
-              <option value="all">{tr("كل الحالات", "All statuses")}</option>
+              <option value="all">{t("admin.serviceTypes.filter.all")}</option>
               <option value="active">
-                {tr("الأنواع النشطة", "Active types")}
+                {t("admin.serviceTypes.filter.active")}
               </option>
               <option value="inactive">
-                {tr("الأنواع المعطلة", "Inactive types")}
+                {t("admin.serviceTypes.filter.inactive")}
               </option>
             </select>
 
@@ -239,10 +216,12 @@ export default function AdminServiceTypesPage() {
               disabled={isRefetching}
               className="inline-flex h-[44px] items-center justify-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <Loader2 className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} />
+              <Loader2
+                className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`}
+              />
               {isRefetching
-                ? tr("جارٍ التحديث...", "Refreshing...")
-                : tr("تحديث", "Refresh")}
+                ? t("admin.serviceTypes.refresh.refreshing")
+                : t("admin.serviceTypes.refresh.normal")}
             </button>
           </div>
         </section>
@@ -250,7 +229,7 @@ export default function AdminServiceTypesPage() {
         {isRefetching && !isAwaitingData ? (
           <div className="mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]">
             <Loader2 className="h-4 w-4 animate-spin" />
-            {tr("جارٍ تحديث أنواع الخدمات...", "Refreshing service types...")}
+            {t("admin.serviceTypes.refresh.types")}
           </div>
         ) : null}
 
@@ -265,7 +244,7 @@ export default function AdminServiceTypesPage() {
         {isError && (
           <div className="mt-6 rounded-[12px] border border-red-200 bg-red-50 px-4 py-3 text-start">
             <p className="font-cairo text-[13px] font-bold text-red-800">
-              {tr("تعذر تحميل الأنواع.", "Failed to load service types.")}
+              {t("admin.serviceTypes.error.load")}
             </p>
             <p className="mt-1 font-cairo text-[12px] text-red-700">
               {userFacingErrorMessage(error, "—")}
@@ -275,7 +254,7 @@ export default function AdminServiceTypesPage() {
               onClick={() => void refetch()}
               className="mt-2 font-cairo text-[12px] font-extrabold text-primary underline"
             >
-              {tr("إعادة المحاولة", "Retry")}
+              {t("admin.serviceTypes.error.retry")}
             </button>
           </div>
         )}
@@ -285,14 +264,8 @@ export default function AdminServiceTypesPage() {
             {filteredServiceTypes.length === 0 ? (
               <p className="px-6 py-12 text-center font-cairo text-[14px] font-semibold text-[#98A2B3]">
                 {hasActiveFilters
-                  ? tr(
-                      "لا توجد أنواع خدمات مطابقة للفلاتر أو البحث الحالي.",
-                      "No service types match the current filters or search.",
-                    )
-                  : tr(
-                      "لا توجد أنواع خدمات بعد. استخدم «إضافة نوع خدمة».",
-                      "No service types yet. Use “Add service type”.",
-                    )}
+                  ? t("admin.serviceTypes.empty.filtered")
+                  : t("admin.serviceTypes.empty.noData")}
               </p>
             ) : (
               <div className="divide-y divide-[#EEF2F6]">
@@ -315,7 +288,7 @@ export default function AdminServiceTypesPage() {
                             type="button"
                             onClick={() => openEdit(s)}
                             className="mt-0.5 flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-[6px] bg-primary text-white shadow-[0_12px_24px_rgba(15,143,139,0.25)] transition hover:brightness-105"
-                            aria-label={tr("الحقول", "Fields")}
+                            aria-label={t("admin.serviceTypes.row.fields")}
                           >
                             <Settings className="h-5 w-5" />
                           </button>
@@ -328,7 +301,9 @@ export default function AdminServiceTypesPage() {
                                 {s.slug}
                               </span>
                               <span className="mx-2">•</span>
-                              {tr(`${nFields} حقل`, `${nFields} fields`)}
+                              {t("admin.serviceTypes.row.fieldsCount", {
+                                count: nFields,
+                              })}
                               <span className="mx-2">•</span>v
                               {s.schemaVersion ?? "—"}
                             </div>
@@ -345,13 +320,13 @@ export default function AdminServiceTypesPage() {
                           className="inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-[#CFFAFE] bg-white px-3 font-cairo text-[12px] font-extrabold text-primary transition hover:bg-[#ECFEFF]"
                         >
                           <Building2 className="h-4 w-4" />
-                          {tr("المزودون", "Providers")}
+                          {t("admin.serviceTypes.row.providers")}
                         </Link>
                         <button
                           type="button"
                           onClick={() => openEdit(s)}
                           className="flex h-9 w-9 items-center justify-center rounded-[10px] text-primary transition hover:bg-[#E7FBFA]"
-                          aria-label={tr("تعديل", "Edit")}
+                          aria-label={t("admin.serviceTypes.row.edit")}
                         >
                           <Edit className="h-4 w-4" />
                         </button>
@@ -367,11 +342,11 @@ export default function AdminServiceTypesPage() {
                         {s.isActive ? (
                           <span className="ms-1 inline-flex h-[24px] items-center gap-1.5 rounded-[10px] bg-[#DCFCE7] px-3 font-cairo text-[12px] font-extrabold text-[#16A34A]">
                             <Check className="h-4 w-4" />
-                            {tr("نشط", "Active")}
+                            {t("admin.serviceTypes.status.active")}
                           </span>
                         ) : (
                           <span className="ms-1 inline-flex h-[24px] items-center gap-1.5 rounded-[10px] bg-[#F3F4F6] px-3 font-cairo text-[12px] font-extrabold text-[#6B7280]">
-                            {tr("معطّل", "Inactive")}
+                            {t("admin.serviceTypes.status.inactive")}
                           </span>
                         )}
                       </div>
@@ -387,10 +362,14 @@ export default function AdminServiceTypesPage() {
           <section className="mt-5 rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div className="font-cairo text-[12px] font-bold text-[#667085]">
-                {tr(
-                  `عرض ${rangeStart.toLocaleString(numberLocale)}–${rangeEnd.toLocaleString(numberLocale)} من ${filteredServiceTypes.length.toLocaleString(numberLocale)} نوع · صفحة ${currentPage.toLocaleString(numberLocale)} / ${totalPages.toLocaleString(numberLocale)}`,
-                  `Showing ${rangeStart.toLocaleString(numberLocale)}–${rangeEnd.toLocaleString(numberLocale)} of ${filteredServiceTypes.length.toLocaleString(numberLocale)} types · page ${currentPage.toLocaleString(numberLocale)} / ${totalPages.toLocaleString(numberLocale)}`,
-                )}
+                {t("admin.serviceTypes.pagination.summary", {
+                  start: rangeStart.toLocaleString(numberLocale),
+                  end: rangeEnd.toLocaleString(numberLocale),
+                  total:
+                    filteredServiceTypes.length.toLocaleString(numberLocale),
+                  page: currentPage.toLocaleString(numberLocale),
+                  totalPages: totalPages.toLocaleString(numberLocale),
+                })}
               </div>
 
               <Pagination

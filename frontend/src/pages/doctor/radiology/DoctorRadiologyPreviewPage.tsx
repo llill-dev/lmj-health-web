@@ -1,39 +1,38 @@
-import { useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import ConfirmActionDialog from '@/components/doctor/confirm-action-dialog';
+import { useState } from "react";
+import { Helmet } from "react-helmet-async";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import ConfirmActionDialog from "@/components/doctor/confirm-action-dialog";
 import {
   RadiologyPreviewActions,
   RadiologyPreviewBanner,
   RadiologyPreviewDocument,
-} from '@/components/doctor/radiology/preview';
-import DoctorRadiologyHubPage from '@/pages/doctor/radiology/DoctorRadiologyHubPage';
-import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
-import { DoctorDocumentPreviewSkeleton } from '@/components/doctor/shared/skeletons';
-import { useToast } from '@/components/ui/ToastProvider';
+} from "@/components/doctor/radiology/preview";
+import DoctorRadiologyHubPage from "@/pages/doctor/radiology/DoctorRadiologyHubPage";
+import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
+import { DoctorDocumentPreviewSkeleton } from "@/components/doctor/shared/skeletons";
+import { useToast } from "@/components/ui/ToastProvider";
 import {
   useEncounterRadiologyWorkspace,
   useRadiologyPreviewPage,
-} from '@/hooks/doctor';
-import { getUserFacingRequestErrorMessage } from '@/lib/api';
-import { useRetryAction } from '@/lib/query/useRetryAction';
-import { readAuthUser } from '@/lib/cookies';
+} from "@/hooks/doctor";
+import { getUserFacingRequestErrorMessage } from "@/lib/api";
+import { useRetryAction } from "@/lib/query/useRetryAction";
+import { readAuthUser } from "@/lib/cookies";
 import {
   generateDoctorOrderDocumentPdf,
   openPdfBlobInNewTab,
-} from '@/lib/doctor/orders/doctorOrderDocuments';
-import { useI18n } from '@/i18n/provider';
+} from "@/lib/doctor/orders/doctorOrderDocuments";
+import { useI18n } from "@/i18n/provider";
 
 export default function DoctorRadiologyPreviewPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const { t, locale, dir } = useI18n();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
-  const doctorId = readAuthUser()?.actorIds?.doctorId ?? '';
+  const doctorId = readAuthUser()?.actorIds?.doctorId ?? "";
 
-  const patientId = searchParams.get('patientId') ?? '';
-  const encounterId = searchParams.get('encounterId') ?? '';
+  const patientId = searchParams.get("patientId") ?? "";
+  const encounterId = searchParams.get("encounterId") ?? "";
 
   const preview = useRadiologyPreviewPage(doctorId, patientId, encounterId);
   const { retry: retryPreview, retrying: retryingPreview } = useRetryAction(
@@ -66,16 +65,16 @@ export default function DoctorRadiologyPreviewPage() {
         response.preview?.pdfUrl ??
         response.preview?.url;
       if (url) {
-        window.open(url, '_blank', 'noopener,noreferrer');
+        window.open(url, "_blank", "noopener,noreferrer");
         return;
       }
       const blob = await generateDoctorOrderDocumentPdf({
-        sourceType: 'imaging_order' as const,
+        sourceType: "imaging_order" as const,
         sourceId: orderId,
       });
       openPdfBlobInNewTab(blob, `imaging-order-${orderId}.pdf`);
     } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), { variant: 'error' });
+      toast(getUserFacingRequestErrorMessage(error), { variant: "error" });
     } finally {
       setBusy(false);
     }
@@ -84,7 +83,7 @@ export default function DoctorRadiologyPreviewPage() {
   return (
     <>
       <Helmet>
-        <title>{tr('معاينة طلب الأشعة', 'Radiology order preview')} • LMJ Health</title>
+        <title>{t("doctor.radiologyPreview.pageTitle")} • LMJ Health</title>
       </Helmet>
 
       <div dir={dir} lang={locale} className="w-full pb-8 sm:pb-10">
@@ -98,7 +97,7 @@ export default function DoctorRadiologyPreviewPage() {
           <DoctorDocumentPreviewSkeleton />
         ) : preview.isError || !preview.previewVm ? (
           <DoctorListErrorState
-            title={tr('تعذّر تحميل المعاينة', 'Failed to load the preview')}
+            title={t("doctor.radiologyPreview.loadFailed")}
             brief={getUserFacingRequestErrorMessage(preview.error)}
             retrying={retryingPreview}
             onRetry={() => void retryPreview()}
@@ -119,25 +118,30 @@ export default function DoctorRadiologyPreviewPage() {
         <ConfirmActionDialog
           open={finalizeOpen}
           onOpenChange={setFinalizeOpen}
-          title={tr('اعتماد نهائي', 'Final approval')}
-          description={tr(
-            `اعتماد طلب الأشعة للمريض ${preview.previewVm?.patientName ?? '—'}`,
-            `Approve the radiology order for patient ${preview.previewVm?.patientName ?? '—'}`,
-          )}
-          confirmLabel={tr('تأكيد', 'Confirm')}
+          title={t("doctor.radiologyPreview.finalizeTitle")}
+          description={
+            locale === "ar"
+              ? `اعتماد طلب الأشعة للمريض ${preview.previewVm?.patientName ?? "—"}`
+              : `Approve the radiology order for patient ${preview.previewVm?.patientName ?? "—"}`
+          }
+          confirmLabel={t("doctor.radiologyPreview.confirm")}
           confirmDisabled={busy || workspace.isBusy}
           onConfirm={async () => {
             setBusy(true);
             try {
               await workspace.finalize();
-              toast(tr('تم اعتماد الطلب.', 'The order has been approved.'), { variant: 'success' });
+              toast(t("doctor.radiologyPreview.approved"), {
+                variant: "success",
+              });
               setFinalizeOpen(false);
               navigate(
                 `/doctor/encounters/${patientId}/${encounterId}/summary`,
                 { replace: true },
               );
             } catch (error) {
-              toast(getUserFacingRequestErrorMessage(error), { variant: 'error' });
+              toast(getUserFacingRequestErrorMessage(error), {
+                variant: "error",
+              });
             } finally {
               setBusy(false);
             }

@@ -1,22 +1,22 @@
-import { Helmet } from 'react-helmet-async';
-import { ChevronLeft, Plus } from 'lucide-react';
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useDebounce } from 'use-debounce';
-import { AdminServicesContent } from '@/components/admin/services/AdminServicesContent';
-import { AdminServicesHeader } from '@/components/admin/services/AdminServicesHeader';
-import { AdminServicesToolbar } from '@/components/admin/services/AdminServicesToolbar';
-import { UpsertServiceTypeDialog } from '@/components/admin/service-types';
-import CreateServiceProviderDialog from '@/components/admin/service-providers/dialogs/CreateServiceProviderDialog';
-import EditServiceProviderDialog from '@/components/admin/service-providers/dialogs/EditServiceProviderDialog';
-import UpdateProviderStatusDialog from '@/components/admin/service-providers/dialogs/UpdateProviderStatusDialog';
-import { ADMIN_SERVICES_PAGE_SIZE } from '@/components/admin/services/tabsConfig';
+import { Helmet } from "react-helmet-async";
+import { ChevronLeft, Plus } from "lucide-react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useDebounce } from "use-debounce";
+import { AdminServicesContent } from "@/components/admin/services/AdminServicesContent";
+import { AdminServicesHeader } from "@/components/admin/services/AdminServicesHeader";
+import { AdminServicesToolbar } from "@/components/admin/services/AdminServicesToolbar";
+import { UpsertServiceTypeDialog } from "@/components/admin/service-types";
+import CreateServiceProviderDialog from "@/components/admin/service-providers/dialogs/CreateServiceProviderDialog";
+import EditServiceProviderDialog from "@/components/admin/service-providers/dialogs/EditServiceProviderDialog";
+import UpdateProviderStatusDialog from "@/components/admin/service-providers/dialogs/UpdateProviderStatusDialog";
+import { ADMIN_SERVICES_PAGE_SIZE } from "@/components/admin/services/tabsConfig";
 import {
   useServiceProvidersList,
   useServiceTypesList,
-} from '@/hooks/admin/services/useAdminServices';
-import type { ManagedServiceProvider, ProviderStatus } from '@/lib/admin/types';
-import { useI18n } from '@/i18n/provider';
+} from "@/hooks/admin/services/useAdminServices";
+import type { ManagedServiceProvider, ProviderStatus } from "@/lib/admin/types";
+import { useI18n } from "@/i18n/provider";
 
 function resolveProviderLabel(provider: ManagedServiceProvider): string {
   if (provider.name?.trim()) return provider.name.trim();
@@ -25,12 +25,11 @@ function resolveProviderLabel(provider: ManagedServiceProvider): string {
 }
 
 export default function AdminServicesPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const { t, locale, dir } = useI18n();
 
-  const [selectedTypeId, setSelectedTypeId] = useState('');
-  const [status, setStatus] = useState<'' | ProviderStatus>('');
-  const [searchInput, setSearchInput] = useState('');
+  const [selectedTypeId, setSelectedTypeId] = useState("");
+  const [status, setStatus] = useState<"" | ProviderStatus>("");
+  const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch] = useDebounce(searchInput, 400);
   const [page, setPage] = useState(1);
 
@@ -63,7 +62,7 @@ export default function AdminServicesPage() {
     setPage(1);
   };
 
-  const handleStatusChange = (next: '' | ProviderStatus) => {
+  const handleStatusChange = (next: "" | ProviderStatus) => {
     setStatus(next);
     setPage(1);
   };
@@ -86,7 +85,7 @@ export default function AdminServicesPage() {
   return (
     <>
       <Helmet>
-        <title>{tr('دليل الخدمات', 'Services directory')} • LMJ Health</title>
+        <title>{t("admin.services.page.title")} • LMJ Health</title>
       </Helmet>
 
       <CreateServiceProviderDialog
@@ -107,7 +106,7 @@ export default function AdminServicesPage() {
           onOpenChange={setStatusOpen}
           providerId={selectedProvider.id}
           providerName={resolveProviderLabel(selectedProvider)}
-          currentStatus={selectedProvider.status || 'draft'}
+          currentStatus={selectedProvider.status || "draft"}
           isServiceTypeActive={selectedProvider.serviceType.isActive}
           onSuccess={() => providersQuery.refetch()}
         />
@@ -119,33 +118,30 @@ export default function AdminServicesPage() {
 
       <div dir={dir} lang={locale}>
         <AdminServicesHeader
-          actionLabel={tr('إضافة مزود', 'Add provider')}
-          actionIcon={<Plus className='h-4 w-4' />}
+          actionLabel={t("admin.services.actionLabel")}
+          actionIcon={<Plus className="h-4 w-4" />}
           onAction={() => setCreateOpen(true)}
         />
 
-        <section className='mt-4 flex flex-col gap-3 rounded-[12px] border border-[#D6EEEC] bg-[#F3FBFA] px-5 py-4 shadow-[0_10px_24px_rgba(20,130,131,0.08)] sm:flex-row sm:items-center sm:justify-between'>
-          <div className='font-cairo text-[13px] font-extrabold text-[#0F766E]'>
-            {tr(
-              'هذه الشاشة تعرض مزوّدي الخدمة الحقيقيين (مخابر، صيدليات، مراكز أشعة...) حسب نوع الخدمة المُعرَّف له. المنشآت الصحية المرتبطة بالأطباء تُدار من شاشة «المنشآت» المستقلة.',
-              'This screen browses real service providers (labs, pharmacies, imaging centers...) grouped by their service type. Doctor-linked medical facilities are managed from the separate Facilities screen.',
-            )}
+        <section className="mt-4 flex flex-col gap-3 rounded-[12px] border border-[#D6EEEC] bg-[#F3FBFA] px-5 py-4 shadow-[0_10px_24px_rgba(20,130,131,0.08)] sm:flex-row sm:items-center sm:justify-between">
+          <div className="font-cairo text-[13px] font-extrabold text-[#0F766E]">
+            {t("admin.services.disclaimer")}
           </div>
-          <div className='flex shrink-0 items-center gap-2'>
+          <div className="flex shrink-0 items-center gap-2">
             <button
-              type='button'
+              type="button"
               onClick={() => setServiceTypeOpen(true)}
-              className='inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#D6EEEC] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#0F766E] transition hover:bg-[#F0FDF4]'
+              className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#D6EEEC] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#0F766E] transition hover:bg-[#F0FDF4]"
             >
-              <Plus className='h-3.5 w-3.5' />
-              {tr('نوع خدمة جديد', 'New service type')}
+              <Plus className="h-3.5 w-3.5" />
+              {t("admin.services.newServiceType")}
             </button>
             <Link
-              to='/admin/service-types'
-              className='inline-flex h-[34px] items-center gap-1 rounded-[8px] border border-[#D6EEEC] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#0F766E] transition hover:bg-[#F0FDF4]'
+              to="/admin/service-types"
+              className="inline-flex h-[34px] items-center gap-1 rounded-[8px] border border-[#D6EEEC] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#0F766E] transition hover:bg-[#F0FDF4]"
             >
-              {tr('إدارة أنواع الخدمات', 'Manage service types')}
-              <ChevronLeft className='h-3.5 w-3.5' />
+              {t("admin.services.manageServiceTypes")}
+              <ChevronLeft className="h-3.5 w-3.5" />
             </Link>
           </div>
         </section>
@@ -159,7 +155,6 @@ export default function AdminServicesPage() {
           onStatusChange={handleStatusChange}
           searchInput={searchInput}
           onSearchChange={handleSearch}
-          locale={locale}
         />
 
         <AdminServicesContent
@@ -173,7 +168,6 @@ export default function AdminServicesPage() {
           onPageChange={setPage}
           onEditProvider={openEdit}
           onChangeStatus={openStatus}
-          locale={locale}
         />
       </div>
     </>

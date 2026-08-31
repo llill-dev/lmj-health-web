@@ -25,8 +25,7 @@ import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
 import { useI18n } from "@/i18n/provider";
 
 export default function DoctorProfileSettingsPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
   const navigate = useNavigate();
   const profileQuery = useDoctorProfile();
   const snapshotQuery = useDoctorHomeSnapshot();
@@ -55,7 +54,7 @@ export default function DoctorProfileSettingsPage() {
 
   const doctor = profileQuery.data.doctor;
   const user = doctor.user;
-  const fieldRows = buildProfileFieldRows(doctor);
+  const fieldRows = buildProfileFieldRows(doctor, t, locale);
   const consultationsCount =
     snapshotQuery.data?.snapshot?.counts?.consultations ?? 0;
   const experienceYears = parseExperienceYears(doctor.bio);
@@ -67,9 +66,7 @@ export default function DoctorProfileSettingsPage() {
   return (
     <>
       <Helmet>
-        <title>
-          {tr("الملف الشخصي • LMJ Health", "Profile • LMJ Health")}
-        </title>
+        <title>{t("doctor.profileSettings.pageTitle")} • LMJ Health</title>
       </Helmet>
 
       <div dir={dir} lang={locale} className="space-y-5 pb-8 sm:pb-10">
@@ -85,36 +82,33 @@ export default function DoctorProfileSettingsPage() {
             {
               key: "consultations",
               value: consultationsCount,
-              label: tr("استشارة", "Consultation"),
+              label: t("doctor.profileSettings.consultation"),
             },
             {
               key: "experience",
               value: experienceYears ?? "—",
-              label: tr("سنة خبرة", "Years experience"),
+              label: t("doctor.profileSettings.yearsExperience"),
             },
             {
               key: "rating",
               value: ratingValue,
-              label: tr("التقييم", "Rating"),
+              label: t("doctor.profileSettings.rating"),
             },
           ]}
         />
 
         <DoctorProfileInfoBanner>
-          {tr(
-            "لتعديل معلوماتك استخدم أزرار «تعديل المعلومات الشخصية» أو «تعديل المعلومات المهنية» أدناه. التعديلات المهنية تخضع لمراجعة الإدارة.",
-            "To update your details use “Edit personal info” or “Edit professional info” below. Professional edits require admin review.",
-          )}
+          {t("doctor.profileSettings.infoBanner")}
         </DoctorProfileInfoBanner>
 
         <DoctorProfileSectionCard
-          title={tr("المعلومات الشخصية", "Personal information")}
+          title={t("doctor.profileSettings.personalInfo")}
           icon={UserRound}
           fields={fieldRows.personal}
         />
 
         <DoctorProfileSectionCard
-          title={tr("المعلومات المهنية", "Professional information")}
+          title={t("doctor.profileSettings.professionalInfo")}
           icon={Briefcase}
           fields={fieldRows.professional}
         />
@@ -129,7 +123,7 @@ export default function DoctorProfileSettingsPage() {
             }
             className="flex h-[48px] w-full items-center justify-center rounded-[8px] border-[1.5px] border-primary bg-white font-cairo text-[14px] font-extrabold text-primary shadow-[0px_6px_16px_-4px_rgba(15,143,139,0.2)] transition hover:bg-[#F0FAFA]"
           >
-            {tr("تعديل المعلومات الشخصية", "Edit personal info")}
+            {t("doctor.profileSettings.editPersonal")}
           </button>
           <button
             type="button"
@@ -140,7 +134,7 @@ export default function DoctorProfileSettingsPage() {
             }
             className="flex h-[48px] w-full items-center justify-center rounded-[8px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_18px_30px_rgba(15,143,139,0.25)] transition hover:bg-[#0A7A77]"
           >
-            {tr("تعديل المعلومات المهنية", "Edit professional info")}
+            {t("doctor.profileSettings.editProfessional")}
           </button>
         </div>
 

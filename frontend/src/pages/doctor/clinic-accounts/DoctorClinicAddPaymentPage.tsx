@@ -25,12 +25,12 @@ import { useToast } from "@/components/ui/ToastProvider";
 import { cn } from "@/lib/utils/utils";
 import { useBillingAccess } from "@/hooks/billing/useBillingAccess";
 
-function buildMethodLabels(tr: (ar: string, en: string) => string): Record<string, string> {
+function buildMethodLabels(t: (key: string) => string): Record<string, string> {
   return {
-    cash: tr("نقدي", "Cash"),
-    card: tr("بطاقة", "Card"),
-    bank_transfer: tr("تحويل بنكي", "Bank transfer"),
-    insurance: tr("تأمين", "Insurance"),
+    cash: t("doctor.clinicAccounts.addPayment.method.cash"),
+    card: t("doctor.clinicAccounts.addPayment.method.card"),
+    bank_transfer: t("doctor.clinicAccounts.addPayment.method.bankTransfer"),
+    insurance: t("doctor.clinicAccounts.addPayment.method.insurance"),
   };
 }
 
@@ -44,9 +44,8 @@ import { useRetryAction } from "@/lib/query/useRetryAction";
 import { useI18n } from "@/i18n/provider";
 
 export default function DoctorClinicAddPaymentPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
-  const methodLabels = buildMethodLabels(tr);
+  const { t, locale, dir } = useI18n();
+  const methodLabels = buildMethodLabels(t);
   const navigate = useNavigate();
   const { basePath, canViewSettings, isSecretary } = useBillingAccess();
   const { toast } = useToast();
@@ -56,8 +55,8 @@ export default function DoctorClinicAddPaymentPage() {
   const settingsQuery = useBillingSettings(!isSecretary || canViewSettings);
   const invoiceQuery = useResolvedBillingInvoice(invoiceParam);
   const createPayment = useCreateBillingPayment();
-  const { retry: retryInvoice, retrying: retryingInvoice } = useRetryAction(() =>
-    invoiceQuery.refetch(),
+  const { retry: retryInvoice, retrying: retryingInvoice } = useRetryAction(
+    () => invoiceQuery.refetch(),
   );
 
   const invoice = invoiceQuery.invoice;
@@ -71,7 +70,8 @@ export default function DoctorClinicAddPaymentPage() {
   // Don't silently offer all payment methods when settings failed to load —
   // the backend may reject a method that's actually disabled in clinic settings.
   const methodsUnavailable =
-    settingsQuery.isError || !settingsQuery.settings?.allowedPaymentMethods?.length;
+    settingsQuery.isError ||
+    !settingsQuery.settings?.allowedPaymentMethods?.length;
   const methods = settingsQuery.settings?.allowedPaymentMethods?.length
     ? settingsQuery.settings.allowedPaymentMethods
     : [];
@@ -93,16 +93,16 @@ export default function DoctorClinicAddPaymentPage() {
 
   const handleSave = async () => {
     if (!invoice?.rawId) {
-      toast(tr("معرّف الفاتورة غير صالح.", "The invoice ID is invalid."), {
-        title: tr("خطأ", "Error"),
+      toast(t("doctor.clinicAccounts.addPayment.error.invalidInvoiceId"), {
+        title: t("doctor.clinicAccounts.addPayment.error.error"),
         variant: "error",
       });
       return;
     }
 
     if (!canAcceptPayment) {
-      toast(tr("لا يوجد مبلغ متبقٍ على هذه الفاتورة.", "There is no remaining amount on this invoice."), {
-        title: tr("لا يمكن إضافة دفعة", "Cannot add a payment"),
+      toast(t("doctor.clinicAccounts.addPayment.error.noRemaining"), {
+        title: t("doctor.clinicAccounts.addPayment.error.cannotAddPayment"),
         variant: "error",
       });
       return;
@@ -110,8 +110,8 @@ export default function DoctorClinicAddPaymentPage() {
 
     const parsedAmount = Number(amount);
     if (!parsedAmount || parsedAmount <= 0) {
-      toast(tr("أدخل مبلغ دفعة صالحاً.", "Enter a valid payment amount."), {
-        title: tr("مبلغ غير صالح", "Invalid amount"),
+      toast(t("doctor.clinicAccounts.addPayment.error.enterValidAmount"), {
+        title: t("doctor.clinicAccounts.addPayment.error.invalidAmount"),
         variant: "error",
       });
       return;
@@ -119,12 +119,11 @@ export default function DoctorClinicAddPaymentPage() {
 
     if (totals && parsedAmount > totals.remaining) {
       toast(
-        tr(
-          `المبلغ يتجاوز المتبقي (${formatBillingAmount(totals.remaining, currency)}).`,
-          `The amount exceeds the remaining balance (${formatBillingAmount(totals.remaining, currency)}).`,
-        ),
+        t("doctor.clinicAccounts.addPayment.error.amountExceedsRemaining", {
+          amount: formatBillingAmount(totals.remaining, currency),
+        }),
         {
-          title: tr("مبلغ غير صالح", "Invalid amount"),
+          title: t("doctor.clinicAccounts.addPayment.error.invalidAmount"),
           variant: "error",
         },
       );
@@ -132,7 +131,7 @@ export default function DoctorClinicAddPaymentPage() {
     }
 
     if (isBillingDateInputAfterToday(date)) {
-      const futureDateMessage = getBillingFutureDateMessage(tr);
+      const futureDateMessage = getBillingFutureDateMessage(t);
       toast(futureDateMessage.message, {
         title: futureDateMessage.title,
         variant: "error",
@@ -150,8 +149,8 @@ export default function DoctorClinicAddPaymentPage() {
         note: notes.trim() || undefined,
       });
 
-      toast(tr("تم حفظ الدفعة بنجاح.", "The payment was saved successfully."), {
-        title: tr("تم الحفظ", "Saved"),
+      toast(t("doctor.clinicAccounts.addPayment.success.saved"), {
+        title: t("doctor.clinicAccounts.addPayment.success.title"),
         variant: "success",
       });
       navigate(`${basePath}/invoices`);
@@ -171,18 +170,13 @@ export default function DoctorClinicAddPaymentPage() {
   return (
     <>
       <Helmet>
-        <title>
-          {tr("إضافة دفعة • LMJ Health", "Add Payment • LMJ Health")}
-        </title>
+        <title>{t("doctor.clinicAccounts.addPayment.page.title")}</title>
       </Helmet>
 
       <div dir={dir} lang={locale}>
         <ClinicAccountsBanner
-          title={tr("إضافة دفعة", "Add payment")}
-          subtitle={tr(
-            "تسجيل دفعة جديدة على الفاتورة",
-            "Record a new payment on the invoice",
-          )}
+          title={t("doctor.clinicAccounts.addPayment.title")}
+          subtitle={t("doctor.clinicAccounts.addPayment.subtitle")}
           icon={<CreditCard className="h-7 w-7 text-white sm:h-8 sm:w-8" />}
         />
 
@@ -190,10 +184,9 @@ export default function DoctorClinicAddPaymentPage() {
 
         {!invoiceParam ? (
           <DoctorListErrorState
-            title={tr("فاتورة غير محددة", "Invoice not specified")}
-            brief={tr(
-              "افتح هذه الصفحة من تفاصيل فاتورة (زر «إضافة دفعة») أو من قائمة الفواتير.",
-              'Open this page from an invoice\'s details (the "Add payment" button) or from the invoices list.',
+            title={t("doctor.clinicAccounts.addPayment.invoiceNotSpecified")}
+            brief={t(
+              "doctor.clinicAccounts.addPayment.invoiceNotSpecifiedBrief",
             )}
             onRetry={() => navigate(`${basePath}/invoices`)}
           />
@@ -203,9 +196,12 @@ export default function DoctorClinicAddPaymentPage() {
           <DoctorListErrorState
             title={
               loadErrorToast?.title ??
-              tr("تعذّر تحميل الفاتورة", "Failed to load invoice")
+              t("doctor.clinicAccounts.addPayment.loadFailed")
             }
-            brief={loadErrorToast?.message ?? tr("تعذّر تحميل بيانات الفاتورة.", "Failed to load the invoice data.")}
+            brief={
+              loadErrorToast?.message ??
+              t("doctor.clinicAccounts.addPayment.loadFailedBrief")
+            }
             retrying={retryingInvoice}
             onRetry={() => void retryInvoice()}
           />
@@ -223,7 +219,7 @@ export default function DoctorClinicAddPaymentPage() {
               <div className="grid grid-cols-3 gap-3">
                 <div className="rounded-[10px] bg-[#FAFAFA] px-3 py-4 text-center">
                   <p className="font-cairo text-[11px] font-bold text-[#98A2B3]">
-                    {tr("الإجمالي", "Total")}
+                    {t("doctor.clinicAccounts.addPayment.total")}
                   </p>
                   <p className="mt-2 font-cairo text-[18px] font-black text-[#111827]">
                     {formatBillingAmount(totals.total, currency)}
@@ -231,7 +227,7 @@ export default function DoctorClinicAddPaymentPage() {
                 </div>
                 <div className="rounded-[10px] bg-[#FAFAFA] px-3 py-4 text-center">
                   <p className="font-cairo text-[11px] font-bold text-[#98A2B3]">
-                    {tr("المدفوع", "Paid")}
+                    {t("doctor.clinicAccounts.addPayment.paid")}
                   </p>
                   <p className="mt-2 font-cairo text-[18px] font-black text-primary">
                     {formatBillingAmount(invoice.paid, currency)}
@@ -239,7 +235,7 @@ export default function DoctorClinicAddPaymentPage() {
                 </div>
                 <div className="rounded-[10px] bg-[#FAFAFA] px-3 py-4 text-center">
                   <p className="font-cairo text-[11px] font-bold text-[#98A2B3]">
-                    {tr("المتبقي", "Remaining")}
+                    {t("doctor.clinicAccounts.addPayment.remaining")}
                   </p>
                   <p className="mt-2 font-cairo text-[18px] font-black text-[#DC2626]">
                     {formatBillingAmount(totals.remaining, currency)}
@@ -248,10 +244,7 @@ export default function DoctorClinicAddPaymentPage() {
               </div>
               {!canAcceptPayment ? (
                 <p className="mt-4 rounded-[10px] bg-[#FEF2F2] px-4 py-3 text-center font-cairo text-[13px] font-bold text-[#DC2626]">
-                  {tr(
-                    "هذه الفاتورة مسدّدة بالكامل — لا يمكن تسجيل دفعة جديدة عليها.",
-                    "This invoice is fully paid — no new payment can be recorded on it.",
-                  )}
+                  {t("doctor.clinicAccounts.addPayment.fullyPaid")}
                 </p>
               ) : null}
             </section>
@@ -259,7 +252,7 @@ export default function DoctorClinicAddPaymentPage() {
             <div className="space-y-5">
               <section className="rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
                 <label className="mb-2 block text-start font-cairo text-[13px] font-extrabold text-[#111827]">
-                  {tr("المبلغ", "Amount")}
+                  {t("doctor.clinicAccounts.addPayment.amount")}
                 </label>
                 <input
                   type="number"
@@ -274,55 +267,49 @@ export default function DoctorClinicAddPaymentPage() {
 
               <section className="rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
                 <h2 className="mb-4 text-start font-cairo text-[13px] font-extrabold text-[#111827]">
-                  {tr("طريقة الدفع", "Payment method")}
+                  {t("doctor.clinicAccounts.addPayment.paymentMethod")}
                 </h2>
                 {methodsUnavailable ? (
                   <p className="rounded-[10px] border border-dashed border-[#FDA29B] bg-[#FEF3F2] px-4 py-3 text-start font-cairo text-[12px] font-semibold text-[#B42318]">
-                    {tr(
-                      "تعذّر تحميل طرق الدفع المفعّلة لهذه العيادة. لا يمكن تسجيل دفعة قبل توفّر هذه البيانات.",
-                      "Could not load the enabled payment methods for this clinic. A payment cannot be recorded until this data is available.",
-                    )}
+                    {t("doctor.clinicAccounts.addPayment.methodsUnavailable")}
                   </p>
                 ) : (
-                <div className="grid grid-cols-2 gap-3">
-                  {methods.map((option) => {
-                    const active = method === option;
-                    return (
-                      <button
-                        key={option}
-                        type="button"
-                        disabled={!canAcceptPayment}
-                        onClick={() => setMethod(option)}
-                        className={cn(
-                          "rounded-[12px] border px-4 py-5 text-center transition disabled:cursor-not-allowed disabled:opacity-50",
-                          active
-                            ? "border-primary bg-[#F0FDFA] text-primary"
-                            : "border-[#EEF2F6] bg-white text-[#667085]",
-                        )}
-                      >
-                        <CreditCard
-                          className="mx-auto mb-2 h-5 w-5"
-                          aria-hidden
-                        />
-                        <span className="font-cairo text-[13px] font-extrabold">
-                          {methodLabels[option] ?? option}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    {methods.map((option) => {
+                      const active = method === option;
+                      return (
+                        <button
+                          key={option}
+                          type="button"
+                          disabled={!canAcceptPayment}
+                          onClick={() => setMethod(option)}
+                          className={cn(
+                            "rounded-[12px] border px-4 py-5 text-center transition disabled:cursor-not-allowed disabled:opacity-50",
+                            active
+                              ? "border-primary bg-[#F0FDFA] text-primary"
+                              : "border-[#EEF2F6] bg-white text-[#667085]",
+                          )}
+                        >
+                          <CreditCard
+                            className="mx-auto mb-2 h-5 w-5"
+                            aria-hidden
+                          />
+                          <span className="font-cairo text-[13px] font-extrabold">
+                            {methodLabels[option] ?? option}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 )}
               </section>
 
               <section className="rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
                 <label className="mb-2 block text-start font-cairo text-[13px] font-extrabold text-[#111827]">
-                  {tr("التاريخ (اختياري)", "Date (optional)")}
+                  {t("doctor.clinicAccounts.addPayment.dateOptional")}
                 </label>
                 <p className="mb-2 text-start font-cairo text-[11px] font-semibold text-[#98A2B3]">
-                  {tr(
-                    "اتركه فارغاً أو اختر اليوم لاستخدام وقت التسجيل الحالي. للأيام السابقة اختر التاريخ المناسب — التواريخ المستقبلية غير متاحة.",
-                    "Leave it empty or select today to use the current recording time. For previous days, pick the appropriate date — future dates are not available.",
-                  )}
+                  {t("doctor.clinicAccounts.addPayment.dateHint")}
                 </p>
                 <input
                   type="date"
@@ -340,33 +327,41 @@ export default function DoctorClinicAddPaymentPage() {
 
               <section className="rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
                 <label className="mb-2 block text-start font-cairo text-[13px] font-extrabold text-[#111827]">
-                  {tr("ملاحظات", "Notes")}
+                  {t("doctor.clinicAccounts.addPayment.notes")}
                 </label>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={4}
                   disabled={!canAcceptPayment}
-                  placeholder={tr("وصف ملاحظات...", "Describe any notes...")}
+                  placeholder={t(
+                    "doctor.clinicAccounts.addPayment.notesPlaceholder",
+                  )}
                   className="w-full rounded-[12px] border border-[#E5E7EB] px-4 py-3 font-cairo text-[13px] font-semibold outline-none focus:border-primary disabled:cursor-not-allowed disabled:bg-[#F9FAFB]"
                 />
               </section>
 
               <button
                 type="button"
-                disabled={createPayment.isPending || !canAcceptPayment || methodsUnavailable}
+                disabled={
+                  createPayment.isPending ||
+                  !canAcceptPayment ||
+                  methodsUnavailable
+                }
                 onClick={() => void handleSave()}
                 className="inline-flex h-[52px] w-full items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_10px_24px_rgba(15,143,139,0.22)] disabled:opacity-60"
               >
                 <Save className="h-4 w-4" aria-hidden />
-                {createPayment.isPending ? tr("جاري الحفظ...", "Saving...") : tr("حفظ الدفعة", "Save payment")}
+                {createPayment.isPending
+                  ? t("doctor.clinicAccounts.addPayment.saving")
+                  : t("doctor.clinicAccounts.addPayment.savePayment")}
               </button>
 
               <Link
                 to={`${basePath}/invoices`}
                 className="inline-block font-cairo text-[13px] font-extrabold text-[#667085]"
               >
-                {tr("الرجوع إلى الفواتير ←", "Back to invoices ←")}
+                {t("doctor.clinicAccounts.addPayment.backToInvoices")}
               </Link>
             </div>
           </>

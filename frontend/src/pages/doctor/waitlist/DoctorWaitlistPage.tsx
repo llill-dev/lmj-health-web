@@ -1,61 +1,63 @@
-'use client';
+"use client";
 
-import { useEffect, useMemo, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { useEffect, useMemo, useState } from "react";
+import { Helmet } from "react-helmet-async";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { motion } from "framer-motion";
 import {
   CalendarClock,
   CheckCircle,
   Hourglass,
   Phone,
   Sparkles,
-} from 'lucide-react';
-import DoctorDashboardOverview from '@/components/doctor/dashboard/doctor-dashboard-overview';
-import { MedicalRecordsPagination } from '@/components/doctor/medical-records/medical-records-pagination';
-import { DoctorListEmptyIllustration } from '@/components/doctor/shared/doctor-list-empty-illustration';
-import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
+} from "lucide-react";
+import DoctorDashboardOverview from "@/components/doctor/dashboard/doctor-dashboard-overview";
+import { MedicalRecordsPagination } from "@/components/doctor/medical-records/medical-records-pagination";
+import { DoctorListEmptyIllustration } from "@/components/doctor/shared/doctor-list-empty-illustration";
+import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
 import {
   DoctorTableSkeleton,
   DoctorToolbarSkeleton,
-} from '@/components/doctor/shared/skeletons';
-import { WaitlistBookDialog } from '@/components/doctor/waitlist/waitlist-book-dialog';
-import { WaitlistTable } from '@/components/doctor/waitlist/waitlist-table';
-import { WaitlistToolbar } from '@/components/doctor/waitlist/waitlist-toolbar';
-import WaitlistSuggestionsDialog from '@/components/doctor/waitlist/waitlist-suggestions-dialog';
-import { useToast } from '@/components/ui/ToastProvider';
+} from "@/components/doctor/shared/skeletons";
+import { WaitlistBookDialog } from "@/components/doctor/waitlist/waitlist-book-dialog";
+import { WaitlistTable } from "@/components/doctor/waitlist/waitlist-table";
+import { WaitlistToolbar } from "@/components/doctor/waitlist/waitlist-toolbar";
+import WaitlistSuggestionsDialog from "@/components/doctor/waitlist/waitlist-suggestions-dialog";
+import { useToast } from "@/components/ui/ToastProvider";
 import {
   useDoctorWaitlist,
   useWaitlistMutations,
-} from '@/hooks/doctor/waitlist/useDoctorWaitlist';
-import { useAvailableAppointmentTypes } from '@/hooks/doctor/appointments/useAppointmentTypes';
-import { getUserFacingRequestErrorMessage } from '@/lib/api';
-import { useRetryAction } from '@/lib/query/useRetryAction';
+} from "@/hooks/doctor/waitlist/useDoctorWaitlist";
+import { useAvailableAppointmentTypes } from "@/hooks/doctor/appointments/useAppointmentTypes";
+import { getUserFacingRequestErrorMessage } from "@/lib/api";
+import { useRetryAction } from "@/lib/query/useRetryAction";
 import {
   waitlistStatusLabel,
   waitlistUrgencyLabel,
-} from '@/lib/doctor/waitlist/labels';
-import type { WaitlistRequest, WaitlistStatus } from '@/lib/doctor/waitlist/types';
-import { readAuthUser } from '@/lib/cookies';
-import { useI18n } from '@/i18n/provider';
+} from "@/lib/doctor/waitlist/labels";
+import type {
+  WaitlistRequest,
+  WaitlistStatus,
+} from "@/lib/doctor/waitlist/types";
+import { readAuthUser } from "@/lib/cookies";
+import { useI18n } from "@/i18n/provider";
 
 export default function DoctorWaitlistPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const { t, locale, dir } = useI18n();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const focusRequestId = searchParams.get('request')?.trim() ?? '';
+  const focusRequestId = searchParams.get("request")?.trim() ?? "";
   const { toast } = useToast();
-  const doctorId = readAuthUser()?.actorIds?.doctorId ?? '';
+  const doctorId = readAuthUser()?.actorIds?.doctorId ?? "";
 
-  const [statusTab, setStatusTab] = useState<'all' | WaitlistStatus>('active');
-  const [search, setSearch] = useState('');
+  const [statusTab, setStatusTab] = useState<"all" | WaitlistStatus>("active");
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(8);
 
   const listParams = useMemo(
     () => ({
-      status: statusTab === 'all' ? undefined : statusTab,
+      status: statusTab === "all" ? undefined : statusTab,
       q: search.trim() || undefined,
       page,
       limit: pageSize,
@@ -66,17 +68,17 @@ export default function DoctorWaitlistPage() {
   const list = useDoctorWaitlist(listParams);
   const totalAllQuery = useDoctorWaitlist({ page: 1, limit: 1 });
   const activeTotalQuery = useDoctorWaitlist({
-    status: 'active',
+    status: "active",
     page: 1,
     limit: 1,
   });
   const contactedTotalQuery = useDoctorWaitlist({
-    status: 'contacted',
+    status: "contacted",
     page: 1,
     limit: 1,
   });
   const bookedTotalQuery = useDoctorWaitlist({
-    status: 'booked',
+    status: "booked",
     page: 1,
     limit: 1,
   });
@@ -95,7 +97,7 @@ export default function DoctorWaitlistPage() {
 
   useEffect(() => {
     if (!focusRequestId) return;
-    setStatusTab('active');
+    setStatusTab("active");
   }, [focusRequestId]);
 
   useEffect(() => {
@@ -106,7 +108,7 @@ export default function DoctorWaitlistPage() {
     list.requests.length === 0 &&
     !list.isAwaitingData &&
     !list.isError &&
-    (search.trim().length > 0 || statusTab !== 'all');
+    (search.trim().length > 0 || statusTab !== "all");
 
   const isTrulyEmpty =
     list.requests.length === 0 &&
@@ -120,35 +122,34 @@ export default function DoctorWaitlistPage() {
   const handleContacted = async (request: WaitlistRequest) => {
     try {
       await mutations.markContacted({ id: request._id });
-      toast(tr('تم تسجيل التواصل مع المريض.', 'Patient contact was recorded.'), {
-        variant: 'success',
+      toast(t("doctor.waitlist.contactedSuccess"), {
+        variant: "success",
       });
     } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), { variant: 'error' });
+      toast(getUserFacingRequestErrorMessage(error), { variant: "error" });
     }
   };
 
   const handleClose = async (request: WaitlistRequest) => {
     const reason =
-      window.prompt(tr('سبب الإغلاق (اختياري):', 'Close reason (optional):')) ??
-      undefined;
+      window.prompt(t("doctor.waitlist.closeReasonPrompt")) ?? undefined;
     try {
       await mutations.closeRequest({
         id: request._id,
         closedReason: reason?.trim() || undefined,
       });
-      toast(tr('تم إغلاق طلب قائمة الانتظار.', 'Waitlist request was closed.'), {
-        variant: 'success',
+      toast(t("doctor.waitlist.closed"), {
+        variant: "success",
       });
     } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), { variant: 'error' });
+      toast(getUserFacingRequestErrorMessage(error), { variant: "error" });
     }
   };
 
   return (
     <>
       <Helmet>
-        <title>{tr('قائمة الانتظار • LMJ Health', 'Waitlist • LMJ Health')}</title>
+        <title>{t("doctor.waitlist.pageTitle")}</title>
       </Helmet>
 
       <div dir={dir} lang={locale} className="w-full pb-8 sm:pb-10">
@@ -156,19 +157,16 @@ export default function DoctorWaitlistPage() {
           variant="appointments"
           surface="mint"
           kpiColumns={4}
-          title={tr('قائمة الانتظار', 'Waitlist')}
+          title={t("doctor.waitlist.title")}
           headerIcon={<Hourglass className="h-8 w-8 text-white" />}
           subtitle={
             <span>
               <span className="font-extrabold text-primary">
-                {totalAllQuery.isAwaitingData ? '—' : totalAllQuery.total}
+                {totalAllQuery.isAwaitingData ? "—" : totalAllQuery.total}
               </span>
               <span className="text-primary/90">
-                {' '}
-                {tr(
-                  '— إدارة طلبات الانتظار، التواصل مع المرضى، والحجز من القائمة',
-                  '— manage waitlist requests, contact patients, and book from the list',
-                )}
+                {" "}
+                {t("doctor.waitlist.subtitle")}
               </span>
             </span>
           }
@@ -180,54 +178,54 @@ export default function DoctorWaitlistPage() {
                 className="flex h-[48px] items-center gap-2 rounded-[6px] border-[1.5px] border-primary bg-[#E6F4F3] px-4 font-cairo text-[14px] font-bold text-primary shadow-[0px_6px_16px_-4px_rgba(15,143,139,0.15)] transition hover:bg-[#DDF0EF]"
                 whileHover={{ y: -1 }}
                 whileTap={{ scale: 0.98 }}
-                transition={{ duration: 0.12, ease: 'easeOut' }}
+                transition={{ duration: 0.12, ease: "easeOut" }}
               >
                 <Sparkles className="h-4 w-4" aria-hidden />
-                <span>{tr('اقتراحات المواعيد', 'Appointment suggestions')}</span>
+                <span>{t("doctor.waitlist.appointmentSuggestions")}</span>
               </motion.button>
               <motion.button
                 type="button"
-                onClick={() => navigate('/doctor/appointments')}
+                onClick={() => navigate("/doctor/appointments")}
                 className="flex h-[48px] items-center gap-2 rounded-[6px] border-[1.5px] border-primary bg-white px-4 font-cairo text-[14px] font-bold text-primary shadow-[0px_6px_16px_-4px_rgba(15,143,139,0.2)] transition hover:bg-[#F0FDFA]"
                 whileHover={{ y: -1 }}
                 whileTap={{ scale: 0.98 }}
-                transition={{ duration: 0.12, ease: 'easeOut' }}
+                transition={{ duration: 0.12, ease: "easeOut" }}
               >
                 <CalendarClock className="h-4 w-4" aria-hidden />
-                <span>{tr('عرض المواعيد', 'View appointments')}</span>
+                <span>{t("doctor.waitlist.viewAppointments")}</span>
               </motion.button>
             </div>
           }
           kpis={[
             {
-              key: 'active',
+              key: "active",
               icon: <Hourglass className="h-5 w-5 shrink-0" />,
               value: activeTotalQuery.isAwaitingData
-                ? '—'
+                ? "—"
                 : activeTotalQuery.total,
-              label: tr('طلبات نشطة', 'Active requests'),
+              label: t("doctor.waitlist.activeRequests"),
             },
             {
-              key: 'contacted',
+              key: "contacted",
               icon: <Phone className="h-5 w-5 shrink-0" />,
               value: contactedTotalQuery.isAwaitingData
-                ? '—'
+                ? "—"
                 : contactedTotalQuery.total,
-              label: tr('تم التواصل', 'Contacted'),
+              label: t("doctor.waitlist.contacted"),
             },
             {
-              key: 'booked',
+              key: "booked",
               icon: <CalendarClock className="h-5 w-5 shrink-0" />,
               value: bookedTotalQuery.isAwaitingData
-                ? '—'
+                ? "—"
                 : bookedTotalQuery.total,
-              label: tr('محجوز', 'Booked'),
+              label: t("doctor.waitlist.booked"),
             },
             {
-              key: 'total',
+              key: "total",
               icon: <CheckCircle className="h-5 w-5 shrink-0" />,
-              value: totalAllQuery.isAwaitingData ? '—' : totalAllQuery.total,
-              label: tr('إجمالي الطلبات', 'Total requests'),
+              value: totalAllQuery.isAwaitingData ? "—" : totalAllQuery.total,
+              label: t("doctor.waitlist.totalRequests"),
             },
           ]}
         />
@@ -238,8 +236,8 @@ export default function DoctorWaitlistPage() {
               search={search}
               onSearchChange={setSearch}
               onClear={() => {
-                setSearch('');
-                setStatusTab('active');
+                setSearch("");
+                setStatusTab("active");
               }}
               statusTab={statusTab}
               onStatusTabChange={setStatusTab}
@@ -254,14 +252,8 @@ export default function DoctorWaitlistPage() {
               </div>
             ) : list.isError ? (
               <DoctorListErrorState
-                title={tr(
-                  'تعذّر تحميل قائمة الانتظار',
-                  'Could not load waitlist',
-                )}
-                brief={tr(
-                  'حدث خطأ أثناء جلب الطلبات.',
-                  'An error occurred while fetching requests.',
-                )}
+                title={t("doctor.waitlist.loadFailed")}
+                brief={t("doctor.waitlist.loadFailedBrief")}
                 retrying={retryingList}
                 onRetry={() => void retryList()}
               />
@@ -272,38 +264,26 @@ export default function DoctorWaitlistPage() {
                 imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.1)]"
                 title={
                   isFilteredEmpty
-                    ? tr(
-                        'لا توجد طلبات تطابق البحث أو الفلتر الحالي',
-                        'No requests match the current search or filter',
-                      )
-                    : tr(
-                        'لا توجد طلبات في قائمة الانتظار بعد',
-                        'No waitlist requests yet',
-                      )
+                    ? t("doctor.waitlist.noResultsFilter")
+                    : t("doctor.waitlist.noResultsEmpty")
                 }
                 subtitle={
                   isFilteredEmpty
-                    ? tr(
-                        'جرّب تعديل كلمات البحث أو إعادة ضبط الفلاتر لعرض النتائج',
-                        'Try adjusting search keywords or resetting filters',
-                      )
-                    : tr(
-                        'عندما يطلب المرضى موعداً عبر قائمة الانتظار ستظهر الطلبات هنا للمتابعة والحجز',
-                        'When patients request appointments via waitlist, they will appear here',
-                      )
+                    ? t("doctor.waitlist.noResultsFilterSubtitle")
+                    : t("doctor.waitlist.noResultsEmptySubtitle")
                 }
-                actionLabel={tr('عرض المواعيد', 'View appointments')}
-                onAction={() => navigate('/doctor/appointments')}
+                actionLabel={t("doctor.waitlist.viewAppointments")}
+                onAction={() => navigate("/doctor/appointments")}
                 actionIcon={<CalendarClock className="h-4 w-4" />}
               />
             ) : (
               <WaitlistTable
                 requests={list.requests}
                 busy={mutations.isBusy}
-                urgencyLabel={(urgency) => waitlistUrgencyLabel(urgency, tr)}
-                statusLabel={(status) => waitlistStatusLabel(status, tr)}
+                urgencyLabel={(urgency) => waitlistUrgencyLabel(urgency, t)}
+                statusLabel={(status) => waitlistStatusLabel(status, t)}
                 highlightRequestId={focusRequestId || undefined}
-                onNavigateAppointments={() => navigate('/doctor/appointments')}
+                onNavigateAppointments={() => navigate("/doctor/appointments")}
                 onContacted={(request) => void handleContacted(request)}
                 onBook={setBookTarget}
                 onClose={(request) => void handleClose(request)}
@@ -321,7 +301,7 @@ export default function DoctorWaitlistPage() {
               showingTo={showingTo}
               total={list.total}
               pageSize={pageSize}
-              itemLabel={tr('طلب', 'request')}
+              itemLabel={t("doctor.waitlist.itemLabel")}
               onPageChange={setPage}
               onPageSizeChange={(size) => {
                 setPageSize(size);
@@ -350,16 +330,10 @@ export default function DoctorWaitlistPage() {
             id: bookTarget._id,
             body,
           });
-          toast(
-            tr(
-              'تم حجز الموعد من قائمة الانتظار.',
-              'Appointment was booked from the waitlist.',
-            ),
-            { variant: 'success' },
-          );
+          toast(t("doctor.waitlist.bookedSuccess"), { variant: "success" });
           setBookTarget(null);
           if (response.appointment?._id) {
-            navigate('/doctor/appointments');
+            navigate("/doctor/appointments");
           }
         }}
       />

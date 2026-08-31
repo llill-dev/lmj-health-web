@@ -36,11 +36,10 @@ function formatUserCreatedAt(value: string | undefined, locale: string) {
   });
 }
 
-function userStatusLabel(
-  user: AdminUserSummary,
-  tr: (ar: string, en: string) => string,
-) {
-  return user.isActive === false ? tr("موقوف", "Inactive") : tr("نشط", "Active");
+function userStatusLabel(user: AdminUserSummary, t: (key: string) => string) {
+  return user.isActive === false
+    ? t("admin.users.status.inactive")
+    : t("admin.users.status.active");
 }
 
 function userStatusTone(user: AdminUserSummary) {
@@ -50,8 +49,7 @@ function userStatusTone(user: AdminUserSummary) {
 }
 
 export default function AdminUsersPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
   const numberLocale = locale === "ar" ? "ar-SA" : "en-US";
 
   const [query, setQuery] = useState("");
@@ -60,7 +58,8 @@ export default function AdminUsersPage() {
   const [pageSize, setPageSize] = useState(10);
   const [createOpen, setCreateOpen] = useState(false);
 
-  const { users, isAwaitingData, isRefetching, isError, error, refetch } = useAdminUsers();
+  const { users, isAwaitingData, isRefetching, isError, error, refetch } =
+    useAdminUsers();
 
   const filteredUsers = useMemo(() => {
     const text = query.trim().toLowerCase();
@@ -105,29 +104,24 @@ export default function AdminUsersPage() {
   return (
     <>
       <Helmet>
-        <title>
-          {tr("مستخدمو الإدارة", "Admin users")} • LMJ Health
-        </title>
+        <title>{t("admin.users.page.title")} • LMJ Health</title>
       </Helmet>
 
       <div dir={dir} lang={locale} className="space-y-5">
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title={tr("مستخدمو الإدارة", "Admin users")}
-          subtitle={tr(
-            "إدارة حسابات الفريق الداخلي. إيقاف وتفعيل الحسابات غير متاحين حالياً.",
-            "Manage internal team accounts. Deactivate and activate are not available yet.",
-          )}
+          title={t("admin.users.page.title")}
+          subtitle={t("admin.users.overview.subtitle")}
           headerIcon={<UserCog className="h-8 w-8 text-white" />}
-          actionLabel={tr("إنشاء مستخدم", "Create user")}
+          actionLabel={t("admin.users.actionLabel")}
           onActionClick={() => setCreateOpen(true)}
           kpis={[
             {
               key: "total",
               icon: <Users className="h-5 w-5 shrink-0" />,
               value: isAwaitingData ? "—" : users.length,
-              label: tr("إجمالي الحسابات", "Total accounts"),
+              label: t("admin.users.kpi.total"),
             },
             {
               key: "active",
@@ -135,7 +129,7 @@ export default function AdminUsersPage() {
               value: isAwaitingData
                 ? "—"
                 : users.filter((user) => user.isActive !== false).length,
-              label: tr("حسابات نشطة", "Active accounts"),
+              label: t("admin.users.kpi.active"),
             },
           ]}
         />
@@ -143,10 +137,7 @@ export default function AdminUsersPage() {
         <div className="flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
           <div className="font-cairo text-sm font-semibold leading-6 text-[#175CD3]">
-            {tr(
-              "هذه الشاشة مخصّصة لمراجعة حسابات الفريق الداخلي وإنشاء الحسابات الجديدة فقط. إيقاف الحسابات أو تعديل حالتها غير مدعوم حاليًا من هذا المسار، لذلك تبقى البطاقات هنا مرجعية مع بيانات التواصل والدور.",
-              "This page is for reviewing internal team accounts and creating new ones only. Account deactivation or status changes are not supported from this flow right now, so the cards remain reference-oriented with role and contact details.",
-            )}
+            {t("admin.users.disclaimer")}
           </div>
         </div>
 
@@ -159,10 +150,7 @@ export default function AdminUsersPage() {
                   setQuery(event.target.value);
                   setPage(1);
                 }}
-                placeholder={tr(
-                  "ابحث بالاسم أو البريد أو الهاتف أو الدور...",
-                  "Search by name, email, phone, or role…",
-                )}
+                placeholder={t("admin.users.search.placeholder")}
                 className="h-[44px] w-full rounded-[10px] border border-[#E5E7EB] bg-white ps-11 pe-4 text-start font-cairo text-[13px] font-semibold text-[#111827] outline-none transition focus:border-primary placeholder:text-[#98A2B3]"
               />
               <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
@@ -175,17 +163,17 @@ export default function AdminUsersPage() {
                 setPage(1);
               }}
               options={[
-                { value: "all", label: tr("كل الحالات", "All statuses") },
+                { value: "all", label: t("admin.users.filter.all") },
                 {
                   value: "active",
-                  label: tr("الحسابات النشطة", "Active accounts"),
+                  label: t("admin.users.filter.active"),
                 },
                 {
                   value: "inactive",
-                  label: tr("الحسابات الموقوفة", "Inactive accounts"),
+                  label: t("admin.users.filter.inactive"),
                 },
               ]}
-              placeholder={tr("كل الحالات", "All statuses")}
+              placeholder={t("admin.users.filter.all")}
               size="sm"
               tone="muted"
             />
@@ -196,10 +184,12 @@ export default function AdminUsersPage() {
               disabled={isRefetching}
               className="inline-flex h-[44px] items-center justify-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-sm font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <RefreshCw className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`}
+              />
               {isRefetching
-                ? tr("جارٍ التحديث...", "Refreshing...")
-                : tr("تحديث", "Refresh")}
+                ? t("admin.users.refresh.refreshing")
+                : t("admin.users.refresh.normal")}
             </button>
           </div>
         </section>
@@ -207,7 +197,7 @@ export default function AdminUsersPage() {
         {isRefetching && !isAwaitingData ? (
           <div className="inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]">
             <RefreshCw className="h-4 w-4 animate-spin" />
-            {tr("جارٍ تحديث حسابات الإدارة...", "Refreshing admin users...")}
+            {t("admin.users.refresh.users")}
           </div>
         ) : null}
 
@@ -221,7 +211,7 @@ export default function AdminUsersPage() {
           <div className="flex flex-col items-center gap-3 rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-10 text-center shadow-[0_12px_24px_rgba(0,0,0,0.06)]">
             <AlertCircle className="h-7 w-7 text-[#DC2626]" />
             <div className="font-cairo text-[14px] font-extrabold text-[#991B1B]">
-              {tr("تعذّر تحميل الحسابات", "Failed to load accounts")}
+              {t("admin.users.error.load")}
             </div>
             <div className="font-cairo text-[13px] font-semibold text-[#B42318]">
               {userFacingErrorMessage(error)}
@@ -231,20 +221,14 @@ export default function AdminUsersPage() {
               onClick={() => void refetch()}
               className="rounded-[8px] border border-[#FECACA] bg-white px-5 py-2 font-cairo text-[12px] font-extrabold text-[#DC2626]"
             >
-              {tr("إعادة المحاولة", "Retry")}
+              {t("admin.users.error.retry")}
             </button>
           </div>
         ) : filteredUsers.length === 0 ? (
           <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085] shadow-[0_12px_24px_rgba(0,0,0,0.06)]">
             {hasActiveFilters
-              ? tr(
-                  "لا توجد حسابات مطابقة للبحث أو الفلترة الحالية.",
-                  "No accounts match the current search or filters.",
-                )
-              : tr(
-                  "لا توجد حسابات إدارة مسجلة حالياً.",
-                  "There are no admin user accounts yet.",
-                )}
+              ? t("admin.users.empty.filtered")
+              : t("admin.users.empty.noData")}
           </div>
         ) : (
           <section className="space-y-4">
@@ -259,7 +243,7 @@ export default function AdminUsersPage() {
                       <div
                         className={`inline-flex h-[24px] items-center rounded-[999px] border px-3 font-cairo text-[11px] font-extrabold ${userStatusTone(user)}`}
                       >
-                        {userStatusLabel(user, tr)}
+                        {userStatusLabel(user, t)}
                       </div>
                       <h2 className="font-cairo text-[16px] font-black text-[#111827]">
                         {user.fullName}
@@ -272,10 +256,7 @@ export default function AdminUsersPage() {
 
                   <div className="flex items-center justify-end gap-2">
                     <span className="inline-flex h-9 items-center rounded-[8px] border border-[#E5E7EB] bg-[#F9FAFB] px-3 font-cairo text-[11px] font-extrabold text-[#667085]">
-                      {tr(
-                        "إيقاف/تفعيل الحساب غير متاح حالياً",
-                        "Deactivate/activate is not available yet",
-                      )}
+                      {t("admin.users.deactivateNotAvailable")}
                     </span>
                   </div>
                 </div>
@@ -283,7 +264,7 @@ export default function AdminUsersPage() {
                   <div className="inline-flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]">
                     <Users className="h-4 w-4 text-primary" />
                     <span>
-                      {tr("أُنشئ في", "Created on")}{" "}
+                      {t("admin.users.createdOn")}{" "}
                       {formatUserCreatedAt(user.createdAt, locale)}
                     </span>
                   </div>
@@ -311,10 +292,11 @@ export default function AdminUsersPage() {
             totalPages={totalPages}
             pageSize={pageSize}
             pageSizeOptions={[10, 20, 50]}
-            summaryLabel={tr(
-              `عرض ${rangeStart.toLocaleString(numberLocale)}–${rangeEnd.toLocaleString(numberLocale)} من ${filteredUsers.length.toLocaleString(numberLocale)} حساب`,
-              `Showing ${rangeStart.toLocaleString(numberLocale)}–${rangeEnd.toLocaleString(numberLocale)} of ${filteredUsers.length.toLocaleString(numberLocale)} accounts`,
-            )}
+            summaryLabel={t("admin.users.pagination.summary", {
+              start: rangeStart.toLocaleString(numberLocale),
+              end: rangeEnd.toLocaleString(numberLocale),
+              total: filteredUsers.length.toLocaleString(numberLocale),
+            })}
             onPageChange={setPage}
             onPageSizeChange={(size) => {
               setPageSize(size);

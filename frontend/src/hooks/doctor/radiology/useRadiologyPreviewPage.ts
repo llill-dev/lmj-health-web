@@ -6,6 +6,7 @@ import { isAwaitingAnyInitialQueryData } from '@/lib/query/queryUi';
 import { mapRadiologyPreviewVm } from '@/components/doctor/radiology/preview/map-radiology-preview';
 import { doctorApi, doctorPatientsQueryKeys } from '@/lib/doctor/client';
 import { loadEncounterImagingOrderForPreview } from '@/lib/doctor/encounters/encounterImagingLoad';
+import { useI18n } from '@/i18n/provider';
 
 export function useRadiologyPreviewPage(
   doctorId: string,
@@ -13,6 +14,7 @@ export function useRadiologyPreviewPage(
   encounterId: string,
   enabled = true,
 ) {
+  const { locale } = useI18n();
   const isEnabled =
     enabled && Boolean(doctorId) && Boolean(patientId) && Boolean(encounterId);
 
@@ -53,11 +55,13 @@ export function useRadiologyPreviewPage(
       order: orderQuery.data,
       encounter: encounterQuery.data?.encounter,
       publicProfile: publicProfileQuery.data?.patient,
+      locale,
     });
   }, [
     orderQuery.data,
     encounterQuery.data?.encounter,
     publicProfileQuery.data?.patient,
+    locale,
   ]);
 
   const isAwaitingData = isAwaitingAnyInitialQueryData([

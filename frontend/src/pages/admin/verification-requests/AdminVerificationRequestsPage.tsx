@@ -22,8 +22,7 @@ import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard
 import { useI18n } from "@/i18n/provider";
 
 export default function AdminVerificationRequestsPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
   const numberLocale = locale === "ar" ? "ar-SY" : "en-US";
   const navigate = useNavigate();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -76,7 +75,7 @@ export default function AdminVerificationRequestsPage() {
       hour12: true,
     });
     return sameDay
-      ? tr(`اليوم ${time}`, `Today ${time}`)
+      ? t("admin.verificationRequests.today", { time })
       : d.toLocaleDateString(numberLocale);
   }
 
@@ -98,7 +97,7 @@ export default function AdminVerificationRequestsPage() {
 
       return {
         id: request._id,
-        requestType: tr("تحقق الطبيب", "Doctor verification"),
+        requestType: t("admin.verificationRequests.requestType"),
         doctor: doctorName,
         specialty: request.doctor?.specialization || "—",
         address,
@@ -106,10 +105,10 @@ export default function AdminVerificationRequestsPage() {
         statusKey: request.status,
         status:
           request.status === "pending"
-            ? tr("معلق", "Pending")
+            ? t("admin.verificationRequests.status.pending")
             : request.status === "approved"
-              ? tr("مقبول", "Approved")
-              : tr("مرفوض", "Rejected"),
+              ? t("admin.verificationRequests.status.approved")
+              : t("admin.verificationRequests.status.rejected"),
         lat,
         lng,
         doctorProfile: (request.doctor ?? null) as Record<
@@ -118,7 +117,7 @@ export default function AdminVerificationRequestsPage() {
         > | null,
       };
     });
-  }, [verificationQuery.data?.requests]);
+  }, [verificationQuery.data?.requests, t]);
 
   const total = verificationQuery.data?.total ?? 0;
   const currentPage = verificationQuery.data?.page ?? page;
@@ -134,37 +133,34 @@ export default function AdminVerificationRequestsPage() {
   return (
     <>
       <Helmet>
-        <title>{tr("طلبات التحقق", "Verification requests")} • LMJ Health</title>
+        <title>{t("admin.verificationRequests.page.title")} • LMJ Health</title>
       </Helmet>
 
       <div dir={dir} lang={locale}>
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title={tr("طلبات التحقق", "Verification requests")}
-          subtitle={tr(
-            "مراجعة طلبات التحقق من موقع العيادة وتخصص الأطباء",
-            "Review clinic location and doctor specialization verification requests",
-          )}
+          title={t("admin.verificationRequests.page.title")}
+          subtitle={t("admin.verificationRequests.overview.subtitle")}
           headerIcon={<Stethoscope className="h-8 w-8 text-white" />}
           kpis={[
             {
               key: "pending",
               icon: <AlertCircle className="h-5 w-5 shrink-0" />,
               value: verificationAwaiting ? "—" : total,
-              label: tr("طلبات في القائمة", "Requests in list"),
+              label: t("admin.verificationRequests.kpi.pending"),
             },
             {
               key: "page",
               icon: <Clock className="h-5 w-5 shrink-0" />,
               value: verificationAwaiting ? "—" : locationRequests.length,
-              label: tr("معروضة الآن", "Shown now"),
+              label: t("admin.verificationRequests.kpi.shown"),
             },
             {
               key: "pages",
               icon: <Filter className="h-5 w-5 shrink-0" />,
               value: verificationAwaiting ? "—" : totalPages,
-              label: tr("عدد الصفحات", "Total pages"),
+              label: t("admin.verificationRequests.kpi.pages"),
             },
           ]}
         />
@@ -172,10 +168,7 @@ export default function AdminVerificationRequestsPage() {
         <div className="mt-4 flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
           <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
-            {tr(
-              "هذه القائمة مخصّصة لفرز طلبات التحقق والانتقال إلى صفحة التفاصيل أو الخريطة عند الحاجة. قرار القبول أو الرفض النهائي يتم من شاشة المراجعة المرتبطة بكل طلب، وليس من بطاقة القائمة نفسها.",
-              "This list is for triaging verification requests and opening the related details or map when needed. The final approve or reject decision is made from each request’s review flow, not directly from the list card itself.",
-            )}
+            {t("admin.verificationRequests.disclaimer")}
           </div>
         </div>
 
@@ -184,16 +177,28 @@ export default function AdminVerificationRequestsPage() {
             <div className="inline-flex items-center gap-2 text-[#475467]">
               <Filter className="h-4 w-4" />
               <span className="font-cairo text-[12px] font-extrabold">
-                {tr("تصفية الطلبات", "Filter requests")}
+                {t("admin.verificationRequests.filter.label")}
               </span>
             </div>
             <div className="flex flex-wrap items-center justify-end gap-2">
               {(
                 [
-                  { id: "all", label: tr("الكل", "All") },
-                  { id: "pending", label: tr("معلق", "Pending") },
-                  { id: "approved", label: tr("مقبول", "Approved") },
-                  { id: "rejected", label: tr("مرفوض", "Rejected") },
+                  {
+                    id: "all",
+                    label: t("admin.verificationRequests.filter.all"),
+                  },
+                  {
+                    id: "pending",
+                    label: t("admin.verificationRequests.filter.pending"),
+                  },
+                  {
+                    id: "approved",
+                    label: t("admin.verificationRequests.filter.approved"),
+                  },
+                  {
+                    id: "rejected",
+                    label: t("admin.verificationRequests.filter.rejected"),
+                  },
                 ] as const
               ).map((option) => {
                 const active = statusFilter === option.id;
@@ -226,12 +231,9 @@ export default function AdminVerificationRequestsPage() {
                 }}
                 options={[10, 20, 50, 100].map((v) => ({
                   value: String(v),
-                  label: tr(`${v} / صفحة`, `${v} / page`),
+                  label: t("admin.verificationRequests.perPage", { count: v }),
                 }))}
-                listboxAriaLabel={tr(
-                  "عدد العناصر في الصفحة",
-                  "Items per page",
-                )}
+                listboxAriaLabel={t("admin.verificationRequests.itemsPerPage")}
               />
             </div>
           </div>
@@ -246,17 +248,11 @@ export default function AdminVerificationRequestsPage() {
             />
           ) : verificationQuery.error ? (
             <div className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-8 text-center font-cairo text-[13px] font-semibold text-[#B42318]">
-              {tr(
-                "تعذّر تحميل طلبات التحقق من الخادم.",
-                "Failed to load verification requests from server.",
-              )}
+              {t("admin.verificationRequests.error.load")}
             </div>
           ) : locationRequests.length === 0 ? (
             <div className="rounded-[12px] border border-[#D1E9FF] bg-white px-6 py-8 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-              {tr(
-                "لا توجد طلبات تحقق معلّقة حاليًا.",
-                "No pending verification requests right now.",
-              )}
+              {t("admin.verificationRequests.empty.noRequests")}
             </div>
           ) : (
             <>
@@ -276,7 +272,7 @@ export default function AdminVerificationRequestsPage() {
                             setDialogOpen(true);
                           }}
                           className="flex h-[58px] w-[58px] items-center justify-center rounded-[8px] bg-[#129692] text-white"
-                          aria-label={tr("عرض الخريطة", "Open map")}
+                          aria-label={t("admin.verificationRequests.openMap")}
                         >
                           <Stethoscope className="h-6 w-6" />
                         </button>
@@ -317,10 +313,7 @@ export default function AdminVerificationRequestsPage() {
                     </div>
                     <button
                       type="button"
-                      aria-label={tr(
-                        "فتح صفحة تفاصيل طلب التحقق",
-                        "Open verification request details page",
-                      )}
+                      aria-label={t("admin.verificationRequests.openDetails")}
                       onClick={() => {
                         navigate(
                           `/admin/verification-requests/${encodeURIComponent(r.id)}`,
@@ -336,7 +329,8 @@ export default function AdminVerificationRequestsPage() {
 
               <div className="mt-4 flex flex-col gap-3 border-t border-[#F2F4F7] pt-6 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                 <div className="text-center font-cairo text-[11px] font-semibold text-[#667085] sm:text-start sm:text-[12px]">
-                  {tr("الصفحة", "Page")} {currentPage} {tr("من", "of")}{" "}
+                  {t("admin.verificationRequests.pagination.page")}{" "}
+                  {currentPage} {t("admin.verificationRequests.pagination.of")}{" "}
                   {totalPages}
                 </div>
 
@@ -354,24 +348,31 @@ export default function AdminVerificationRequestsPage() {
                     options={[
                       {
                         value: "10",
-                        label: tr("10 / صفحة", "10 / page"),
+                        label: t("admin.verificationRequests.perPage", {
+                          count: "10",
+                        }),
                       },
                       {
                         value: "20",
-                        label: tr("20 / صفحة", "20 / page"),
+                        label: t("admin.verificationRequests.perPage", {
+                          count: "20",
+                        }),
                       },
                       {
                         value: "50",
-                        label: tr("50 / صفحة", "50 / page"),
+                        label: t("admin.verificationRequests.perPage", {
+                          count: "50",
+                        }),
                       },
                       {
                         value: "100",
-                        label: tr("100 / صفحة", "100 / page"),
+                        label: t("admin.verificationRequests.perPage", {
+                          count: "100",
+                        }),
                       },
                     ]}
-                    listboxAriaLabel={tr(
-                      "عدد النتائج في الصفحة",
-                      "Results per page",
+                    listboxAriaLabel={t(
+                      "admin.verificationRequests.itemsPerPage",
                     )}
                   />
 
@@ -385,7 +386,7 @@ export default function AdminVerificationRequestsPage() {
                         : "h-[38px] flex-1 rounded-[10px] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827] shadow-[0_10px_20px_rgba(0,0,0,0.06)] sm:flex-none"
                     }
                   >
-                    {tr("السابق", "Previous")}
+                    {t("admin.verificationRequests.pagination.previous")}
                   </button>
                   <button
                     type="button"
@@ -399,7 +400,7 @@ export default function AdminVerificationRequestsPage() {
                         : "h-[38px] flex-1 rounded-[10px] bg-primary px-4 font-cairo text-[12px] font-bold text-white shadow-[0_10px_20px_rgba(15,143,139,0.25)] sm:flex-none"
                     }
                   >
-                    {tr("التالي", "Next")}
+                    {t("admin.verificationRequests.pagination.next")}
                   </button>
                 </div>
               </div>

@@ -29,16 +29,19 @@ const STATUS_STYLES: Record<RestoreRequest["status"], string> = {
 };
 
 const PAGE_LIMIT = 20;
-const STATUS_TABS: RestoreRequest["status"][] = ["pending", "approved", "rejected"];
+const STATUS_TABS: RestoreRequest["status"][] = [
+  "pending",
+  "approved",
+  "rejected",
+];
 
 export default function AdminDoctorRestoreRequestsPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
 
   const statusLabels: Record<RestoreRequest["status"], string> = {
-    pending: tr("قيد المراجعة", "Pending review"),
-    approved: tr("مقبول", "Approved"),
-    rejected: tr("مرفوض", "Rejected"),
+    pending: t("admin.doctorRestoreRequests.status.pending"),
+    approved: t("admin.doctorRestoreRequests.status.approved"),
+    rejected: t("admin.doctorRestoreRequests.status.rejected"),
   };
 
   const [selectedRequest, setSelectedRequest] = useState<RestoreRequest | null>(
@@ -78,9 +81,10 @@ export default function AdminDoctorRestoreRequestsPage() {
   const totalPages = Math.max(1, Math.ceil(total / PAGE_LIMIT));
 
   function formatDate(value?: string) {
-    if (!value) return tr("غير محدد", "Not set");
+    if (!value) return t("admin.doctorRestoreRequests.notSet");
     const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return tr("غير محدد", "Not set");
+    if (Number.isNaN(date.getTime()))
+      return t("admin.doctorRestoreRequests.notSet");
     return date.toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US", {
       year: "numeric",
       month: "long",
@@ -94,11 +98,7 @@ export default function AdminDoctorRestoreRequestsPage() {
     <>
       <Helmet>
         <title>
-          {tr(
-            "طلبات استعادة حساب الأطباء",
-            "Doctor account restore requests",
-          )}{" "}
-          • LMJ Health
+          {t("admin.doctorRestoreRequests.page.title")} • LMJ Health
         </title>
       </Helmet>
 
@@ -106,30 +106,24 @@ export default function AdminDoctorRestoreRequestsPage() {
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title={tr(
-            "طلبات استعادة حساب الأطباء",
-            "Doctor account restore requests",
-          )}
-          subtitle={tr(
-            "مراجعة طلبات الأطباء الذين انتهت فترة الاسترجاع التلقائي لحساباتهم",
-            "Review requests from doctors whose automatic restore window has ended",
-          )}
+          title={t("admin.doctorRestoreRequests.page.title")}
+          subtitle={t("admin.doctorRestoreRequests.subtitle")}
           headerIcon={<ShieldCheck className="h-8 w-8 text-white" />}
           kpis={[
             {
               key: "pending",
               icon: <Clock className="h-5 w-5 shrink-0" />,
               value: pendingBadgeCount,
-              label: tr("طلبات قيد المراجعة", "Pending requests"),
+              label: t("admin.doctorRestoreRequests.pendingRequests"),
             },
             {
               key: "current-tab",
               icon: <CheckCircle2 className="h-5 w-5 shrink-0" />,
               value: isAwaitingData ? "…" : total,
-              label: tr(
-                `إجمالي: ${statusLabels[activeStatus]}`,
-                `Total: ${statusLabels[activeStatus]}`,
-              ),
+              label:
+                t("admin.doctorRestoreRequests.total").replace(":", "") +
+                ": " +
+                statusLabels[activeStatus],
             },
           ]}
         />
@@ -137,10 +131,7 @@ export default function AdminDoctorRestoreRequestsPage() {
         <div className="flex items-start gap-3 rounded-[12px] border border-[#FEF3C7] bg-[#FFFBEB] px-4 py-3 text-start">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#B54708]" />
           <div className="font-cairo text-[12px] font-bold leading-6 text-[#B54708]">
-            {tr(
-              "تُستخدم هذه القائمة لفرز الطلبات التي تحتاج قرارًا إداريًا بعد انتهاء الاسترجاع التلقائي. الطلبات المعلّقة تحتاج فتح المراجعة، أما الطلبات المقبولة أو المرفوضة فتبقى هنا كسجل مرجعي للحالة النهائية.",
-              "This list is used to triage requests that need an admin decision after the automatic restore window ends. Pending requests need review, while approved or rejected requests remain here as a reference record of the final status.",
-            )}
+            {t("admin.doctorRestoreRequests.disclaimer")}
           </div>
         </div>
 
@@ -181,17 +172,14 @@ export default function AdminDoctorRestoreRequestsPage() {
               <input
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                placeholder={tr(
-                  "ابحث بالاسم أو البريد أو الهاتف…",
-                  "Search by name, email, or phone…",
-                )}
+                placeholder={t("admin.doctorRestoreRequests.searchPlaceholder")}
                 className="h-[40px] w-full rounded-[8px] border border-[#E5E7EB] bg-white px-3.5 ps-10 font-cairo text-[12px] font-bold text-[#111827] outline-none placeholder:text-[#98A2B3] focus:border-primary"
               />
               <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
             </div>
             <label className="flex items-center gap-2 rounded-[8px] border border-[#E5E7EB] bg-white px-3.5">
               <span className="shrink-0 font-cairo text-[11px] font-extrabold text-[#667085]">
-                {tr("من", "From")}
+                {t("admin.doctorRestoreRequests.from")}
               </span>
               <input
                 type="date"
@@ -202,7 +190,7 @@ export default function AdminDoctorRestoreRequestsPage() {
             </label>
             <label className="flex items-center gap-2 rounded-[8px] border border-[#E5E7EB] bg-white px-3.5">
               <span className="shrink-0 font-cairo text-[11px] font-extrabold text-[#667085]">
-                {tr("إلى", "To")}
+                {t("admin.doctorRestoreRequests.to")}
               </span>
               <input
                 type="date"
@@ -218,10 +206,7 @@ export default function AdminDoctorRestoreRequestsPage() {
           <div className="flex flex-col items-center gap-3 rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-10 text-center shadow-[0_12px_24px_rgba(0,0,0,0.06)]">
             <AlertCircle className="h-7 w-7 text-[#DC2626]" />
             <div className="font-cairo text-[14px] font-extrabold text-[#991B1B]">
-              {tr(
-                "تعذر تحميل طلبات الاستعادة",
-                "Failed to load restore requests",
-              )}
+              {t("admin.doctorRestoreRequests.loadError")}
             </div>
             <button
               type="button"
@@ -229,24 +214,21 @@ export default function AdminDoctorRestoreRequestsPage() {
               className="inline-flex items-center gap-2 rounded-[8px] border border-[#FECACA] bg-white px-5 py-2 font-cairo text-[12px] font-extrabold text-[#DC2626]"
             >
               <RefreshCw className="h-4 w-4" />
-              {tr("إعادة المحاولة", "Retry")}
+              {t("admin.doctorRestoreRequests.retry")}
             </button>
           </div>
         ) : null}
 
         {!isError && isAwaitingData ? (
           <div className="rounded-[12px] border border-[#E5E7EB] bg-white px-6 py-10 text-center font-cairo text-[13px] font-bold text-[#667085] shadow-[0_12px_24px_rgba(0,0,0,0.06)]">
-            {tr(
-              "جار تحميل طلبات الاستعادة...",
-              "Loading restore requests…",
-            )}
+            {t("admin.doctorRestoreRequests.loading")}
           </div>
         ) : null}
 
         {!isError && !isAwaitingData && isRefetching ? (
           <div className="flex items-center justify-center gap-2 rounded-[12px] border border-[#D1FAE5] bg-[#ECFDF5] px-6 py-3 text-center font-cairo text-[12px] font-extrabold text-[#047857] shadow-[0_12px_24px_rgba(0,0,0,0.04)]">
             <RefreshCw className="h-4 w-4 animate-spin" />
-            {tr("جارٍ تحديث طلبات الاستعادة...", "Refreshing restore requests...")}
+            {t("admin.doctorRestoreRequests.refreshing")}
           </div>
         ) : null}
 
@@ -254,16 +236,10 @@ export default function AdminDoctorRestoreRequestsPage() {
           <div className="rounded-[12px] border border-[#E5E7EB] bg-white px-6 py-10 text-center shadow-[0_12px_24px_rgba(0,0,0,0.06)]">
             <ShieldCheck className="mx-auto h-8 w-8 text-[#98A2B3]" />
             <div className="mt-3 font-cairo text-[15px] font-extrabold text-[#111827]">
-              {tr(
-                "لا توجد طلبات استعادة مطابقة",
-                "No matching restore requests",
-              )}
+              {t("admin.doctorRestoreRequests.noMatching")}
             </div>
             <div className="mt-2 font-cairo text-[13px] font-semibold leading-7 text-[#667085]">
-              {tr(
-                "جرّب تغيير التبويب أو مسح الفلاتر.",
-                "Try a different tab or clear the filters.",
-              )}
+              {t("admin.doctorRestoreRequests.tryDifferent")}
             </div>
           </div>
         ) : null}
@@ -304,24 +280,24 @@ export default function AdminDoctorRestoreRequestsPage() {
 
                   <div className="mt-4 space-y-2 font-cairo text-[12px] font-semibold text-[#475467]">
                     <div>
-                      {tr("تاريخ الطلب:", "Requested:")}{" "}
+                      {t("admin.doctorRestoreRequests.requested")}{" "}
                       {formatDate(request.requestedAt)}
                     </div>
                     {request.specialization ? (
                       <div>
-                        {tr("الاختصاص:", "Specialization:")}{" "}
+                        {t("admin.doctorRestoreRequests.specialization")}{" "}
                         {request.specialization}
                       </div>
                     ) : null}
                     {request.reason ? (
                       <div>
-                        {tr("سبب الاستعادة:", "Restore reason:")}{" "}
+                        {t("admin.doctorRestoreRequests.restoreReason")}{" "}
                         {request.reason}
                       </div>
                     ) : null}
                     {request.deletionReason ? (
                       <div>
-                        {tr("سبب الحذف:", "Deletion reason:")}{" "}
+                        {t("admin.doctorRestoreRequests.deletionReason")}{" "}
                         {request.deletionReason}
                       </div>
                     ) : null}
@@ -335,7 +311,7 @@ export default function AdminDoctorRestoreRequestsPage() {
                         className="inline-flex h-10 items-center gap-2 rounded-[8px] border border-primary bg-primary px-4 font-cairo text-[12px] font-extrabold text-white transition hover:bg-primary/90"
                       >
                         <ShieldCheck className="h-4 w-4" />
-                        {tr("مراجعة الطلب", "Review request")}
+                        {t("admin.doctorRestoreRequests.reviewRequest")}
                       </button>
                     </div>
                   ) : null}
@@ -352,19 +328,21 @@ export default function AdminDoctorRestoreRequestsPage() {
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
               className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white text-[#344054] disabled:opacity-40"
-              aria-label={tr("الصفحة السابقة", "Previous page")}
+              aria-label={t("admin.doctorRestoreRequests.previousPage")}
             >
               <ChevronRight className="h-4 w-4" />
             </button>
             <span className="font-cairo text-[12px] font-bold text-[#344054]">
-              {tr(`صفحة ${page} من ${totalPages}`, `Page ${page} of ${totalPages}`)}
+              {t("admin.doctorRestoreRequests.pageOf")
+                .replace("{page}", String(page))
+                .replace("{total}", String(totalPages))}
             </span>
             <button
               type="button"
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page >= totalPages}
               className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white text-[#344054] disabled:opacity-40"
-              aria-label={tr("الصفحة التالية", "Next page")}
+              aria-label={t("admin.doctorRestoreRequests.nextPage")}
             >
               <ChevronLeft className="h-4 w-4" />
             </button>

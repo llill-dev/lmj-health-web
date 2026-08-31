@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { XCircle } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { ClinicAccountsModalShell } from '@/components/doctor/clinic-accounts/clinic-accounts-modal-shell';
-import { useToast } from '@/components/ui/ToastProvider';
-import { useCancelBillingInvoice } from '@/hooks/doctor/billing';
-import { getUserFacingRequestErrorMessage } from '@/lib/api';
-import type { ClinicInvoice } from '@/lib/doctor/clinicAccounts/types';
-import { useI18n } from '@/i18n/provider';
+import { XCircle } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ClinicAccountsModalShell } from "@/components/doctor/clinic-accounts/clinic-accounts-modal-shell";
+import { useToast } from "@/components/ui/ToastProvider";
+import { useCancelBillingInvoice } from "@/hooks/doctor/billing";
+import { getUserFacingRequestErrorMessage } from "@/lib/api";
+import type { ClinicInvoice } from "@/lib/doctor/clinicAccounts/types";
+import { useI18n } from "@/i18n/provider";
 
 export function InvoiceCancelDialog({
   open,
@@ -20,14 +20,13 @@ export function InvoiceCancelDialog({
   onClose: () => void;
   onSuccess?: () => void;
 }) {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const { t, locale, dir } = useI18n();
   const { toast } = useToast();
   const cancelInvoice = useCancelBillingInvoice();
-  const [reason, setReason] = useState('');
+  const [reason, setReason] = useState("");
 
   useEffect(() => {
-    if (open) setReason('');
+    if (open) setReason("");
   }, [open]);
 
   if (!invoice) return null;
@@ -39,13 +38,15 @@ export function InvoiceCancelDialog({
         invoiceId: invoice.rawId,
         reason: reason.trim() || undefined,
       });
-      toast(tr('تم إلغاء الفاتورة.', 'Invoice cancelled.'), { variant: 'success' });
+      toast(t("doctor.clinicAccounts.invoiceCancel.success"), {
+        variant: "success",
+      });
       onSuccess?.();
       onClose();
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
-        title: tr('تعذّر إلغاء الفاتورة', 'Could not cancel invoice'),
-        variant: 'error',
+        title: t("doctor.clinicAccounts.invoiceCancel.error"),
+        variant: "error",
       });
     }
   };
@@ -54,7 +55,7 @@ export function InvoiceCancelDialog({
     <ClinicAccountsModalShell
       open={open}
       onClose={onClose}
-      title={tr('إلغاء الفاتورة', 'Cancel invoice')}
+      title={t("doctor.clinicAccounts.invoiceCancel.title")}
       headerPattern
       maxWidthClass="max-w-[520px]"
     >
@@ -64,22 +65,21 @@ export function InvoiceCancelDialog({
             {invoice.id} • {invoice.patientName}
           </p>
           <p className="mt-1 font-cairo text-[12px] font-semibold text-[#991B1B]">
-            {tr(
-              'هذا الإجراء يُلغي الفاتورة نهائيًا. تأكد من صحة القرار قبل المتابعة.',
-              'This permanently cancels the invoice. Make sure before continuing.',
-            )}
+            {t("doctor.clinicAccounts.invoiceCancel.warning")}
           </p>
         </div>
 
         <div>
           <label className="mb-2 block text-start font-cairo text-[13px] font-extrabold text-[#111827]">
-            {tr('سبب الإلغاء (اختياري)', 'Cancellation reason (optional)')}
+            {t("doctor.clinicAccounts.invoiceCancel.reasonLabel")}
           </label>
           <textarea
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             rows={3}
-            placeholder={tr('اكتب سبب إلغاء الفاتورة...', 'Describe why this invoice is being cancelled...')}
+            placeholder={t(
+              "doctor.clinicAccounts.invoiceCancel.reasonPlaceholder",
+            )}
             className="w-full rounded-[12px] border border-[#E5E7EB] px-4 py-3 font-cairo text-[13px] font-semibold outline-none focus:border-primary"
           />
         </div>
@@ -91,7 +91,7 @@ export function InvoiceCancelDialog({
             disabled={cancelInvoice.isPending}
             className="inline-flex h-[48px] items-center justify-center rounded-[10px] border border-[#E5E7EB] font-cairo text-[14px] font-extrabold text-[#667085] disabled:opacity-60"
           >
-            {tr('تراجع', 'Back')}
+            {t("doctor.clinicAccounts.invoiceCancel.back")}
           </button>
           <button
             type="button"
@@ -101,8 +101,8 @@ export function InvoiceCancelDialog({
           >
             <XCircle className="h-4 w-4" aria-hidden />
             {cancelInvoice.isPending
-              ? tr('جارٍ الإلغاء...', 'Cancelling...')
-              : tr('تأكيد الإلغاء', 'Confirm cancellation')}
+              ? t("doctor.clinicAccounts.invoiceCancel.cancelling")
+              : t("doctor.clinicAccounts.invoiceCancel.confirm")}
           </button>
         </div>
       </div>

@@ -13,6 +13,7 @@ import {
   User,
 } from "lucide-react";
 import { cn } from "@/lib/utils/utils";
+import { useI18n } from "@/i18n/provider";
 import type { AdminContentItem } from "@/lib/admin/types";
 import {
   contentStatusLabel,
@@ -44,9 +45,9 @@ function quickSourceCount(item: AdminContentItem): number | null {
       const sourceRecord = source as Record<string, unknown>;
       return Boolean(
         readSourceText(sourceRecord.url) ||
-          readSourceText(sourceRecord.href) ||
-          readSourceText(sourceRecord.sourceUrl) ||
-          readSourceText(sourceRecord.link),
+        readSourceText(sourceRecord.href) ||
+        readSourceText(sourceRecord.sourceUrl) ||
+        readSourceText(sourceRecord.link),
       );
     }).length;
   }
@@ -56,10 +57,10 @@ function quickSourceCount(item: AdminContentItem): number | null {
       const blockRecord = block as Record<string, unknown>;
       return Boolean(
         readSourceText(blockRecord.url) ||
-          readSourceText(blockRecord.href) ||
-          readSourceText(blockRecord.sourceUrl) ||
-          readSourceText(blockRecord.sourceLink) ||
-          readSourceText(blockRecord.link),
+        readSourceText(blockRecord.href) ||
+        readSourceText(blockRecord.sourceUrl) ||
+        readSourceText(blockRecord.sourceLink) ||
+        readSourceText(blockRecord.link),
       );
     }).length;
   }
@@ -84,8 +85,6 @@ export function AdminContentListItem({
   item,
   showMineOnly,
   actionBusy,
-  locale,
-  tr,
   numberLocale,
   onSubmitReview,
   onApprove,
@@ -98,8 +97,6 @@ export function AdminContentListItem({
   item: AdminContentItem;
   showMineOnly: boolean;
   actionBusy: boolean;
-  locale: string;
-  tr: (ar: string, en: string) => string;
   numberLocale: string;
   onSubmitReview: (item: AdminContentItem) => void;
   onApprove: (item: AdminContentItem) => void;
@@ -109,6 +106,7 @@ export function AdminContentListItem({
   onEdit: (item: AdminContentItem) => void;
   onView: (item: AdminContentItem) => void;
 }) {
+  const { t, locale } = useI18n();
   const sourceCount = quickSourceCount(item);
   const readinessSignal = getListReadinessSignal(item, sourceCount);
   const acceptanceChip = getListAcceptanceScenarioChip(
@@ -137,18 +135,28 @@ export function AdminContentListItem({
               {toDisplayText(item.title) || "—"}
             </div>
             {(() => {
-              const lk = languageKindLabel(item.language, locale as "ar" | "en");
+              const lk = languageKindLabel(
+                item.language,
+                locale as "ar" | "en",
+              );
               return (
                 <span
                   className={cn(
                     "inline-flex h-[22px] min-w-[1.6rem] shrink-0 items-center justify-center rounded-[8px] border px-2 font-cairo text-[10px] font-extrabold",
-                    lk.code === "ar" && "border-primary/30 bg-[#E7FBFA] text-primary",
-                    lk.code === "en" && "border-blue-200 bg-[#EFF6FF] text-[#1D4ED8]",
-                    lk.code === "other" && "border-[#E5E7EB] bg-[#F3F4F6] text-[#667085]",
+                    lk.code === "ar" &&
+                      "border-primary/30 bg-[#E7FBFA] text-primary",
+                    lk.code === "en" &&
+                      "border-blue-200 bg-[#EFF6FF] text-[#1D4ED8]",
+                    lk.code === "other" &&
+                      "border-[#E5E7EB] bg-[#F3F4F6] text-[#667085]",
                   )}
                   title={lk.label}
                 >
-                  {lk.code === "ar" ? tr("ع", "AR") : lk.code === "en" ? "EN" : tr("؟", "?")}
+                  {lk.code === "ar"
+                    ? t("admin.medicalContent.listItem.ar")
+                    : lk.code === "en"
+                      ? "EN"
+                      : t("admin.medicalContent.listItem.unknown")}
                 </span>
               );
             })()}
@@ -167,17 +175,20 @@ export function AdminContentListItem({
           <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 font-cairo text-[12px] font-semibold text-[#667085]">
             <span className="inline-flex items-center gap-1.5">
               <Eye className="h-3.5 w-3.5 shrink-0 text-[#98A2B3]" />
-              {Number(item.viewCount ?? item.views ?? 0).toLocaleString(numberLocale)}{" "}
-              {tr("مشاهدة", "views")}
+              {Number(item.viewCount ?? item.views ?? 0).toLocaleString(
+                numberLocale,
+              )}{" "}
+              {t("admin.medicalContent.listItem.views")}
             </span>
             <span className="inline-flex items-center gap-1.5">
               <Clock className="h-3.5 w-3.5 shrink-0 text-[#98A2B3]" />
-              {tr("آخر تحديث:", "Last update:")} {formatContentDate(item.updatedAt, locale as "ar" | "en")}
+              {t("admin.medicalContent.listItem.lastUpdate")}{" "}
+              {formatContentDate(item.updatedAt, locale as "ar" | "en")}
             </span>
             {creatorName ? (
               <span className="inline-flex items-center gap-1.5">
                 <User className="h-3.5 w-3.5 shrink-0 text-[#98A2B3]" />
-                {tr("بواسطة:", "By:")} {creatorName}
+                {t("admin.medicalContent.listItem.by")} {creatorName}
               </span>
             ) : null}
           </div>
@@ -186,25 +197,30 @@ export function AdminContentListItem({
           <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-dashed border-[#EEF2F6] pt-3">
             <div className="inline-flex items-center gap-1.5 rounded-full bg-[#F8FAFC] px-2.5 py-1 font-cairo text-[10.5px] font-bold text-[#667085]">
               {item.status === "DRAFT"
-                ? tr("التالي: إرسال للمراجعة", "Next: send for review")
+                ? t("admin.medicalContent.listItem.nextSubmitReview")
                 : item.status === "IN_REVIEW"
-                  ? tr("التالي: موافقة أو رفض", "Next: approve or reject")
+                  ? t("admin.medicalContent.listItem.nextApproveReject")
                   : item.status === "PUBLISHED"
-                    ? tr("التالي: أرشفة عند الحاجة", "Next: archive if needed")
-                    : tr("العنصر مؤرشف للمرجع", "Item archived for reference")}
+                    ? t("admin.medicalContent.listItem.nextArchive")
+                    : t("admin.medicalContent.listItem.archived")}
             </div>
             <div
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-cairo text-[10.5px] font-bold",
-                sourceCount === 0 ? "bg-[#FFF7ED] text-[#C2410C]" : "bg-[#F8FAFC] text-[#667085]",
+                sourceCount === 0
+                  ? "bg-[#FFF7ED] text-[#C2410C]"
+                  : "bg-[#F8FAFC] text-[#667085]",
               )}
             >
               <LinkIcon className="h-3.5 w-3.5" />
               {sourceCount === null
-                ? tr("تحقق من المصادر داخل التفاصيل", "Check sources in details")
+                ? t("admin.medicalContent.listItem.checkSources")
                 : sourceCount === 0
-                  ? tr("لا توجد مصادر مرفقة بعد", "No sources attached yet")
-                  : tr(`${sourceCount} مصدر/مصادر`, `${sourceCount} source(s)`)}
+                  ? t("admin.medicalContent.listItem.noSources")
+                  : t("admin.medicalContent.listItem.sources").replace(
+                      "{count}",
+                      String(sourceCount),
+                    )}
             </div>
             <div
               className={cn(
@@ -213,7 +229,7 @@ export function AdminContentListItem({
               )}
             >
               <AlertTriangle className="h-3.5 w-3.5" />
-              {tr(readinessSignal.ar, readinessSignal.en)}
+              {t(readinessSignal.ar, readinessSignal.en)}
             </div>
             <div className="inline-flex items-center gap-1.5 rounded-full border border-[#E4E7EC] bg-white px-2.5 py-1 font-cairo text-[10.5px] font-bold text-[#475467]">
               {acceptanceChip}
@@ -223,7 +239,10 @@ export function AdminContentListItem({
                 key={`${item._id}-${cue.action}`}
                 className="inline-flex items-center gap-1.5 rounded-full border border-[#D0D5DD] bg-[#F9FAFB] px-2.5 py-1 font-cairo text-[10.5px] font-bold text-[#667085]"
               >
-                {localizeAcceptanceCopy(cue.label, locale === "en" ? "en" : "ar")}
+                {localizeAcceptanceCopy(
+                  cue.label,
+                  locale === "en" ? "en" : "ar",
+                )}
               </div>
             ))}
           </div>
@@ -237,11 +256,11 @@ export function AdminContentListItem({
               disabled={actionBusy}
               onClick={() => onSubmitReview(item)}
               className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#E5E7EB] px-3 text-[#475467] transition hover:bg-[#F9FAFB] disabled:opacity-50"
-              aria-label={tr("إرسال للمراجعة", "Send for review")}
+              aria-label={t("admin.medicalContent.listItem.sendForReview")}
             >
               <ClipboardCheck className="w-4 h-4" />
               <span className="font-cairo text-[11px] font-extrabold">
-                {tr("إرسال للمراجعة", "Send for review")}
+                {t("admin.medicalContent.listItem.sendForReview")}
               </span>
             </button>
           ) : null}
@@ -253,11 +272,11 @@ export function AdminContentListItem({
                 disabled={actionBusy}
                 onClick={() => onApprove(item)}
                 className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#BBF7D0] bg-[#F6FEF9] px-3 text-[#16A34A] transition hover:bg-[#ECFDF3] disabled:opacity-50"
-                aria-label={tr("موافقة", "Approve")}
+                aria-label={t("admin.medicalContent.listItem.approve")}
               >
                 <Check className="w-4 h-4" />
                 <span className="font-cairo text-[11px] font-extrabold">
-                  {tr("موافقة", "Approve")}
+                  {t("admin.medicalContent.listItem.approve")}
                 </span>
               </button>
               <button
@@ -265,11 +284,11 @@ export function AdminContentListItem({
                 disabled={actionBusy}
                 onClick={() => onReject(item)}
                 className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#FECACA] bg-[#FFFBFA] px-3 text-[#EF4444] transition hover:bg-[#FEF2F2] disabled:opacity-50"
-                aria-label={tr("رفض", "Reject")}
+                aria-label={t("admin.medicalContent.listItem.reject")}
               >
                 <X className="w-4 h-4" />
                 <span className="font-cairo text-[11px] font-extrabold">
-                  {tr("رفض", "Reject")}
+                  {t("admin.medicalContent.listItem.reject")}
                 </span>
               </button>
             </>
@@ -281,11 +300,11 @@ export function AdminContentListItem({
               disabled={actionBusy}
               onClick={() => onArchive(item)}
               className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#BFDBFE] bg-[#F5FAFF] px-3 text-[#1D4ED8] transition hover:bg-[#EFF6FF] disabled:opacity-50"
-              aria-label={tr("أرشفة", "Archive")}
+              aria-label={t("admin.medicalContent.listItem.archive")}
             >
               <Archive className="w-4 h-4" />
               <span className="font-cairo text-[11px] font-extrabold">
-                {tr("أرشفة", "Archive")}
+                {t("admin.medicalContent.listItem.archive")}
               </span>
             </button>
           ) : null}
@@ -296,11 +315,11 @@ export function AdminContentListItem({
               disabled={actionBusy}
               onClick={() => onPublish(item)}
               className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#67E8F9] bg-[#F0FDFF] px-3 text-[#0891B2] transition hover:bg-[#ECFEFF] disabled:opacity-50"
-              aria-label={tr("نشر", "Publish")}
+              aria-label={t("admin.medicalContent.listItem.publish")}
             >
               <ShieldCheck className="w-4 h-4" />
               <span className="font-cairo text-[11px] font-extrabold">
-                {tr("نشر", "Publish")}
+                {t("admin.medicalContent.listItem.publish")}
               </span>
             </button>
           ) : null}
@@ -311,7 +330,7 @@ export function AdminContentListItem({
             type="button"
             onClick={() => onEdit(item)}
             className="flex h-[32px] w-[32px] items-center justify-center rounded-[10px] text-[#0F8F8B] transition hover:bg-[#E7FBFA]"
-            aria-label={tr("تعديل", "Edit")}
+            aria-label={t("admin.medicalContent.listItem.edit")}
           >
             <Pencil className="w-4 h-4" />
           </button>
@@ -319,7 +338,7 @@ export function AdminContentListItem({
             type="button"
             onClick={() => onView(item)}
             className="flex h-[32px] w-[32px] items-center justify-center rounded-[10px] text-[#2563EB] transition hover:bg-[#EFF6FF]"
-            aria-label={tr("عرض", "View")}
+            aria-label={t("admin.medicalContent.listItem.view")}
           >
             <Eye className="w-4 h-4" />
           </button>

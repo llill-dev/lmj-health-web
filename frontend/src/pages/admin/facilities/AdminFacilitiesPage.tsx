@@ -58,12 +58,13 @@ const UNOWNED_OWNER_FILTER = "__unowned__";
 
 function getFacilityOwnerLabel(
   facility: FacilitySummary,
-  tr: (ar: string, en: string) => string,
+  t: (key: string, fallback?: string) => string,
 ): string {
   const ownerName = facility.owner?.user?.fullName || facility.owner?.fullName;
-  if (ownerName) return tr(`المالك: ${ownerName}`, `Owner: ${ownerName}`);
-  if (facility.ownerDoctorId) return tr("المالك: طبيب محدد", "Owner: assigned doctor");
-  return tr("المالك: غير محدد", "Owner: unassigned");
+  if (ownerName)
+    return t("admin.facilities.ownerLabel.named").replace("{name}", ownerName);
+  if (facility.ownerDoctorId) return t("admin.facilities.ownerLabel.assigned");
+  return t("admin.facilities.ownerLabel.unassigned");
 }
 
 function getFacilityLocationLabel(facility: FacilitySummary): string {
@@ -76,29 +77,28 @@ function formatFacilityAttributeLabel(value: string): string {
 }
 
 export default function AdminFacilitiesPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { locale, dir, t } = useI18n();
   const numberLocale = locale === "ar" ? "ar-EG" : "en-US";
 
   const FACILITY_TYPE_LABELS: Record<string, string> = {
-    hospital: tr("مستشفى", "Hospital"),
-    clinic: tr("عيادة", "Clinic"),
-    polyclinic: tr("عيادات متعددة", "Polyclinic"),
-    medical_center: tr("مركز طبي", "Medical center"),
-    laboratory: tr("مختبر", "Laboratory"),
-    imaging_center: tr("مركز أشعة", "Imaging center"),
-    pharmacy: tr("صيدلية", "Pharmacy"),
-    rehabilitation_center: tr("مركز تأهيل", "Rehabilitation center"),
-    dialysis_center: tr("مركز غسيل كلوي", "Dialysis center"),
-    emergency_center: tr("طوارئ", "Emergency center"),
-    other: tr("أخرى", "Other"),
+    hospital: t("admin.facilities.type.hospital"),
+    clinic: t("admin.facilities.type.clinic"),
+    polyclinic: t("admin.facilities.type.polyclinic"),
+    medical_center: t("admin.facilities.type.medical_center"),
+    laboratory: t("admin.facilities.type.laboratory"),
+    imaging_center: t("admin.facilities.type.imaging_center"),
+    pharmacy: t("admin.facilities.type.pharmacy"),
+    rehabilitation_center: t("admin.facilities.type.rehabilitation_center"),
+    dialysis_center: t("admin.facilities.type.dialysis_center"),
+    emergency_center: t("admin.facilities.type.emergency_center"),
+    other: t("admin.facilities.type.other"),
   };
 
   const STATUS_LABELS: Record<string, string> = {
-    ACTIVE: tr("نشط", "Active"),
-    PENDING: tr("قيد المراجعة", "Pending"),
-    INACTIVE: tr("معطّل", "Inactive"),
-    DELETED: tr("محذوف", "Deleted"),
+    ACTIVE: t("admin.facilities.status.active"),
+    PENDING: t("admin.facilities.status.pending"),
+    INACTIVE: t("admin.facilities.status.inactive"),
+    DELETED: t("admin.facilities.status.deleted"),
   };
 
   const [createOpen, setCreateOpen] = useState(false);
@@ -162,10 +162,10 @@ export default function AdminFacilitiesPage() {
       user: { fullName: doctor.user?.fullName || doctor._id },
     })) || [];
   const ownerFilterPlaceholder = isLoadingOwnerDoctors
-    ? tr("جارٍ تحميل الأطباء...", "Loading doctors…")
+    ? t("admin.facilities.ownerLoadingPlaceholder")
     : ownerDoctors.length === 0
-      ? tr("تصفية حسب المالك", "Filter by owner")
-      : tr("الطبيب المالك", "Owner doctor");
+      ? t("admin.facilities.ownerFilterPlaceholder")
+      : t("admin.facilities.ownerDoctorPlaceholder");
 
   const openEdit = useCallback((facility: FacilitySummary) => {
     setSelectedFacility(facility);
@@ -218,32 +218,29 @@ export default function AdminFacilitiesPage() {
   );
 
   const SORT_BY_LABELS: Record<FacilitySortBy, string> = {
-    updatedAt: tr("آخر تحديث", "Last updated"),
-    createdAt: tr("تاريخ الإنشاء", "Created date"),
-    name: tr("الاسم", "Name"),
-    city: tr("المدينة", "City"),
-    status: tr("الحالة", "Status"),
-    facilityType: tr("نوع المنشأة", "Facility type"),
-    doctorCount: tr("عدد الأطباء", "Doctor count"),
+    updatedAt: t("admin.facilities.sortBy.updatedAt"),
+    createdAt: t("admin.facilities.sortBy.createdAt"),
+    name: t("admin.facilities.sortBy.name"),
+    city: t("admin.facilities.sortBy.city"),
+    status: t("admin.facilities.sortBy.status"),
+    facilityType: t("admin.facilities.sortBy.facilityType"),
+    doctorCount: t("admin.facilities.sortBy.doctorCount"),
   };
 
   return (
     <>
       <Helmet>
-        <title>{tr("المنشآت الطبية", "Medical facilities")} • LMJ Health</title>
+        <title>{t("admin.facilities.page.title")} • LMJ Health</title>
       </Helmet>
 
       <div dir={dir} lang={locale}>
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title={tr("المنشآت الطبية", "Medical facilities")}
-          subtitle={tr(
-            "إدارة المنشآت الطبية والمستشفيات",
-            "Manage facilities and hospitals",
-          )}
+          title={t("admin.facilities.page.title")}
+          subtitle={t("admin.facilities.page.subtitle")}
           headerIcon={<Building2 className="h-8 w-8 text-white" />}
-          actionLabel={tr("إضافة منشأة", "Add facility")}
+          actionLabel={t("admin.facilities.actionLabel")}
           onActionClick={() => setCreateOpen(true)}
           kpis={[
               {
@@ -252,17 +249,14 @@ export default function AdminFacilitiesPage() {
                 value: isLoading
                   ? "—"
                   : totalFacilities.toLocaleString(numberLocale),
-                label: tr("إجمالي المنشآت", "Total facilities"),
+                label: t("admin.facilities.kpi.total"),
               },
             ]}
         />
 
         <section className="mt-4 rounded-[12px] border border-[#D6EEEC] bg-[#F3FBFA] px-6 py-4 shadow-[0_10px_24px_rgba(20,130,131,0.08)]">
           <div className="font-cairo text-[13px] font-extrabold text-[#0F766E]">
-            {tr(
-              "تُستخدم هذه الشاشة لإدارة سجل المنشأة نفسه: الاسم، النوع، الحالة، والربط بالطبيب المالك. تفاصيل الأطباء المرتبطين والمراجعة الأوسع للبيانات تتم من أزرار «الأطباء» و«تفاصيل» داخل كل منشأة.",
-              "Use this screen to manage the facility record itself: name, type, status, and owner-doctor linkage. Linked doctors and broader record review are handled from the “Doctors” and “Details” actions on each facility.",
-            )}
+            {t("admin.facilities.disclaimer")}
           </div>
         </section>
 
@@ -270,26 +264,25 @@ export default function AdminFacilitiesPage() {
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <div className="font-cairo text-[12px] font-extrabold text-[#667085]">
-                {tr("قائمة المنشآت الطبية", "Facilities list")}
+                {t("admin.facilities.list.title")}
               </div>
               <div className="mt-1 font-cairo text-[11px] font-bold text-[#98A2B3]">
-                {hasActiveFilters
-                  ? tr(
-                      isLoading
-                        ? "جارٍ تحميل النتائج..."
-                        : `عرض ${facilities.length.toLocaleString(numberLocale)} من أصل ${totalFacilities.toLocaleString(numberLocale)} منشأة`,
-                      isLoading
-                        ? "Loading results..."
-                        : `Showing ${facilities.length.toLocaleString(numberLocale)} of ${totalFacilities.toLocaleString(numberLocale)} facilities`,
-                    )
-                  : tr(
-                      isLoading
-                        ? "جارٍ تحميل النتائج..."
-                        : `إجمالي النتائج: ${totalFacilities.toLocaleString(numberLocale)}`,
-                      isLoading
-                        ? "Loading results..."
-                        : `Total results: ${totalFacilities.toLocaleString(numberLocale)}`,
-                    )}
+                {isLoading
+                  ? t("admin.facilities.loadingResults")
+                  : hasActiveFilters
+                    ? t("admin.facilities.showingOfTotal")
+                        .replace(
+                          "{shown}",
+                          facilities.length.toLocaleString(numberLocale),
+                        )
+                        .replace(
+                          "{total}",
+                          totalFacilities.toLocaleString(numberLocale),
+                        )
+                    : t("admin.facilities.totalResults").replace(
+                        "{total}",
+                        totalFacilities.toLocaleString(numberLocale),
+                      )}
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -300,7 +293,7 @@ export default function AdminFacilitiesPage() {
                 className="inline-flex h-[40px] items-center gap-2 rounded-[8px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054] disabled:opacity-50"
               >
                 <Filter className="h-4 w-4" />
-                {tr("إعادة التصفية", "Reset filters")}
+                {t("admin.facilities.resetFilters")}
               </button>
               <button
                 type="button"
@@ -312,8 +305,8 @@ export default function AdminFacilitiesPage() {
                   className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`}
                 />
                 {isFetching
-                  ? tr("جارٍ التحديث...", "Refreshing...")
-                  : tr("تحديث", "Refresh")}
+                  ? t("admin.facilities.refreshing")
+                  : t("admin.facilities.refresh")}
               </button>
             </div>
           </div>
@@ -325,7 +318,7 @@ export default function AdminFacilitiesPage() {
                 type="text"
                 value={filters.q}
                 onChange={(e) => setFilters({ ...filters, q: e.target.value })}
-                placeholder={tr("بحث بالاسم...", "Search by name…")}
+                placeholder={t("admin.facilities.searchPlaceholder")}
                 className="w-full rounded-[8px] border border-[#E5E7EB] bg-white pe-10 ps-3 py-2.5 font-cairo text-[12px] font-bold text-[#344054] placeholder:text-[#98A2B3] focus:border-primary focus:outline-none"
               />
             </div>
@@ -336,13 +329,22 @@ export default function AdminFacilitiesPage() {
                 setFilters({ ...filters, status: value as FacilityStatus | "" })
               }
               options={[
-                { value: "", label: tr("كل الحالات", "All statuses") },
-                { value: "ACTIVE", label: tr("نشط", "Active") },
-                { value: "PENDING", label: tr("قيد المراجعة", "Pending") },
-                { value: "INACTIVE", label: tr("معطّل", "Inactive") },
-                { value: "DELETED", label: tr("محذوف", "Deleted") },
+                { value: "", label: t("admin.facilities.allStatuses") },
+                { value: "ACTIVE", label: t("admin.facilities.status.active") },
+                {
+                  value: "PENDING",
+                  label: t("admin.facilities.status.pending"),
+                },
+                {
+                  value: "INACTIVE",
+                  label: t("admin.facilities.status.inactive"),
+                },
+                {
+                  value: "DELETED",
+                  label: t("admin.facilities.status.deleted"),
+                },
               ]}
-              placeholder={tr("الحالة", "Status")}
+              placeholder={t("admin.facilities.statusPlaceholder")}
             />
 
             <StyledSelect
@@ -354,7 +356,7 @@ export default function AdminFacilitiesPage() {
                 })
               }
               options={[
-                { value: "", label: tr("كل الأنواع", "All types") },
+                { value: "", label: t("admin.facilities.allTypes") },
                 ...Object.entries(FACILITY_TYPE_LABELS).map(
                   ([value, label]) => ({
                     value,
@@ -362,14 +364,14 @@ export default function AdminFacilitiesPage() {
                   }),
                 ),
               ]}
-              placeholder={tr("نوع المنشأة", "Facility type")}
+              placeholder={t("admin.facilities.typePlaceholder")}
             />
 
             <input
               type="text"
               value={filters.city}
               onChange={(e) => setFilters({ ...filters, city: e.target.value })}
-              placeholder={tr("المدينة...", "City…")}
+              placeholder={t("admin.facilities.cityPlaceholder")}
               className="w-full rounded-[8px] border border-[#E5E7EB] bg-white px-3 py-2.5 font-cairo text-[12px] font-bold text-[#344054] placeholder:text-[#98A2B3] focus:border-primary focus:outline-none"
             />
 
@@ -379,11 +381,17 @@ export default function AdminFacilitiesPage() {
                 setFilters({ ...filters, hasDoctors: value })
               }
               options={[
-                { value: "", label: tr("الكل", "All") },
-                { value: "true", label: tr("لديها أطباء", "Has doctors") },
-                { value: "false", label: tr("بدون أطباء", "No doctors") },
+                { value: "", label: t("admin.facilities.doctorsFilter.all") },
+                {
+                  value: "true",
+                  label: t("admin.facilities.doctorsFilter.has"),
+                },
+                {
+                  value: "false",
+                  label: t("admin.facilities.doctorsFilter.none"),
+                },
               ]}
-              placeholder={tr("الأطباء", "Doctors")}
+              placeholder={t("admin.facilities.doctorsPlaceholder")}
             />
 
             <StyledSelect
@@ -392,8 +400,11 @@ export default function AdminFacilitiesPage() {
                 setFilters({ ...filters, ownerDoctorId: value })
               }
               options={[
-                { value: "", label: tr("كل المالكين", "All owners") },
-                { value: UNOWNED_OWNER_FILTER, label: tr("بدون مالك", "No owner") },
+                { value: "", label: t("admin.facilities.ownerFilter.all") },
+                {
+                  value: UNOWNED_OWNER_FILTER,
+                  label: t("admin.facilities.ownerFilter.none"),
+                },
                 ...ownerDoctors.map((doctor) => ({
                   value: doctor._id,
                   label: doctor.user.fullName,
@@ -411,10 +422,7 @@ export default function AdminFacilitiesPage() {
               onChange={(e) =>
                 setFilters({ ...filters, attribute: e.target.value })
               }
-              placeholder={tr(
-                "السمة (مثال: night_shift)…",
-                "Attribute (e.g. night_shift)…",
-              )}
+              placeholder={t("admin.facilities.attributePlaceholder")}
               dir="ltr"
               className={`w-full rounded-[8px] border border-[#E5E7EB] bg-white px-3 py-2.5 ${locale === "ar" ? "text-start" : "text-end"} font-cairo text-[12px] font-bold text-[#344054] placeholder:text-[#98A2B3] focus:border-primary focus:outline-none`}
             />
@@ -425,12 +433,12 @@ export default function AdminFacilitiesPage() {
                 setFilters({ ...filters, sortBy: value as FacilitySortBy | "" })
               }
               options={[
-                { value: "", label: tr("بلا ترتيب محدّد", "No specific sort") },
+                { value: "", label: t("admin.facilities.sortByNone") },
                 ...(Object.entries(SORT_BY_LABELS) as [FacilitySortBy, string][]).map(
                   ([value, label]) => ({ value, label }),
                 ),
               ]}
-              placeholder={tr("ترتيب حسب", "Sort by")}
+              placeholder={t("admin.facilities.sortByPlaceholder")}
             />
 
             <StyledSelect
@@ -440,10 +448,10 @@ export default function AdminFacilitiesPage() {
               }
               disabled={!filters.sortBy}
               options={[
-                { value: "desc", label: tr("تنازلي", "Descending") },
-                { value: "asc", label: tr("تصاعدي", "Ascending") },
+                { value: "desc", label: t("admin.facilities.sortOrder.desc") },
+                { value: "asc", label: t("admin.facilities.sortOrder.asc") },
               ]}
-              placeholder={tr("اتجاه الترتيب", "Sort direction")}
+              placeholder={t("admin.facilities.sortDirectionPlaceholder")}
             />
           </div>
         </section>
@@ -451,7 +459,7 @@ export default function AdminFacilitiesPage() {
         <section className="mt-4 space-y-3">
           {isFetching && !isLoading ? (
             <div className="rounded-[12px] border border-[#D1FAE5] bg-[#ECFDF5] px-4 py-3 font-cairo text-[12px] font-bold text-[#047857]">
-              {tr("جارٍ تحديث قائمة المنشآت...", "Refreshing facilities list...")}
+              {t("admin.facilities.refreshingList")}
             </div>
           ) : null}
           {isLoading ? (
@@ -463,10 +471,7 @@ export default function AdminFacilitiesPage() {
               <div className="font-cairo text-[13px] font-semibold text-[#B42318]">
                 {userFacingErrorMessage(
                   error,
-                  tr(
-                    "تعذّر تحميل قائمة المنشآت الطبية.",
-                    "Failed to load facilities list.",
-                  ),
+                  t("admin.facilities.loadError"),
                 )}
               </div>
               <button
@@ -475,17 +480,14 @@ export default function AdminFacilitiesPage() {
                 className="mt-3 inline-flex h-[36px] items-center gap-2 rounded-[10px] border border-[#FCA5A5] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#B42318] hover:bg-[#FFF5F5]"
               >
                 <RefreshCw className="h-4 w-4" />
-                {tr("إعادة المحاولة", "Retry")}
+                {t("admin.facilities.retry")}
               </button>
             </div>
           ) : facilities.length === 0 ? (
             <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085]">
               {hasActiveFilters
-                ? tr(
-                    "لا توجد منشآت تطابق التصفية الحالية.",
-                    "No facilities match current filters.",
-                  )
-                : tr("لا توجد منشآت طبية حالياً.", "No facilities currently.")}
+                ? t("admin.facilities.emptyFiltered")
+                : t("admin.facilities.emptyAll")}
             </div>
           ) : (
             facilities.map((facility) => {
@@ -534,16 +536,16 @@ export default function AdminFacilitiesPage() {
                           <div className="flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]">
                             <Users className="h-3.5 w-3.5" />
                             {facility.doctorCount === 0
-                              ? tr("لا يوجد أطباء", "No doctors")
-                              : tr(
-                                  `${facility.doctorCount} طبيب`,
-                                  `${facility.doctorCount} doctors`,
+                              ? t("admin.facilities.doctorCount.none")
+                              : t("admin.facilities.doctorCount.some").replace(
+                                  "{count}",
+                                  String(facility.doctorCount),
                                 )}
                           </div>
                         )}
                         <div className="flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]">
                           <UserCheck className="h-3.5 w-3.5" />
-                          {getFacilityOwnerLabel(facility, tr)}
+                          {getFacilityOwnerLabel(facility, t)}
                         </div>
                         <div className="inline-flex items-center rounded-[6px] border px-2 py-1 font-cairo text-[11px] font-bold">
                           {STATUS_LABELS[facility.status || ""] ||
@@ -571,10 +573,7 @@ export default function AdminFacilitiesPage() {
                       ) : null}
                       {isDeleted ? (
                         <p className="mt-3 font-cairo text-[11px] font-bold text-[#B42318]">
-                          {tr(
-                            "هذه المنشأة محذوفة حاليًا، لذلك تم تعطيل إجراءات التعديل والحالة والحذف.",
-                            "This facility is deleted, so edit/status/delete actions are disabled.",
-                          )}
+                          {t("admin.facilities.deletedNotice")}
                         </p>
                       ) : null}
                     </div>
@@ -583,50 +582,50 @@ export default function AdminFacilitiesPage() {
                       <button
                         type="button"
                         onClick={() => openDetails(facility)}
-                        title={tr("عرض التفاصيل", "View details")}
+                        title={t("admin.facilities.viewDetails")}
                         className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#344054] transition hover:bg-[#F3F4F6]"
                       >
                         <Eye className="h-3.5 w-3.5" />
-                        {tr("تفاصيل", "Details")}
+                        {t("admin.facilities.details")}
                       </button>
                       <button
                         type="button"
                         onClick={() => openDoctors(facility)}
-                        title={tr("الأطباء", "Doctors")}
+                        title={t("admin.facilities.doctors")}
                         className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#344054] transition hover:bg-[#F3F4F6]"
                       >
                         <UserCheck className="h-3.5 w-3.5" />
-                        {tr("الأطباء", "Doctors")}
+                        {t("admin.facilities.doctors")}
                       </button>
                       <button
                         type="button"
                         onClick={() => openStatus(facility)}
-                        title={tr("تغيير الحالة", "Change status")}
+                        title={t("admin.facilities.changeStatus")}
                         disabled={isDeleted}
                         className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#344054] transition hover:bg-[#F3F4F6] disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <Filter className="h-3.5 w-3.5" />
-                        {tr("الحالة", "Status")}
+                        {t("admin.facilities.status")}
                       </button>
                       <button
                         type="button"
                         onClick={() => openEdit(facility)}
-                        title={tr("تعديل البيانات", "Edit details")}
+                        title={t("admin.facilities.editDetails")}
                         disabled={isDeleted}
                         className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#BBF7D0] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#16A34A] transition hover:bg-[#F0FDF4] disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <Edit3 className="h-3.5 w-3.5" />
-                        {tr("تعديل", "Edit")}
+                        {t("admin.facilities.edit")}
                       </button>
                       <button
                         type="button"
                         onClick={() => openDelete(facility)}
-                        title={tr("حذف", "Delete")}
+                        title={t("admin.facilities.delete")}
                         disabled={isDeleted}
                         className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#FECACA] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#DC2626] transition hover:bg-[#FEF2F2] disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
-                        {tr("حذف", "Delete")}
+                        {t("admin.facilities.delete")}
                       </button>
                     </div>
                   </div>

@@ -1,49 +1,53 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Plus } from 'lucide-react';
-import { Helmet } from 'react-helmet-async';
+import { useEffect, useState } from "react";
+import { Plus } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 import {
   ClinicAccountsSearchRow,
   ClinicAccountsSubNav,
   ClinicAccountsModalShell,
-} from '@/components/doctor/clinic-accounts';
-import { DoctorListEmptyIllustration } from '@/components/doctor/shared/doctor-list-empty-illustration';
-import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
-import DoctorTablePagination from '@/components/doctor/shared/doctor-table-pagination';
-import { DoctorTableSkeleton } from '@/components/doctor/shared/skeletons';
-import { useToast } from '@/components/ui/ToastProvider';
+} from "@/components/doctor/clinic-accounts";
+import { DoctorListEmptyIllustration } from "@/components/doctor/shared/doctor-list-empty-illustration";
+import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
+import DoctorTablePagination from "@/components/doctor/shared/doctor-table-pagination";
+import { DoctorTableSkeleton } from "@/components/doctor/shared/skeletons";
+import { useToast } from "@/components/ui/ToastProvider";
 import {
   useBillingServices,
   useBillingSettings,
   useCreateBillingService,
   useDeleteBillingService,
   useUpdateBillingService,
-} from '@/hooks/doctor/billing';
-import { getUserFacingRequestErrorMessage } from '@/lib/api';
-import { formatBillingAmount } from '@/lib/doctor/billing/format';
-import type { ApiBillingService } from '@/lib/doctor/billing/apiTypes';
-import { useRetryAction } from '@/lib/query/useRetryAction';
-import { useBillingAccess } from '@/hooks/billing/useBillingAccess';
-import { useI18n } from '@/i18n/provider';
+} from "@/hooks/doctor/billing";
+import { getUserFacingRequestErrorMessage } from "@/lib/api";
+import { formatBillingAmount } from "@/lib/doctor/billing/format";
+import type { ApiBillingService } from "@/lib/doctor/billing/apiTypes";
+import { useRetryAction } from "@/lib/query/useRetryAction";
+import { useBillingAccess } from "@/hooks/billing/useBillingAccess";
+import { useI18n } from "@/i18n/provider";
 
 export default function DoctorClinicServicesPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const { t, locale, dir } = useI18n();
   const { toast } = useToast();
   const { canManageServices } = useBillingAccess();
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<ApiBillingService | null>(null);
-  const [name, setName] = useState('');
-  const [defaultPrice, setDefaultPrice] = useState('');
-  const [durationMinutes, setDurationMinutes] = useState('');
-  const [description, setDescription] = useState('');
+  const [name, setName] = useState("");
+  const [defaultPrice, setDefaultPrice] = useState("");
+  const [durationMinutes, setDurationMinutes] = useState("");
+  const [description, setDescription] = useState("");
 
   const settingsQuery = useBillingSettings();
-  const list = useBillingServices({ search, page, limit, includeInactive: true });
+  const list = useBillingServices({
+    search,
+    page,
+    limit,
+    includeInactive: true,
+  });
   const createService = useCreateBillingService();
   const updateService = useUpdateBillingService();
   const deleteService = useDeleteBillingService();
@@ -51,16 +55,16 @@ export default function DoctorClinicServicesPage() {
 
   useEffect(() => {
     if (!dialogOpen) return;
-    setName(editTarget?.name ?? '');
+    setName(editTarget?.name ?? "");
     setDefaultPrice(
-      editTarget?.defaultPrice != null ? String(editTarget.defaultPrice) : '',
+      editTarget?.defaultPrice != null ? String(editTarget.defaultPrice) : "",
     );
     setDurationMinutes(
       editTarget?.durationMinutes != null
         ? String(editTarget.durationMinutes)
-        : '',
+        : "",
     );
-    setDescription(editTarget?.description ?? '');
+    setDescription(editTarget?.description ?? "");
   }, [dialogOpen, editTarget]);
 
   const openCreate = () => {
@@ -77,7 +81,9 @@ export default function DoctorClinicServicesPage() {
     if (!name.trim()) return;
     // Backend requires defaultPrice > 0 (exclusiveMinimum: 0) — reject 0/empty client-side.
     if (defaultPrice.trim() && Number(defaultPrice) <= 0) {
-      toast(tr('السعر الافتراضي يجب أن يكون أكبر من صفر.', 'The default price must be greater than zero.'), { variant: 'error' });
+      toast(t("doctor.clinicAccounts.services.error.invalidPrice"), {
+        variant: "error",
+      });
       return;
     }
     const body = {
@@ -94,32 +100,37 @@ export default function DoctorClinicServicesPage() {
     try {
       if (editTarget?.id) {
         await updateService.mutateAsync({ serviceId: editTarget.id, body });
-        toast(tr('تم تحديث الخدمة.', 'The service was updated.'), { variant: 'success' });
+        toast(t("doctor.clinicAccounts.services.success.updated"), {
+          variant: "success",
+        });
       } else {
         await createService.mutateAsync(body);
-        toast(tr('تم إنشاء الخدمة.', 'The service was created.'), { variant: 'success' });
+        toast(t("doctor.clinicAccounts.services.success.created"), {
+          variant: "success",
+        });
       }
       setDialogOpen(false);
     } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), { variant: 'error' });
+      toast(getUserFacingRequestErrorMessage(error), { variant: "error" });
     }
   };
 
   const handleDeactivate = async (service: ApiBillingService) => {
     if (
       !window.confirm(
-        tr(
-          `تعطيل الخدمة "${service.name ?? ''}"؟ يمكنك تفعيلها مرة أخرى لاحقًا.`,
-          `Deactivate the service "${service.name ?? ''}"? You can reactivate it later.`,
-        ),
+        t("doctor.clinicAccounts.services.confirmDeactivate", {
+          name: service.name ?? "",
+        }),
       )
     )
       return;
     try {
       await deleteService.mutateAsync(service.id);
-      toast(tr('تم تعطيل الخدمة.', 'The service was deactivated.'), { variant: 'success' });
+      toast(t("doctor.clinicAccounts.services.success.deactivated"), {
+        variant: "success",
+      });
     } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), { variant: 'error' });
+      toast(getUserFacingRequestErrorMessage(error), { variant: "error" });
     }
   };
 
@@ -129,18 +140,18 @@ export default function DoctorClinicServicesPage() {
         serviceId: service.id,
         body: { isActive: true },
       });
-      toast(tr('تم تفعيل الخدمة.', 'The service was activated.'), { variant: 'success' });
+      toast(t("doctor.clinicAccounts.services.success.activated"), {
+        variant: "success",
+      });
     } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), { variant: 'error' });
+      toast(getUserFacingRequestErrorMessage(error), { variant: "error" });
     }
   };
 
   return (
     <>
       <Helmet>
-        <title>
-          {tr('خدمات الفوترة • LMJ Health', 'Billing Services • LMJ Health')}
-        </title>
+        <title>{t("doctor.clinicAccounts.services.page.title")}</title>
       </Helmet>
 
       <div dir={dir} lang={locale} className="w-full pb-8 sm:pb-10">
@@ -149,13 +160,10 @@ export default function DoctorClinicServicesPage() {
         <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <div className="text-start">
             <h1 className="font-cairo text-[28px] font-black text-[#111827]">
-              {tr('كتالوج الخدمات', 'Services catalog')}
+              {t("doctor.clinicAccounts.services.title")}
             </h1>
             <p className="mt-2 font-cairo text-[14px] font-semibold text-[#667085]">
-              {tr(
-                'إدارة خدمات الفوترة المرتبطة بأنواع المواعيد.',
-                'Manage billing services linked to appointment types.',
-              )}
+              {t("doctor.clinicAccounts.services.subtitle")}
             </p>
           </div>
           {canManageServices ? (
@@ -164,7 +172,7 @@ export default function DoctorClinicServicesPage() {
               onClick={openCreate}
               className="h-11 rounded-[10px] bg-primary px-5 font-cairo text-[13px] font-extrabold text-white"
             >
-              {tr('خدمة جديدة', 'New service')}
+              {t("doctor.clinicAccounts.services.newService")}
             </button>
           ) : null}
         </header>
@@ -173,12 +181,12 @@ export default function DoctorClinicServicesPage() {
           value={search}
           onChange={setSearch}
           onValueChangeExtra={() => setPage(1)}
-          placeholder={tr('بحث عن خدمة...', 'Search services...')}
-          onClear={() => setSearch('')}
+          placeholder={t("doctor.clinicAccounts.services.searchPlaceholder")}
+          onClear={() => setSearch("")}
         />
         {!canManageServices ? (
           <p className="mt-4 text-start font-cairo text-[12px] font-semibold text-[#667085]">
-            {tr('هذه الصفحة في وضع العرض فقط حسب صلاحيات حسابك.', 'This page is view-only based on your account permissions.')}
+            {t("doctor.clinicAccounts.services.viewOnly")}
           </p>
         ) : null}
 
@@ -187,7 +195,7 @@ export default function DoctorClinicServicesPage() {
             <DoctorTableSkeleton rows={5} columns={4} />
           ) : list.isError ? (
             <DoctorListErrorState
-              title={tr('تعذّر تحميل الخدمات', 'Failed to load services')}
+              title={t("doctor.clinicAccounts.services.loadFailed")}
               brief={getUserFacingRequestErrorMessage(list.error)}
               retrying={retrying}
               onRetry={() => void retry()}
@@ -199,40 +207,45 @@ export default function DoctorClinicServicesPage() {
               imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.1)]"
               title={
                 search.trim()
-                  ? tr(
-                      'لا توجد خدمات تطابق البحث الحالي',
-                      'No services match the current search',
-                    )
-                  : tr('لا توجد خدمات مضافة بعد', 'No services added yet')
+                  ? t("doctor.clinicAccounts.services.empty.matching")
+                  : t("doctor.clinicAccounts.services.empty.none")
               }
               subtitle={
                 search.trim()
-                  ? tr(
-                      'جرّب تعديل كلمات البحث لعرض النتائج',
-                      'Try adjusting search terms to see results',
-                    )
-                  : tr(
-                      'أضف خدمات العيادة الطبية التي تقدمها للمرضى مع الأسعار والمدة الزمنية',
-                      'Add clinic medical services you offer patients with prices and duration',
-                    )
+                  ? t("doctor.clinicAccounts.services.empty.matchingSubtitle")
+                  : t("doctor.clinicAccounts.services.empty.noneSubtitle")
               }
               actionLabel={
-                canManageServices ? tr('إضافة خدمة', 'Add service') : undefined
+                canManageServices
+                  ? t("doctor.clinicAccounts.services.addService")
+                  : undefined
               }
               onAction={canManageServices ? openCreate : undefined}
-              actionIcon={canManageServices ? <Plus className="h-4 w-4" /> : undefined}
+              actionIcon={
+                canManageServices ? <Plus className="h-4 w-4" /> : undefined
+              }
             />
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-[720px] w-full text-start">
                 <thead>
                   <tr className="border-b border-[#EEF2F6] font-cairo text-[12px] font-extrabold text-[#667085]">
-                    <th className="px-3 py-3">{tr('الخدمة', 'Service')}</th>
-                    <th className="px-3 py-3">{tr('السعر', 'Price')}</th>
-                    <th className="px-3 py-3">{tr('المدة', 'Duration')}</th>
-                    <th className="px-3 py-3">{tr('الحالة', 'Status')}</th>
+                    <th className="px-3 py-3">
+                      {t("doctor.clinicAccounts.services.table.service")}
+                    </th>
+                    <th className="px-3 py-3">
+                      {t("doctor.clinicAccounts.services.table.price")}
+                    </th>
+                    <th className="px-3 py-3">
+                      {t("doctor.clinicAccounts.services.table.duration")}
+                    </th>
+                    <th className="px-3 py-3">
+                      {t("doctor.clinicAccounts.services.table.status")}
+                    </th>
                     {canManageServices ? (
-                      <th className="px-3 py-3">{tr('إجراءات', 'Actions')}</th>
+                      <th className="px-3 py-3">
+                        {t("doctor.clinicAccounts.services.table.actions")}
+                      </th>
                     ) : null}
                   </tr>
                 </thead>
@@ -244,14 +257,20 @@ export default function DoctorClinicServicesPage() {
                       </td>
                       <td className="px-3 py-4 font-cairo text-[13px] font-semibold">
                         {service.defaultPrice != null
-                          ? formatBillingAmount(service.defaultPrice, settingsQuery.currency)
-                          : '—'}
+                          ? formatBillingAmount(
+                              service.defaultPrice,
+                              settingsQuery.currency,
+                            )
+                          : "—"}
                       </td>
                       <td className="px-3 py-4 font-cairo text-[13px] font-semibold">
-                        {service.durationMinutes ?? '—'} {tr('د', 'min')}
+                        {service.durationMinutes ?? "—"}{" "}
+                        {t("doctor.clinicAccounts.services.table.min")}
                       </td>
                       <td className="px-3 py-4">
-                        {service.isActive !== false ? tr('نشط', 'Active') : tr('غير نشط', 'Inactive')}
+                        {service.isActive !== false
+                          ? t("doctor.clinicAccounts.services.status.active")
+                          : t("doctor.clinicAccounts.services.status.inactive")}
                       </td>
                       {canManageServices ? (
                         <td className="px-3 py-4">
@@ -261,7 +280,7 @@ export default function DoctorClinicServicesPage() {
                               onClick={() => openEdit(service)}
                               className="rounded-[6px] border border-primary px-3 py-1 text-[11px] font-extrabold text-primary"
                             >
-                              {tr('تعديل', 'Edit')}
+                              {t("doctor.clinicAccounts.services.edit")}
                             </button>
                             {service.isActive !== false ? (
                               <button
@@ -269,7 +288,7 @@ export default function DoctorClinicServicesPage() {
                                 onClick={() => void handleDeactivate(service)}
                                 className="rounded-[6px] bg-[#FEF3F2] px-3 py-1 text-[11px] font-extrabold text-[#B42318]"
                               >
-                                {tr('تعطيل', 'Deactivate')}
+                                {t("doctor.clinicAccounts.services.deactivate")}
                               </button>
                             ) : (
                               <button
@@ -277,7 +296,7 @@ export default function DoctorClinicServicesPage() {
                                 onClick={() => void handleActivate(service)}
                                 className="rounded-[6px] bg-[#F0FDFA] px-3 py-1 text-[11px] font-extrabold text-primary"
                               >
-                                {tr('تفعيل', 'Activate')}
+                                {t("doctor.clinicAccounts.services.activate")}
                               </button>
                             )}
                           </div>
@@ -313,8 +332,8 @@ export default function DoctorClinicServicesPage() {
         onClose={() => setDialogOpen(false)}
         title={
           editTarget
-            ? tr('تعديل خدمة', 'Edit service')
-            : tr('خدمة جديدة', 'New service')
+            ? t("doctor.clinicAccounts.services.editService")
+            : t("doctor.clinicAccounts.services.newService")
         }
         maxWidthClass="max-w-[520px]"
       >
@@ -322,7 +341,7 @@ export default function DoctorClinicServicesPage() {
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder={tr('اسم الخدمة', 'Service name')}
+            placeholder={t("doctor.clinicAccounts.services.modal.serviceName")}
             className="h-11 w-full rounded-[8px] border border-[#E5E7EB] px-3 font-cairo text-[13px]"
           />
           <input
@@ -331,7 +350,7 @@ export default function DoctorClinicServicesPage() {
             step="any"
             value={defaultPrice}
             onChange={(e) => setDefaultPrice(e.target.value)}
-            placeholder={tr('السعر الافتراضي', 'Default price')}
+            placeholder={t("doctor.clinicAccounts.services.modal.defaultPrice")}
             className="h-11 w-full rounded-[8px] border border-[#E5E7EB] px-3 font-cairo text-[13px]"
           />
           <input
@@ -339,27 +358,25 @@ export default function DoctorClinicServicesPage() {
             min={1}
             value={durationMinutes}
             onChange={(e) => setDurationMinutes(e.target.value)}
-            placeholder={tr('المدة بالدقائق (مثال: 30)', 'Duration in minutes (e.g. 30)')}
+            placeholder={t("doctor.clinicAccounts.services.modal.duration")}
             className="h-11 w-full rounded-[8px] border border-[#E5E7EB] px-3 font-cairo text-[13px]"
           />
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder={tr('الوصف', 'Description')}
+            placeholder={t("doctor.clinicAccounts.services.modal.description")}
             rows={3}
             className="w-full rounded-[8px] border border-[#E5E7EB] px-3 py-2 font-cairo text-[13px]"
           />
           <button
             type="button"
             disabled={
-              createService.isPending ||
-              updateService.isPending ||
-              !name.trim()
+              createService.isPending || updateService.isPending || !name.trim()
             }
             onClick={() => void handleSave()}
             className="h-11 w-full rounded-[8px] bg-primary font-cairo text-[13px] font-extrabold text-white disabled:opacity-60"
           >
-            {tr('حفظ', 'Save')}
+            {t("doctor.clinicAccounts.services.modal.save")}
           </button>
         </div>
       </ClinicAccountsModalShell>

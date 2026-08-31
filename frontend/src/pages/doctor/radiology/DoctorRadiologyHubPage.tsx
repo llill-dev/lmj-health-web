@@ -1,36 +1,39 @@
-import { type ReactNode } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { useMemo, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-import { RadiologyPageHeader, RadiologyVisitExpandableCard } from '@/components/doctor/radiology';
+import { type ReactNode } from "react";
+import { Helmet } from "react-helmet-async";
+import { useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import {
+  RadiologyPageHeader,
+  RadiologyVisitExpandableCard,
+} from "@/components/doctor/radiology";
 import {
   formatRadiologyOrderCode,
   resolveRadiologyStatusLabel,
-} from '@/components/doctor/radiology/map-radiology-ui';
-import type { MedicalVisitCardData } from '@/components/doctor/encounters/types';
+} from "@/components/doctor/radiology/map-radiology-ui";
+import type { MedicalVisitCardData } from "@/components/doctor/encounters/types";
 import {
   ENCOUNTERS_LIST_ITEM,
   ENCOUNTERS_LIST_STAGGER,
-} from '@/components/doctor/encounters/encounters-motion';
-import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
-import { DoctorExpandableCardSkeleton } from '@/components/doctor/shared/skeletons';
+} from "@/components/doctor/encounters/encounters-motion";
+import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
+import { DoctorExpandableCardSkeleton } from "@/components/doctor/shared/skeletons";
 import {
   useDoctorMedicalEncountersPage,
   useEncounterRadiologyWorkspace,
-} from '@/hooks/doctor';
-import { getUserFacingRequestErrorMessage } from '@/lib/api';
-import { useRetryAction } from '@/lib/query/useRetryAction';
-import { readAuthUser } from '@/lib/cookies';
-import { useI18n } from '@/i18n/provider';
+} from "@/hooks/doctor";
+import { getUserFacingRequestErrorMessage } from "@/lib/api";
+import { useRetryAction } from "@/lib/query/useRetryAction";
+import { readAuthUser } from "@/lib/cookies";
+import { useI18n } from "@/i18n/provider";
 
 const DEFAULT_FILTERS = {
-  search: '',
-  status: 'open' as const,
-  dateFrom: '',
-  dateTo: '',
-  sortBy: 'startedAt' as const,
-  sortOrder: 'desc' as const,
+  search: "",
+  status: "open" as const,
+  dateFrom: "",
+  dateTo: "",
+  sortBy: "startedAt" as const,
+  sortOrder: "desc" as const,
 };
 
 function RadiologyVisitCardRow({
@@ -44,8 +47,7 @@ function RadiologyVisitCardRow({
   expanded: boolean;
   onToggle: () => void;
 }) {
-  const { locale } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const { t, locale } = useI18n();
   const navigate = useNavigate();
   const workspace = useEncounterRadiologyWorkspace(
     doctorId,
@@ -56,8 +58,8 @@ function RadiologyVisitCardRow({
 
   const items = expanded ? workspace.items : [];
   const statusLabel = workspace.order
-    ? resolveRadiologyStatusLabel(workspace.order)
-    : tr('مسودة', 'Draft');
+    ? resolveRadiologyStatusLabel(workspace.order, locale)
+    : t("doctor.radiology.draft");
   const orderCode = workspace.order?._id
     ? formatRadiologyOrderCode(workspace.order._id)
     : undefined;
@@ -89,9 +91,8 @@ function RadiologyVisitCardRow({
 }
 
 export default function DoctorRadiologyHubPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
-  const doctorId = readAuthUser()?.actorIds?.doctorId ?? '';
+  const { t, locale, dir } = useI18n();
+  const doctorId = readAuthUser()?.actorIds?.doctorId ?? "";
   const [expandedVisitId, setExpandedVisitId] = useState<string | null>(null);
 
   const { visits, isAwaitingData, isError, error, refetch } =
@@ -101,7 +102,7 @@ export default function DoctorRadiologyHubPage() {
   );
 
   const openVisits = useMemo(
-    () => visits.filter((v) => v.status === 'open'),
+    () => visits.filter((v) => v.status === "open"),
     [visits],
   );
 
@@ -112,7 +113,7 @@ export default function DoctorRadiologyHubPage() {
   } else if (isError) {
     listContent = (
       <DoctorListErrorState
-        title={tr('تعذّر تحميل الزيارات', 'Failed to load encounters')}
+        title={t("doctor.radiology.loadFailed")}
         brief={getUserFacingRequestErrorMessage(error)}
         retrying={retryingVisits}
         onRetry={() => void retryVisits()}
@@ -121,10 +122,7 @@ export default function DoctorRadiologyHubPage() {
   } else if (openVisits.length === 0) {
     listContent = (
       <div className="rounded-[12px] border border-dashed border-[#BFEDEC] bg-[#F8FFFE] py-10 text-center font-cairo text-[14px] font-semibold text-[#667085]">
-        {tr(
-          'لا توجد زيارات مفتوحة لطلبات الأشعة.',
-          'No open encounters for radiology orders.',
-        )}
+        {t("doctor.radiology.noOpenEncounters")}
       </div>
     );
   } else {
@@ -162,14 +160,12 @@ export default function DoctorRadiologyHubPage() {
   return (
     <>
       <Helmet>
-        <title>
-          {tr('طلبات الأشعة • LMJ Health', 'Radiology Orders • LMJ Health')}
-        </title>
+        <title>{t("doctor.radiology.page.title")}</title>
       </Helmet>
       <div dir={dir} lang={locale} className="w-full pb-8 sm:pb-10">
         <RadiologyPageHeader
-          patientName={tr('الزيارات المفتوحة', 'Open encounters')}
-          statusLabel={tr('قائمة', 'List')}
+          patientName={t("doctor.radiology.openEncounters")}
+          statusLabel={t("doctor.radiology.list")}
           backTo="/doctor/encounters"
         />
         {listContent}

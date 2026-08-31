@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   Bar,
@@ -14,22 +14,25 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from 'recharts';
+} from "recharts";
 import type {
   ExpenseBreakdownPoint,
   MonthlyFinancePoint,
   WeeklyOverviewPoint,
-} from '@/lib/doctor/clinicAccounts/types';
-import { formatBillingAmount, formatBillingNumber } from '@/lib/doctor/billing/format';
-import { useI18n } from '@/i18n/provider';
+} from "@/lib/doctor/clinicAccounts/types";
+import {
+  formatBillingAmount,
+  formatBillingNumber,
+} from "@/lib/doctor/billing/format";
+import { useI18n } from "@/i18n/provider";
 
 const formatAxisTick = (value: number) =>
   formatBillingNumber(value, { maximumFractionDigits: 0 });
 
 const TOOLTIP_STYLE = {
   borderRadius: 10,
-  border: '1px solid #EEF2F6',
-  fontFamily: 'Cairo, sans-serif',
+  border: "1px solid #EEF2F6",
+  fontFamily: "Cairo, sans-serif",
   fontSize: 12,
 };
 
@@ -40,22 +43,25 @@ export function AccountsOverviewChart({
   data: WeeklyOverviewPoint[];
   currency?: string;
 }) {
-  const { locale } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const { t } = useI18n();
 
   return (
     <div className="h-[280px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} barGap={6} barCategoryGap="18%">
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#EEF2F6" />
+          <CartesianGrid
+            strokeDasharray="3 3"
+            vertical={false}
+            stroke="#EEF2F6"
+          />
           <XAxis
             dataKey="week"
-            tick={{ fill: '#667085', fontSize: 12, fontFamily: 'Cairo' }}
+            tick={{ fill: "#667085", fontSize: 12, fontFamily: "Cairo" }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
-            tick={{ fill: '#667085', fontSize: 12, fontFamily: 'Cairo' }}
+            tick={{ fill: "#667085", fontSize: 12, fontFamily: "Cairo" }}
             axisLine={false}
             tickLine={false}
             tickFormatter={formatAxisTick}
@@ -65,18 +71,33 @@ export function AccountsOverviewChart({
             formatter={(v) => formatBillingAmount(Number(v), currency)}
           />
           <Legend
-            wrapperStyle={{ fontFamily: 'Cairo', fontSize: 12 }}
+            wrapperStyle={{ fontFamily: "Cairo", fontSize: 12 }}
             formatter={(value) =>
-              value === 'income'
-                ? tr('دخل', 'Income')
-                : value === 'expenses'
-                  ? tr('مصاريف', 'Expenses')
-                  : tr('أرباح', 'Profit')
+              value === "income"
+                ? t("doctor.clinicAccounts.charts.income")
+                : value === "expenses"
+                  ? t("doctor.clinicAccounts.charts.expenses")
+                  : t("doctor.clinicAccounts.charts.profit")
             }
           />
-          <Bar dataKey="income" name="income" fill="#0F8F8B" radius={[6, 6, 0, 0]} />
-          <Bar dataKey="expenses" name="expenses" fill="#EF4444" radius={[6, 6, 0, 0]} />
-          <Bar dataKey="profit" name="profit" fill="#5EEAD4" radius={[6, 6, 0, 0]} />
+          <Bar
+            dataKey="income"
+            name="income"
+            fill="#0F8F8B"
+            radius={[6, 6, 0, 0]}
+          />
+          <Bar
+            dataKey="expenses"
+            name="expenses"
+            fill="#EF4444"
+            radius={[6, 6, 0, 0]}
+          />
+          <Bar
+            dataKey="profit"
+            name="profit"
+            fill="#5EEAD4"
+            radius={[6, 6, 0, 0]}
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -90,22 +111,25 @@ export function FinancialBarChart({
   data: MonthlyFinancePoint[];
   currency?: string;
 }) {
-  const { locale } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const { t } = useI18n();
 
   return (
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} barGap={4}>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#EEF2F6" />
+          <CartesianGrid
+            strokeDasharray="3 3"
+            vertical={false}
+            stroke="#EEF2F6"
+          />
           <XAxis
             dataKey="month"
-            tick={{ fill: '#667085', fontSize: 12, fontFamily: 'Cairo' }}
+            tick={{ fill: "#667085", fontSize: 12, fontFamily: "Cairo" }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
-            tick={{ fill: '#667085', fontSize: 12, fontFamily: 'Cairo' }}
+            tick={{ fill: "#667085", fontSize: 12, fontFamily: "Cairo" }}
             axisLine={false}
             tickLine={false}
             tickFormatter={formatAxisTick}
@@ -114,16 +138,16 @@ export function FinancialBarChart({
             contentStyle={TOOLTIP_STYLE}
             formatter={(v) => formatBillingAmount(Number(v), currency)}
           />
-          <Legend wrapperStyle={{ fontFamily: 'Cairo', fontSize: 12 }} />
+          <Legend wrapperStyle={{ fontFamily: "Cairo", fontSize: 12 }} />
           <Bar
             dataKey="income"
-            name={tr('دخل', 'Income')}
+            name={t("doctor.clinicAccounts.charts.income")}
             fill="#0F8F8B"
             radius={[6, 6, 0, 0]}
           />
           <Bar
             dataKey="expenses"
-            name={tr('مصاريف', 'Expenses')}
+            name={t("doctor.clinicAccounts.charts.expenses")}
             fill="#EF4444"
             radius={[6, 6, 0, 0]}
           />
@@ -140,22 +164,25 @@ export function FinancialLineChart({
   data: MonthlyFinancePoint[];
   currency?: string;
 }) {
-  const { locale } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const { t } = useI18n();
 
   return (
     <div className="h-[280px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#EEF2F6" />
+          <CartesianGrid
+            strokeDasharray="3 3"
+            vertical={false}
+            stroke="#EEF2F6"
+          />
           <XAxis
             dataKey="month"
-            tick={{ fill: '#667085', fontSize: 12, fontFamily: 'Cairo' }}
+            tick={{ fill: "#667085", fontSize: 12, fontFamily: "Cairo" }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
-            tick={{ fill: '#667085', fontSize: 12, fontFamily: 'Cairo' }}
+            tick={{ fill: "#667085", fontSize: 12, fontFamily: "Cairo" }}
             axisLine={false}
             tickLine={false}
             tickFormatter={formatAxisTick}
@@ -167,10 +194,10 @@ export function FinancialLineChart({
           <Line
             type="monotone"
             dataKey="profit"
-            name={tr('ربح', 'Profit')}
+            name={t("doctor.clinicAccounts.charts.profit")}
             stroke="#0F8F8B"
             strokeWidth={3}
-            dot={{ r: 5, fill: '#0F8F8B' }}
+            dot={{ r: 5, fill: "#0F8F8B" }}
             activeDot={{ r: 7 }}
           />
         </LineChart>

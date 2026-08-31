@@ -34,8 +34,7 @@ const EMPTY_ADVANCED: AuditAdvancedFilters = {
 };
 
 export default function AdminSystemLogsPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
   const numberLocale = locale === "ar" ? "ar-SA" : "en-US";
 
   const [search, setSearch] = useState("");
@@ -142,46 +141,41 @@ export default function AdminSystemLogsPage() {
   return (
     <>
       <Helmet>
-        <title>{tr("سجلات النظام", "System logs")} • LMJ Health</title>
+        <title>{t("admin.systemLogs.page.title")} • LMJ Health</title>
       </Helmet>
 
       <div dir={dir} lang={locale}>
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title={tr("سجلات النظام", "System logs")}
-          subtitle={tr(
-            "مراجعة جميع الأنشطة والحركات في النظام بالوقت الفعلي",
-            "Review all system activity and events in near real time",
-          )}
+          title={t("admin.systemLogs.page.title")}
+          subtitle={t("admin.systemLogs.overview.subtitle")}
           headerIcon={<Activity className="h-8 w-8 text-white" />}
           kpiColumns={4}
           kpis={[
             {
               key: "total",
               icon: <Activity className="h-5 w-5 shrink-0" />,
-              value: isAwaitingData
-                ? "—"
-                : total.toLocaleString(numberLocale),
-              label: tr("إجمالي السجلات", "Total records"),
+              value: isAwaitingData ? "—" : total.toLocaleString(numberLocale),
+              label: t("admin.systemLogs.kpi.total"),
             },
             {
               key: "fail",
               icon: <ShieldAlert className="h-5 w-5 shrink-0" />,
               value: isAwaitingData ? "—" : failCount,
-              label: tr("إجراءات فاشلة", "Failed actions"),
+              label: t("admin.systemLogs.kpi.fail"),
             },
             {
               key: "deny",
               icon: <Shield className="h-5 w-5 shrink-0" />,
               value: isAwaitingData ? "—" : denyCount,
-              label: tr("محاولات مرفوضة", "Denied attempts"),
+              label: t("admin.systemLogs.kpi.deny"),
             },
             {
               key: "phi",
               icon: <ShieldCheck className="h-5 w-5 shrink-0" />,
               value: isAwaitingData ? "—" : phiCount,
-              label: tr("وصول للبيانات الطبية", "PHI access"),
+              label: t("admin.systemLogs.kpi.phi"),
             },
           ]}
         />
@@ -189,10 +183,7 @@ export default function AdminSystemLogsPage() {
         <div className="mt-4 flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
           <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
-            {tr(
-              "هذه الصفحة مخصّصة للمراجعة التدقيقية والبحث في السجل فقط. السجلات هنا مرجعية وغير قابلة للتعديل، ويجب استخدام الشاشات الأصلية المرتبطة بكل كيان عند الحاجة إلى تنفيذ إجراء فعلي أو تصحيح البيانات.",
-              "This page is for audit review and log search only. The records here are reference-only and cannot be edited, so use the original entity pages whenever a real action or data correction is needed.",
-            )}
+            {t("admin.systemLogs.disclaimer")}
           </div>
         </div>
 
@@ -241,14 +232,12 @@ export default function AdminSystemLogsPage() {
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div className="font-cairo text-[12px] font-bold text-[#475467]">
                 {hasActiveFilters
-                  ? tr(
-                      `تم تطبيق الفلاتر الحالية ويجري عرض ${total.toLocaleString(numberLocale)} سجل مطابق.`,
-                      `Current filters are applied and ${total.toLocaleString(numberLocale)} matching records are shown.`,
-                    )
-                  : tr(
-                      `يتم عرض جميع السجلات المطابقة ضمن الصفحة الحالية وعددها ${total.toLocaleString(numberLocale)}.`,
-                      `All matching records for the current page scope are shown: ${total.toLocaleString(numberLocale)}.`,
-                    )}
+                  ? t("admin.systemLogs.filters.applied", {
+                      total: total.toLocaleString(numberLocale),
+                    })
+                  : t("admin.systemLogs.filters.all", {
+                      total: total.toLocaleString(numberLocale),
+                    })}
               </div>
               {hasActiveFilters ? (
                 <button
@@ -257,7 +246,7 @@ export default function AdminSystemLogsPage() {
                   className="inline-flex h-9 items-center gap-2 self-start rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-extrabold text-[#344054] md:self-auto"
                 >
                   <FilterX className="h-4 w-4" />
-                  {tr("مسح كل الفلاتر", "Clear all filters")}
+                  {t("admin.systemLogs.filters.clear")}
                 </button>
               ) : null}
             </div>

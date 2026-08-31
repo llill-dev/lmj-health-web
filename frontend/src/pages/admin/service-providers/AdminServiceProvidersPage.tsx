@@ -28,11 +28,11 @@ import { useI18n } from "@/i18n/provider";
 
 const PAGE_LIMIT = 20;
 
-const STATUS_FILTER_OPTIONS: Array<{ value: string; ar: string; en: string }> = [
-  { value: "", ar: "كل الحالات", en: "All statuses" },
-  { value: "draft", ar: "مسودة", en: "Draft" },
-  { value: "active", ar: "نشط", en: "Active" },
-  { value: "inactive", ar: "معطّل", en: "Inactive" },
+const STATUS_FILTER_OPTIONS: Array<{ value: string }> = [
+  { value: "" },
+  { value: "draft" },
+  { value: "active" },
+  { value: "inactive" },
 ];
 
 function resolveProviderLabel(provider: ManagedServiceProvider): string {
@@ -42,8 +42,7 @@ function resolveProviderLabel(provider: ManagedServiceProvider): string {
 }
 
 export default function AdminServiceProvidersPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedTypeId = searchParams.get("serviceType") ?? "";
   const selectedStatus = searchParams.get("status") ?? "";
@@ -58,9 +57,9 @@ export default function AdminServiceProvidersPage() {
     useState<ManagedServiceProvider | null>(null);
 
   const statusLabels: Record<string, string> = {
-    active: tr("نشط", "Active"),
-    inactive: tr("معطّل", "Inactive"),
-    draft: tr("مسودة", "Draft"),
+    active: t("admin.serviceProviders.status.active"),
+    inactive: t("admin.serviceProviders.status.inactive"),
+    draft: t("admin.serviceProviders.status.draft"),
   };
 
   const typesQuery = useServiceTypesList();
@@ -126,7 +125,7 @@ export default function AdminServiceProvidersPage() {
   return (
     <>
       <Helmet>
-        <title>{tr("مزودو الخدمة", "Service providers")} • LMJ Health</title>
+        <title>{t("admin.serviceProviders.page.title")} • LMJ Health</title>
       </Helmet>
 
       <div dir={dir} lang={locale}>
@@ -135,29 +134,27 @@ export default function AdminServiceProvidersPage() {
           className="mb-5 inline-flex items-center gap-2 font-cairo text-[12px] font-extrabold text-[#667085] transition hover:text-primary"
         >
           <ChevronLeft className="h-4 w-4" />
-          {tr("العودة إلى أنواع الخدمات", "Back to service types")}
+          {t("admin.serviceProviders.backToTypes")}
         </Link>
 
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title={tr("مزودو الخدمة", "Service providers")}
-          subtitle={tr(
-            `${total} مزود خدمة`,
-            `${total} service provider${total === 1 ? "" : "s"}`,
-          )}
+          title={t("admin.serviceProviders.overview.title")}
+          subtitle={
+            total === 1
+              ? `${total} ${t("admin.serviceProviders.overview.subtitle.singular")}`
+              : `${total} ${t("admin.serviceProviders.overview.subtitle.plural")}`
+          }
           headerIcon={<Building2 className="h-8 w-8 text-white" />}
-          actionLabel={tr("إضافة مزود", "Add provider")}
+          actionLabel={t("admin.serviceProviders.overview.actionLabel")}
           actionIcon={<Plus className="h-4 w-4" />}
           onActionClick={() => setCreateOpen(true)}
         />
 
         <section className="mt-4 rounded-[12px] border border-[#D6EEEC] bg-[#F3FBFA] px-5 py-4 shadow-[0_10px_24px_rgba(20,130,131,0.08)]">
           <div className="font-cairo text-[13px] font-extrabold text-[#0F766E]">
-            {tr(
-              "ابدأ بتحديد نوع الخدمة أولاً، ثم راجع مزوّدي هذا النوع فقط. الاسم الظاهر في كل بطاقة هو المزوّد، والحالة توضّح هل هو متاح للاستخدام أم لا.",
-              "Select a service type first, then review only its providers. Each card shows the provider name clearly, and the status indicates whether it is currently available.",
-            )}
+            {t("admin.serviceProviders.disclaimer")}
           </div>
         </section>
 
@@ -165,35 +162,43 @@ export default function AdminServiceProvidersPage() {
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:items-end">
             <div className="lg:col-span-4">
               <div className="mb-2 font-cairo text-[12px] font-extrabold text-[#667085]">
-                {tr("نوع الخدمة", "Service type")}
+                {t("admin.serviceProviders.filters.serviceType")}
               </div>
               <StyledSelect
                 value={selectedTypeId}
                 onChange={(value) => updateFilters({ serviceType: value })}
                 options={[
-                  { value: "", label: tr("كل الأنواع", "All types") },
+                  {
+                    value: "",
+                    label: t("admin.serviceProviders.filters.allTypes"),
+                  },
                   ...typeOptions,
                 ]}
-                listboxAriaLabel={tr("نوع الخدمة", "Service type")}
+                listboxAriaLabel={t(
+                  "admin.serviceProviders.filters.serviceType",
+                )}
               />
             </div>
             <div className="lg:col-span-3">
               <div className="mb-2 font-cairo text-[12px] font-extrabold text-[#667085]">
-                {tr("الحالة", "Status")}
+                {t("admin.serviceProviders.filters.status")}
               </div>
               <StyledSelect
                 value={selectedStatus}
                 onChange={(value) => updateFilters({ status: value })}
                 options={STATUS_FILTER_OPTIONS.map((o) => ({
                   value: o.value,
-                  label: tr(o.ar, o.en),
+                  label:
+                    o.value === ""
+                      ? t("admin.serviceProviders.filters.allStatuses")
+                      : t(`admin.serviceProviders.status.${o.value}`),
                 }))}
-                listboxAriaLabel={tr("الحالة", "Status")}
+                listboxAriaLabel={t("admin.serviceProviders.filters.status")}
               />
             </div>
             <div className="lg:col-span-3">
               <div className="mb-2 font-cairo text-[12px] font-extrabold text-[#667085]">
-                {tr("بحث", "Search")}
+                {t("admin.serviceProviders.filters.search")}
               </div>
               <form
                 onSubmit={(e) => {
@@ -206,12 +211,14 @@ export default function AdminServiceProvidersPage() {
                   type="text"
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
-                  placeholder={tr("ابحث بالاسم أو المدينة…", "Search name or city…")}
+                  placeholder={t(
+                    "admin.serviceProviders.filters.searchPlaceholder",
+                  )}
                   className="h-[40px] w-full rounded-[8px] border border-[#E5E7EB] bg-white px-4 pe-10 font-cairo text-[12px] font-bold text-[#101828] outline-none focus-visible:border-primary"
                 />
                 <button
                   type="submit"
-                  aria-label={tr("بحث", "Search")}
+                  aria-label={t("admin.serviceProviders.filters.search")}
                   className="absolute inset-y-0 end-2 flex items-center text-[#98A2B3]"
                 >
                   <Search className="h-4 w-4" />
@@ -228,13 +235,13 @@ export default function AdminServiceProvidersPage() {
                 <RefreshCw
                   className={`h-4 w-4 ${providersQuery.isFetching ? "animate-spin" : ""}`}
                 />
-                {tr("تحديث", "Refresh")}
+                {t("admin.serviceProviders.refresh")}
               </button>
               {hasFilters ? (
                 <button
                   type="button"
                   onClick={clearFilters}
-                  aria-label={tr("مسح الفلاتر", "Clear filters")}
+                  aria-label={t("admin.serviceProviders.filters.clear")}
                   className="inline-flex h-[40px] items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white px-3 text-[#667085]"
                 >
                   <X className="h-4 w-4" />
@@ -252,10 +259,7 @@ export default function AdminServiceProvidersPage() {
           ) : providers.length === 0 ? (
             <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-10 text-center">
               <p className="font-cairo text-[13px] font-semibold text-[#667085]">
-                {tr(
-                  "لا يوجد مزودون يطابقون هذه الفلاتر.",
-                  "No providers match these filters.",
-                )}
+                {t("admin.serviceProviders.empty.noProviders")}
               </p>
               <button
                 type="button"
@@ -263,7 +267,7 @@ export default function AdminServiceProvidersPage() {
                 className="mt-4 inline-flex items-center gap-1.5 rounded-[8px] bg-primary px-4 py-2 font-cairo text-[12px] font-extrabold text-white"
               >
                 <Plus className="h-4 w-4" />
-                {tr("إضافة مزود", "Create provider")}
+                {t("admin.serviceProviders.empty.createProvider")}
               </button>
             </div>
           ) : (
@@ -293,7 +297,7 @@ export default function AdminServiceProvidersPage() {
                         </span>
                         {inactiveType ? (
                           <span className="inline-flex items-center rounded-full bg-[#FFFBEB] px-2 py-0.5 font-cairo text-[10px] font-extrabold text-[#92400E]">
-                            {tr("نوع غير مُفعّل", "Type inactive")}
+                            {t("admin.serviceProviders.typeInactive")}
                           </span>
                         ) : null}
                       </div>
@@ -303,7 +307,7 @@ export default function AdminServiceProvidersPage() {
                         {provider.city ? ` · ${provider.city}` : ""}
                         {provider.country ? `, ${provider.country}` : ""}
                         {" · "}
-                        {tr("إصدار", "v")}
+                        {t("admin.serviceProviders.version")}
                         {provider.schemaVersionAtWrite}
                       </div>
                     </div>
@@ -311,20 +315,20 @@ export default function AdminServiceProvidersPage() {
                       <button
                         type="button"
                         onClick={() => openEdit(provider)}
-                        title={tr("تعديل البيانات", "Edit details")}
+                        title={t("admin.serviceProviders.actions.editDetails")}
                         className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#BBF7D0] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#16A34A] transition hover:bg-[#F0FDF4]"
                       >
                         <Edit3 className="h-3.5 w-3.5" />
-                        {tr("تعديل", "Edit")}
+                        {t("admin.serviceProviders.actions.edit")}
                       </button>
                       <button
                         type="button"
                         onClick={() => openStatus(provider)}
-                        title={tr("تغيير الحالة", "Change status")}
+                        title={t("admin.serviceProviders.actions.changeStatus")}
                         className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#FDE68A] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#D97706] transition hover:bg-[#FFFBEB]"
                       >
                         <Power className="h-3.5 w-3.5" />
-                        {tr("الحالة", "Status")}
+                        {t("admin.serviceProviders.actions.status")}
                       </button>
                     </div>
                   </div>
@@ -340,19 +344,21 @@ export default function AdminServiceProvidersPage() {
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1}
                 className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white text-[#344054] disabled:opacity-40"
-                aria-label={tr("الصفحة السابقة", "Previous page")}
+                aria-label={t("admin.serviceProviders.pagination.previous")}
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
               <span className="font-cairo text-[12px] font-bold text-[#344054]">
-                {tr(`صفحة ${page} من ${totalPages}`, `Page ${page} of ${totalPages}`)}
+                {t("admin.serviceProviders.pagination.page")
+                  .replace("{page}", String(page))
+                  .replace("{totalPages}", String(totalPages))}
               </span>
               <button
                 type="button"
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page >= totalPages}
                 className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white text-[#344054] disabled:opacity-40"
-                aria-label={tr("الصفحة التالية", "Next page")}
+                aria-label={t("admin.serviceProviders.pagination.next")}
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>

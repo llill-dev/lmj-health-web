@@ -269,6 +269,9 @@ export default function RescheduleAppointmentDialog({
                 <Dialog.Title className="text-start font-cairo text-[24px] font-extrabold leading-[30px] text-[#101828]">
                   {t("doctor.appointments.reschedule.title")}
                 </Dialog.Title>
+                <Dialog.Description className="sr-only">
+                  {t("doctor.appointments.reschedule.subtitle")}
+                </Dialog.Description>
 
                 <div className="mt-6 text-start font-cairo text-[16px] font-extrabold text-[#101828] sm:mt-8">
                   {patientName}

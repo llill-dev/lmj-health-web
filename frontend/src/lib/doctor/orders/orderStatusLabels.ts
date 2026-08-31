@@ -43,6 +43,31 @@ export const ORDER_STATUS_CODE_AR: Record<string, string> = {
   COMPLETE: 'مكتمل',
 };
 
+/** English labels — same status codes as ORDER_STATUS_CODE_AR, used when the active UI locale is English. */
+export const ORDER_STATUS_CODE_EN: Record<string, string> = {
+  REQUESTED: 'Requested',
+  PENDING: 'Pending',
+  DRAFT: 'Draft',
+  ACCEPTED: 'Accepted',
+  IN_PROGRESS: 'In progress',
+  COMPLETED: 'Completed',
+  FINALIZED: 'Finalized',
+  FINAL: 'Finalized',
+  CANCELLED: 'Cancelled',
+  CANCELED: 'Cancelled',
+  REJECTED: 'Rejected',
+  EXPIRED: 'Expired',
+  ACTIVE: 'Active',
+  CLOSED: 'Closed',
+  OPEN: 'Open',
+  DONE: 'Done',
+  COMPLETE: 'Completed',
+};
+
+function statusLabelMapFor(locale: 'ar' | 'en'): Record<string, string> {
+  return locale === 'en' ? ORDER_STATUS_CODE_EN : ORDER_STATUS_CODE_AR;
+}
+
 const STATUS_TOKEN_RE =
   /\b(REQUESTED|PENDING|DRAFT|FINALIZED|FINAL|IN_PROGRESS|INPROGRESS|COMPLETED|COMPLETE|CANCELLED|CANCELED|ACCEPTED|REJECTED|EXPIRED)\b/gi;
 
@@ -170,15 +195,19 @@ export type DoctorOrderStatusUiKey =
 export function resolveDoctorOrderStatusUiMeta(
   statusCode?: string | null,
   statusLabel?: string | null,
+  locale: 'ar' | 'en' = 'ar',
 ): { code: string; key: DoctorOrderStatusUiKey; label: string } {
   const code = resolveCanonicalDoctorOrderStatusCode(statusCode, statusLabel);
+  const map = statusLabelMapFor(locale);
+  // بالعربي: يُفضَّل النص الوارد من الخادم كما هو. بالإنجليزي: النص الوارد غالباً عربي (حقل legacy)،
+  // لذا يُشتق التصنيف الإنجليزي من الكود القياسي أولاً، والنص الوارد يبقى أخير خيار احتياطي فقط.
   const label =
-    statusLabel?.trim() ||
-    resolveOrderStatusLabelAr(code) ||
-    '—';
+    locale === 'en'
+      ? (map[code] ?? resolveOrderStatusLabel(code, statusLabel, locale) ?? statusLabel?.trim() ?? '—')
+      : (statusLabel?.trim() || resolveOrderStatusLabel(code, undefined, locale) || '—');
 
   if (code.includes('CANCEL')) {
-    return { code: 'CANCELLED', key: 'cancelled', label: ORDER_STATUS_CODE_AR.CANCELLED };
+    return { code: 'CANCELLED', key: 'cancelled', label: map.CANCELLED };
   }
   if (
     code === 'FINALIZED' ||
@@ -189,14 +218,14 @@ export function resolveDoctorOrderStatusUiMeta(
     return {
       code,
       key: 'completed',
-      label: ORDER_STATUS_CODE_AR[code] ?? label,
+      label: map[code] ?? label,
     };
   }
   if (code === 'IN_PROGRESS' || code === 'ACCEPTED' || code === 'ACTIVE') {
     return {
       code,
       key: 'in_progress',
-      label: ORDER_STATUS_CODE_AR[code] ?? label,
+      label: map[code] ?? label,
     };
   }
   if (
@@ -208,7 +237,7 @@ export function resolveDoctorOrderStatusUiMeta(
     return {
       code,
       key: 'pending',
-      label: ORDER_STATUS_CODE_AR[code] ?? label,
+      label: map[code] ?? label,
     };
   }
 
@@ -242,25 +271,35 @@ function normalizeStatusToken(token: string): string {
   return upper;
 }
 
-/** ترجمة كود حالة واحد للعرض (لا يُستخدم عند الإرسال للخادم). */
-export function resolveOrderStatusLabelAr(
+/** ترجمة كود حالة واحد للعرض حسب اللغة النشطة (لا يُستخدم عند الإرسال للخادم). */
+export function resolveOrderStatusLabel(
   code?: string | null,
   fallback?: string | null,
+  locale: 'ar' | 'en' = 'ar',
 ): string {
   const raw = (code ?? fallback ?? '').trim();
   if (!raw) return '—';
 
-  const direct = ORDER_STATUS_CODE_AR[raw.toUpperCase()];
+  const map = statusLabelMapFor(locale);
+  const direct = map[raw.toUpperCase()];
   if (direct) return direct;
 
   const normalized = raw.toUpperCase().replace(/[\s-]+/g, '_');
-  if (ORDER_STATUS_CODE_AR[normalized]) return ORDER_STATUS_CODE_AR[normalized];
+  if (map[normalized]) return map[normalized];
 
   if (/^[A-Za-z][A-Za-z0-9_\s-]*$/.test(raw) && raw.length <= 40) {
-    return ORDER_STATUS_CODE_AR[normalized] ?? 'غير معروف';
+    return map[normalized] ?? (locale === 'en' ? 'Unknown' : 'غير معروف');
   }
 
   return raw;
+}
+
+/** @deprecated استخدم resolveOrderStatusLabel(code, fallback, locale) — أُبقيت للتوافق مع الاستدعاءات التي لا تمرّر اللغة بعد. */
+export function resolveOrderStatusLabelAr(
+  code?: string | null,
+  fallback?: string | null,
+): string {
+  return resolveOrderStatusLabel(code, fallback, 'ar');
 }
 
 /** حالات نهائية — API-3: لا PATCH status ولا إلحاق نتائج. */
@@ -307,7 +346,10 @@ export function canAppendDoctorOrderResults(code?: string | null): boolean {
  * خيارات PATCH /api/doctors/orders/:orderId/status حسب سياسة الانتقال في API-3.
  * الحالات النهائية: COMPLETED، CANCELLED، REJECTED، EXPIRED (+ FINALIZED للطلبات المعتمدة).
  */
-export function buildDoctorOrderStatusUpdateOptions(currentCode?: string | null): Array<{
+export function buildDoctorOrderStatusUpdateOptions(
+  currentCode?: string | null,
+  locale: 'ar' | 'en' = 'ar',
+): Array<{
   value: string;
   label: string;
 }> {
@@ -337,7 +379,7 @@ export function buildDoctorOrderStatusUpdateOptions(currentCode?: string | null)
 
   return Array.from(next).map((value) => ({
     value,
-    label: resolveOrderStatusLabelAr(value),
+    label: resolveOrderStatusLabel(value, undefined, locale),
   }));
 }
 

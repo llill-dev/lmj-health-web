@@ -1,15 +1,14 @@
-import { Helmet } from 'react-helmet-async';
-import { ArrowRight, CalendarClock, Settings, Stethoscope } from 'lucide-react';
-import { Link, useParams } from 'react-router-dom';
-import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
-import { SecretaryDoctorAppointmentsPanel } from '@/components/admin/secretaries/SecretaryDoctorAppointmentsPanel';
-import { useAdminSecretaryById } from '@/hooks/admin/secretaries/useAdminSecretaryById';
-import { useI18n } from '@/i18n/provider';
+import { Helmet } from "react-helmet-async";
+import { ArrowRight, CalendarClock, Settings, Stethoscope } from "lucide-react";
+import { Link, useParams } from "react-router-dom";
+import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
+import { SecretaryDoctorAppointmentsPanel } from "@/components/admin/secretaries/SecretaryDoctorAppointmentsPanel";
+import { useAdminSecretaryById } from "@/hooks/admin/secretaries/useAdminSecretaryById";
+import { useI18n } from "@/i18n/provider";
 
 export default function AdminSecretaryAppointmentsManagementPage() {
-  const { secretaryId = '' } = useParams();
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const { secretaryId = "" } = useParams();
+  const { t, locale, dir } = useI18n();
   const { secretaryName, doctorName, assignedDoctorId, isAwaitingData } =
     useAdminSecretaryById(secretaryId);
 
@@ -17,82 +16,81 @@ export default function AdminSecretaryAppointmentsManagementPage() {
     <>
       <Helmet>
         <title>
-          {tr('إدارة مواعيد السكرتير', 'Manage secretary appointments')} • LMJ
-          Health
+          {t("admin.secretaryAppointmentsManagement.page.title")} • LMJ Health
         </title>
       </Helmet>
 
       <div dir={dir} lang={locale}>
         <Link
           to={`/admin/secretaries/${secretaryId}`}
-          className='mb-5 inline-flex items-center gap-2 font-cairo text-[12px] font-extrabold text-[#667085] transition hover:text-primary'
+          className="mb-5 inline-flex items-center gap-2 font-cairo text-[12px] font-extrabold text-[#667085] transition hover:text-primary"
         >
-          <ArrowRight className='h-4 w-4' />
-          {tr('العودة إلى ملف السكرتير', 'Back to secretary profile')}
+          <ArrowRight className="h-4 w-4" />
+          {t("admin.secretaryAppointmentsManagement.backToProfile")}
         </Link>
 
         <AdminDashboardOverview
-          variant='admin'
-          surface='mint'
-          title={tr('إدارة مواعيد السكرتير', 'Manage secretary appointments')}
+          variant="admin"
+          surface="mint"
+          title={t("admin.secretaryAppointmentsManagement.overview.title")}
           subtitle={
             isAwaitingData
-              ? tr('جارٍ التحميل…', 'Loading…')
-              : tr(
-                  `${secretaryName} — إدارة مواعيد ${doctorName}`,
-                  `${secretaryName} — managing appointments for ${doctorName}`,
+              ? t(
+                  "admin.secretaryAppointmentsManagement.overview.subtitle.loading",
                 )
+              : t("admin.secretaryAppointmentsManagement.overview.subtitle", {
+                  secretaryName,
+                  doctorName,
+                })
           }
-          headerIcon={<CalendarClock className='h-8 w-8 text-white' />}
+          headerIcon={<CalendarClock className="h-8 w-8 text-white" />}
         />
 
-        <section className='mt-5 rounded-[12px] border border-[#D5E8E6] bg-[#F8FFFE] px-5 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]'>
-          <div className='flex items-start gap-3 text-start'>
-            <div className='flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary'>
-              <Settings className='h-5 w-5' />
+        <section className="mt-5 rounded-[12px] border border-[#D5E8E6] bg-[#F8FFFE] px-5 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]">
+          <div className="flex items-start gap-3 text-start">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <Settings className="h-5 w-5" />
             </div>
             <div>
-              <div className='font-cairo text-sm font-extrabold text-[#111827]'>
-                {tr('هذه شاشة إدارة المواعيد', 'This is the appointment management screen')}
+              <div className="font-cairo text-sm font-extrabold text-[#111827]">
+                {t("admin.secretaryAppointmentsManagement.info.title")}
               </div>
-              <div className='mt-1 font-cairo text-sm font-semibold leading-6 text-[#667085]'>
-                {tr(
-                  'يتم استخدام هذا المسار فقط عندما تحتاج الإدارة إلى تنفيذ إجراءات تنظيمية مباشرة على مواعيد الطبيب المرتبطة بالسكرتير.',
-                  'Use this route only when the admin needs to perform direct operational actions on the doctor appointments linked to the secretary.',
-                )}
+              <div className="mt-1 font-cairo text-sm font-semibold leading-6 text-[#667085]">
+                {t("admin.secretaryAppointmentsManagement.info.description")}
               </div>
             </div>
           </div>
         </section>
 
-        <section className='mt-4 grid grid-cols-1 gap-3 md:grid-cols-3'>
-          <div className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]'>
-            <div className='font-cairo text-[11px] font-bold text-[#98A2B3]'>
-              {tr('الطبيب المرتبط', 'Linked doctor')}
+        <section className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+          <div className="rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]">
+            <div className="font-cairo text-[11px] font-bold text-[#98A2B3]">
+              {t("admin.secretaryAppointmentsManagement.cards.doctor")}
             </div>
-            <div className='mt-2 flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#111827]'>
-              <Stethoscope className='h-4 w-4 text-primary' />
-              {doctorName || tr('غير محدد', 'Not set')}
-            </div>
-          </div>
-
-          <div className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]'>
-            <div className='font-cairo text-[11px] font-bold text-[#98A2B3]'>
-              {tr('نطاق الصفحة', 'Page scope')}
-            </div>
-            <div className='mt-2 flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#111827]'>
-              <Settings className='h-4 w-4 text-primary' />
-              {tr('تنفيذ إجراءات تشغيلية', 'Operational appointment actions')}
+            <div className="mt-2 flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#111827]">
+              <Stethoscope className="h-4 w-4 text-primary" />
+              {doctorName ||
+                t("admin.secretaryAppointmentsManagement.cards.notSet")}
             </div>
           </div>
 
-          <div className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]'>
-            <div className='font-cairo text-[11px] font-bold text-[#98A2B3]'>
-              {tr('الإجراء الحالي', 'Current action')}
+          <div className="rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]">
+            <div className="font-cairo text-[11px] font-bold text-[#98A2B3]">
+              {t("admin.secretaryAppointmentsManagement.cards.scope")}
             </div>
-            <div className='mt-2 flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#111827]'>
-              <CalendarClock className='h-4 w-4 text-primary' />
-              {tr('إدارة جدول الطبيب', 'Manage doctor schedule')}
+            <div className="mt-2 flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#111827]">
+              <Settings className="h-4 w-4 text-primary" />
+              {t("admin.secretaryAppointmentsManagement.cards.scopeValue")}
+            </div>
+          </div>
+
+          <div className="rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]">
+            <div className="font-cairo text-[11px] font-bold text-[#98A2B3]">
+              {t("admin.secretaryAppointmentsManagement.cards.action")}
+            </div>
+            <div className="mt-2 flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#111827]">
+              <CalendarClock className="h-4 w-4 text-primary" />
+              {t("admin.secretaryAppointmentsManagement.cards.actionValue")}
             </div>
           </div>
         </section>
@@ -100,7 +98,7 @@ export default function AdminSecretaryAppointmentsManagementPage() {
         <SecretaryDoctorAppointmentsPanel
           assignedDoctorId={assignedDoctorId}
           doctorName={doctorName}
-          mode='manage'
+          mode="manage"
         />
       </div>
     </>

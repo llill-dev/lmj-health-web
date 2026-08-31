@@ -20,14 +20,23 @@ import { useSecretaryAssignedDoctor } from "@/hooks/secretary/useSecretaryAssign
 import { useSecretaryPermissions } from "@/hooks/secretary/useSecretaryPermissions";
 import { doctorApi } from "@/lib/doctor/client";
 import { ApiError } from "@/lib/api";
-import { getPatientFileAccessErrorMessage, getPatientFileMutationErrorMessage } from "@/lib/doctor/writeFlowErrors";
-import { triggerBrowserFileDownload, triggerBrowserFileDownloadAndOpen } from "@/lib/files/triggerBrowserFileDownload";
+import {
+  getPatientFileAccessErrorMessage,
+  getPatientFileMutationErrorMessage,
+} from "@/lib/doctor/writeFlowErrors";
+import {
+  triggerBrowserFileDownload,
+  triggerBrowserFileDownloadAndOpen,
+} from "@/lib/files/triggerBrowserFileDownload";
 import { useI18n } from "@/i18n/provider";
 import StyledSelect from "@/components/ui/styled-select";
 import { MedicalRecordsPagination } from "@/components/doctor/medical-records/medical-records-pagination";
 import ConfirmActionDialog from "@/components/doctor/confirm-action-dialog";
 
-function formatIsoDate(value: string | null | undefined, locale: "ar" | "en"): string {
+function formatIsoDate(
+  value: string | null | undefined,
+  locale: "ar" | "en",
+): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
@@ -53,8 +62,7 @@ function SurfaceSection({
   count?: number;
   searchMatch?: boolean;
 }) {
-  const { locale } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale } = useI18n();
   return (
     <section className="overflow-hidden rounded-[20px] border border-[#E8EEF6] bg-white shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
       <header className="border-b border-[#EDF2F7] px-4 py-6 sm:px-6 sm:py-7 lg:px-8 lg:py-9">
@@ -63,8 +71,8 @@ function SurfaceSection({
         </h2>
         {count !== undefined && (
           <p className="mt-1 font-cairo text-[13px] font-semibold text-[#98A2B3]">
-            {tr(`${count} ملف`, `${count} files`)}
-            {searchMatch ? tr(" مطابق للبحث", " matching the search") : ""}
+            {locale === "ar" ? `${count} ملفات` : `${count} files`}
+            {searchMatch ? t("secretary.patientFiles.matchingSearch") : ""}
           </p>
         )}
       </header>
@@ -76,19 +84,19 @@ function SurfaceSection({
 function FilesSearchInput({
   value,
   onChange,
+  t,
 }: {
   value: string;
   onChange: (value: string) => void;
+  t: (key: string) => string;
 }) {
-  const { locale } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   return (
     <div className="relative min-w-0">
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        placeholder={tr("ابحث بالاسم، نوع الملف، أو التاريخ…", "Search by name, file type, or date…")}
-        aria-label={tr("بحث عن ملف", "Search for a file")}
+        placeholder={t("secretary.patientFiles.searchPlaceholder")}
+        aria-label={t("secretary.patientFiles.searchAriaLabel")}
         className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white pe-10 ps-4 font-cairo text-[14px] font-bold text-[#111827] shadow-[0_3px_8px_rgba(15,23,42,0.03)] outline-none placeholder:font-cairo placeholder:text-[14px] placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-primary"
       />
       <div className="pointer-events-none absolute end-3 top-1/2 flex -translate-y-1/2 items-center gap-1 text-[#98A2B3]">
@@ -112,8 +120,17 @@ const PatientFileRow = memo<{
   locale: "ar" | "en";
   disabled?: boolean;
   deleting?: boolean;
-}>(function PatientFileRow({ file, onView, onDownload, onDelete, locale, disabled, deleting }) {
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  t: (key: string) => string;
+}>(function PatientFileRow({
+  file,
+  onView,
+  onDownload,
+  onDelete,
+  locale,
+  disabled,
+  deleting,
+  t,
+}) {
   return (
     <div className="grid grid-cols-1 gap-4 border-b border-[#EEF2F6] px-4 py-4 last:border-b-0 sm:px-6 lg:grid-cols-12 lg:items-center lg:px-8 lg:py-5">
       <div className="flex items-center gap-4 lg:col-span-4">
@@ -148,7 +165,7 @@ const PatientFileRow = memo<{
           onClick={() => onView(file.id)}
           disabled={disabled}
           className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-primary text-white transition hover:bg-[#0A7A77] disabled:cursor-not-allowed disabled:opacity-60"
-          title={tr("عرض", "View")}
+          title={t("secretary.patientFiles.view")}
         >
           <Eye className="h-4 w-4" />
         </button>
@@ -157,7 +174,7 @@ const PatientFileRow = memo<{
           onClick={() => onDownload(file.id)}
           disabled={disabled}
           className="flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white text-[#1F2937] transition hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-60"
-          title={tr("تحميل", "Download")}
+          title={t("secretary.patientFiles.download")}
         >
           <Download className="h-4 w-4" />
         </button>
@@ -167,7 +184,7 @@ const PatientFileRow = memo<{
             onClick={() => onDelete(file.id)}
             disabled={disabled || deleting}
             className="flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#F04438] bg-white text-[#D92D20] transition hover:bg-[#FEF3F2] disabled:cursor-not-allowed disabled:opacity-60"
-            title={tr("حذف", "Delete")}
+            title={t("secretary.patientFiles.delete")}
           >
             {deleting ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -182,12 +199,13 @@ const PatientFileRow = memo<{
 });
 
 export default function SecretaryPatientFilesPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
   const [searchInput, setSearchInput] = useState("");
   const [patientId, setPatientId] = useState("");
   const [category, setCategory] = useState("");
-  const [archived, setArchived] = useState<"all" | "active" | "archived">("active");
+  const [archived, setArchived] = useState<"all" | "active" | "archived">(
+    "active",
+  );
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const { toast } = useToast();
@@ -215,7 +233,10 @@ export default function SecretaryPatientFilesPage() {
   const uploadFile = useUploadDoctorPatientFile(patientId);
   const deleteFile = useDeleteDoctorPatientFile(patientId);
   const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<{ id: string; filename: string } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{
+    id: string;
+    filename: string;
+  } | null>(null);
 
   useEffect(() => {
     setPage(1);
@@ -227,47 +248,39 @@ export default function SecretaryPatientFilesPage() {
     filesQuery.error instanceof ApiError && filesQuery.error.status === 403;
   const fileActionsDisabledReason = useMemo(() => {
     if (!canViewFiles) {
-      return tr(
-        "هذا الحساب لا يملك صلاحية الوصول إلى ملفات المرضى حالياً.",
-        "This account is not allowed to access patient files right now.",
-      );
+      return t("secretary.patientFiles.noPermission");
     }
     if (assignedDoctorQuery.isLoading) {
-      return tr(
-        "جاري تحميل الطبيب المسؤول قبل إتاحة فتح الملفات وتنزيلها.",
-        "Loading the assigned doctor before file actions become available.",
-      );
+      return t("secretary.patientFiles.loadingDoctor");
     }
     if (assignedDoctorQuery.isForbidden) {
-      return tr(
-        "الباك أعاد 403 على الطبيب المسؤول، لذلك لا يمكن فتح ملفات المرضى أو تنزيلها بهذه الصلاحية.",
-        "The backend returned 403 for the assigned doctor, so patient files cannot be opened or downloaded with this permission set.",
-      );
+      return t("secretary.patientFiles.doctorForbidden");
     }
     if (assignedDoctorQuery.isUnassigned) {
-      return tr(
-        "الباك أعاد 404 على الطبيب المسؤول، لذلك لا يوجد طبيب مرتبط حالياً للوصول إلى ملفات المرضى.",
-        "The backend returned 404 for the assigned doctor, so no linked doctor is currently available for patient file access.",
-      );
+      return t("secretary.patientFiles.doctorNotFound");
     }
     if (assignedDoctorQuery.isError) {
-      return tr(
-        "تعذر تحميل الطبيب المسؤول، لذلك تم تعطيل فتح الملفات وتنزيلها مؤقتاً.",
-        "Could not load the assigned doctor, so file open and download actions are temporarily disabled.",
-      );
+      return t("secretary.patientFiles.doctorLoadError");
     }
     if (!doctorId) {
-      return tr(
-        "لا يمكن فتح ملفات المرضى أو تنزيلها قبل ربط السكرتير بطبيب مسؤول.",
-        "Patient files cannot be opened or downloaded until the secretary is linked to an assigned doctor.",
-      );
+      return t("secretary.patientFiles.noAssignedDoctor");
     }
     return null;
-  }, [assignedDoctorQuery.isError, assignedDoctorQuery.isForbidden, assignedDoctorQuery.isLoading, assignedDoctorQuery.isUnassigned, canViewFiles, doctorId, tr]);
+  }, [
+    assignedDoctorQuery.isError,
+    assignedDoctorQuery.isForbidden,
+    assignedDoctorQuery.isLoading,
+    assignedDoctorQuery.isUnassigned,
+    canViewFiles,
+    doctorId,
+    t,
+  ]);
 
   const patientDirectory = useMemo(
     () =>
-      new Map((patientsQuery.patients ?? []).map((patient) => [patient._id, patient])),
+      new Map(
+        (patientsQuery.patients ?? []).map((patient) => [patient._id, patient]),
+      ),
     [patientsQuery.patients],
   );
   const files = useMemo(
@@ -275,14 +288,18 @@ export default function SecretaryPatientFilesPage() {
       (filesQuery.files ?? []).map((file) => ({
         id: file.id || file._id || "",
         patientName:
-          patientDirectory.get(patientId)?.user?.fullName || tr("مريض", "Patient"),
+          patientDirectory.get(patientId)?.user?.fullName ||
+          t("secretary.patientFiles.patient"),
         patientId:
           patientDirectory.get(patientId)?.publicId || patientId || "—",
-        fileType: file.mimeType || file.originalName || tr("ملف", "File"),
+        fileType:
+          file.mimeType ||
+          file.originalName ||
+          t("secretary.patientFiles.file"),
         date: file.createdAt || "",
-        filename: file.originalName || tr("ملف", "File"),
+        filename: file.originalName || t("secretary.patientFiles.file"),
       })),
-    [filesQuery.files, patientDirectory, patientId, tr],
+    [filesQuery.files, patientDirectory, patientId, t],
   );
 
   async function resolveDownloadUrl(fileId: string) {
@@ -302,7 +319,7 @@ export default function SecretaryPatientFilesPage() {
       await triggerBrowserFileDownload(url, filename);
     } catch (error) {
       toast(getPatientFileAccessErrorMessage(error, "download", locale), {
-        title: tr("فشل التنزيل", "Download failed"),
+        title: t("secretary.patientFiles.downloadFailed"),
         variant: "error",
       });
     }
@@ -315,7 +332,7 @@ export default function SecretaryPatientFilesPage() {
       await triggerBrowserFileDownloadAndOpen(url, filename);
     } catch (error) {
       toast(getPatientFileAccessErrorMessage(error, "open", locale), {
-        title: tr("فشل الفتح", "Open failed"),
+        title: t("secretary.patientFiles.openFailed"),
         variant: "error",
       });
     }
@@ -327,12 +344,12 @@ export default function SecretaryPatientFilesPage() {
     if (!file || !patientId) return;
     try {
       await uploadFile.mutateAsync({ file });
-      toast(tr("تم رفع الملف بنجاح.", "The file was uploaded successfully."), {
+      toast(t("secretary.patientFiles.uploadSuccess"), {
         variant: "success",
       });
     } catch (error) {
       toast(getPatientFileMutationErrorMessage(error, "upload", locale), {
-        title: tr("فشل رفع الملف", "Upload failed"),
+        title: t("secretary.patientFiles.uploadFailed"),
         variant: "error",
       });
     }
@@ -348,10 +365,12 @@ export default function SecretaryPatientFilesPage() {
     setDeletingFileId(fileId);
     try {
       await deleteFile.mutateAsync(fileId);
-      toast(tr("تم حذف الملف.", "The file was deleted."), { variant: "success" });
+      toast(t("secretary.patientFiles.deleteSuccess"), {
+        variant: "success",
+      });
     } catch (error) {
       toast(getPatientFileMutationErrorMessage(error, "delete", locale), {
-        title: tr("فشل حذف الملف", "Delete failed"),
+        title: t("secretary.patientFiles.deleteFailed"),
         variant: "error",
       });
       throw error;
@@ -364,9 +383,13 @@ export default function SecretaryPatientFilesPage() {
   const searchedFiles = files;
 
   return (
-    <div dir={dir} lang={locale} className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
+    <div
+      dir={dir}
+      lang={locale}
+      className="space-y-6 pb-6 sm:space-y-7 sm:pb-8"
+    >
       <SurfaceSection
-        title={tr("ملفات المرضى", "Patient files")}
+        title={t("secretary.patientFiles.title")}
         count={files.length}
         searchMatch={!!searchInput}
       >
@@ -381,34 +404,49 @@ export default function SecretaryPatientFilesPage() {
             }
             className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white px-4 font-cairo text-[14px] font-bold text-[#111827] shadow-[0_3px_8px_rgba(15,23,42,0.03)] outline-none focus:border-primary"
           >
-            <option value="">{tr("اختر مريضاً لعرض ملفاته", "Choose a patient to view files")}</option>
+            <option value="">
+              {t("secretary.patientFiles.choosePatient")}
+            </option>
             {(patientsQuery.patients ?? []).map((patient) => (
               <option key={patient._id} value={patient._id}>
-                {patient.user?.fullName || tr("مريض", "Patient")} - {patient.publicId || patient._id}
+                {patient.user?.fullName || t("secretary.patientFiles.patient")}{" "}
+                - {patient.publicId || patient._id}
               </option>
             ))}
           </select>
         </div>
         <div className="flex flex-col gap-3 px-4 py-5 sm:px-5 sm:py-6 lg:flex-row lg:items-center">
           <div className="flex-1">
-            <FilesSearchInput value={searchInput} onChange={setSearchInput} />
+            <FilesSearchInput
+              value={searchInput}
+              onChange={setSearchInput}
+              t={t}
+            />
           </div>
           <input
             value={category}
             onChange={(event) => setCategory(event.target.value)}
-            placeholder={tr("الفئة", "Category")}
+            placeholder={t("secretary.patientFiles.category")}
             className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white px-4 font-cairo text-[14px] font-bold text-[#111827] outline-none focus:border-primary lg:w-[160px]"
           />
           <div className="w-full lg:w-[150px]">
             <StyledSelect
               value={archived}
-              onChange={(value) => setArchived(value as "all" | "active" | "archived")}
+              onChange={(value) =>
+                setArchived(value as "all" | "active" | "archived")
+              }
               options={[
-                { value: "active", label: tr("غير مؤرشف", "Active") },
-                { value: "archived", label: tr("مؤرشف", "Archived") },
-                { value: "all", label: tr("الكل", "All") },
+                {
+                  value: "active",
+                  label: t("secretary.patientFiles.archiveActive"),
+                },
+                {
+                  value: "archived",
+                  label: t("secretary.patientFiles.archiveArchived"),
+                },
+                { value: "all", label: t("secretary.patientFiles.archiveAll") },
               ]}
-              listboxAriaLabel={tr("حالة الأرشفة", "Archive status")}
+              listboxAriaLabel={t("secretary.patientFiles.archiveStatus")}
             />
           </div>
           {canManageFiles && patientId ? (
@@ -418,18 +456,30 @@ export default function SecretaryPatientFilesPage() {
               ) : (
                 <Upload className="h-4 w-4" />
               )}
-              {tr("رفع ملف", "Upload file")}
-              <input type="file" className="hidden" onChange={(event) => void handleUpload(event)} />
+              {t("secretary.patientFiles.uploadFile")}
+              <input
+                type="file"
+                className="hidden"
+                onChange={(event) => void handleUpload(event)}
+              />
             </label>
           ) : null}
         </div>
 
         <div className="hidden border-b border-[#EEF2F6] px-8 py-4 lg:block">
           <div className="grid grid-cols-12 gap-4 text-start font-cairo text-[14px] font-bold text-[#A1AAB9]">
-            <div className="col-span-4">{tr("المريض", "Patient")}</div>
-            <div className="col-span-3">{tr("نوع الملف", "File type")}</div>
-            <div className="col-span-3">{tr("التاريخ", "Date")}</div>
-            <div className="col-span-2">{tr("الإجراءات", "Actions")}</div>
+            <div className="col-span-4">
+              {t("secretary.patientFiles.patientColumn")}
+            </div>
+            <div className="col-span-3">
+              {t("secretary.patientFiles.fileType")}
+            </div>
+            <div className="col-span-3">
+              {t("secretary.patientFiles.dateColumn")}
+            </div>
+            <div className="col-span-2">
+              {t("secretary.patientFiles.actionsColumn")}
+            </div>
           </div>
         </div>
 
@@ -442,16 +492,13 @@ export default function SecretaryPatientFilesPage() {
         ) : patientsQuery.isAwaitingData ? (
           <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
             <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
-              {tr("جاري تحميل قائمة المرضى...", "Loading patients...")}
+              {t("secretary.patientFiles.loadingPatients")}
             </p>
           </div>
         ) : patientsQuery.isError ? (
           <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
             <p className="max-w-[560px] font-cairo text-[15px] font-semibold text-[#64748B]">
-              {tr(
-                "تعذر تحميل قائمة المرضى المرتبطة بالطبيب المسؤول، لذلك لا يمكن عرض الملفات حالياً.",
-                "Could not load the assigned doctor's patient list, so files cannot be shown right now.",
-              )}
+              {t("secretary.patientFiles.patientListError")}
             </p>
             <button
               type="button"
@@ -460,38 +507,32 @@ export default function SecretaryPatientFilesPage() {
               className="rounded-[10px] border border-[#D0D5DD] bg-white px-4 py-2 font-cairo text-[14px] font-black text-[#344054] transition-colors hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {patientsQuery.isRefetching
-                ? tr("جاري إعادة المحاولة...", "Retrying...")
-                : tr("إعادة المحاولة", "Retry")}
+                ? t("secretary.patientFiles.retrying")
+                : t("secretary.patientFiles.retry")}
             </button>
           </div>
         ) : !patientId ? (
           <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
             <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
-              {tr("اختر مريضاً أولاً لعرض الملفات.", "Choose a patient first to view files.")}
+              {t("secretary.patientFiles.choosePatientFirst")}
             </p>
           </div>
         ) : filesQuery.isAwaitingData ? (
           <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
             <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
-              {tr("جاري تحميل الملفات...", "Loading files...")}
+              {t("secretary.patientFiles.loadingFiles")}
             </p>
           </div>
         ) : filesAccessDenied ? (
           <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
             <p className="max-w-[560px] font-cairo text-[15px] font-semibold text-[#64748B]">
-              {tr(
-                "لا تملك صلاحية الوصول إلى ملف هذا المريض بعينه. قد تحتاج إلى طلب الوصول أولاً حتى لو كانت لديك صلاحية عرض ملفات المرضى عموماً.",
-                "You don't have access to this specific patient's file. You may need to request access first, even though you have general patient-files permission.",
-              )}
+              {t("secretary.patientFiles.patientAccessDenied")}
             </p>
           </div>
         ) : filesQuery.isError ? (
           <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
             <p className="max-w-[560px] font-cairo text-[15px] font-semibold text-[#64748B]">
-              {tr(
-                "تعذر تحميل ملفات المريض حالياً. أعد المحاولة لمتابعة العرض أو التنزيل.",
-                "Could not load the patient files right now. Retry to continue viewing or downloading.",
-              )}
+              {t("secretary.patientFiles.loadError")}
             </p>
             <button
               type="button"
@@ -500,16 +541,16 @@ export default function SecretaryPatientFilesPage() {
               className="rounded-[10px] border border-[#D0D5DD] bg-white px-4 py-2 font-cairo text-[14px] font-black text-[#344054] transition-colors hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {filesQuery.isRefetching
-                ? tr("جاري إعادة المحاولة...", "Retrying...")
-                : tr("إعادة المحاولة", "Retry")}
+                ? t("secretary.patientFiles.retrying")
+                : t("secretary.patientFiles.retry")}
             </button>
           </div>
         ) : searchedFiles.length === 0 ? (
           <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
             <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
               {searchInput
-                ? tr("لا توجد نتائج مطابقة لبحثك.", "No results match your search.")
-                : tr("لا يوجد ملفات للمرضى.", "No patient files found.")}
+                ? t("secretary.patientFiles.noSearchResults")
+                : t("secretary.patientFiles.noFilesFound")}
             </p>
             {fileActionsDisabledReason ? (
               <p className="max-w-[520px] font-cairo text-[13px] font-semibold text-[#98A2B3]">
@@ -533,18 +574,24 @@ export default function SecretaryPatientFilesPage() {
                 }
                 deleting={deletingFileId === file.id}
                 disabled={Boolean(fileActionsDisabledReason)}
+                t={t}
               />
             ))}
             {filesQuery.total > filesQuery.files.length || page > 1 ? (
               <div className="px-4 py-4 sm:px-6 lg:px-8">
                 <MedicalRecordsPagination
                   page={page}
-                  totalPages={Math.max(1, Math.ceil(filesQuery.total / pageSize))}
-                  showingFrom={filesQuery.total === 0 ? 0 : (page - 1) * pageSize + 1}
+                  totalPages={Math.max(
+                    1,
+                    Math.ceil(filesQuery.total / pageSize),
+                  )}
+                  showingFrom={
+                    filesQuery.total === 0 ? 0 : (page - 1) * pageSize + 1
+                  }
                   showingTo={Math.min(page * pageSize, filesQuery.total)}
                   total={filesQuery.total}
                   pageSize={pageSize}
-                  itemLabel={tr("ملف", "file")}
+                  itemLabel={t("secretary.patientFiles.fileLabel")}
                   onPageChange={setPage}
                   onPageSizeChange={(size) => {
                     setPageSize(size);
@@ -562,12 +609,12 @@ export default function SecretaryPatientFilesPage() {
         onOpenChange={(next) => {
           if (!next) setDeleteTarget(null);
         }}
-        title={tr("حذف الملف", "Delete file")}
-        description={tr(
-          `هل تريد بالتأكيد حذف الملف "${deleteTarget?.filename ?? ""}"؟ لا يمكن التراجع عن هذا الإجراء.`,
-          `Are you sure you want to delete "${deleteTarget?.filename ?? ""}"? This action cannot be undone.`,
+        title={t("secretary.patientFiles.deleteFileTitle")}
+        description={t("secretary.patientFiles.deleteFileDescription").replace(
+          "{filename}",
+          deleteTarget?.filename ?? "",
         )}
-        confirmLabel={tr("حذف", "Delete")}
+        confirmLabel={t("secretary.patientFiles.delete")}
         confirmDisabled={deletingFileId === deleteTarget?.id}
         onConfirm={confirmDelete}
       />

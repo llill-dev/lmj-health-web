@@ -39,8 +39,7 @@ import {
 const PAGE_SIZE = 8;
 
 export default function DoctorMedicalServicesDirectoryPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
   const [search, setSearch] = useState("");
 
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -99,12 +98,7 @@ export default function DoctorMedicalServicesDirectoryPage() {
     return (
       <>
         <Helmet>
-          <title>
-            {tr(
-              "دليل الخدمات الطبية • LMJ Health",
-              "Medical Services Directory • LMJ Health",
-            )}
-          </title>
+          <title>{t("doctor.medicalServicesDirectory.pageTitle")}</title>
         </Helmet>
 
         <div
@@ -114,10 +108,7 @@ export default function DoctorMedicalServicesDirectoryPage() {
         >
           <div className="flex items-center gap-3 font-cairo text-[14px] font-semibold text-[#667085]">
             <Loader2 className="h-5 w-5 animate-spin text-primary" />
-            {tr(
-              "جارٍ تحميل دليل الخدمات الطبية…",
-              "Loading medical services directory…",
-            )}
+            {t("doctor.medicalServicesDirectory.loading")}
           </div>
         </div>
       </>
@@ -128,25 +119,13 @@ export default function DoctorMedicalServicesDirectoryPage() {
     return (
       <>
         <Helmet>
-          <title>
-            {tr(
-              "دليل الخدمات الطبية • LMJ Health",
-              "Medical Services Directory • LMJ Health",
-            )}
-          </title>
+          <title>{t("doctor.medicalServicesDirectory.pageTitle")}</title>
         </Helmet>
 
         <DoctorListErrorState
-          title={tr(
-            "تعذّر تحميل دليل الخدمات الطبية",
-            "Failed to load medical services directory",
-          )}
+          title={t("doctor.medicalServicesDirectory.loadFailed")}
           brief={
-            errorMessage ??
-            tr(
-              "حدث خطأ أثناء جلب الجهات الطبية المنشورة. حاول مرة أخرى.",
-              "An error occurred while fetching published medical facilities. Try again.",
-            )
+            errorMessage ?? t("doctor.medicalServicesDirectory.loadFailedBrief")
           }
           onRetry={() => void retryDirectory()}
           retrying={retryingDirectory}
@@ -158,19 +137,14 @@ export default function DoctorMedicalServicesDirectoryPage() {
   return (
     <>
       <Helmet>
-        <title>
-          {tr(
-            "دليل الخدمات الطبية • LMJ Health",
-            "Medical Services Directory • LMJ Health",
-          )}
-        </title>
+        <title>{t("doctor.medicalServicesDirectory.pageTitle")}</title>
       </Helmet>
 
       <div dir={dir} lang={locale}>
         <DoctorDashboardOverview
           variant="appointments"
           surface="mint"
-          title={tr("دليل الخدمات الطبية", "Medical services directory")}
+          title={t("doctor.medicalServicesDirectory.title")}
           subtitle={
             <span>
               <span className="font-extrabold text-primary">
@@ -181,10 +155,7 @@ export default function DoctorMedicalServicesDirectoryPage() {
 
               <span className="text-primary/90">
                 {" "}
-                {tr(
-                  "— دليلك للوصول للخدمات والجهات الصحية المتاحة",
-                  "— your guide to available health services and facilities",
-                )}
+                {t("doctor.medicalServicesDirectory.subtitle")}
               </span>
             </span>
           }
@@ -195,14 +166,11 @@ export default function DoctorMedicalServicesDirectoryPage() {
         <ClinicAccountsSearchRow
           value={search}
           onChange={setSearch}
-          placeholder={tr(
-            "ابحث عن جهة أو خدمة...",
-            "Search a facility or service...",
-          )}
+          placeholder={t("doctor.medicalServicesDirectory.searchPlaceholder")}
           onValueChangeExtra={() => setPage(1)}
           onClear={() => {
-            setSearch('');
-            setActiveCategory('clinics');
+            setSearch("");
+            setActiveCategory("clinics");
             setPage(1);
           }}
         />
@@ -210,16 +178,16 @@ export default function DoctorMedicalServicesDirectoryPage() {
         <ClinicAccountsFilterTabs
           value={activeCategory}
           onChange={handleCategoryChange}
-          options={buildMedicalServiceCategoryTabs(tr)}
+          options={buildMedicalServiceCategoryTabs(t)}
         />
 
         <section className="mt-4 rounded-[14px] border border-[#FDE68A] bg-[#FFFBEB] px-5 py-4 shadow-[0_8px_18px_rgba(15,23,42,0.04)]">
           <h2 className="font-cairo text-[14px] font-extrabold text-[#92400E]">
-            {tr('تنبيه مهم', 'Important notice')}
+            {t("doctor.medicalServicesDirectory.noticeTitle")}
           </h2>
           <div className="mt-2 space-y-1 font-cairo text-[12px] font-bold leading-7 text-[#92400E]">
-            <p>{tr('هذا الدليل مخصّص لاستعراض الجهات الطبية المنشورة وبيانات التواصل معها.', 'This directory is for browsing published medical facilities and their contact details.')}</p>
-            <p>{tr('الحجز أو طلب الخدمة من داخل هذا المسار غير متاح حالياً.', 'Booking or requesting a service from within this section is not available yet.')}</p>
+            <p>{t("doctor.medicalServicesDirectory.noticeText1")}</p>
+            <p>{t("doctor.medicalServicesDirectory.noticeText2")}</p>
           </div>
         </section>
 
@@ -231,16 +199,16 @@ export default function DoctorMedicalServicesDirectoryPage() {
               imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.1)]"
               title={
                 debouncedSearch.trim()
-                  ? tr('لا توجد جهات تطابق البحث في هذا التصنيف', 'No facilities match your search in this category')
-                  : tr('لا توجد جهات منشورة في هذا التصنيف بعد', 'No facilities have been published in this category yet')
+                  ? t("doctor.medicalServicesDirectory.emptySearchTitle")
+                  : t("doctor.medicalServicesDirectory.emptyNoSearchTitle")
               }
               subtitle={
                 debouncedSearch.trim()
-                  ? tr('جرّب تعديل كلمات البحث أو تغيير التصنيف لعرض المزيد من النتائج', 'Try adjusting your search terms or changing the category to see more results')
-                  : tr('تصفح الجهات والخدمات الطبية المنشورة والمتاحة حالياً', 'Browse the published medical facilities and services currently available')
+                  ? t("doctor.medicalServicesDirectory.emptySearchSubtitle")
+                  : t("doctor.medicalServicesDirectory.emptyNoSearchSubtitle")
               }
-              actionLabel={tr('تصفح دليل الخدمات', 'Browse services directory')}
-              onAction={() => setActiveCategory('clinics')}
+              actionLabel={t("doctor.medicalServicesDirectory.browseAction")}
+              onAction={() => setActiveCategory("clinics")}
               actionIcon={<Search className="h-4 w-4" />}
             />
           ) : (

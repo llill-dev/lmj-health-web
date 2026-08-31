@@ -11,10 +11,10 @@ import {
 import type { AdminContentType } from "@/lib/admin/types";
 import { useI18n } from "@/i18n/provider";
 
-type TypeFilterValue = "الكل" | AdminContentType;
+type TypeFilterValue = "all" | AdminContentType;
 
 const TYPE_FILTER_CONFIG = [
-  { value: "الكل" as const, icon: BookOpen, iconAdaptsToActive: true },
+  { value: "all" as const, icon: BookOpen, iconAdaptsToActive: true },
   { value: "CONDITION" as const, icon: HeartPulse },
   { value: "SYMPTOM" as const, icon: FileText },
   { value: "GENERAL_ADVICE" as const, icon: Stethoscope },
@@ -34,7 +34,7 @@ export function AdminContentTypeFilterBar({
 
   const typeFilters = TYPE_FILTER_CONFIG.map((filter) => ({
     ...filter,
-    label: t(`adminMedicalContent.type.${filter.value}`),
+    label: t(`admin.medicalContent.type.${filter.value}`),
   }));
 
   return (

@@ -33,6 +33,7 @@ import {
 
 import type { SignupFieldConflictMessages } from "@/lib/auth/signupMessaging";
 import StyledSelect from "@/components/ui/styled-select";
+import { useI18n } from "@/i18n/provider";
 
 export default function SignUpStep1Account({
   onBack,
@@ -49,6 +50,7 @@ export default function SignUpStep1Account({
   contactPrecheckBusy?: boolean;
   onDismissContactConflict?: (field: "email" | "phone") => void;
 }) {
+  const { t, locale } = useI18n();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -66,7 +68,7 @@ export default function SignUpStep1Account({
     watch,
     formState: { errors, dirtyFields },
   } = useForm<Step1AccountFormInput, unknown, Step1AccountValues>({
-    resolver: zodResolver(step1AccountSchema),
+    resolver: zodResolver(step1AccountSchema(locale)),
     defaultValues: {
       fullName: defaultValues?.fullName ?? "",
       email: defaultValues?.email ?? "",

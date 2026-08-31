@@ -1,7 +1,14 @@
 "use client";
 import * as Dialog from "@radix-ui/react-dialog";
 import { motion } from "framer-motion";
-import { AlertCircle, CalendarDays, Clock3, UserRound, X } from "lucide-react";
+import {
+  AlertCircle,
+  CalendarDays,
+  CalendarSearch,
+  Clock3,
+  UserRound,
+  X,
+} from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -9,8 +16,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useAvailableAppointmentTypes } from "@/hooks/doctor";
 import { useSlots } from "@/hooks";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
+import { doctorApi } from "@/lib/doctor/client";
 import StyledSelect from "@/components/ui/styled-select";
 import { useI18n } from "@/i18n/provider";
+
+/** كم يوماً للأمام نفحصها بحثاً عن أقرب موعد متاح — سقف معقول يمنع فحصاً غير محدود. */
+const NEAREST_AVAILABLE_SEARCH_DAYS = 30;
 
 export type BookAppointmentValues = {
   patientId: string;
@@ -78,6 +89,8 @@ export default function BookAppointmentDialog({
   const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const bookSelectOutletRef = useRef<HTMLDivElement>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isFindingNearestDate, setIsFindingNearestDate] = useState(false);
+  const [nearestDateNotFound, setNearestDateNotFound] = useState(false);
   const {
     register,
     control,
@@ -146,6 +159,10 @@ export default function BookAppointmentDialog({
   }, [open]);
 
   useEffect(() => {
+    setNearestDateNotFound(false);
+  }, [selectedDate]);
+
+  useEffect(() => {
     if (!selectedDate) {
       if (selectedTime !== "") {
         setValue("time", "", { shouldValidate: true });
@@ -159,6 +176,7 @@ export default function BookAppointmentDialog({
 
   const resetForm = () => {
     setSubmitError(null);
+    setNearestDateNotFound(false);
     reset({
       patientId: "",
       date: "",
@@ -166,6 +184,43 @@ export default function BookAppointmentDialog({
       appointmentTypeId: "",
       notes: "",
     });
+  };
+
+  const handleFindNearestDate = async () => {
+    setNearestDateNotFound(false);
+    setIsFindingNearestDate(true);
+    try {
+      const start = new Date();
+      for (let offset = 0; offset < NEAREST_AVAILABLE_SEARCH_DAYS; offset += 1) {
+        const candidate = new Date(start);
+        candidate.setDate(candidate.getDate() + offset);
+        const candidateDate = formatLocalDate(candidate);
+        try {
+          const response = await doctorApi.slots.getSlots({
+            date: candidateDate,
+            type: "free",
+            doctorId,
+          });
+          const slots =
+            "freeSlots" in response && Array.isArray(response.freeSlots)
+              ? response.freeSlots
+              : [];
+          const hasFreeSlot = slots.some(
+            (slot) =>
+              candidateDate !== today || !isPastSlot(candidateDate, slot.startTime),
+          );
+          if (hasFreeSlot) {
+            setValue("date", candidateDate, { shouldValidate: true });
+            return;
+          }
+        } catch {
+          // تجاهل خطأ يوم واحد وتابع الفحص لليوم التالي
+        }
+      }
+      setNearestDateNotFound(true);
+    } finally {
+      setIsFindingNearestDate(false);
+    }
   };
 
   return (
@@ -242,9 +297,9 @@ export default function BookAppointmentDialog({
                   <Dialog.Title className="font-cairo text-[24px] font-black leading-[30px]">
                     {t("doctor.appointments.book.title")}
                   </Dialog.Title>
-                  <p className="mt-2 font-cairo text-[13px] font-semibold leading-6 text-white/85">
+                  <Dialog.Description className="mt-2 font-cairo text-[13px] font-semibold leading-6 text-white/85">
                     {t("doctor.appointments.book.subtitle")}
-                  </p>
+                  </Dialog.Description>
                 </div>
 
                 <Dialog.Close asChild>
@@ -355,8 +410,21 @@ export default function BookAppointmentDialog({
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <div className="mb-2 text-start font-cairo text-[14px] font-extrabold text-[#111827]">
-                        {t("doctor.appointments.book.date")}
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <div className="text-start font-cairo text-[14px] font-extrabold text-[#111827]">
+                          {t("doctor.appointments.book.date")}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => void handleFindNearestDate()}
+                          disabled={isFindingNearestDate}
+                          className="inline-flex items-center gap-1 font-cairo text-[11px] font-extrabold text-primary transition hover:text-[#0d7a76] disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          <CalendarSearch className="h-3.5 w-3.5" aria-hidden />
+                          {isFindingNearestDate
+                            ? tr("جارٍ البحث...", "Searching...")
+                            : tr("أقرب موعد متاح", "Nearest available")}
+                        </button>
                       </div>
                       <input
                         type="date"
@@ -369,6 +437,13 @@ export default function BookAppointmentDialog({
                       {errors.date ? (
                         <div className="mt-2 text-start font-cairo text-[12px] font-bold text-[#D92D20]">
                           {errors.date.message}
+                        </div>
+                      ) : nearestDateNotFound ? (
+                        <div className="mt-2 text-start font-cairo text-[11px] font-semibold text-[#98A2B3]">
+                          {tr(
+                            `لم يُعثر على موعد متاح خلال ${NEAREST_AVAILABLE_SEARCH_DAYS} يومًا القادمة.`,
+                            `No available date found in the next ${NEAREST_AVAILABLE_SEARCH_DAYS} days.`,
+                          )}
                         </div>
                       ) : null}
                     </div>

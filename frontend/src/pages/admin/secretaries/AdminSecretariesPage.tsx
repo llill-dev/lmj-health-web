@@ -30,8 +30,7 @@ import { useI18n } from "@/i18n/provider";
 
 export default function AdminSecretariesPage() {
   const navigate = useNavigate();
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
   const numberLocale = locale === "ar" ? "ar-EG" : "en-US";
   const numberLocaleSa = locale === "ar" ? "ar-SA" : "en-US";
 
@@ -76,20 +75,17 @@ export default function AdminSecretariesPage() {
   return (
     <>
       <Helmet>
-        <title>{tr("إدارة السكرتارية", "Secretaries")} • LMJ Health</title>
+        <title>{t("admin.secretaries.page.title")} • LMJ Health</title>
       </Helmet>
 
       <div dir={dir} lang={locale}>
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title={tr("إدارة السكرتارية", "Secretaries management")}
-          subtitle={tr(
-            "مراقبة حسابات السكرتيرين المرتبطين بالأطباء. تدعم لوحة الإدارة حالياً الاستعراض فقط، بينما يبقى الإنشاء والتعديل محجوبين لغياب Admin endpoints معتمدة لهذه العمليات.",
-            "Monitor secretary accounts linked to doctors. The Admin area currently supports listing only, while create and edit remain blocked because approved Admin endpoints for these actions are missing.",
-          )}
+          title={t("admin.secretaries.overview.title")}
+          subtitle={t("admin.secretaries.overview.subtitle")}
           headerIcon={<Users className="h-8 w-8 text-white" />}
-          actionLabel={tr("عرض فقط", "Read only")}
+          actionLabel={t("admin.secretaries.overview.actionLabel")}
           actionDisabled
           kpis={[
             {
@@ -98,19 +94,19 @@ export default function AdminSecretariesPage() {
               value: isAwaitingData
                 ? "—"
                 : (data?.total ?? 0).toLocaleString(numberLocale),
-              label: tr("إجمالي السكرتارية", "Total secretaries"),
+              label: t("admin.secretaries.kpi.total"),
             },
             {
               key: "doctors",
               icon: <Stethoscope className="h-5 w-5 shrink-0" />,
               value: doctorsListAwaiting ? "—" : doctorOptions.length,
-              label: tr("أطباء مرتبطون", "Linked doctors"),
+              label: t("admin.secretaries.kpi.doctors"),
             },
             {
               key: "page",
               icon: <Mail className="h-5 w-5 shrink-0" />,
               value: isAwaitingData ? "—" : (data?.results ?? 0),
-              label: tr("في هذه الصفحة", "On this page"),
+              label: t("admin.secretaries.kpi.page"),
             },
           ]}
         />
@@ -118,10 +114,7 @@ export default function AdminSecretariesPage() {
         <div className="mt-4 flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
           <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
-            {tr(
-              "هذه القائمة مخصّصة لمراجعة السكرتيرين المرتبطين بالأطباء والتنقل إلى ملفاتهم أو صفحات مواعيدهم فقط. إنشاء السكرتير أو تعديل صلاحياته أو إيقافه ما يزال خارج هذا المسار حتى تتوفر endpoints إدارية معتمدة له.",
-              "This list is for reviewing secretaries linked to doctors and navigating to their profiles or appointment pages only. Creating a secretary, changing permissions, or offboarding them remains outside this flow until approved admin endpoints exist for it.",
-            )}
+            {t("admin.secretaries.disclaimer")}
           </div>
         </div>
 
@@ -130,10 +123,7 @@ export default function AdminSecretariesPage() {
             <input
               value={searchInput}
               onChange={(e) => handleSearchChange(e.target.value)}
-              placeholder={tr(
-                "البحث بالاسم أو البريد أو الهاتف...",
-                "Search by name, email, or phone...",
-              )}
+              placeholder={t("admin.secretaries.search.placeholder")}
               className="h-[42px] w-full rounded-[10px] border border-[#E5E7EB] bg-white px-4 pe-10 text-start font-cairo text-[12px] font-bold text-[#111827] outline-none transition focus:border-primary placeholder:text-[#98A2B3]"
             />
             <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
@@ -150,22 +140,19 @@ export default function AdminSecretariesPage() {
               setDoctorIdFilter(v);
               setPage(1);
             }}
-            placeholder={tr("كل الأطباء", "All doctors")}
+            placeholder={t("admin.secretaries.filter.allDoctors")}
             options={[
-              { value: "", label: tr("كل الأطباء", "All doctors") },
+              { value: "", label: t("admin.secretaries.filter.allDoctors") },
               ...doctorOptions.map((d) => ({
                 value: d._id,
                 label: `${d.user?.fullName ?? d._id}${d.specialization ? ` — ${d.specialization}` : ""}`,
               })),
             ]}
-            listboxAriaLabel={tr("تصفية حسب الطبيب", "Filter by doctor")}
+            listboxAriaLabel={t("admin.secretaries.filter.doctor")}
           />
           {doctorOptions.length >= 200 ? (
             <p className="mt-1.5 text-start font-cairo text-[10px] font-semibold text-[#98A2B3]">
-              {tr(
-                "عُرضت أول 200 طبيب معتمد. استخدم البحث أعلاه لتضييق السكرتيرين.",
-                "Showing the first 200 approved doctors. Use search above to narrow secretaries.",
-              )}
+              {t("admin.secretaries.filter.doctorLimit")}
             </p>
           ) : null}
         </div>
@@ -175,13 +162,10 @@ export default function AdminSecretariesPage() {
             <Lock className="mt-0.5 h-4 w-4 shrink-0 text-[#B42318]" />
             <div>
               <div className="font-cairo text-[12px] font-extrabold text-[#991B1B]">
-                {tr("هذه الصفحة للعرض فقط", "This page is read-only")}
+                {t("admin.secretaries.readOnly.title")}
               </div>
               <div className="mt-1 font-cairo text-[11px] font-bold leading-6 text-[#B42318]">
-                {tr(
-                  ADMIN_SECRETARY_BLOCKER_MESSAGE.ar,
-                  ADMIN_SECRETARY_BLOCKER_MESSAGE.en,
-                )}
+                {t("admin.secretaries.readOnly.message")}
               </div>
             </div>
           </div>
@@ -198,13 +182,13 @@ export default function AdminSecretariesPage() {
             <div className="flex flex-col items-center gap-3 rounded-[12px] border border-[#FEE2E2] bg-[#FEF2F2] px-6 py-10 text-center">
               <AlertCircle className="h-7 w-7 text-[#DC2626]" />
               <div className="font-cairo text-[14px] font-extrabold text-[#991B1B]">
-                {tr("تعذّر تحميل البيانات", "Failed to load data")}
+                {t("admin.secretaries.error.load")}
               </div>
               <button
                 onClick={() => refetch()}
                 className="mt-1 rounded-[8px] border border-[#FECACA] bg-white px-5 py-2 font-cairo text-[12px] font-extrabold text-[#DC2626]"
               >
-                {tr("إعادة المحاولة", "Retry")}
+                {t("admin.secretaries.error.retry")}
               </button>
             </div>
           ) : data?.secretaries.length === 0 ? (
@@ -212,14 +196,8 @@ export default function AdminSecretariesPage() {
               <Users className="h-10 w-10 text-[#D0D5DD]" />
               <div className="font-cairo text-[14px] font-extrabold text-[#667085]">
                 {debouncedSearch
-                  ? tr(
-                      "لا توجد نتائج مطابقة للبحث",
-                      "No results match your search",
-                    )
-                  : tr(
-                      "لا يوجد سكرتيرون مسجلون",
-                      "No secretaries registered",
-                    )}
+                  ? t("admin.secretaries.empty.noResults")
+                  : t("admin.secretaries.empty.noData")}
               </div>
             </div>
           ) : (
@@ -243,7 +221,7 @@ export default function AdminSecretariesPage() {
                             {s.user?.fullName ?? "—"}
                           </div>
                           <div className="mt-0.5 font-cairo text-[11px] font-bold text-[#98A2B3]">
-                            {tr("سكرتير", "Secretary")}
+                            {t("admin.secretaries.role")}
                             {s.doctor?.user?.fullName
                               ? ` • ${s.doctor.user.fullName}`
                               : ""}
@@ -254,17 +232,14 @@ export default function AdminSecretariesPage() {
                       <div className="flex items-center gap-2">
                         <span
                           className="flex h-8 items-center gap-1.5 rounded-[8px] border border-[#E5E7EB] bg-[#F9FAFB] px-3 font-cairo text-[11px] font-extrabold text-[#667085]"
-                          title={tr(
-                            "تعديل البيانات غير متاح من لوحة الإدارة حالياً",
-                            "Editing secretary data is not available from the admin area right now",
-                          )}
+                          title={t("admin.secretaries.badge.editUnavailable")}
                         >
                           <Eye className="h-3.5 w-3.5" />
-                          {tr("عرض فقط", "Read only")}
+                          {t("admin.secretaries.badge.readOnly")}
                         </span>
                         {userId && (
                           <span className="flex h-8 items-center rounded-[8px] border border-[#E5E7EB] bg-[#F9FAFB] px-3 font-cairo text-[11px] font-extrabold text-[#667085]">
-                            {tr("إيقاف غير متاح", "Offboard unavailable")}
+                            {t("admin.secretaries.badge.offboardUnavailable")}
                           </span>
                         )}
                         <button
@@ -274,7 +249,7 @@ export default function AdminSecretariesPage() {
                               state: { secretary: s },
                             })
                           }
-                          title={tr("ملف السكرتير", "Secretary profile")}
+                          title={t("admin.secretaries.actions.profile")}
                           className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-primary text-white shadow-sm transition hover:bg-primary/90"
                         >
                           <ChevronLeft className="h-4 w-4" />
@@ -302,7 +277,7 @@ export default function AdminSecretariesPage() {
                         <div className="flex items-center gap-2 text-primary">
                           <Stethoscope className="h-4 w-4" />
                           <span className="font-cairo text-[12px] font-extrabold">
-                            {tr("الطبيب المسؤول", "Assigned doctor")}
+                            {t("admin.secretaries.assignedDoctor")}
                           </span>
                         </div>
                         <div className="text-start">
@@ -321,7 +296,7 @@ export default function AdminSecretariesPage() {
                     {perms.length > 0 && (
                       <div className="mt-4">
                         <div className="mb-2 font-cairo text-[11px] font-extrabold text-[#98A2B3]">
-                          {tr("الصلاحيات", "Permissions")} ({perms.length})
+                          {t("admin.secretaries.permissions")} ({perms.length})
                         </div>
                         <div className="flex flex-wrap gap-1.5">
                           {perms.map((p) => (
@@ -350,7 +325,7 @@ export default function AdminSecretariesPage() {
                           }
                           className="h-[30px] rounded-[8px] border border-primary bg-white px-4 font-cairo text-[11px] font-extrabold text-primary transition hover:bg-[#E7FBFA]"
                         >
-                          {tr("عرض المواعيد", "View appointments")}
+                          {t("admin.secretaries.actions.viewAppointments")}
                         </button>
                         <button
                           type="button"
@@ -362,7 +337,7 @@ export default function AdminSecretariesPage() {
                           }
                           className="h-[30px] rounded-[8px] border border-primary bg-white px-4 font-cairo text-[11px] font-extrabold text-primary transition hover:bg-[#E7FBFA]"
                         >
-                          {tr("إدارة المواعيد", "Manage appointments")}
+                          {t("admin.secretaries.actions.manageAppointments")}
                         </button>
                       </div>
                     </div>
@@ -379,10 +354,7 @@ export default function AdminSecretariesPage() {
             totalPages={totalPages}
             pageSize={LIMIT}
             pageSizeOptions={[10, 20, 50]}
-            summaryLabel={tr(
-              `عرض ${paginationRange.start.toLocaleString(numberLocaleSa)}–${paginationRange.end.toLocaleString(numberLocaleSa)} من ${data!.total.toLocaleString(numberLocaleSa)} سكرتيراً`,
-              `Showing ${paginationRange.start.toLocaleString(numberLocaleSa)}–${paginationRange.end.toLocaleString(numberLocaleSa)} of ${data!.total.toLocaleString(numberLocaleSa)} secretaries`,
-            )}
+            summaryLabel={t("admin.secretaries.pagination.summary").replace("{start}", String(paginationRange.start)).replace("{end}", String(paginationRange.end)).replace("{total}", String(data!.total))}
             onPageChange={setPage}
             onPageSizeChange={() => {
               setPage(1);

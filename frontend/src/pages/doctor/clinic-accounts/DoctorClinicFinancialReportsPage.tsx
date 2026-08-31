@@ -35,28 +35,66 @@ import { useToast } from "@/components/ui/ToastProvider";
 import { useBillingAccess } from "@/hooks/billing/useBillingAccess";
 import { useI18n } from "@/i18n/provider";
 
-function buildMonths(tr: (ar: string, en: string) => string) {
+function buildMonths(t: (key: string) => string) {
   return [
-    { value: "all", label: tr("السنة كاملة", "Full year") },
-    { value: "1", label: tr("يناير", "January") },
-    { value: "2", label: tr("فبراير", "February") },
-    { value: "3", label: tr("مارس", "March") },
-    { value: "4", label: tr("أبريل", "April") },
-    { value: "5", label: tr("مايو", "May") },
-    { value: "6", label: tr("يونيو", "June") },
-    { value: "7", label: tr("يوليو", "July") },
-    { value: "8", label: tr("أغسطس", "August") },
-    { value: "9", label: tr("سبتمبر", "September") },
-    { value: "10", label: tr("أكتوبر", "October") },
-    { value: "11", label: tr("نوفمبر", "November") },
-    { value: "12", label: tr("ديسمبر", "December") },
+    {
+      value: "all",
+      label: t("doctor.clinicAccounts.financialReports.month.all"),
+    },
+    {
+      value: "1",
+      label: t("doctor.clinicAccounts.financialReports.month.january"),
+    },
+    {
+      value: "2",
+      label: t("doctor.clinicAccounts.financialReports.month.february"),
+    },
+    {
+      value: "3",
+      label: t("doctor.clinicAccounts.financialReports.month.march"),
+    },
+    {
+      value: "4",
+      label: t("doctor.clinicAccounts.financialReports.month.april"),
+    },
+    {
+      value: "5",
+      label: t("doctor.clinicAccounts.financialReports.month.may"),
+    },
+    {
+      value: "6",
+      label: t("doctor.clinicAccounts.financialReports.month.june"),
+    },
+    {
+      value: "7",
+      label: t("doctor.clinicAccounts.financialReports.month.july"),
+    },
+    {
+      value: "8",
+      label: t("doctor.clinicAccounts.financialReports.month.august"),
+    },
+    {
+      value: "9",
+      label: t("doctor.clinicAccounts.financialReports.month.september"),
+    },
+    {
+      value: "10",
+      label: t("doctor.clinicAccounts.financialReports.month.october"),
+    },
+    {
+      value: "11",
+      label: t("doctor.clinicAccounts.financialReports.month.november"),
+    },
+    {
+      value: "12",
+      label: t("doctor.clinicAccounts.financialReports.month.december"),
+    },
   ];
 }
 
 export default function DoctorClinicFinancialReportsPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
-  const months = buildMonths(tr);
+  const { t, locale, dir } = useI18n();
+  const months = buildMonths(t);
   const { toast } = useToast();
   const { canExportReports, canViewSettings, isSecretary } = useBillingAccess();
   const settingsQuery = useBillingSettings(!isSecretary || canViewSettings);
@@ -81,24 +119,28 @@ export default function DoctorClinicFinancialReportsPage() {
     dateTo: useCustomRange ? dateTo : undefined,
   });
   const exportPdf = useExportBillingReportPdf();
-  const { retry: retryReports, retrying: retryingReports } = useRetryAction(() =>
-    reportsQuery.refetch(),
+  const { retry: retryReports, retrying: retryingReports } = useRetryAction(
+    () => reportsQuery.refetch(),
   );
 
-  const currency = reportsQuery.currency ?? currencyOverride ?? settingsQuery.currency;
+  const currency =
+    reportsQuery.currency ?? currencyOverride ?? settingsQuery.currency;
   const formatMoney = (value: number) => formatBillingAmount(value, currency);
   const currencyOptions = useMemo(() => {
     const list = settingsQuery.supportedCurrencies?.length
       ? settingsQuery.supportedCurrencies
       : [];
     return [
-      { value: "", label: tr("العملة الافتراضية", "Default currency") },
+      {
+        value: "",
+        label: t("doctor.clinicAccounts.financialReports.defaultCurrency"),
+      },
       ...list.map((item) => ({
         value: item.code,
-        label: formatBillingCurrencyOptionLabel(item.code, item.name, tr),
+        label: formatBillingCurrencyOptionLabel(item.code, item.name, t),
       })),
     ];
-  }, [settingsQuery.supportedCurrencies, tr]);
+  }, [settingsQuery.supportedCurrencies, t]);
 
   const totals = useMemo(() => {
     const summary = reportsQuery.summary;
@@ -130,13 +172,13 @@ export default function DoctorClinicFinancialReportsPage() {
         result.fileName?.trim() ||
         `billing-report-${year}${month === "all" ? "" : `-${month}`}.pdf`;
       await triggerBrowserFileDownloadAndOpen(url, fileName);
-      toast(tr("تم تنزيل التقرير وفتحه في تبويب جديد.", "The report was downloaded and opened in a new tab."), {
-        title: tr("تصدير PDF", "Export PDF"),
+      toast(t("doctor.clinicAccounts.financialReports.exportSuccess"), {
+        title: t("doctor.clinicAccounts.financialReports.exportTitle"),
         variant: "success",
       });
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
-        title: tr("تعذّر التصدير", "Could not export"),
+        title: t("doctor.clinicAccounts.financialReports.exportFailed"),
         variant: "error",
       });
     }
@@ -145,18 +187,13 @@ export default function DoctorClinicFinancialReportsPage() {
   return (
     <>
       <Helmet>
-        <title>
-          {tr("التقارير المالية • LMJ Health", "Financial Reports • LMJ Health")}
-        </title>
+        <title>{t("doctor.clinicAccounts.financialReports.page.title")}</title>
       </Helmet>
 
       <div dir={dir} lang={locale}>
         <ClinicAccountsBanner
-          title={tr("التقارير المالية", "Financial reports")}
-          subtitle={tr(
-            "التقارير الشاملة للدخل والمصاريف والربح",
-            "Comprehensive income, expense, and profit reports",
-          )}
+          title={t("doctor.clinicAccounts.financialReports.title")}
+          subtitle={t("doctor.clinicAccounts.financialReports.subtitle")}
           icon={<BarChart3 className="h-7 w-7 text-white sm:h-8 sm:w-8" />}
         />
 
@@ -192,14 +229,16 @@ export default function DoctorClinicFinancialReportsPage() {
               options={currencyOptions}
               value={currencyOverride}
               onChange={setCurrencyOverride}
-              listboxAriaLabel={tr("العملة", "Currency")}
+              listboxAriaLabel={t(
+                "doctor.clinicAccounts.financialReports.currency",
+              )}
             />
           </div>
         </div>
 
         <div className="mb-6 flex flex-wrap items-center gap-3">
           <span className="font-cairo text-[12px] font-bold text-[#667085]">
-            {tr("أو فترة مخصصة:", "Or a custom range:")}
+            {t("doctor.clinicAccounts.financialReports.customRange")}
           </span>
           <input
             type="date"
@@ -222,26 +261,20 @@ export default function DoctorClinicFinancialReportsPage() {
               }}
               className="font-cairo text-[12px] font-extrabold text-primary hover:underline"
             >
-              {tr("إلغاء الفترة المخصصة", "Clear custom range")}
+              {t("doctor.clinicAccounts.financialReports.clearCustomRange")}
             </button>
           ) : null}
         </div>
 
         {reportsQuery.mixedCurrencies ? (
           <div className="mb-4 rounded-[12px] border border-[#FEDF89] bg-[#FFFAEB] px-4 py-3 text-start font-cairo text-[12px] font-semibold text-[#B54708]">
-            {tr(
-              "هذا التقرير يحتوي على سجلات بعملات متعددة. الإجمالي المعروض ليس تحويلاً موحّداً — الأرقام تمثل العملة المحددة فقط دون تحويل سعر الصرف.",
-              "This report contains records in multiple currencies. The total shown is not a unified conversion — figures reflect only the selected currency, with no exchange-rate conversion applied.",
-            )}
+            {t("doctor.clinicAccounts.financialReports.mixedCurrenciesWarning")}
           </div>
         ) : null}
 
         {reportsQuery.isError ? (
           <DoctorListErrorState
-            title={tr(
-              "تعذّر تحميل التقرير المالي",
-              "Failed to load financial report",
-            )}
+            title={t("doctor.clinicAccounts.financialReports.loadFailed")}
             brief={getUserFacingRequestErrorMessage(reportsQuery.error)}
             retrying={retryingReports}
             onRetry={() => void retryReports()}
@@ -251,23 +284,23 @@ export default function DoctorClinicFinancialReportsPage() {
         ) : (
           <section className="grid grid-cols-1 gap-4 md:grid-cols-4">
             <ClinicAccountsStatCard
-              label={tr("الدخل", "Income")}
+              label={t("doctor.clinicAccounts.financialReports.income")}
               value={formatMoney(totals.income)}
               icon={TrendingUp}
             />
             <ClinicAccountsStatCard
-              label={tr("المصاريف", "Expenses")}
+              label={t("doctor.clinicAccounts.financialReports.expenses")}
               value={formatMoney(totals.expenses)}
               icon={TrendingDown}
               className="bg-[#EF4444]"
             />
             <ClinicAccountsStatCard
-              label={tr("الربح", "Profit")}
+              label={t("doctor.clinicAccounts.financialReports.profit")}
               value={formatMoney(totals.profit)}
               icon={BarChart3}
             />
             <ClinicAccountsStatCard
-              label={tr("الاسترجاعات", "Refunds")}
+              label={t("doctor.clinicAccounts.financialReports.refunds")}
               value={formatMoney(totals.refunds)}
               icon={TrendingDown}
               className="bg-[#B54708]"
@@ -278,49 +311,61 @@ export default function DoctorClinicFinancialReportsPage() {
         <section className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
           <div className="rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-start font-cairo text-[16px] font-extrabold text-[#111827]">
-              {tr("الدخل والمصاريف", "Income and expenses")}
+              {t("doctor.clinicAccounts.financialReports.incomeAndExpenses")}
             </h2>
             {reportsQuery.monthlyFinance.length === 0 ? (
               <p className="py-10 text-center font-cairo text-[13px] font-semibold text-[#98A2B3]">
-                {tr("لا توجد بيانات لهذه الفترة.", "No data for this period.")}
+                {t("doctor.clinicAccounts.financialReports.noData")}
               </p>
             ) : (
-              <FinancialBarChart data={reportsQuery.monthlyFinance} currency={currency} />
+              <FinancialBarChart
+                data={reportsQuery.monthlyFinance}
+                currency={currency}
+              />
             )}
           </div>
           <div className="rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-start font-cairo text-[16px] font-extrabold text-[#111827]">
-              {tr("اتجاه الربح", "Profit trend")}
+              {t("doctor.clinicAccounts.financialReports.profitTrend")}
             </h2>
             {reportsQuery.monthlyFinance.length === 0 ? (
               <p className="py-10 text-center font-cairo text-[13px] font-semibold text-[#98A2B3]">
-                {tr("لا توجد بيانات لهذه الفترة.", "No data for this period.")}
+                {t("doctor.clinicAccounts.financialReports.noData")}
               </p>
             ) : (
-              <FinancialLineChart data={reportsQuery.monthlyFinance} currency={currency} />
+              <FinancialLineChart
+                data={reportsQuery.monthlyFinance}
+                currency={currency}
+              />
             )}
           </div>
         </section>
 
         <section className="mt-6 rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
           <h2 className="mb-4 text-start font-cairo text-[16px] font-extrabold text-[#111827]">
-            {tr("المصاريف حسب الفئة", "Expenses by category")}
+            {t("doctor.clinicAccounts.financialReports.expensesByCategory")}
           </h2>
           {reportsQuery.expenseBreakdown.length === 0 ? (
             <p className="py-10 text-center font-cairo text-[13px] font-semibold text-[#98A2B3]">
-              {tr("لا توجد مصاريف مسجلة لهذه الفترة.", "No expenses recorded for this period.")}
+              {t("doctor.clinicAccounts.financialReports.noExpenses")}
             </p>
           ) : (
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.2fr]">
-              <ExpensePieChart data={reportsQuery.expenseBreakdown} currency={currency} />
-              <ExpensePieLegend data={reportsQuery.expenseBreakdown} currency={currency} />
+              <ExpensePieChart
+                data={reportsQuery.expenseBreakdown}
+                currency={currency}
+              />
+              <ExpensePieLegend
+                data={reportsQuery.expenseBreakdown}
+                currency={currency}
+              />
             </div>
           )}
         </section>
 
         <section className="mt-6 rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
           <h2 className="mb-4 text-start font-cairo text-[16px] font-extrabold text-[#111827]">
-            {tr("تصدير التقرير", "Export report")}
+            {t("doctor.clinicAccounts.financialReports.exportReport")}
           </h2>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {canExportReports ? (
@@ -331,24 +376,25 @@ export default function DoctorClinicFinancialReportsPage() {
                 className="inline-flex h-[52px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
               >
                 <FileText className="h-4 w-4" aria-hidden />
-                {exportPdf.isPending ? tr("جاري التصدير...", "Exporting...") : "PDF"}
+                {exportPdf.isPending
+                  ? t("doctor.clinicAccounts.financialReports.exporting")
+                  : "PDF"}
               </button>
             ) : (
               <div className="inline-flex h-[52px] items-center justify-center rounded-[12px] bg-[#F2F4F7] px-4 font-cairo text-[13px] font-bold text-[#667085]">
-                {tr("التصدير غير متاح ضمن صلاحياتك الحالية", "Export is not available with your current permissions")}
+                {t("doctor.clinicAccounts.financialReports.exportNotAvailable")}
               </div>
             )}
             <button
               type="button"
               disabled
               className="inline-flex h-[52px] items-center justify-center gap-2 rounded-[12px] bg-[#E5E7EB] font-cairo text-[14px] font-extrabold text-[#98A2B3]"
-              title={tr(
-                "Excel غير مدعوم في API-3 حالياً",
-                "Excel is not supported in API-3 yet",
+              title={t(
+                "doctor.clinicAccounts.financialReports.excelNotSupported",
               )}
             >
               <FileSpreadsheet className="h-4 w-4" aria-hidden />
-              {tr("Excel (قريباً)", "Excel (coming soon)")}
+              {t("doctor.clinicAccounts.financialReports.excelComingSoon")}
             </button>
           </div>
         </section>

@@ -136,7 +136,6 @@ export function CreateEncounterDialog({
   onSubmit,
 }: CreateEncounterDialogProps) {
   const { t, locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const { toast } = useToast();
   const selectListboxOutletRef = useRef<HTMLDivElement>(null);
   const valuesRef = useRef<EncounterFormValues>(INITIAL_VALUES);
@@ -254,16 +253,10 @@ export function CreateEncounterDialog({
     setErrors(nextErrors);
 
     if (hasErrors(nextErrors)) {
-      toast(
-        tr(
-          "يرجى مراجعة الحقول المعلّمة بالأحمر قبل إنشاء الزيارة.",
-          "Please review the fields marked in red before creating the encounter.",
-        ),
-        {
-          title: tr("بيانات ناقصة أو غير صحيحة", "Missing or invalid data"),
-          variant: "warning",
-        },
-      );
+      toast(t("doctor.encounters.create.validation.reviewFields"), {
+        title: t("doctor.encounters.create.validation.missingOrInvalidData"),
+        variant: "warning",
+      });
       return;
     }
 
@@ -287,7 +280,7 @@ export function CreateEncounterDialog({
           ...error.fields,
         }));
         toast(error.message, {
-          title: tr("تعذّر إنشاء الزيارة", "Failed to create the encounter"),
+          title: t("doctor.encounters.create.validation.failedToCreate"),
           variant: "error",
           durationMs: 5200,
         });
@@ -322,20 +315,17 @@ export function CreateEncounterDialog({
           <div className="flex shrink-0 items-start justify-between gap-4 border-b border-[#EAECF0] bg-[linear-gradient(180deg,#F8FFFE_0%,#FFFFFF_100%)] px-6 py-5">
             <div className="text-start">
               <Dialog.Title className="mt-3 font-cairo text-[24px] font-black text-[#101828]">
-                {tr("إنشاء زيارة طبية", "Create medical encounter")}
+                {t("doctor.encounters.create.title")}
               </Dialog.Title>
               <Dialog.Description className="mt-1 font-cairo text-[13px] font-semibold leading-6 text-[#667085]">
-                {tr(
-                  "جهّز الزيارة بدقة من أول خطوة: اختر المريض، حدّد نوع الزيارة، وأضف ملاحظات افتتاحية واضحة قبل البدء.",
-                  "Prepare the encounter carefully from the first step: choose the patient, set the encounter type, and add clear opening notes before you begin.",
-                )}
+                {t("doctor.encounters.create.subtitle")}
               </Dialog.Description>
             </div>
             <Dialog.Close asChild>
               <button
                 type="button"
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#E4E7EC] text-[#667085] transition hover:bg-[#F9FAFB]"
-                aria-label={tr("إغلاق", "Close")}
+                aria-label={t("doctor.encounters.create.close")}
               >
                 <X className="w-5 h-5" />
               </button>
@@ -350,7 +340,7 @@ export function CreateEncounterDialog({
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="min-w-0">
                   <label className="mb-2 block text-start font-cairo text-[13px] font-extrabold text-[#344054]">
-                    {tr("المريض", "Patient")}
+                    {t("doctor.encounters.create.patient")}
                   </label>
                   <div className={fieldShell(Boolean(errors.patientId))}>
                     <StyledSelect
@@ -358,20 +348,17 @@ export function CreateEncounterDialog({
                       value={values.patientId}
                       onChange={(next) => setFieldValue("patientId", next)}
                       onBlur={() => markTouched("patientId")}
-                      placeholder={tr(
-                        "اختر المريض الذي ستبدأ له الزيارة",
-                        "Select the patient to start the encounter for",
-                      )}
+                      placeholder={t("doctor.encounters.create.selectPatient")}
                       error={Boolean(errors.patientId)}
-                      emptyTriggerLabel={tr(
-                        "لا يوجد مرضى متاحون",
-                        "No patients available",
+                      emptyTriggerLabel={t(
+                        "doctor.encounters.create.noPatientsAvailable",
                       )}
-                      emptyState={tr(
-                        "لا يوجد مرضى متاحون حاليًا لإنشاء زيارة جديدة.",
-                        "No patients are currently available to create a new encounter.",
+                      emptyState={t(
+                        "doctor.encounters.create.noPatientsAvailableMessage",
                       )}
-                      listboxAriaLabel={tr("اختيار المريض", "Select patient")}
+                      listboxAriaLabel={t(
+                        "doctor.encounters.create.selectPatientAria",
+                      )}
                       triggerClassName="rounded-[14px]"
                       dropdownMaxHeight={240}
                       listboxPortalRef={selectListboxOutletRef}
@@ -386,7 +373,7 @@ export function CreateEncounterDialog({
 
                 <div className="min-w-0">
                   <label className="mb-2 block text-start font-cairo text-[13px] font-extrabold text-[#344054]">
-                    {tr("نوع الزيارة", "Encounter type")}
+                    {t("doctor.encounters.create.encounterType")}
                   </label>
                   <div className={fieldShell(Boolean(errors.origin))}>
                     <StyledSelect
@@ -396,14 +383,12 @@ export function CreateEncounterDialog({
                         setFieldValue("origin", next as DoctorEncounterOrigin)
                       }
                       onBlur={() => markTouched("origin")}
-                      placeholder={tr(
-                        "اختر نوع الزيارة",
-                        "Select the encounter type",
+                      placeholder={t(
+                        "doctor.encounters.create.selectEncounterType",
                       )}
                       error={Boolean(errors.origin)}
-                      listboxAriaLabel={tr(
-                        "اختيار نوع الزيارة",
-                        "Select encounter type",
+                      listboxAriaLabel={t(
+                        "doctor.encounters.create.selectEncounterTypeAria",
                       )}
                       triggerClassName="rounded-[14px]"
                       dropdownMaxHeight={240}
@@ -420,7 +405,7 @@ export function CreateEncounterDialog({
 
               <div>
                 <label className="mb-2 block text-start font-cairo text-[13px] font-extrabold text-[#344054]">
-                  {tr("رقم الموعد المرتبط", "Linked appointment id")}
+                  {t("doctor.encounters.create.linkedAppointmentId")}
                 </label>
                 <div className={fieldShell(Boolean(errors.appointmentId))}>
                   <div className="flex gap-3 items-center">
@@ -436,14 +421,8 @@ export function CreateEncounterDialog({
                       onBlur={() => markTouched("appointmentId")}
                       placeholder={
                         values.origin === "appointment"
-                          ? tr(
-                              "أدخل معرّف الموعد (24 حرفاً) من نظام المواعيد",
-                              "Enter the appointment id (24 characters) from the appointments system",
-                            )
-                          : tr(
-                              "اختياري — اتركه فارغاً إن لم تربط بموعد",
-                              "Optional — leave empty if not linked to an appointment",
-                            )
+                          ? t("doctor.encounters.create.enterAppointmentId")
+                          : t("doctor.encounters.create.leaveEmptyOptional")
                       }
                       className="h-12 w-full border-0 bg-transparent px-0 text-start font-cairo text-[14px] font-bold text-[#101828] outline-none placeholder:font-semibold placeholder:text-[#98A2B3]"
                       aria-invalid={Boolean(errors.appointmentId)}
@@ -457,14 +436,8 @@ export function CreateEncounterDialog({
                 ) : (
                   <div className="mt-2 text-start font-cairo text-[11px] font-semibold text-[#667085]">
                     {values.origin === "appointment"
-                      ? tr(
-                          "عند اختيار «مرتبطة بموعد» يصبح معرّف الموعد مطلوباً.",
-                          'When "Linked to appointment" is selected, the appointment id becomes required.',
-                        )
-                      : tr(
-                          "إذا أدخلت معرّف موعد، يجب أن يكون صالحاً بالكامل.",
-                          "If you enter an appointment id, it must be fully valid.",
-                        )}
+                      ? t("doctor.encounters.create.appointmentIdRequired")
+                      : t("doctor.encounters.create.appointmentIdMustBeValid")}
                   </div>
                 )}
               </div>
@@ -475,23 +448,17 @@ export function CreateEncounterDialog({
                   </div>
                   <div>
                     <div className="font-cairo text-[13px] font-extrabold text-[#101828]">
-                      {tr(
-                        "تهيئة احترافية للزيارة",
-                        "Professional encounter setup",
-                      )}
+                      {t("doctor.encounters.create.professionalSetup")}
                     </div>
                     <div className="mt-1 font-cairo text-[11px] font-semibold leading-6 text-[#667085]">
-                      {tr(
-                        "الملاحظات الأولية ستظهر ضمن تفاصيل الزيارة، لذلك اكتب سبب الزيارة أو الهدف الطبي بشكل مختصر وواضح.",
-                        "The opening notes will appear within the encounter details, so write the reason for the encounter or the medical goal briefly and clearly.",
-                      )}
+                      {t("doctor.encounters.create.openingNotesDescription")}
                     </div>
                   </div>
                 </div>
               </div>
               <div>
                 <label className="mb-2 block text-start font-cairo text-[13px] font-extrabold text-[#344054]">
-                  {tr("ملاحظات افتتاحية", "Opening notes")}
+                  {t("doctor.encounters.create.openingNotes")}
                 </label>
                 <div className={fieldShell(Boolean(errors.notes))}>
                   <div className="flex gap-3 items-start">
@@ -504,9 +471,8 @@ export function CreateEncounterDialog({
                         setFieldValue("notes", event.target.value)
                       }
                       onBlur={() => markTouched("notes")}
-                      placeholder={tr(
-                        "اكتب ملخصًا افتتاحيًا يوضح سبب الزيارة، الشكوى الأساسية، أو الهدف من المتابعة.",
-                        "Write an opening summary explaining the reason for the encounter, the main complaint, or the follow-up goal.",
+                      placeholder={t(
+                        "doctor.encounters.create.openingNotesPlaceholder",
                       )}
                       rows={5}
                       className="min-h-[132px] w-full resize-none border-0 bg-transparent px-0 py-1 text-start font-cairo text-[14px] font-bold text-[#101828] outline-none placeholder:font-semibold placeholder:text-[#98A2B3]"
@@ -521,10 +487,7 @@ export function CreateEncounterDialog({
                     </div>
                   ) : (
                     <div className="text-start font-cairo text-[11px] font-semibold text-[#667085]">
-                      {tr(
-                        "يفضّل أن تكون الملاحظات مباشرة وواضحة منذ بداية الزيارة.",
-                        "It's best for the notes to be direct and clear from the start of the encounter.",
-                      )}
+                      {t("doctor.encounters.create.notesDirectAndClear")}
                     </div>
                   )}
                   <div className="shrink-0 font-cairo text-[11px] font-semibold text-[#98A2B3]">
@@ -540,7 +503,7 @@ export function CreateEncounterDialog({
                   type="button"
                   className="inline-flex h-12 items-center justify-center rounded-[14px] border border-[#D0D5DD] px-5 font-cairo text-[14px] font-extrabold text-[#344054] transition hover:bg-[#F9FAFB]"
                 >
-                  {tr("إلغاء", "Cancel")}
+                  {t("doctor.encounters.create.cancel")}
                 </button>
               </Dialog.Close>
               <button
@@ -553,7 +516,7 @@ export function CreateEncounterDialog({
                 ) : (
                   <ClipboardPlus className="w-4 h-4" />
                 )}
-                {tr("إنشاء الزيارة", "Create encounter")}
+                {t("doctor.encounters.create.createEncounter")}
               </button>
             </div>
           </form>

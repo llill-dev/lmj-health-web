@@ -1,8 +1,16 @@
 import { ApiError, getUserFacingRequestErrorMessage } from "@/lib/api";
+import { getTranslationValue } from "@/i18n/translations";
+import { getCurrentLocale } from "@/i18n/runtime";
 
 type SupportedLocale = "ar" | "en";
 
 function tr(locale: SupportedLocale, ar: string, en: string): string {
+  // Use centralized translation system with fallback to local strings
+  const key = locale === "ar" ? ar : en;
+  const translated = getTranslationValue(locale, key);
+  if (translated) return translated;
+
+  // Fallback to local strings
   return locale === "ar" ? ar : en;
 }
 

@@ -5,6 +5,7 @@ import { ADMIN_SERVICES_PAGE_SIZE } from "@/components/admin/services/tabsConfig
 import { FacilityCardSkeleton } from "@/components/admin/skeletons/FacilityCardSkeleton";
 import { resolveLabel } from "@/lib/admin/types";
 import type { ManagedServiceProvider } from "@/lib/admin/types";
+import { useI18n } from "@/i18n/provider";
 
 function resolveProviderLabel(provider: ManagedServiceProvider): string {
   if (provider.name?.trim()) return provider.name.trim();
@@ -23,7 +24,6 @@ export function AdminServicesContent({
   onPageChange,
   onEditProvider,
   onChangeStatus,
-  locale,
 }: {
   isAwaitingData: boolean;
   isError: boolean;
@@ -35,13 +35,12 @@ export function AdminServicesContent({
   onPageChange: (p: number) => void;
   onEditProvider: (provider: ManagedServiceProvider) => void;
   onChangeStatus: (provider: ManagedServiceProvider) => void;
-  locale: "ar" | "en";
 }) {
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale } = useI18n();
   const statusLabels: Record<string, string> = {
-    active: tr("نشط", "Active"),
-    inactive: tr("معطّل", "Inactive"),
-    draft: tr("مسودة", "Draft"),
+    active: t("admin.services.status.active"),
+    inactive: t("admin.services.status.inactive"),
+    draft: t("admin.services.status.draft"),
   };
 
   return (
@@ -58,7 +57,7 @@ export function AdminServicesContent({
         <div className="flex flex-col items-center gap-3 rounded-[12px] border border-[#FEE2E2] bg-white py-12 text-center">
           <AlertCircle className="h-8 w-8 text-[#F04438]" />
           <p className="font-cairo text-[14px] font-bold text-[#F04438]">
-            {tr("حدث خطأ أثناء تحميل البيانات", "Something went wrong loading the data")}
+            {t("admin.services.content.loadError")}
           </p>
           <button
             type="button"
@@ -66,7 +65,7 @@ export function AdminServicesContent({
             className="inline-flex items-center gap-2 rounded-[8px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[12px] font-bold text-[#667085]"
           >
             <RefreshCw className="h-4 w-4" />
-            {tr("إعادة المحاولة", "Retry")}
+            {t("admin.services.content.retry")}
           </button>
         </div>
       )}
@@ -74,12 +73,7 @@ export function AdminServicesContent({
       {!isAwaitingData && !isError && (
         <>
           {providers.length === 0 ? (
-            <EmptyState
-              message={tr(
-                "لا يوجد مزوّدون يطابقون هذه الفلاتر. أضف مزوّدًا جديدًا من الزر أعلاه.",
-                "No providers match these filters. Add a new provider from the button above.",
-              )}
-            />
+            <EmptyState message={t("admin.services.content.emptyState")} />
           ) : (
             providers.map((provider) => {
               const inactiveType = !provider.serviceType.isActive;
@@ -107,7 +101,7 @@ export function AdminServicesContent({
                         </span>
                         {inactiveType ? (
                           <span className="inline-flex items-center rounded-full bg-[#FFFBEB] px-2 py-0.5 font-cairo text-[10px] font-extrabold text-[#92400E]">
-                            {tr("نوع غير مُفعّل", "Type inactive")}
+                            {t("admin.services.content.typeInactive")}
                           </span>
                         ) : null}
                       </div>
@@ -117,7 +111,7 @@ export function AdminServicesContent({
                         {provider.city ? ` · ${provider.city}` : ""}
                         {provider.country ? `, ${provider.country}` : ""}
                         {" · "}
-                        {tr("إصدار", "v")}
+                        {t("admin.services.content.version")}
                         {provider.schemaVersionAtWrite}
                       </div>
                     </div>
@@ -125,20 +119,20 @@ export function AdminServicesContent({
                       <button
                         type="button"
                         onClick={() => onEditProvider(provider)}
-                        title={tr("تعديل البيانات", "Edit details")}
+                        title={t("admin.services.content.editDetails")}
                         className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#BBF7D0] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#16A34A] transition hover:bg-[#F0FDF4]"
                       >
                         <Edit3 className="h-3.5 w-3.5" />
-                        {tr("تعديل", "Edit")}
+                        {t("admin.services.content.edit")}
                       </button>
                       <button
                         type="button"
                         onClick={() => onChangeStatus(provider)}
-                        title={tr("تغيير الحالة", "Change status")}
+                        title={t("admin.services.content.changeStatus")}
                         className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#FDE68A] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#D97706] transition hover:bg-[#FFFBEB]"
                       >
                         <Power className="h-3.5 w-3.5" />
-                        {tr("الحالة", "Status")}
+                        {t("admin.services.content.status")}
                       </button>
                     </div>
                   </div>
@@ -150,12 +144,17 @@ export function AdminServicesContent({
           {total > 0 && (
             <div className="flex items-center justify-between pt-2">
               <p className="font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                {tr(
-                  `عرض ${(page - 1) * ADMIN_SERVICES_PAGE_SIZE + 1}–${Math.min(page * ADMIN_SERVICES_PAGE_SIZE, total)} من ${total} مزوّد`,
-                  `Showing ${(page - 1) * ADMIN_SERVICES_PAGE_SIZE + 1}-${Math.min(page * ADMIN_SERVICES_PAGE_SIZE, total)} of ${total} providers`,
-                )}
+                {t("admin.services.content.showing", {
+                  start: (page - 1) * ADMIN_SERVICES_PAGE_SIZE + 1,
+                  end: Math.min(page * ADMIN_SERVICES_PAGE_SIZE, total),
+                  total,
+                })}
               </p>
-              <Pagination page={page} totalPages={totalPages} onPage={onPageChange} />
+              <Pagination
+                page={page}
+                totalPages={totalPages}
+                onPage={onPageChange}
+              />
             </div>
           )}
         </>

@@ -47,6 +47,9 @@ export function EncountersFiltersBar({
           className="h-11 w-full rounded-[10px] border border-[#E2E8F0] bg-[#F8FAFC] pe-3 ps-10 font-cairo text-[13px] font-semibold text-[#101828] placeholder:text-[#98A2B3] outline-none transition-shadow focus:border-primary/40 focus:ring-2 focus:ring-primary/15"
         />
       </label>
+      <p className="ps-1 font-cairo text-[11px] font-semibold text-[#98A2B3]">
+        {t("doctor.encounters.searchScopeHint")}
+      </p>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <label className="block text-start">
           <span className="mb-1.5 block font-cairo text-[12px] font-bold text-[#475467]">

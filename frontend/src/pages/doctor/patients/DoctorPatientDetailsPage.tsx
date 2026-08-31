@@ -56,7 +56,10 @@ import {
   getPatientFileMutationErrorMessage,
 } from "@/lib/doctor/writeFlowErrors";
 import { PatientTabEmptyIllustration } from "@/components/doctor/patients/patient-tab-empty-illustration";
-import type { FullProfileData, PatientDetailsTab } from "@/components/doctor/patients/patient-details";
+import type {
+  FullProfileData,
+  PatientDetailsTab,
+} from "@/components/doctor/patients/patient-details";
 import {
   TABS,
   TAB_PANEL_TRANSITION,
@@ -85,10 +88,10 @@ import { useI18n } from "@/i18n/provider";
 
 function formatIsoDate(
   value: string | null | undefined,
-  locale: "ar" | "en" = "ar",
-  tr: (ar: string, en: string) => string = (ar, en) => (locale === "ar" ? ar : en),
+  locale: "ar" | "en",
+  t: (key: string) => string,
 ): string {
-  if (!value) return tr("لا توجد زيارات", "No visits");
+  if (!value) return t("doctor.patientDetails.noVisits");
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value ?? "";
   return date.toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US");
@@ -110,14 +113,14 @@ function toCardData(
     isTemporary?: boolean;
   },
   locale: "ar" | "en",
-  tr: (ar: string, en: string) => string,
+  t: (key: string) => string,
 ): Omit<DoctorPatientExpandableCardData, "relationshipState"> {
   const accountStatusLabel =
     patient.user.accountStatus === "temporary"
-      ? tr("مؤقت", "Temporary")
+      ? t("doctor.patientDetails.status.temporary")
       : patient.user.accountStatus === "suspended"
-        ? tr("معلّق", "Suspended")
-        : tr("نشط", "Active");
+        ? t("doctor.patientDetails.status.suspended")
+        : t("doctor.patientDetails.status.active");
 
   return {
     id: patient._id,
@@ -128,10 +131,10 @@ function toCardData(
     isTemporary:
       patient.isTemporary ?? patient.user.accountStatus === "temporary",
     phone: patient.user.phone ?? "—",
-    lastVisit: formatIsoDate(patient.lastVisitAt, locale, tr),
+    lastVisit: formatIsoDate(patient.lastVisitAt, locale, t),
     allergies: patient.allergies ?? [],
     medicalConditions: patient.medicalConditions ?? [],
-    bloodType: patient.bloodType ?? tr("غير محدد", "Not specified"),
+    bloodType: patient.bloodType ?? t("doctor.patientDetails.notSpecified"),
     heightLabel: "—",
     weightLabel: "—",
     measurementUnitLabel: "—",
@@ -140,38 +143,25 @@ function toCardData(
 
 function getPatientAccessErrorMessage(
   error: unknown,
-  tr: (ar: string, en: string) => string,
+  t: (key: string) => string,
 ): string {
   if (!(error instanceof ApiError)) {
     return getUserFacingRequestErrorMessage(error);
   }
   if (error.messageKey === "errors.doctor.notApproved") {
-    return tr(
-      "حساب الطبيب الحالي غير معتمد بعد، لذلك لا يمكن تحميل بيانات هذا المريض.",
-      "The current doctor account is not approved yet, so this patient's data cannot be loaded.",
-    );
+    return t("doctor.patientDetails.error.notApproved");
   }
   if (error.status === 401) {
-    return tr(
-      "انتهت صلاحية جلسة الدخول أو لم يتم التحقق من الهوية. سجّل الدخول من جديد.",
-      "Your session has expired or your identity could not be verified. Please sign in again.",
-    );
+    return t("doctor.patientDetails.error.sessionExpired");
   }
   if (error.status === 403) {
-    return (
-      error.message ||
-      tr(
-        "لا تملك صلاحية عرض هذا المريض بهذا الحساب.",
-        "You do not have permission to view this patient with this account.",
-      )
-    );
+    return error.message || t("doctor.patientDetails.error.noPermission");
   }
   return error.message || getUserFacingRequestErrorMessage(error);
 }
 
 export default function DoctorPatientDetailsPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
   const { patientId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -217,7 +207,9 @@ export default function DoctorPatientDetailsPage() {
         _id: publicProfileQuery.patient._id ?? patientId,
         publicId: patientId,
         user: {
-          fullName: publicProfileQuery.patient.user?.fullName ?? tr("مريض", "Patient"),
+          fullName:
+            publicProfileQuery.patient.user?.fullName ??
+            t("doctor.patientDetails.patient"),
           phone: publicProfileQuery.patient.user?.phone,
           accountStatus: "active",
         },
@@ -228,9 +220,9 @@ export default function DoctorPatientDetailsPage() {
         isTemporary: false,
       },
       locale,
-      tr,
+      t,
     );
-  }, [patientId, publicProfileQuery.patient, locale, tr]);
+  }, [patientId, publicProfileQuery.patient, locale, t]);
 
   const fullProfileBasePatient = useMemo(() => {
     if (!patientId || !fullProfileQuery.patient) return null;
@@ -239,7 +231,9 @@ export default function DoctorPatientDetailsPage() {
         _id: fullProfileQuery.patient._id ?? patientId,
         publicId: fullProfileQuery.patient.patientId ?? patientId,
         user: {
-          fullName: fullProfileQuery.patient.user?.fullName ?? tr("مريض", "Patient"),
+          fullName:
+            fullProfileQuery.patient.user?.fullName ??
+            t("doctor.patientDetails.patient"),
           phone: fullProfileQuery.patient.user?.phone,
           accountStatus: "active",
         },
@@ -250,9 +244,9 @@ export default function DoctorPatientDetailsPage() {
         isTemporary: false,
       },
       locale,
-      tr,
+      t,
     );
-  }, [patientId, fullProfileQuery.patient, locale, tr]);
+  }, [patientId, fullProfileQuery.patient, locale, t]);
 
   const basePatient =
     initialPatient ?? fullProfileBasePatient ?? fallbackPatient;
@@ -275,7 +269,7 @@ export default function DoctorPatientDetailsPage() {
 
   // جلب مواعيد المريض — API لا يدعم فلتر patientId، نجلب آخر 100 موعد ونفلتر محلياً
   const patientAppointmentsQuery = useQuery({
-    queryKey: ['doctor-patient-appointments', doctorId, patientId],
+    queryKey: ["doctor-patient-appointments", doctorId, patientId],
     queryFn: async () => {
       if (!doctorId || !patientId) return { appointments: [] };
       try {
@@ -362,14 +356,14 @@ export default function DoctorPatientDetailsPage() {
         basePatient.medicalConditions,
       bloodType: publicProfileQuery.patient?.bloodType ?? basePatient.bloodType,
       heightLabel: publicProfileQuery.patient?.heightCm
-        ? `${publicProfileQuery.patient.heightCm} ${tr("سم", "cm")}`
+        ? `${publicProfileQuery.patient.heightCm} ${t("doctor.patientDetails.unit.cm")}`
         : "—",
       weightLabel: publicProfileQuery.patient?.weightKg
-        ? `${publicProfileQuery.patient.weightKg} ${tr("كغ", "kg")}`
+        ? `${publicProfileQuery.patient.weightKg} ${t("doctor.patientDetails.unit.kg")}`
         : "—",
       measurementUnitLabel:
         publicProfileQuery.patient?.measurementUnit === "metric"
-          ? tr("متري", "Metric")
+          ? t("doctor.patientDetails.unit.metric")
           : (publicProfileQuery.patient?.measurementUnit ?? "—"),
     };
   }, [
@@ -378,7 +372,7 @@ export default function DoctorPatientDetailsPage() {
     basePatient,
     encountersQuery.encounters,
     publicProfileQuery.patient,
-    tr,
+    t,
   ]);
 
   const fullProfileData: FullProfileData | null = isTemporary
@@ -394,15 +388,15 @@ export default function DoctorPatientDetailsPage() {
           medicalHistory: (fullProfileQuery.patient.medicalHistory ?? []).map(
             (record) => ({
               id: record._id,
-              title: record.title ?? tr("سجل طبي", "Medical record"),
+              title: record.title ?? t("doctor.patientDetails.medicalRecord"),
               diagnosis: record.diagnosis ?? "—",
-              date: formatIsoDate(record.date ?? record.createdAt, locale, tr),
+              date: formatIsoDate(record.date ?? record.createdAt, locale, t),
             }),
           ),
           medications: (fullProfileQuery.patient.medications ?? []).map(
             (medication, index) => ({
               id: medication._id ?? `med-${index}`,
-              name: medication.name ?? tr("دواء", "Medication"),
+              name: medication.name ?? t("doctor.patientDetails.medication"),
               dosage: medication.dosage ?? "—",
               frequency: medication.frequency ?? "—",
             }),
@@ -412,10 +406,12 @@ export default function DoctorPatientDetailsPage() {
           ).map((prescription: any, index: number) => ({
             id: prescription._id ?? `prescription-${index}`,
             status: prescription.status ?? "draft",
-            createdAt: formatIsoDate(prescription.createdAt, locale, tr),
+            createdAt: formatIsoDate(prescription.createdAt, locale, t),
             items: (prescription.items ?? []).map((item: any) => ({
               medicationName:
-                item.medication?.name ?? item.medicationName ?? tr("دواء", "Medication"),
+                item.medication?.name ??
+                item.medicationName ??
+                t("doctor.patientDetails.medication"),
               dosage: item.dosage ?? "—",
               frequency: item.frequency ?? "—",
             })),
@@ -426,8 +422,8 @@ export default function DoctorPatientDetailsPage() {
             : (fullProfileQuery.patient.files ?? [])
           ).map((file) => ({
             id: file._id,
-            name: file.originalName ?? tr("ملف", "File"),
-            createdAt: formatIsoDate(file.createdAt, locale, tr),
+            name: file.originalName ?? t("doctor.patientDetails.file"),
+            createdAt: formatIsoDate(file.createdAt, locale, t),
           })),
           orders: (
             fullProfileQuery.patient.orders ??
@@ -441,7 +437,7 @@ export default function DoctorPatientDetailsPage() {
               order.orderName ??
               order.orderType ??
               order.type ??
-              tr("طلب طبي", "Medical order"),
+              t("doctor.patientDetails.order"),
             status: order.status ?? order.statusCode ?? "pending",
             category: resolvePatientOrderCategory(order),
           })),
@@ -481,10 +477,7 @@ export default function DoctorPatientDetailsPage() {
       const response = await requestAccessMutation.mutateAsync({
         patientId,
         body: {
-          reason: tr(
-            "طلب وصول من صفحة تفاصيل المريض",
-            "Access request from the patient details page",
-          ),
+          reason: t("doctor.patientDetails.accessRequestReason"),
         },
       });
       setPendingAccess({
@@ -492,17 +485,13 @@ export default function DoctorPatientDetailsPage() {
           response.pendingRequestId ?? response.request?._id ?? null,
         message: response.message,
       });
-      toast(
-        response.message ??
-          tr("تم إرسال طلب الوصول بنجاح.", "The access request was sent successfully."),
-        {
-          title: tr("نجاح", "Success"),
-          variant: "success",
-        },
-      );
+      toast(response.message ?? t("doctor.patientDetails.accessRequestSent"), {
+        title: t("doctor.patientDetails.success"),
+        variant: "success",
+      });
     } catch (error) {
       toast(getDoctorAccessRequestErrorMessage(error), {
-        title: tr("تعذّر إرسال طلب الوصول", "Could not send the access request"),
+        title: t("doctor.patientDetails.accessRequestFailed"),
         variant: "error",
       });
     }
@@ -522,7 +511,7 @@ export default function DoctorPatientDetailsPage() {
       window.open(fileUrl, "_blank", "noopener,noreferrer");
     } catch (error) {
       toast(getPatientFileAccessErrorMessage(error, "open"), {
-        title: tr("تعذّر فتح الملف", "Could not open the file"),
+        title: t("doctor.patientDetails.file.openFailed"),
         variant: "error",
       });
     } finally {
@@ -546,7 +535,7 @@ export default function DoctorPatientDetailsPage() {
       );
     } catch (error) {
       toast(getPatientFileAccessErrorMessage(error, "download"), {
-        title: tr("تعذّر تحميل الملف", "Could not download the file"),
+        title: t("doctor.patientDetails.file.downloadFailed"),
         variant: "error",
       });
     } finally {
@@ -559,16 +548,13 @@ export default function DoctorPatientDetailsPage() {
     setFileActionKey(fileId);
     try {
       const response = await deletePatientFileMutation.mutateAsync(fileId);
-      toast(
-        response.message ?? tr("تم حذف الملف بنجاح.", "The file was deleted successfully."),
-        {
-          title: tr("نجاح", "Success"),
-          variant: "success",
-        },
-      );
+      toast(response.message ?? t("doctor.patientDetails.file.deleteSuccess"), {
+        title: t("doctor.patientDetails.success"),
+        variant: "success",
+      });
     } catch (error) {
       toast(getPatientFileMutationErrorMessage(error, "delete"), {
-        title: tr("تعذّر حذف الملف", "Could not delete the file"),
+        title: t("doctor.patientDetails.file.deleteFailed"),
         variant: "error",
       });
     } finally {
@@ -582,16 +568,13 @@ export default function DoctorPatientDetailsPage() {
     setFileActionKey("upload");
     try {
       const response = await uploadPatientFileMutation.mutateAsync({ file });
-      toast(
-        response.message ?? tr("تم رفع الملف بنجاح.", "The file was uploaded successfully."),
-        {
-          title: tr("نجاح", "Success"),
-          variant: "success",
-        },
-      );
+      toast(response.message ?? t("doctor.patientDetails.file.uploadSuccess"), {
+        title: t("doctor.patientDetails.success"),
+        variant: "success",
+      });
     } catch (error) {
       toast(getPatientFileMutationErrorMessage(error, "upload"), {
-        title: tr("تعذّر رفع الملف", "Could not upload the file"),
+        title: t("doctor.patientDetails.file.uploadFailed"),
         variant: "error",
       });
     } finally {
@@ -637,7 +620,7 @@ export default function DoctorPatientDetailsPage() {
                 className="mt-4 inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-current bg-white px-4 font-cairo text-[13px] font-extrabold transition-opacity hover:opacity-90"
               >
                 <Link2 className="w-4 h-4" />
-                {tr("إرسال طلب وصول", "Send access request")}
+                {t("doctor.patientDetails.sendAccessRequest")}
               </button>
             ) : null}
           </div>
@@ -653,7 +636,9 @@ export default function DoctorPatientDetailsPage() {
 
     const encounters = encountersQuery.encounters ?? [];
     const encountersCount = encounters.length;
-    const hasOpenEncounter = encounters.some((encounter) => encounter.status === "open");
+    const hasOpenEncounter = encounters.some(
+      (encounter) => encounter.status === "open",
+    );
 
     if (activeTab === "basic") {
       return (
@@ -681,30 +666,27 @@ export default function DoctorPatientDetailsPage() {
     }
 
     const tabLabel =
-      TABS.find((tab) => tab.id === activeTab)?.label ?? tr("هذا القسم", "This section");
+      TABS.find((tab) => tab.id === activeTab)?.label ??
+      t("doctor.patientDetails.thisSection");
 
     /** ملف كامل غير متاح (خطأ شبكة أو رد الخادم) — يُعرَض وفق اسم التبويب النشِط */
     if (!fullProfileData && !isTemporary) {
       const detailMsg = fullProfileQuery.isError
-        ? getPatientAccessErrorMessage(fullProfileQuery.error, tr)
+        ? getPatientAccessErrorMessage(fullProfileQuery.error, t)
         : fullProfileQuery.deniedError instanceof ApiError
           ? fullProfileQuery.deniedError.message ||
-            getPatientAccessErrorMessage(fullProfileQuery.deniedError, tr)
-          : tr(
-              "تعذّر إكمال طلب البيانات. تحقّق من الاتصال ثم أعد المحاولة.",
-              "Could not complete the data request. Check your connection and try again.",
-            );
+            getPatientAccessErrorMessage(fullProfileQuery.deniedError, t)
+          : t("doctor.patientDetails.error.requestFailed");
       const canRetry = Boolean(doctorId && patientId);
 
       return (
         <EmptyPanel
-          title={tr(`تعذّر عرض «${tabLabel}»`, `Could not display “${tabLabel}”`)}
-          message={tr(
-            "حدث خطأ أثناء جلب جزء ملف المريض المرتبط بهذا القسم، أو لم تُرسَل البيانات من الخادم بشكل مكتمل. راجع الوصف أسفله ثم يمكن إعادة المحاولة إن أمكن.",
-            "An error occurred while fetching the part of the patient's file linked to this section, or the data was not sent completely by the server. Review the description below, then retry if possible.",
-          )}
+          title={t("doctor.patientDetails.error.displayFailed", {
+            label: tabLabel,
+          })}
+          message={t("doctor.patientDetails.error.fetchError")}
           detail={detailMsg}
-          actionLabel={canRetry ? tr("إعادة المحاولة", "Retry") : undefined}
+          actionLabel={canRetry ? t("doctor.patientDetails.retry") : undefined}
           actionPending={retryingPatientProfile}
           onAction={
             canRetry
@@ -725,7 +707,7 @@ export default function DoctorPatientDetailsPage() {
           medicalConditions={patient?.medicalConditions ?? []}
           timelineFilter={timelineFilter}
           onTimelineFilterChange={setTimelineFilter}
-          onCreateMedicalRecord={() => navigate('/doctor/medical-records')}
+          onCreateMedicalRecord={() => navigate("/doctor/medical-records")}
           onOpenEncountersTab={() => setActiveTab("encounters")}
           onOpenPrescriptionsTab={() => setActiveTab("prescriptions")}
           onOpenOrdersTab={() => setActiveTab("tests")}
@@ -744,8 +726,8 @@ export default function DoctorPatientDetailsPage() {
           onRetry={() => {
             void retryEncounters();
           }}
-          onOpenEncountersPage={() => navigate('/doctor/encounters')}
-          formatIsoDate={formatIsoDate}
+          onOpenEncountersPage={() => navigate("/doctor/encounters")}
+          formatIsoDate={(value) => formatIsoDate(value, locale, t)}
         />
       );
     }
@@ -754,7 +736,7 @@ export default function DoctorPatientDetailsPage() {
       return (
         <HistoryTab
           fullProfileData={fullProfileData}
-          onAddRecord={() => navigate('/doctor/medical-records')}
+          onAddRecord={() => navigate("/doctor/medical-records")}
         />
       );
     }
@@ -776,7 +758,7 @@ export default function DoctorPatientDetailsPage() {
             navigate(
               patientId
                 ? `/doctor/prescription?patientId=${encodeURIComponent(patientId)}`
-                : '/doctor/prescription',
+                : "/doctor/prescription",
             )
           }
         />
@@ -811,8 +793,8 @@ export default function DoctorPatientDetailsPage() {
         <DocumentsTab
           fullProfileData={fullProfileData}
           encounters={encounters}
-          onOpenFiles={() => setActiveTab('files')}
-          onOpenEncountersPage={() => navigate('/doctor/encounters')}
+          onOpenFiles={() => setActiveTab("files")}
+          onOpenEncountersPage={() => navigate("/doctor/encounters")}
         />
       );
     }
@@ -827,19 +809,16 @@ export default function DoctorPatientDetailsPage() {
           onRetry={() => {
             void retryAppointments();
           }}
-          onOpenAppointments={() => navigate('/doctor/appointments')}
-          formatIsoDate={formatIsoDate}
+          onOpenAppointments={() => navigate("/doctor/appointments")}
+          formatIsoDate={(value) => formatIsoDate(value, locale, t)}
         />
       );
     }
 
     return (
       <EmptyPanel
-        title={tr("قسم غير متاح", "Section unavailable")}
-        message={tr(
-          `لا توجد واجهة تعرض الآن لمكوّن «${tabLabel}».`,
-          `There is currently no interface to display the “${tabLabel}” component.`,
-        )}
+        title={t("doctor.patientDetails.sectionUnavailable")}
+        message={t("doctor.patientDetails.noInterface", { label: tabLabel })}
       />
     );
   }
@@ -855,9 +834,7 @@ export default function DoctorPatientDetailsPage() {
         onChange={handleUploadFile}
       />
       <Helmet>
-        <title>
-          {tr("تفاصيل المريض • LMJ Health", "Patient Details • LMJ Health")}
-        </title>
+        <title>{t("doctor.patientDetails.page.title")}</title>
         <style>{`
           @media print {
             @page { margin: 2cm; }
@@ -873,26 +850,20 @@ export default function DoctorPatientDetailsPage() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="text-start">
             <div className="font-cairo text-[26px] font-black leading-[34px] text-[#111827]">
-              {tr("ملف المريض", "Patient file")}
+              {t("doctor.patientDetails.patientFile")}
             </div>
             <div className="mt-1 font-cairo text-[13px] font-semibold leading-relaxed text-[#64748b]">
               {patientError && patientId ? (
                 <>
-                  {tr(
-                    "لتصعيد المشكلة مع الدعم يُستخدَم معرّف النظام: ",
-                    "For support escalation use system ID: ",
-                  )}
+                  {t("doctor.patientDetails.supportId")}
                   <span className="rounded-md bg-[#F1F5F9] px-1.5 py-0.5 font-mono text-[11px] font-medium text-[#334155]">
                     {patientId}
                   </span>
                 </>
               ) : patient ? (
-                tr(
-                  "عرض البيانات المعتمدة والسجل الصحي وفق صلاحياتك كطبيب.",
-                  "View approved data and health record based on your doctor permissions.",
-                )
+                t("doctor.patientDetails.viewData")
               ) : patientId ? (
-                tr("جارٍ تحميل تفاصيل الملف…", "Loading file details…")
+                t("doctor.patientDetails.loading")
               ) : (
                 "—"
               )}
@@ -904,7 +875,7 @@ export default function DoctorPatientDetailsPage() {
             className="no-print inline-flex h-[40px] items-center justify-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-extrabold text-[#344054] hover:bg-[#F9FAFB]"
           >
             <ArrowRight className="w-4 h-4" />
-            {tr("العودة إلى المرضى", "Back to patients")}
+            {t("doctor.patientDetails.backToPatients")}
           </button>
         </div>
 
@@ -922,7 +893,7 @@ export default function DoctorPatientDetailsPage() {
               className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-cairo text-[12px] font-extrabold text-white shadow-sm transition-all hover:bg-[#0d7a77] hover:shadow-md"
             >
               <Plus className="h-3.5 w-3.5" />
-              {tr("حجز موعد", "Book appointment")}
+              {t("doctor.patientDetails.bookAppointment")}
             </button>
             <button
               type="button"
@@ -930,7 +901,7 @@ export default function DoctorPatientDetailsPage() {
               className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#475467] transition-all hover:bg-[#F8FAFC] hover:border-[#CBD5E1]"
             >
               <ClipboardList className="h-3.5 w-3.5" />
-              {tr("سجل طبي جديد", "New medical record")}
+              {t("doctor.patientDetails.newMedicalRecord")}
             </button>
             <button
               type="button"
@@ -944,7 +915,7 @@ export default function DoctorPatientDetailsPage() {
               className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[#E9D5FF] bg-[#FAF5FF] px-4 font-cairo text-[12px] font-extrabold text-[#7C3AED] transition-all hover:bg-[#F3E8FF] hover:border-[#DDD6FE]"
             >
               <FileText className="h-3.5 w-3.5" />
-              {tr("وصفة جديدة", "New prescription")}
+              {t("doctor.patientDetails.newPrescription")}
             </button>
             {stateInfo?.canRequestAccess && (
               <button
@@ -954,7 +925,7 @@ export default function DoctorPatientDetailsPage() {
                 className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[#FED7AA] bg-[#FFFBEB] px-4 font-cairo text-[12px] font-extrabold text-[#B45309] transition-all hover:bg-[#FEF3C7] hover:border-[#FDBA74] disabled:opacity-60"
               >
                 <Link2 className="h-3.5 w-3.5" />
-                {tr("طلب وصول", "Request access")}
+                {t("doctor.patientDetails.requestAccess")}
               </button>
             )}
             <button
@@ -963,7 +934,7 @@ export default function DoctorPatientDetailsPage() {
               className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#475467] transition-all hover:bg-[#F8FAFC] hover:border-[#CBD5E1]"
             >
               <Printer className="h-3.5 w-3.5" />
-              {tr("طباعة", "Print")}
+              {t("doctor.patientDetails.print")}
             </button>
           </motion.div>
         )}
@@ -980,7 +951,7 @@ export default function DoctorPatientDetailsPage() {
               <div className="flex gap-2 items-center mb-1">
                 <Stethoscope className="h-4 w-4 text-[#0EA5E9]" />
                 <span className="font-cairo text-[11px] font-bold text-[#64748B]">
-                  {tr("الزيارات", "Visits")}
+                  {t("doctor.patientDetails.visits")}
                 </span>
               </div>
               <div className="font-cairo text-[22px] font-black text-[#0F172A]">
@@ -991,7 +962,7 @@ export default function DoctorPatientDetailsPage() {
               <div className="flex gap-2 items-center mb-1">
                 <ClipboardList className="h-4 w-4 text-[#A855F7]" />
                 <span className="font-cairo text-[11px] font-bold text-[#64748B]">
-                  {tr("السجلات", "Records")}
+                  {t("doctor.patientDetails.records")}
                 </span>
               </div>
               <div className="font-cairo text-[22px] font-black text-[#0F172A]">
@@ -1002,7 +973,7 @@ export default function DoctorPatientDetailsPage() {
               <div className="flex gap-2 items-center mb-1">
                 <Pill className="h-4 w-4 text-[#F43F5E]" />
                 <span className="font-cairo text-[11px] font-bold text-[#64748B]">
-                  {tr("الأدوية", "Medications")}
+                  {t("doctor.patientDetails.medications")}
                 </span>
               </div>
               <div className="font-cairo text-[22px] font-black text-[#0F172A]">
@@ -1013,7 +984,7 @@ export default function DoctorPatientDetailsPage() {
               <div className="flex gap-2 items-center mb-1">
                 <Activity className="h-4 w-4 text-[#EAB308]" />
                 <span className="font-cairo text-[11px] font-bold text-[#64748B]">
-                  {tr("الطلبات", "Orders")}
+                  {t("doctor.patientDetails.orders")}
                 </span>
               </div>
               <div className="font-cairo text-[22px] font-black text-[#0F172A]">
@@ -1024,7 +995,7 @@ export default function DoctorPatientDetailsPage() {
               <div className="flex gap-2 items-center mb-1">
                 <FileText className="w-4 h-4 text-primary" />
                 <span className="font-cairo text-[11px] font-bold text-[#64748B]">
-                  {tr("الملفات", "Files")}
+                  {t("doctor.patientDetails.files")}
                 </span>
               </div>
               <div className="font-cairo text-[22px] font-black text-[#0F172A]">
@@ -1035,7 +1006,7 @@ export default function DoctorPatientDetailsPage() {
               <div className="flex gap-2 items-center mb-1">
                 <FileText className="h-4 w-4 text-[#8B5CF6]" />
                 <span className="font-cairo text-[11px] font-bold text-[#64748B]">
-                  {tr("الوصفات", "Prescriptions")}
+                  {t("doctor.patientDetails.prescriptions")}
                 </span>
               </div>
               <div className="font-cairo text-[22px] font-black text-[#0F172A]">
@@ -1047,9 +1018,9 @@ export default function DoctorPatientDetailsPage() {
 
         {patientError ? (
           <DoctorListErrorState
-            title={tr("تعذّر تحميل ملف المريض", "Failed to load patient file")}
-            brief={getPatientAccessErrorMessage(patientError, tr)}
-            detail={getPatientAccessErrorMessage(patientError, tr)}
+            title={t("doctor.patientDetails.loadFailed")}
+            brief={getPatientAccessErrorMessage(patientError, t)}
+            detail={getPatientAccessErrorMessage(patientError, t)}
             retrying={retryingPatientProfile}
             onRetry={() => void retryPatientProfile()}
           />
@@ -1175,12 +1146,12 @@ export default function DoctorPatientDetailsPage() {
         onSubmit={async (values) => {
           try {
             await addMedicationMutation.mutateAsync(values);
-            toast(tr("تمت إضافة الدواء للمريض.", "The medication was added for the patient."), {
+            toast(t("doctor.patientDetails.medicationAdded"), {
               variant: "success",
             });
           } catch (error) {
             toast(getUserFacingRequestErrorMessage(error), {
-              title: tr("تعذّر إضافة الدواء", "Could not add the medication"),
+              title: t("doctor.patientDetails.medicationAddFailed"),
               variant: "error",
             });
             throw error;

@@ -43,8 +43,7 @@ import { useI18n } from "@/i18n/provider";
 export default function AdminComplaintsPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { locale, dir, t } = useI18n();
   const [page, setPage] = useState(1);
   const [limit] = useState(15);
   const [searchInput, setSearchInput] = useState("");
@@ -62,11 +61,11 @@ export default function AdminComplaintsPage() {
   const patientIdFilter = searchParams.get("patientId") ?? "";
 
   useEffect(() => {
-    const t = window.setTimeout(
+    const timeoutId = window.setTimeout(
       () => setDebouncedSearch(searchInput.trim()),
       350,
     );
-    return () => window.clearTimeout(t);
+    return () => window.clearTimeout(timeoutId);
   }, [searchInput]);
 
   useEffect(() => {
@@ -181,7 +180,7 @@ export default function AdminComplaintsPage() {
   const listErrorMessage = listQuery.isError
     ? complaintUserFacingError(
         listQuery.error,
-        tr("تعذر تحميل قائمة الشكاوى.", "Failed to load complaints list."),
+        t("admin.complaints.loadError"),
       )
     : null;
   const totalList = listQuery.data?.total ?? 0;
@@ -202,38 +201,32 @@ export default function AdminComplaintsPage() {
 
   const nextActionLabel = (status: ComplaintLifecycleStatus) => {
     if (status === "submitted") {
-      return tr("الإجراء التالي: بدء المراجعة", "Next action: start review");
+      return t("admin.complaints.nextAction.submitted");
     }
     if (status === "under_review") {
-      return tr(
-        "الإجراء التالي: تحويلها للمعالجة",
-        "Next action: move to in progress",
-      );
+      return t("admin.complaints.nextAction.underReview");
     }
     if (status === "in_progress") {
-      return tr("الإجراء التالي: إغلاق أو حل", "Next action: resolve or close");
+      return t("admin.complaints.nextAction.inProgress");
     }
     if (status === "resolved") {
-      return tr("الإجراء الحالي: مراجعة الإغلاق", "Current action: review closure");
+      return t("admin.complaints.nextAction.resolved");
     }
-    return tr("الشكوى مغلقة للمتابعة المرجعية", "Complaint closed for reference");
+    return t("admin.complaints.nextAction.closed");
   };
 
   return (
     <>
       <Helmet>
-        <title>{tr("الشكاوي", "Complaints")} • LMJ Health</title>
+        <title>{t("admin.complaints.page.title")} • LMJ Health</title>
       </Helmet>
 
       <div dir={dir} lang={locale} className="text-start">
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title={tr("الشكاوي", "Complaints")}
-          subtitle={tr(
-            "متابعة شكاوى المرضى ومعالجة طلبات الدعم",
-            "Track patient complaints and support requests",
-          )}
+          title={t("admin.complaints.page.title")}
+          subtitle={t("admin.complaints.page.subtitle")}
           headerIcon={<MessageSquare className="h-8 w-8 text-white" />}
           kpiColumns={3}
           kpis={[
@@ -241,19 +234,19 @@ export default function AdminComplaintsPage() {
               key: "total",
               icon: <MessageSquare className="h-5 w-5 shrink-0" />,
               value: countsAwaiting ? "—" : stats.total,
-              label: tr("إجمالي الشكاوي", "Total complaints"),
+              label: t("admin.complaints.kpi.total"),
             },
             {
               key: "review",
               icon: <SlidersHorizontal className="h-5 w-5 shrink-0" />,
               value: countsAwaiting ? "—" : stats.review,
-              label: tr("قيد المراجعة", "Under review"),
+              label: t("admin.complaints.kpi.review"),
             },
             {
               key: "closed",
               icon: <Stethoscope className="h-5 w-5 shrink-0" />,
               value: countsAwaiting ? "—" : stats.closed,
-              label: tr("مغلقة", "Closed"),
+              label: t("admin.complaints.kpi.closed"),
             },
           ]}
         />
@@ -261,10 +254,7 @@ export default function AdminComplaintsPage() {
         <div className="mt-4 flex items-start gap-3 rounded-xl border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
           <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
-            {tr(
-              "هذه القائمة مخصّصة لالتقاط الشكاوى الجديدة وفرزها حسب الحالة والنوع ثم فتح السجل الكامل. تحديث مسار الشكوى الفعلي ومراجعة المرفقات أو الإغلاق النهائي يتم من صفحة تفاصيل الشكوى نفسها.",
-              "This list is for spotting new complaints, filtering them by status and type, and opening the full record. The actual complaint workflow update, attachment review, and final closure happen from the complaint details page itself.",
-            )}
+            {t("admin.complaints.disclaimer")}
           </div>
         </div>
 
@@ -279,10 +269,7 @@ export default function AdminComplaintsPage() {
               <AlertTriangle className="h-5 w-5" strokeWidth={2.25} />
             </div>
             <p className="min-w-0 pt-0.5 font-cairo text-[14px] font-bold leading-relaxed text-[#9A3412]">
-              {tr(
-                "يوجد شكوى جديدة (حالة مقدّمة) مقدمة من المريض",
-                "There is a new complaint (submitted) from patient",
-              )}{" "}
+              {t("admin.complaints.newComplaintBanner")}{" "}
               <span className="font-black text-[#7C2D12]">{bannerName}</span>.
             </p>
           </motion.section>
@@ -300,10 +287,7 @@ export default function AdminComplaintsPage() {
               value={searchInput}
               disabled={listAwaiting}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder={tr(
-                "بحث (اسم، بريد، موضوع، النص...)",
-                "Search (name, email, subject, text...)",
-              )}
+              placeholder={t("admin.complaints.searchPlaceholder")}
               className="h-11 w-full rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] py-2.5 ps-11 pe-3 font-cairo text-[13px] font-medium text-[#111827] placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
             <Search className="pointer-events-none absolute start-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-[#94A3B8]" />
@@ -312,7 +296,7 @@ export default function AdminComplaintsPage() {
             <span className="inline-flex items-center gap-1.5 text-[#64748B]">
               <SlidersHorizontal className="h-4 w-4" />
               <span className="font-cairo text-[12px] font-extrabold">
-                {tr("تصفية", "Filter")}
+                {t("admin.complaints.filter")}
               </span>
             </span>
             <StyledSelect
@@ -325,23 +309,29 @@ export default function AdminComplaintsPage() {
                 setStatusFilter(v as "all" | ComplaintLifecycleStatus)
               }
               options={[
-                { value: "all", label: tr("الحالة — الكل", "Status — all") },
-                { value: "submitted", label: tr("مقدّمة", "Submitted") },
+                { value: "all", label: t("admin.complaints.status.all") },
+                {
+                  value: "submitted",
+                  label: t("admin.complaints.status.submitted"),
+                },
                 {
                   value: "under_review",
-                  label: tr("قيد المراجعة", "Under review"),
+                  label: t("admin.complaints.status.underReview"),
                 },
                 {
                   value: "in_progress",
-                  label: tr("قيد المعالجة", "In progress"),
+                  label: t("admin.complaints.status.inProgress"),
                 },
-                { value: "resolved", label: tr("تم الحل", "Resolved") },
-                { value: "closed", label: tr("مغلقة", "Closed") },
+                {
+                  value: "resolved",
+                  label: t("admin.complaints.status.resolved"),
+                },
+                {
+                  value: "closed",
+                  label: t("admin.complaints.status.closed"),
+                },
               ]}
-              listboxAriaLabel={tr(
-                "تصفية حالة الشكوى",
-                "Filter complaint status",
-              )}
+              listboxAriaLabel={t("admin.complaints.statusFilterAriaLabel")}
             />
             <StyledSelect
               className="h-10 min-w-[180px]"
@@ -353,18 +343,18 @@ export default function AdminComplaintsPage() {
               options={[
                 {
                   value: "all",
-                  label: tr("نوع الشكوى — الكل", "Complaint type — all"),
+                  label: t("admin.complaints.type.all"),
                 },
                 ...COMPLAINT_TYPES.map((type) => ({
                   value: type,
                   label: complaintTypeAr(type, locale),
                 })),
               ]}
-              listboxAriaLabel={tr("تصفية نوع الشكوى", "Filter complaint type")}
+              listboxAriaLabel={t("admin.complaints.typeFilterAriaLabel")}
             />
             <label className="flex h-10 items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-3">
               <span className="shrink-0 font-cairo text-[11px] font-extrabold text-[#667085]">
-                {tr("من", "From")}
+                {t("admin.complaints.dateFrom")}
               </span>
               <input
                 type="date"
@@ -376,7 +366,7 @@ export default function AdminComplaintsPage() {
             </label>
             <label className="flex h-10 items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-3">
               <span className="shrink-0 font-cairo text-[11px] font-extrabold text-[#667085]">
-                {tr("إلى", "To")}
+                {t("admin.complaints.dateTo")}
               </span>
               <input
                 type="date"
@@ -402,7 +392,7 @@ export default function AdminComplaintsPage() {
                 className="inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054]"
               >
                 <FilterX className="h-4 w-4" />
-                {tr("مسح الفلاتر", "Clear filters")}
+                {t("admin.complaints.clearFilters")}
               </button>
             ) : null}
           </div>
@@ -411,15 +401,15 @@ export default function AdminComplaintsPage() {
         {patientIdFilter ? (
           <div className="mt-3 inline-flex items-center gap-2 rounded-[10px] border border-[#D1E9FF] bg-[#F5FAFF] px-3 py-2 font-cairo text-[12px] font-bold text-[#175CD3]">
             <UserRound className="h-4 w-4" />
-            {tr(
-              `تُعرض شكاوى مريض واحد محدَّد (${patientIdFilter})`,
-              `Showing complaints for one specific patient (${patientIdFilter})`,
+            {t("admin.complaints.patientFilterBanner").replace(
+              "{id}",
+              patientIdFilter,
             )}
             <button
               type="button"
               onClick={clearPatientFilter}
               className="inline-flex h-6 w-6 items-center justify-center rounded-full hover:bg-[#E0EEFF]"
-              aria-label={tr("إزالة فلتر المريض", "Clear patient filter")}
+              aria-label={t("admin.complaints.clearPatientFilter")}
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -429,18 +419,14 @@ export default function AdminComplaintsPage() {
         {listQuery.isRefetching && !listAwaiting ? (
           <div className="mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]">
             <RefreshCw className="h-4 w-4 animate-spin" />
-            {tr("جارٍ تحديث النتائج...", "Refreshing results...")}
+            {t("admin.complaints.refreshingResults")}
           </div>
         ) : null}
 
         {listQuery.isError ? (
           <div className="mt-8 rounded-xl border border-[#FECACA] bg-[#FEF2F2] px-5 py-4 text-center shadow-[0_8px_24px_rgba(127,29,29,0.08)]">
             <p className="font-cairo text-sm font-semibold text-red-600">
-              {listErrorMessage ??
-                tr(
-                  "تعذر تحميل قائمة الشكاوى.",
-                  "Failed to load complaints list.",
-                )}
+              {listErrorMessage ?? t("admin.complaints.loadError")}
             </p>
             <button
               type="button"
@@ -448,7 +434,7 @@ export default function AdminComplaintsPage() {
               className="mt-3 inline-flex h-[36px] items-center gap-2 rounded-[10px] border border-[#FCA5A5] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#B42318] hover:bg-[#FFF5F5]"
             >
               <RefreshCw className="h-4 w-4" />
-              {tr("إعادة المحاولة", "Retry")}
+              {t("admin.complaints.retry")}
             </button>
           </div>
         ) : listAwaiting ? (
@@ -493,7 +479,7 @@ export default function AdminComplaintsPage() {
                               {c.contactSnapshot?.fullName ?? "—"}
                             </div>
                             <div className="mt-1 font-cairo text-[18px] font-semibold leading-[22px] text-primary">
-                              {tr("نوع الشكوى:", "Complaint type:")}{" "}
+                              {t("admin.complaints.complaintType")}{" "}
                               <span className="text-[#1F2937]">
                                 {complaintTypeAr(c.type, locale)}
                               </span>
@@ -517,7 +503,11 @@ export default function AdminComplaintsPage() {
                           </span>
                         </div>
                         <div className="shrink-0 font-cairo text-[14px] font-bold text-[#99A1AF]">
-                          {formatListTime(c.createdAt, locale, tr('اليوم', 'Today'))}
+                          {formatListTime(
+                            c.createdAt,
+                            locale,
+                            t("admin.complaints.today"),
+                          )}
                         </div>
                       </div>
                       <div className="ms-0 mt-1 sm:ms-[80px]">
@@ -541,22 +531,13 @@ export default function AdminComplaintsPage() {
                 </div>
                 <p className="mt-3 font-cairo text-[13px] font-extrabold text-[#344054]">
                   {hasActiveFilters
-                    ? tr(
-                        "لا توجد شكاوى مطابقة للفلاتر أو البحث الحالي.",
-                        "No complaints match the current filters or search.",
-                      )
-                    : tr("لا توجد شكاوى حتى الآن.", "No complaints yet.")}
+                    ? t("admin.complaints.emptyFiltered")
+                    : t("admin.complaints.emptyAll")}
                 </p>
                 <p className="mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]">
                   {hasActiveFilters
-                    ? tr(
-                        "غيّر معايير البحث أو امسح الفلاتر لعرض نتائج أوسع.",
-                        "Adjust the search criteria or clear filters to show broader results.",
-                      )
-                    : tr(
-                        "ستظهر الشكاوى الجديدة هنا بمجرد إرسالها من المرضى أو قنوات الدعم.",
-                        "New complaints will appear here once they are submitted through patient or support channels.",
-                      )}
+                    ? t("admin.complaints.emptyFilteredHint")
+                    : t("admin.complaints.emptyAllHint")}
                 </p>
               </div>
             ) : null}

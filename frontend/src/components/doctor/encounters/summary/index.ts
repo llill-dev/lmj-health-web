@@ -1,4 +1,3 @@
-export { default as EncounterSummaryFinishDialog } from './encounter-summary-finish-dialog';
 export { EncounterSummaryInnerCard } from './encounter-summary-inner-card';
 export { EncounterSummaryHeader } from './encounter-summary-header';
 export { EncounterSummaryBody } from './encounter-summary-body';

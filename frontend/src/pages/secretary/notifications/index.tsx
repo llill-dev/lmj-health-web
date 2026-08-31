@@ -3,7 +3,10 @@ import { useDoctorNotificationsPage } from "@/hooks/doctor/notifications/useDoct
 import { notificationItemId } from "@/lib/notifications/client";
 import { useI18n } from "@/i18n/provider";
 
-function formatRelativeDate(value: string | undefined, locale: "ar" | "en"): string {
+function formatRelativeDate(
+  value: string | undefined,
+  locale: "ar" | "en",
+): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
@@ -98,8 +101,7 @@ function NotificationCard({
 }
 
 export default function SecretaryNotificationsPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
   const numberLocale = locale === "ar" ? "ar-SA" : "en-US";
   const notificationsQuery = useDoctorNotificationsPage(false, 1, 100);
   type UiNotification = {
@@ -110,11 +112,15 @@ export default function SecretaryNotificationsPage() {
     type: "info" | "success" | "warning";
     isRead: boolean;
   };
-  const notifications: UiNotification[] = (notificationsQuery.listQuery.data?.notifications ?? []).map(
+  const notifications: UiNotification[] = (
+    notificationsQuery.listQuery.data?.notifications ?? []
+  ).map(
     (item): UiNotification => ({
-      id: notificationItemId(item) || `${item.title || "notice"}-${item.createdAt || "time"}`,
-      title: item.title || tr("إشعار", "Notification"),
-      message: item.body || tr("لا توجد تفاصيل إضافية.", "No additional details."),
+      id:
+        notificationItemId(item) ||
+        `${item.title || "notice"}-${item.createdAt || "time"}`,
+      title: item.title || t("secretary.notifications.fallbackTitle"),
+      message: item.body || t("secretary.notifications.fallbackMessage"),
       time: formatRelativeDate(item.createdAt, locale),
       type: item.type === "warning" ? "warning" : "info",
       isRead: Boolean(item.isRead ?? item.read ?? item.is_read),
@@ -122,16 +128,21 @@ export default function SecretaryNotificationsPage() {
   );
 
   return (
-    <div dir={dir} lang={locale} className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
-      <SurfaceSection title={tr("الإشعارات", "Notifications")}>
+    <div
+      dir={dir}
+      lang={locale}
+      className="space-y-6 pb-6 sm:space-y-7 sm:pb-8"
+    >
+      <SurfaceSection title={t("secretary.notifications.title")}>
         <div className="px-4 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
           <div className="mb-6 flex items-center justify-between">
             <div className="text-start">
               <h3 className="font-cairo text-[18px] font-bold text-[#243044]">
-                {tr("الإشعارات", "Notifications")}
+                {t("secretary.notifications.title")}
               </h3>
               <p className="mt-1 font-cairo text-[14px] font-semibold text-[#98A2B3]">
-                {notifications.length.toLocaleString(numberLocale)} {tr("إشعار", "notifications")}
+                {notifications.length.toLocaleString(numberLocale)}{" "}
+                {t("secretary.notifications.notifications")}
               </p>
             </div>
             <button
@@ -144,27 +155,24 @@ export default function SecretaryNotificationsPage() {
               }
               className="rounded-[8px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[13px] font-black text-[#1F2937] transition hover:bg-[#F8FAFC]"
             >
-              {tr("تحديد الكل كمقروء", "Mark all as read")}
+              {t("secretary.notifications.markAllAsRead")}
             </button>
           </div>
 
           {notificationsQuery.listQuery.isLoading ? (
             <div className="flex min-h-[300px] items-center justify-center py-12">
               <p className="font-cairo text-[14px] font-semibold text-[#98A2B3]">
-                {tr("جاري تحميل الإشعارات...", "Loading notifications...")}
+                {t("secretary.notifications.loading")}
               </p>
             </div>
           ) : notificationsQuery.listQuery.isError ? (
             <div className="flex min-h-[300px] flex-col items-center justify-center gap-4 py-12 text-center">
               <div>
                 <h3 className="font-cairo text-[18px] font-bold text-[#243044]">
-                  {tr("تعذر تحميل الإشعارات", "Notifications could not be loaded")}
+                  {t("secretary.notifications.loadError")}
                 </h3>
                 <p className="mt-2 font-cairo text-[14px] font-semibold text-[#98A2B3]">
-                  {tr(
-                    "حدثت مشكلة أثناء جلب الإشعارات. حاول مرة أخرى.",
-                    "There was a problem loading notifications. Please try again.",
-                  )}
+                  {t("secretary.notifications.loadErrorMessage")}
                 </p>
               </div>
               <button
@@ -172,7 +180,7 @@ export default function SecretaryNotificationsPage() {
                 onClick={() => void notificationsQuery.listQuery.refetch()}
                 className="rounded-[8px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[13px] font-black text-[#1F2937] transition hover:bg-[#F8FAFC]"
               >
-                {tr("إعادة المحاولة", "Retry")}
+                {t("secretary.notifications.retry")}
               </button>
             </div>
           ) : notifications.length === 0 ? (
@@ -182,10 +190,10 @@ export default function SecretaryNotificationsPage() {
               </div>
               <div className="text-center">
                 <h3 className="font-cairo text-[18px] font-bold text-[#243044]">
-                  {tr("لا توجد إشعارات", "No notifications")}
+                  {t("secretary.notifications.noNotifications")}
                 </h3>
                 <p className="mt-2 font-cairo text-[14px] font-semibold text-[#98A2B3]">
-                  {tr("سيتم عرض الإشعارات الجديدة هنا", "New notifications will appear here")}
+                  {t("secretary.notifications.noNotificationsMessage")}
                 </p>
               </div>
             </div>
@@ -193,7 +201,7 @@ export default function SecretaryNotificationsPage() {
             <>
               {notificationsQuery.listQuery.isRefetching ? (
                 <div className="mb-3 text-start font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                  {tr("جاري تحديث الإشعارات...", "Refreshing notifications...")}
+                  {t("secretary.notifications.refreshing")}
                 </div>
               ) : null}
               <div className="space-y-3">

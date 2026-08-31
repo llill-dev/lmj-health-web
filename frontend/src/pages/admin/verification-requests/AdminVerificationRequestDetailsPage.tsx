@@ -28,8 +28,7 @@ import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
 import { useI18n } from "@/i18n/provider";
 
 export default function AdminVerificationRequestDetailsPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
 
   const navigate = useNavigate();
   const { requestId } = useParams();
@@ -77,7 +76,7 @@ export default function AdminVerificationRequestDetailsPage() {
         specialty: "—",
         address: "—",
         requestedAt: "—",
-        status: tr("معلق", "Pending"),
+        status: t("admin.verificationRequestDetails.status.pending"),
         lat: "—",
         lng: "—",
         changeRows: buildChangeRows(null, locale),
@@ -105,7 +104,7 @@ export default function AdminVerificationRequestDetailsPage() {
       id: request._id,
       doctorId: request.doctor?._id ?? "",
       statusKey: request.status,
-      requestType: tr("تحقق الطبيب", "Doctor verification"),
+      requestType: t("admin.verificationRequestDetails.doctorVerification"),
       doctor: doctorName,
       specialty: request.doctor?.specialization || "—",
       address: addressParts.length > 0 ? addressParts.join("، ") : "—",
@@ -114,18 +113,21 @@ export default function AdminVerificationRequestDetailsPage() {
       requestedBy: request.requestedBy?.fullName || "—",
       status:
         request.status === "pending"
-          ? tr("معلق", "Pending")
+          ? t("admin.verificationRequestDetails.status.pending")
           : request.status === "approved"
-            ? tr("مقبول", "Approved")
-            : tr("مرفوض", "Rejected"),
+            ? t("admin.verificationRequestDetails.status.approved")
+            : t("admin.verificationRequestDetails.status.rejected"),
       lat,
       lng,
-      changeRows: buildChangeRows({
-        ...request,
-        requestedChanges,
-      }, locale),
+      changeRows: buildChangeRows(
+        {
+          ...request,
+          requestedChanges,
+        },
+        locale,
+      ),
     };
-  }, [requestId, requestQuery.data, tr, locale]);
+  }, [requestId, requestQuery.data, t, locale]);
 
   const lookupCategory = resolveDoctorSpecialtyLookupCategory();
   const lookupsQuery = useAdminLookups({
@@ -147,8 +149,7 @@ export default function AdminVerificationRequestDetailsPage() {
     <>
       <Helmet>
         <title>
-          {tr("تفاصيل طلب التحقق", "Verification request details")} • LMJ
-          Health
+          {t("admin.verificationRequestDetails.page.title")} • LMJ Health
         </title>
       </Helmet>
 
@@ -156,7 +157,7 @@ export default function AdminVerificationRequestDetailsPage() {
         <div className="my-8 flex items-center justify-between">
           <div className="text-start">
             <div className="font-cairo text-[28px] font-black leading-[34px] text-[#1F2937]">
-              {tr("تفاصيل طلب التحقق", "Verification request details")}
+              {t("admin.verificationRequestDetails.page.title")}
             </div>
           </div>
           <button
@@ -164,21 +165,18 @@ export default function AdminVerificationRequestDetailsPage() {
             onClick={() => navigate("/admin/verification-requests")}
             className="inline-flex h-[34px] items-center gap-1 rounded-[8px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-bold text-[#344054]"
           >
-            {tr(
-              "العودة إلى قائمة طلبات التحقق",
-              "Back to verification requests",
-            )}
+            {t("admin.verificationRequestDetails.backToList")}
             <ChevronLeft className="h-4 w-4" />
           </button>
         </div>
 
         {requestAwaiting ? (
           <div className="rounded-[10px] border border-[#D1E9E6] bg-white px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-            {tr("جارِ تحميل تفاصيل الطلب...", "Loading request details…")}
+            {t("admin.verificationRequestDetails.loading")}
           </div>
         ) : requestQuery.error ? (
           <div className="rounded-[10px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#B42318]">
-            {tr("تعذر تحميل تفاصيل الطلب.", "Failed to load request details.")}
+            {t("admin.verificationRequestDetails.error.load")}
           </div>
         ) : (
           <section className="rounded-[10px] border border-[#B9D8D6] bg-white px-6 py-5 shadow-[0_6px_14px_rgba(16,24,40,0.05)]">
@@ -192,7 +190,7 @@ export default function AdminVerificationRequestDetailsPage() {
                       setDialogOpen(true);
                     }}
                     className="flex h-[58px] w-[58px] items-center justify-center rounded-[6px] bg-[#129692] text-white"
-                    aria-label={tr("عرض الخريطة", "Open map")}
+                    aria-label={t("admin.verificationRequestDetails.openMap")}
                   >
                     <Stethoscope className="h-6 w-6" />
                   </button>
@@ -227,7 +225,7 @@ export default function AdminVerificationRequestDetailsPage() {
                 <div className="flex items-center gap-2 text-primary">
                   <FileSearch className="h-4 w-4" />
                   <div className="font-cairo text-[11px] font-extrabold">
-                    {tr("نوع الطلب", "Request type")}
+                    {t("admin.verificationRequestDetails.requestType")}
                   </div>
                 </div>
                 <div className="mt-2 font-cairo text-[13px] font-black text-[#111827]">
@@ -238,20 +236,24 @@ export default function AdminVerificationRequestDetailsPage() {
                 <div className="flex items-center gap-2 text-primary">
                   <ShieldCheck className="h-4 w-4" />
                   <div className="font-cairo text-[11px] font-extrabold">
-                    {tr("الإجراء المتاح", "Available action")}
+                    {t("admin.verificationRequestDetails.availableAction")}
                   </div>
                 </div>
                 <div className="mt-2 font-cairo text-[13px] font-black text-[#111827]">
                   {isPendingRequest
-                    ? tr("قبول أو رفض الطلب", "Approve or reject request")
-                    : tr("تمت المراجعة", "Already reviewed")}
+                    ? t(
+                        "admin.verificationRequestDetails.action.approveOrReject",
+                      )
+                    : t(
+                        "admin.verificationRequestDetails.action.alreadyReviewed",
+                      )}
                 </div>
               </div>
               <div className="rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3">
                 <div className="flex items-center gap-2 text-primary">
                   <User className="h-4 w-4" />
                   <div className="font-cairo text-[11px] font-extrabold">
-                    {tr("مقدم الطلب", "Requested by")}
+                    {t("admin.verificationRequestDetails.requestedBy")}
                   </div>
                 </div>
                 <div className="mt-2 font-cairo text-[13px] font-black text-[#111827]">
@@ -262,7 +264,7 @@ export default function AdminVerificationRequestDetailsPage() {
                 <div className="flex items-center gap-2 text-primary">
                   <FileBadge2 className="h-4 w-4" />
                   <div className="font-cairo text-[11px] font-extrabold">
-                    {tr("ملاحظة المراجعة", "Review note")}
+                    {t("admin.verificationRequestDetails.reviewNote")}
                   </div>
                 </div>
                 <div className="mt-2 font-cairo text-[13px] font-black text-[#111827]">
@@ -274,14 +276,8 @@ export default function AdminVerificationRequestDetailsPage() {
             <div className="rounded-[10px] border border-[#D6EEEC] bg-[#F3FBFA] px-4 py-4">
               <p className="font-cairo text-[13px] font-semibold leading-6 text-[#215A57]">
                 {isPendingRequest
-                  ? tr(
-                      "هذه الصفحة مخصّصة لمراجعة طلب التحقق قبل اتخاذ القرار. يمكنك من هنا فحص بيانات الطبيب، مراجعة الحقول المتغيرة، ثم قبول الطلب أو رفضه.",
-                      "This page is used to review the verification request before making a decision. From here you can inspect the doctor data, review the changed fields, then approve or reject the request.",
-                    )
-                  : tr(
-                      "تمت مراجعة هذا الطلب سابقًا، لذلك تُعرض هذه الصفحة الآن كمرجع للحالة النهائية والبيانات التي كانت ضمن طلب التحقق.",
-                      "This request has already been reviewed, so this page now serves as a reference for the final status and the data included in the verification request.",
-                    )}
+                  ? t("admin.verificationRequestDetails.disclaimer.pending")
+                  : t("admin.verificationRequestDetails.disclaimer.reviewed")}
               </p>
             </div>
 
@@ -290,10 +286,9 @@ export default function AdminVerificationRequestDetailsPage() {
             <div className="mt-3 border-t border-[#B9D8D6] pt-2" />
 
             <div className="my-6 text-start font-cairo text-[20px] font-semibold leading-[20px] text-[#000000]">
-              {tr(
-                `طلب الدكتور ${cardData.doctor} تعديل الحقول التالية:`,
-                `Dr. ${cardData.doctor} requested changes for the following fields:`,
-              )}
+              {t("admin.verificationRequestDetails.changesTitle", {
+                doctor: cardData.doctor,
+              })}
             </div>
 
             <div className="mt-3 overflow-hidden rounded-[6px] border border-[#0F8F89]">
@@ -301,13 +296,15 @@ export default function AdminVerificationRequestDetailsPage() {
                 <thead>
                   <tr className="bg-[#F8FAFA]">
                     <th className="w-1/3 border border-[#0F8F89] px-4 py-3 font-cairo text-[16px] font-extrabold text-[#0F8F89]">
-                      {tr("طلب التعديل", "Requested change")}
+                      {t(
+                        "admin.verificationRequestDetails.table.requestedChange",
+                      )}
                     </th>
                     <th className="w-1/3 border border-[#0F8F89] px-4 py-3 font-cairo text-[16px] font-extrabold text-[#0F8F89]">
-                      {tr("قبل التعديل", "Before")}
+                      {t("admin.verificationRequestDetails.table.before")}
                     </th>
                     <th className="w-1/3 border border-[#0F8F89] px-4 py-3 font-cairo text-[16px] font-extrabold text-[#0F8F89]">
-                      {tr("بعد التعديل", "After")}
+                      {t("admin.verificationRequestDetails.table.after")}
                     </th>
                   </tr>
                 </thead>
@@ -332,10 +329,7 @@ export default function AdminVerificationRequestDetailsPage() {
                         colSpan={3}
                         className="border border-[#0F8F89] px-4 py-6 text-center font-cairo text-[14px] font-semibold text-[#6B7280]"
                       >
-                        {tr(
-                          "لا توجد حقول تعديل مرسلة من الخادم لهذا الطلب.",
-                          "No changed fields were sent by the server for this request.",
-                        )}
+                        {t("admin.verificationRequestDetails.table.noChanges")}
                       </td>
                     </tr>
                   )}
@@ -345,10 +339,7 @@ export default function AdminVerificationRequestDetailsPage() {
 
             {specializationState.needsAdminResolve ? (
               <p className="mt-4 text-center font-cairo text-[12px] font-semibold text-[#92400E]">
-                {tr(
-                  "عند «قبول التعديلات» يجب اختيار تخصص مُدار من القائمة أو إنشاء تخصص جديد في نافذة التأكيد.",
-                  "When choosing “Approve changes”, select a managed specialization from the list or create a new one in the confirmation dialog.",
-                )}
+                {t("admin.verificationRequestDetails.specializationNote")}
               </p>
             ) : null}
 
@@ -366,7 +357,7 @@ export default function AdminVerificationRequestDetailsPage() {
                 className="inline-flex h-[50px] items-center gap-2 rounded-[8px] bg-[#129692] px-5 font-cairo text-[16px] font-bold text-white disabled:cursor-not-allowed disabled:opacity-55"
               >
                 <MapPinned className="h-4 w-4" />
-                {tr("الملف الشخصي", "Profile")}
+                {t("admin.verificationRequestDetails.profile")}
               </button>
               {isPendingRequest ? (
                 <>
@@ -379,7 +370,7 @@ export default function AdminVerificationRequestDetailsPage() {
                     className="inline-flex h-[50px] items-center gap-2 rounded-[8px] bg-[#16A34A] px-5 font-cairo text-[16px] font-bold text-white"
                   >
                     <BookOpen className="h-4 w-4" />
-                    {tr("قبول التعديلات", "Approve changes")}
+                    {t("admin.verificationRequestDetails.approveChanges")}
                   </button>
                   <button
                     type="button"
@@ -390,7 +381,7 @@ export default function AdminVerificationRequestDetailsPage() {
                     className="inline-flex h-[50px] items-center gap-2 rounded-[8px] bg-[#EF4444] px-5 font-cairo text-[16px] font-bold text-white"
                   >
                     <FileBadge2 className="h-4 w-4" />
-                    {tr("رفض التعديلات", "Reject changes")}
+                    {t("admin.verificationRequestDetails.rejectChanges")}
                   </button>
                 </>
               ) : null}

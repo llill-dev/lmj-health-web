@@ -10,8 +10,7 @@ import { useSecretaryAssignedDoctor } from "@/hooks/secretary/useSecretaryAssign
 import { useI18n } from "@/i18n/provider";
 
 export default function SecretaryBookAppointmentPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
   const navigate = useNavigate();
   const { toast } = useToast();
   const assignedDoctorQuery = useSecretaryAssignedDoctor();
@@ -28,46 +27,25 @@ export default function SecretaryBookAppointmentPage() {
   const bookAppointment = useBookDoctorAppointmentApi();
   const bookingBlockMessage = useMemo(() => {
     if (assignedDoctorQuery.isLoading || patientsQuery.isAwaitingData) {
-      return tr(
-        "جارٍ تجهيز بيانات الطبيب والمرضى قبل الحجز.",
-        "Preparing doctor and patient data before booking.",
-      );
+      return t("secretary.bookAppointment.preparingData");
     }
     if (assignedDoctorQuery.isForbidden) {
-      return tr(
-        "هذا الحساب لا يملك صلاحية الوصول إلى الطبيب المسؤول، لذلك تم إيقاف الحجز.",
-        "This account is not allowed to access the assigned doctor, so booking is blocked.",
-      );
+      return t("secretary.bookAppointment.forbiddenAccess");
     }
     if (assignedDoctorQuery.isUnassigned) {
-      return tr(
-        "لا يمكن حجز موعد قبل ربط السكرتيرة بطبيب مسؤول فعلي.",
-        "Booking is unavailable until the secretary is linked to an actual assigned doctor.",
-      );
+      return t("secretary.bookAppointment.unassigned");
     }
     if (assignedDoctorQuery.isError) {
-      return tr(
-        "تعذر تحميل الطبيب المسؤول. أعد المحاولة قبل متابعة الحجز.",
-        "Could not load the assigned doctor. Try again before booking.",
-      );
+      return t("secretary.bookAppointment.loadDoctorError");
     }
     if (!doctorId) {
-      return tr(
-        "لا يمكن حجز موعد قبل ربط السكرتير بطبيب مسؤول.",
-        "Booking is unavailable until the secretary is linked to an assigned doctor.",
-      );
+      return t("secretary.bookAppointment.noDoctorLinked");
     }
     if (patientsQuery.isError) {
-      return tr(
-        "تعذر تحميل قائمة المرضى. أعد المحاولة قبل متابعة الحجز.",
-        "Could not load the patient list. Try again before booking.",
-      );
+      return t("secretary.bookAppointment.loadPatientsError");
     }
     if ((patientsQuery.patients?.length ?? 0) === 0) {
-      return tr(
-        "لا يوجد مرضى متاحون للحجز حالياً.",
-        "No patients are currently available for booking.",
-      );
+      return t("secretary.bookAppointment.noPatients");
     }
     return null;
   }, [
@@ -79,16 +57,16 @@ export default function SecretaryBookAppointmentPage() {
     patientsQuery.isAwaitingData,
     patientsQuery.isError,
     patientsQuery.patients,
-    tr,
+    t,
   ]);
 
   const patients = useMemo(
     () =>
       (patientsQuery.patients ?? []).map((patient) => ({
         id: patient._id,
-        name: patient.user?.fullName || tr("مريض", "Patient"),
+        name: patient.user?.fullName || t("secretary.bookAppointment.patient"),
       })),
-    [patientsQuery.patients, tr],
+    [patientsQuery.patients, t],
   );
 
   async function handleBook(values: {
@@ -100,7 +78,7 @@ export default function SecretaryBookAppointmentPage() {
   }) {
     if (bookingBlockMessage) {
       toast(bookingBlockMessage, {
-        title: tr("الحجز غير متاح", "Booking unavailable"),
+        title: t("secretary.bookAppointment.bookingUnavailable"),
         variant: "error",
       });
       return;
@@ -115,21 +93,25 @@ export default function SecretaryBookAppointmentPage() {
         appointmentTypeId: values.appointmentTypeId || undefined,
         notes: values.notes?.trim() || undefined,
       });
-      toast(tr("تم حجز الموعد بنجاح.", "Appointment booked successfully."), {
-        title: tr("تم الحجز", "Booked"),
+      toast(t("secretary.bookAppointment.bookSuccess"), {
+        title: t("secretary.bookAppointment.booked"),
         variant: "success",
       });
       navigate("/secretary/appointments");
     } catch (error) {
       toast(getAppointmentBookingErrorMessage(error, locale), {
-        title: tr("فشل الحجز", "Booking failed"),
+        title: t("secretary.bookAppointment.bookingFailed"),
         variant: "error",
       });
     }
   }
 
   return (
-    <div dir={dir} lang={locale} className="mx-auto w-full max-w-5xl pb-6 sm:pb-8">
+    <div
+      dir={dir}
+      lang={locale}
+      className="mx-auto w-full max-w-5xl pb-6 sm:pb-8"
+    >
       <BookAppointmentPanel
         patients={patients}
         onSubmit={handleBook}

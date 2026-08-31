@@ -1,48 +1,41 @@
-'use client';
+"use client";
 
-import {
-  BookOpen,
-  CreditCard,
-  DollarSign,
-  Percent,
-  Save,
-} from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import StyledSelect from '@/components/ui/styled-select';
-import { useToast } from '@/components/ui/ToastProvider';
+import { BookOpen, CreditCard, DollarSign, Percent, Save } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Helmet } from "react-helmet-async";
+import StyledSelect from "@/components/ui/styled-select";
+import { useToast } from "@/components/ui/ToastProvider";
 import {
   ClinicAccountsBanner,
   ClinicAccountsSubNav,
-} from '@/components/doctor/clinic-accounts';
-import { BillingSettingsToggle } from '@/components/doctor/clinic-accounts/billing-settings-toggle';
-import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
-import { DoctorInlineDetailsSkeleton } from '@/components/doctor/shared/skeletons';
+} from "@/components/doctor/clinic-accounts";
+import { BillingSettingsToggle } from "@/components/doctor/clinic-accounts/billing-settings-toggle";
+import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
+import { DoctorInlineDetailsSkeleton } from "@/components/doctor/shared/skeletons";
 import {
   useBillingSettings,
   useUpdateBillingSettings,
-} from '@/hooks/doctor/billing';
-import { getUserFacingRequestErrorMessage } from '@/lib/api';
-import type { ApiBillingPaymentMethod } from '@/lib/doctor/billing/apiTypes';
+} from "@/hooks/doctor/billing";
+import { getUserFacingRequestErrorMessage } from "@/lib/api";
+import type { ApiBillingPaymentMethod } from "@/lib/doctor/billing/apiTypes";
 import {
   BILLING_DISCOUNT_PRESET_OPTIONS,
   buildBillingPaymentMethodOptions,
   formatBillingCurrencyOptionLabel,
-} from '@/lib/doctor/billing/settingsUi';
-import { useRetryAction } from '@/lib/query/useRetryAction';
-import { cn } from '@/lib/utils/utils';
-import { useBillingAccess } from '@/hooks/billing/useBillingAccess';
-import { useI18n } from '@/i18n/provider';
+} from "@/lib/doctor/billing/settingsUi";
+import { useRetryAction } from "@/lib/query/useRetryAction";
+import { cn } from "@/lib/utils/utils";
+import { useBillingAccess } from "@/hooks/billing/useBillingAccess";
+import { useI18n } from "@/i18n/provider";
 
 function sectionCardClassName() {
-  return 'rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm';
+  return "rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm";
 }
 
 export default function DoctorClinicFinancialSettingsPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const { t, locale, dir } = useI18n();
   const { toast } = useToast();
-  const paymentMethodOptions = buildBillingPaymentMethodOptions(tr);
+  const paymentMethodOptions = buildBillingPaymentMethodOptions(t);
   const { canManageSettings } = useBillingAccess();
   const settingsQuery = useBillingSettings();
   const updateSettings = useUpdateBillingSettings();
@@ -50,19 +43,21 @@ export default function DoctorClinicFinancialSettingsPage() {
     () => settingsQuery.refetch(),
   );
 
-  const [currency, setCurrency] = useState('USD');
+  const [currency, setCurrency] = useState("USD");
   const [taxEnabled, setTaxEnabled] = useState(false);
-  const [taxPercent, setTaxPercent] = useState('0');
-  const [discountPresets, setDiscountPresets] = useState<number[]>([0, 10, 20, 30]);
-  const [paymentMethods, setPaymentMethods] = useState<ApiBillingPaymentMethod[]>(
-    ['cash', 'card', 'bank_transfer', 'insurance'],
-  );
+  const [taxPercent, setTaxPercent] = useState("0");
+  const [discountPresets, setDiscountPresets] = useState<number[]>([
+    0, 10, 20, 30,
+  ]);
+  const [paymentMethods, setPaymentMethods] = useState<
+    ApiBillingPaymentMethod[]
+  >(["cash", "card", "bank_transfer", "insurance"]);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     if (!settingsQuery.settings || hydrated) return;
     const settings = settingsQuery.settings;
-    setCurrency(settings.currency ?? settingsQuery.currency ?? 'USD');
+    setCurrency(settings.currency ?? settingsQuery.currency ?? "USD");
     setTaxEnabled(Boolean(settings.taxEnabled));
     setTaxPercent(String(settings.defaultTaxPercent ?? 0));
     setDiscountPresets(
@@ -81,12 +76,12 @@ export default function DoctorClinicFinancialSettingsPage() {
   const currencyOptions = useMemo(() => {
     const list = settingsQuery.supportedCurrencies?.length
       ? settingsQuery.supportedCurrencies
-      : [{ code: settingsQuery.currency ?? 'USD' }];
+      : [{ code: settingsQuery.currency ?? "USD" }];
     return list.map((item) => ({
       value: item.code,
-      label: formatBillingCurrencyOptionLabel(item.code, item.name, tr),
+      label: formatBillingCurrencyOptionLabel(item.code, item.name, t),
     }));
-  }, [settingsQuery.currency, settingsQuery.supportedCurrencies, tr]);
+  }, [settingsQuery.currency, settingsQuery.supportedCurrencies, t]);
 
   const toggleDiscountPreset = (value: number) => {
     setDiscountPresets((prev) => {
@@ -110,10 +105,15 @@ export default function DoctorClinicFinancialSettingsPage() {
 
   const handleSave = async () => {
     const parsedTax = Number(taxPercent);
-    if (taxEnabled && (Number.isNaN(parsedTax) || parsedTax < 0 || parsedTax > 100)) {
-      toast(tr('أدخل نسبة ضريبة بين 0 و 100.', 'Enter a tax percentage between 0 and 100.'), {
-        title: tr('نسبة غير صالحة', 'Invalid percentage'),
-        variant: 'error',
+    if (
+      taxEnabled &&
+      (Number.isNaN(parsedTax) || parsedTax < 0 || parsedTax > 100)
+    ) {
+      toast(t("doctor.clinicAccounts.financialSettings.error.invalidTax"), {
+        title: t(
+          "doctor.clinicAccounts.financialSettings.error.invalidTaxTitle",
+        ),
+        variant: "error",
       });
       return;
     }
@@ -126,14 +126,14 @@ export default function DoctorClinicFinancialSettingsPage() {
         discountPresets,
         allowedPaymentMethods: paymentMethods,
       });
-      toast(tr('تم حفظ الإعدادات المالية بنجاح.', 'The financial settings were saved successfully.'), {
-        title: tr('تم الحفظ', 'Saved'),
-        variant: 'success',
+      toast(t("doctor.clinicAccounts.financialSettings.success.saved"), {
+        title: t("doctor.clinicAccounts.financialSettings.success.savedTitle"),
+        variant: "success",
       });
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
-        title: tr('تعذّر حفظ الإعدادات', 'Could not save the settings'),
-        variant: 'error',
+        title: t("doctor.clinicAccounts.financialSettings.error.saveFailed"),
+        variant: "error",
       });
     }
   };
@@ -141,21 +141,13 @@ export default function DoctorClinicFinancialSettingsPage() {
   return (
     <>
       <Helmet>
-        <title>
-          {tr(
-            'الإعدادات المالية • LMJ Health',
-            'Financial Settings • LMJ Health',
-          )}
-        </title>
+        <title>{t("doctor.clinicAccounts.financialSettings.page.title")}</title>
       </Helmet>
 
       <div dir={dir} lang={locale}>
         <ClinicAccountsBanner
-          title={tr('الإعدادات المالية', 'Financial settings')}
-          subtitle={tr(
-            'إعدادات العملة والضريبة والخصومات وطرق الدفع',
-            'Currency, tax, discounts, and payment method settings',
-          )}
+          title={t("doctor.clinicAccounts.financialSettings.title")}
+          subtitle={t("doctor.clinicAccounts.financialSettings.subtitle")}
           icon={<BookOpen className="h-7 w-7 text-white sm:h-8 sm:w-8" />}
         />
 
@@ -163,7 +155,7 @@ export default function DoctorClinicFinancialSettingsPage() {
 
         {settingsQuery.isError ? (
           <DoctorListErrorState
-            title={tr('تعذّر تحميل الإعدادات', 'Failed to load settings')}
+            title={t("doctor.clinicAccounts.financialSettings.loadFailed")}
             brief={getUserFacingRequestErrorMessage(settingsQuery.error)}
             retrying={retryingSettings}
             onRetry={() => void retrySettings()}
@@ -175,10 +167,7 @@ export default function DoctorClinicFinancialSettingsPage() {
             {!canManageSettings ? (
               <div className="rounded-[16px] border border-[#D0D5DD] bg-[#F8FAFC] p-4 text-start">
                 <p className="font-cairo text-[13px] font-semibold text-[#667085]">
-                  {tr(
-                    'يمكنك مراجعة الإعدادات المالية فقط. تعديلها يتطلب صلاحية إدارة الإعدادات.',
-                    'You can only review the financial settings. Editing them requires the manage-settings permission.',
-                  )}
+                  {t("doctor.clinicAccounts.financialSettings.viewOnly")}
                 </p>
               </div>
             ) : null}
@@ -186,21 +175,20 @@ export default function DoctorClinicFinancialSettingsPage() {
               <div className="mb-4 flex items-center gap-2 text-start">
                 <DollarSign className="h-5 w-5 text-primary" aria-hidden />
                 <h2 className="font-cairo text-[15px] font-extrabold text-[#111827]">
-                  {tr('العملة', 'Currency')}
+                  {t("doctor.clinicAccounts.financialSettings.currency")}
                 </h2>
               </div>
               <StyledSelect
                 options={currencyOptions}
                 value={currency}
                 onChange={setCurrency}
-                listboxAriaLabel={tr('العملة', 'Currency')}
+                listboxAriaLabel={t(
+                  "doctor.clinicAccounts.financialSettings.currency",
+                )}
                 disabled={!canManageSettings}
               />
               <p className="mt-2 text-start font-cairo text-[11px] font-semibold text-[#98A2B3]">
-                {tr(
-                  'تغيير العملة لا يُحوّل الفواتير والمصاريف الحالية — كل سجل يحتفظ بالعملة التي أُنشئ بها، والتغيير يسري على السجلات الجديدة فقط.',
-                  "Changing the currency does not convert existing invoices and expenses — each record keeps the currency it was created with, and the change applies only to new records.",
-                )}
+                {t("doctor.clinicAccounts.financialSettings.currencyNote")}
               </p>
             </section>
 
@@ -208,24 +196,24 @@ export default function DoctorClinicFinancialSettingsPage() {
               <div className="mb-4 flex items-center gap-2 text-start">
                 <Percent className="h-5 w-5 text-primary" aria-hidden />
                 <h2 className="font-cairo text-[15px] font-extrabold text-[#111827]">
-                  {tr('الضريبة', 'Tax')}
+                  {t("doctor.clinicAccounts.financialSettings.tax")}
                 </h2>
               </div>
               <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                 <span className="font-cairo text-[13px] font-bold text-[#667085]">
-                  {tr('تفعيل الضريبة', 'Enable tax')}
+                  {t("doctor.clinicAccounts.financialSettings.enableTax")}
                 </span>
                 <BillingSettingsToggle
                   checked={taxEnabled}
                   onChange={setTaxEnabled}
-                  label={tr('تفعيل الضريبة', 'Enable tax')}
+                  label={t("doctor.clinicAccounts.financialSettings.enableTax")}
                   disabled={!canManageSettings}
                 />
               </div>
               {taxEnabled ? (
                 <div>
                   <label className="mb-2 block text-start font-cairo text-[12px] font-bold text-[#667085]">
-                    {tr('نسبة الضريبة (%)', 'Tax percentage (%)')}
+                    {t("doctor.clinicAccounts.financialSettings.taxPercentage")}
                   </label>
                   <input
                     type="number"
@@ -243,10 +231,12 @@ export default function DoctorClinicFinancialSettingsPage() {
 
             <section className={sectionCardClassName()}>
               <h2 className="mb-1 text-start font-cairo text-[15px] font-extrabold text-[#111827]">
-                {tr('الخصومات', 'Discounts')}
+                {t("doctor.clinicAccounts.financialSettings.discounts")}
               </h2>
               <p className="mb-4 text-start font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                {tr('اختر نسب الخصم المتاحة عند إنشاء الفواتير', 'Choose the discount percentages available when creating invoices')}
+                {t(
+                  "doctor.clinicAccounts.financialSettings.discountsDescription",
+                )}
               </p>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {BILLING_DISCOUNT_PRESET_OPTIONS.map((preset) => {
@@ -258,10 +248,10 @@ export default function DoctorClinicFinancialSettingsPage() {
                       disabled={!canManageSettings}
                       onClick={() => toggleDiscountPreset(preset)}
                       className={cn(
-                        'h-[52px] rounded-[12px] border-2 font-cairo text-[15px] font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60',
+                        "h-[52px] rounded-[12px] border-2 font-cairo text-[15px] font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60",
                         active
-                          ? 'border-primary bg-[#F0FDFA] text-primary'
-                          : 'border-[#E5E7EB] bg-white text-[#667085] hover:border-primary/40',
+                          ? "border-primary bg-[#F0FDFA] text-primary"
+                          : "border-[#E5E7EB] bg-white text-[#667085] hover:border-primary/40",
                       )}
                     >
                       {preset}%
@@ -275,7 +265,7 @@ export default function DoctorClinicFinancialSettingsPage() {
               <div className="mb-4 flex items-center gap-2 text-start">
                 <CreditCard className="h-5 w-5 text-primary" aria-hidden />
                 <h2 className="font-cairo text-[15px] font-extrabold text-[#111827]">
-                  {tr('طرق الدفع', 'Payment methods')}
+                  {t("doctor.clinicAccounts.financialSettings.paymentMethods")}
                 </h2>
               </div>
               <div className="space-y-4">
@@ -304,7 +294,9 @@ export default function DoctorClinicFinancialSettingsPage() {
                   My Health
                 </p>
                 <p className="mt-2 font-cairo text-[13px] font-semibold text-[#667085]">
-                  {tr('تكامل My Health غير متاح حالياً في واجهة الفوترة — لا يوجد endpoint خلفي لمزامنة البيانات بعد.', 'The My Health integration is not currently available in the billing interface — there is no backend endpoint to sync data yet.')}
+                  {t(
+                    "doctor.clinicAccounts.financialSettings.myHealthIntegration",
+                  )}
                 </p>
               </div>
             </section>
@@ -317,7 +309,9 @@ export default function DoctorClinicFinancialSettingsPage() {
                 className="inline-flex h-[52px] w-full items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_10px_24px_rgba(15,143,139,0.22)] disabled:opacity-60"
               >
                 <Save className="h-4 w-4" aria-hidden />
-                {updateSettings.isPending ? tr('جاري الحفظ...', 'Saving...') : tr('حفظ الإعدادات', 'Save settings')}
+                {updateSettings.isPending
+                  ? t("doctor.clinicAccounts.financialSettings.saving")
+                  : t("doctor.clinicAccounts.financialSettings.saveSettings")}
               </button>
             ) : null}
           </div>

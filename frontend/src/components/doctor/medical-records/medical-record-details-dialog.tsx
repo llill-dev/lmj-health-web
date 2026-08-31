@@ -196,6 +196,9 @@ export default function MedicalRecordDetailsDialog({
                 <Dialog.Title className='text-start font-cairo text-[20px] font-extrabold leading-[28px] text-[#101828]'>
                   تفاصيل السجل الطبي
                 </Dialog.Title>
+                <Dialog.Description className='sr-only'>
+                  عرض تفاصيل السجل الطبي الكاملة للمريض.
+                </Dialog.Description>
               </div>
 
               <div className='mt-6 h-px w-full bg-[#EEF2F6]' />

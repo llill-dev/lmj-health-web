@@ -24,6 +24,7 @@ import {
   step3ProfessionalSchema,
   type Step3ProfessionalValues,
 } from './signup-schemas';
+import { useI18n } from '@/i18n/provider';
 
 export default function SignUpStep3Professional({
   onPrev,
@@ -46,6 +47,7 @@ export default function SignUpStep3Professional({
     refetch: refetchSpecialties,
   } = useDoctorSignupSpecialties();
 
+  const { locale } = useI18n();
   const hasSpecialtyCatalog =
     !specialtiesError && !specialtiesLoading && specialties.length > 0;
 
@@ -60,7 +62,7 @@ export default function SignUpStep3Professional({
     handleSubmit,
     formState: { errors },
   } = useForm<Step3ProfessionalValues>({
-    resolver: zodResolver(step3ProfessionalSchema),
+    resolver: zodResolver(step3ProfessionalSchema(locale)),
     defaultValues: {
       specialty: defaultValues?.specialty ?? '',
       specialtySource: defaultValues?.specialtySource ?? 'manual',

@@ -34,7 +34,10 @@ import RescheduleAppointmentDialog from "@/components/doctor/appointments/resche
 import DoctorTablePagination from "@/components/doctor/shared/doctor-table-pagination";
 import { formatAppointmentDate } from "@/lib/shared/formatAppointmentDateTime";
 
-function formatIsoDate(value: string | null | undefined, locale: "ar" | "en"): string {
+function formatIsoDate(
+  value: string | null | undefined,
+  locale: "ar" | "en",
+): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
@@ -51,42 +54,41 @@ function patientInitials(name: string, locale: "ar" | "en" = "ar"): string {
 
 function appointmentStatusPresentation(
   status: string,
-  locale: "ar" | "en",
+  t: (key: string) => string,
 ): {
   label: string;
   className: string;
 } {
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   if (status === "completed") {
     return {
-      label: tr("مكتمل", "Completed"),
+      label: t("secretary.appointments.status.completed"),
       className: "bg-[#EAFBF0] text-[#22C55E]",
     };
   }
 
   if (status === "postponed") {
     return {
-      label: tr("مؤجل", "Postponed"),
+      label: t("secretary.appointments.status.postponed"),
       className: "bg-[#FFF2E8] text-[#FF6A00]",
     };
   }
 
   if (status === "cancelled") {
     return {
-      label: tr("ملغي", "Cancelled"),
+      label: t("secretary.appointments.status.cancelled"),
       className: "bg-[#FEE2E2] text-[#B42318]",
     };
   }
 
   if (status === "no-show") {
     return {
-      label: tr("لم يحضر", "No-show"),
+      label: t("secretary.appointments.status.noShow"),
       className: "bg-[#F3F4F6] text-[#4B5563]",
     };
   }
 
   return {
-    label: tr("مجدول", "Scheduled"),
+    label: t("secretary.appointments.status.scheduled"),
     className: "bg-[#DDF4F1] text-primary",
   };
 }
@@ -113,26 +115,19 @@ function SurfaceSection({
 function AppointmentsSearchInput({
   value,
   onChange,
-  locale,
+  t,
 }: {
   value: string;
   onChange: (value: string) => void;
-  locale: "ar" | "en";
+  t: (key: string) => string;
 }) {
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   return (
     <div className="relative min-w-0">
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        placeholder={tr(
-          "بحث ضمن هذه الصفحة بالاسم أو رقم الملف…",
-          "Search on this page by name or file number…",
-        )}
-        aria-label={tr(
-          "بحث ضمن مواعيد هذه الصفحة فقط",
-          "Search within this page's appointments only",
-        )}
+        placeholder={t("secretary.appointments.searchPlaceholder")}
+        aria-label={t("secretary.appointments.searchAriaLabel")}
         className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white pe-10 ps-4 font-cairo text-[14px] font-bold text-[#111827] shadow-[0_3px_8px_rgba(15,23,42,0.03)] outline-none placeholder:font-cairo placeholder:text-[14px] placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-primary"
       />
       <div className="pointer-events-none absolute end-3 top-1/2 flex -translate-y-1/2 items-center gap-1 text-[#98A2B3]">
@@ -173,6 +168,7 @@ const AppointmentTableRow = memo<{
   fileActionKey: string | null;
   onOpenFile: (fileId: string) => void;
   onDownloadFile: (fileId: string) => void;
+  t: (key: string) => string;
 }>(function AppointmentTableRow({
   appointment,
   expanded,
@@ -188,11 +184,12 @@ const AppointmentTableRow = memo<{
   fileActionKey,
   onOpenFile,
   onDownloadFile,
+  t,
 }) {
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
-  const status = appointmentStatusPresentation(appointment.status, locale);
+  const status = appointmentStatusPresentation(appointment.status, t);
   const isActionable =
-    appointment.rawStatus === "scheduled" || appointment.rawStatus === "rescheduled";
+    appointment.rawStatus === "scheduled" ||
+    appointment.rawStatus === "rescheduled";
 
   return (
     <div className="border-b border-[#EEF2F6] last:border-b-0">
@@ -238,7 +235,7 @@ const AppointmentTableRow = memo<{
             aria-expanded={expanded}
             className="inline-flex items-center gap-2 font-cairo text-[15px] font-black text-primary transition-colors hover:text-[#0A7A77]"
           >
-            {tr("عرض", "View")}
+            {t("secretary.appointments.view")}
             <ChevronRight className="h-4 w-4" />
           </button>
         </div>
@@ -251,12 +248,13 @@ const AppointmentTableRow = memo<{
               <FileText className="mt-0.5 h-[18px] w-[18px] shrink-0 text-primary" />
               <div className="flex min-w-0 flex-1 flex-col gap-1 text-start sm:flex-row sm:items-center sm:gap-4">
                 <div className="font-cairo text-[14px] font-bold text-primary">
-                  {tr("سبب الزيارة", "Reason for visit")}
+                  {t("secretary.appointments.reasonForVisit")}
                 </div>
                 <div className="mt-0.5 break-words font-cairo text-[14px] font-normal text-[#1F2937]">
                   {detailsLoading
-                    ? tr("جاري التحميل...", "Loading...")
-                    : detailNotes?.trim() || tr("لم يُذكر سبب", "No reason given")}
+                    ? t("secretary.appointments.loading")
+                    : detailNotes?.trim() ||
+                      t("secretary.appointments.noReasonGiven")}
                 </div>
               </div>
             </div>
@@ -264,15 +262,15 @@ const AppointmentTableRow = memo<{
 
           <div className="mt-4">
             <div className="mb-2 font-cairo text-[13px] font-extrabold text-[#101828]">
-              {tr("ملفات الموعد", "Appointment files")}
+              {t("secretary.appointments.appointmentFiles")}
             </div>
             {detailsLoading ? (
               <p className="rounded-lg border border-dashed border-[#E5E7EB] bg-white px-4 py-6 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-                {tr("جاري تحميل الملفات...", "Loading files...")}
+                {t("secretary.appointments.loadingFiles")}
               </p>
             ) : detailFiles.length === 0 ? (
               <p className="rounded-lg border border-dashed border-[#E5E7EB] bg-white px-4 py-6 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-                {tr("لا توجد ملفات مرفقة بهذا الموعد.", "No files attached to this appointment.")}
+                {t("secretary.appointments.noFilesAttached")}
               </p>
             ) : (
               <div className="space-y-2">
@@ -303,7 +301,7 @@ const AppointmentTableRow = memo<{
                           ) : (
                             <Eye className="h-3.5 w-3.5" />
                           )}
-                          {tr("عرض", "View")}
+                          {t("secretary.appointments.view")}
                         </button>
                         <button
                           type="button"
@@ -312,7 +310,7 @@ const AppointmentTableRow = memo<{
                           className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-primary bg-white px-3 font-cairo text-[12px] font-bold text-primary transition-colors hover:bg-[#F0F9F9] disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           <Download className="h-3.5 w-3.5" />
-                          {tr("تحميل", "Download")}
+                          {t("secretary.appointments.download")}
                         </button>
                       </div>
                     </div>
@@ -330,7 +328,7 @@ const AppointmentTableRow = memo<{
                   onClick={() => onReschedule(appointment)}
                   className="rounded-[10px] border border-[#D0D5DD] bg-white px-4 py-2 font-cairo text-[13px] font-black text-[#344054] transition-colors hover:bg-[#F8FAFC]"
                 >
-                  {tr("إعادة جدولة", "Reschedule")}
+                  {t("secretary.appointments.reschedule")}
                 </button>
               ) : null}
               {canCancel ? (
@@ -339,7 +337,7 @@ const AppointmentTableRow = memo<{
                   onClick={() => onCancel(appointment)}
                   className="rounded-[10px] border border-[#FDA29B] bg-white px-4 py-2 font-cairo text-[13px] font-black text-[#B42318] transition-colors hover:bg-[#FEF3F2]"
                 >
-                  {tr("إلغاء الموعد", "Cancel appointment")}
+                  {t("secretary.appointments.cancelAppointment")}
                 </button>
               ) : null}
             </div>
@@ -351,8 +349,7 @@ const AppointmentTableRow = memo<{
 });
 
 export default function SecretaryAppointmentsPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
   const numberLocale = locale === "ar" ? "ar-SA" : "en-US";
   const { toast } = useToast();
   const { hasPermission } = useSecretaryPermissions();
@@ -371,8 +368,11 @@ export default function SecretaryAppointmentsPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [fileActionKey, setFileActionKey] = useState<string | null>(null);
 
-  const [cancelTarget, setCancelTarget] = useState<AppointmentRowData | null>(null);
-  const [rescheduleTarget, setRescheduleTarget] = useState<AppointmentRowData | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<AppointmentRowData | null>(
+    null,
+  );
+  const [rescheduleTarget, setRescheduleTarget] =
+    useState<AppointmentRowData | null>(null);
 
   const detailsQuery = useDoctorAppointmentDetailsApi(expandedId ?? "");
   const appointmentFilesQuery = useDoctorAppointmentFilesApi(
@@ -386,22 +386,25 @@ export default function SecretaryAppointmentsPage() {
         : detailsQuery.files;
     return source.map((file) => ({
       id: file._id,
-      name: file.originalName ?? tr("ملف", "File"),
+      name: file.originalName ?? t("secretary.appointments.file"),
       date: (file.linkedAt ?? "").slice(0, 10),
     }));
-  }, [appointmentFilesQuery.files, detailsQuery.files, tr]);
+  }, [appointmentFilesQuery.files, detailsQuery.files, t]);
 
   async function handleOpenAppointmentFile(fileId: string) {
     if (!expandedId || fileActionKey) return;
     setFileActionKey(fileId);
     try {
-      const response = await doctorAppointmentsApi.getFileDownloadUrl(expandedId, fileId);
+      const response = await doctorAppointmentsApi.getFileDownloadUrl(
+        expandedId,
+        fileId,
+      );
       const fileUrl = response.url ?? response.downloadUrl;
       if (!fileUrl) throw new Error("missing download url");
       window.open(fileUrl, "_blank", "noopener,noreferrer");
     } catch (error) {
       toast(getAppointmentFileAccessErrorMessage(error, "open"), {
-        title: tr("تعذر فتح الملف", "Could not open the file"),
+        title: t("secretary.appointments.couldNotOpenFile"),
         variant: "error",
       });
     } finally {
@@ -425,7 +428,7 @@ export default function SecretaryAppointmentsPage() {
       );
     } catch (error) {
       toast(getAppointmentFileAccessErrorMessage(error, "download"), {
-        title: tr("تعذر تحميل الملف", "Could not download the file"),
+        title: t("secretary.appointments.couldNotDownloadFile"),
         variant: "error",
       });
     } finally {
@@ -458,26 +461,42 @@ export default function SecretaryAppointmentsPage() {
     () =>
       (appointmentsQuery.appointments ?? []).map((row) => ({
         id: row._id,
-        patientName: row.patient?.userId?.fullName || tr("مريض", "Patient"),
+        patientName:
+          row.patient?.userId?.fullName || t("secretary.appointments.patient"),
         patientId: row.patient?.publicId || row.patient?._id || "—",
         date: row.date || row.startDateTime || "",
         time: row.startTime || "—",
         status: row.status === "rescheduled" ? "postponed" : row.status,
         rawStatus: row.status,
       })),
-    [appointmentsQuery.appointments, tr],
+    [appointmentsQuery.appointments, t],
   );
 
   const filterTabs = useMemo(
     () => [
-      { key: "all" as const, label: tr("الكل", "All") },
-      { key: "scheduled" as const, label: tr("مجدول", "Scheduled") },
-      { key: "completed" as const, label: tr("مكتمل", "Completed") },
-      { key: "postponed" as const, label: tr("مؤجل", "Postponed") },
-      { key: "cancelled" as const, label: tr("ملغي", "Cancelled") },
-      { key: "no-show" as const, label: tr("لم يحضر", "No-show") },
+      { key: "all" as const, label: t("secretary.appointments.filterAll") },
+      {
+        key: "scheduled" as const,
+        label: t("secretary.appointments.filterScheduled"),
+      },
+      {
+        key: "completed" as const,
+        label: t("secretary.appointments.filterCompleted"),
+      },
+      {
+        key: "postponed" as const,
+        label: t("secretary.appointments.filterPostponed"),
+      },
+      {
+        key: "cancelled" as const,
+        label: t("secretary.appointments.filterCancelled"),
+      },
+      {
+        key: "no-show" as const,
+        label: t("secretary.appointments.filterNoShow"),
+      },
     ],
-    [tr],
+    [t],
   );
 
   // Backend GET /appointments has no free-text search param — filter the current page client-side.
@@ -491,24 +510,36 @@ export default function SecretaryAppointmentsPage() {
     );
   }, [appointments, searchInput]);
 
-  const totalPages = Math.max(1, Math.ceil((appointmentsQuery.total || appointments.length) / limit));
+  const totalPages = Math.max(
+    1,
+    Math.ceil((appointmentsQuery.total || appointments.length) / limit),
+  );
 
   const handleToggle = (appointmentId: string) => {
-    setExpandedId((current) => (current === appointmentId ? null : appointmentId));
+    setExpandedId((current) =>
+      current === appointmentId ? null : appointmentId,
+    );
   };
 
   const resetToFirstPage = () => setPage(1);
 
   return (
-    <div dir={dir} lang={locale} className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
-      <SurfaceSection title={tr("المواعيد", "Appointments")}>
+    <div
+      dir={dir}
+      lang={locale}
+      className="space-y-6 pb-6 sm:space-y-7 sm:pb-8"
+    >
+      <SurfaceSection title={t("secretary.appointments.appointments")}>
         <div className="flex flex-col gap-4 border-b border-[#EEF2F6] px-4 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8 lg:py-6">
           <div className="text-start">
             <p className="font-cairo text-[13px] font-semibold text-[#98A2B3]">
-              {(appointmentsQuery.total || appointments.length).toLocaleString(numberLocale)} {tr("موعد", "appointments")}
-              {searchInput ? tr(" مطابق للبحث", " matching search") : ""}
+              {(appointmentsQuery.total || appointments.length).toLocaleString(
+                numberLocale,
+              )}{" "}
+              {t("secretary.appointments.appointments")}
+              {searchInput ? t("secretary.appointments.matchingSearch") : ""}
               {appointmentsQuery.isRefetching
-                ? tr(" • جاري تحديث البيانات", " • Refreshing data")
+                ? t("secretary.appointments.refreshingData")
                 : ""}
             </p>
           </div>
@@ -520,7 +551,7 @@ export default function SecretaryAppointmentsPage() {
                 className="flex h-[42px] items-center gap-2 rounded-[10px] bg-primary px-5 font-cairo text-[15px] font-black text-white shadow-[0_10px_20px_rgba(15,143,139,0.30)] transition-colors hover:bg-primary/90"
               >
                 <Plus className="h-4 w-4" />
-                {tr("حجز موعد جديد", "Book new appointment")}
+                {t("secretary.appointments.bookNewAppointment")}
               </Link>
             </div>
           ) : null}
@@ -531,7 +562,7 @@ export default function SecretaryAppointmentsPage() {
             <AppointmentsSearchInput
               value={searchInput}
               onChange={setSearchInput}
-              locale={locale}
+              t={t}
             />
           </div>
           <input
@@ -541,7 +572,7 @@ export default function SecretaryAppointmentsPage() {
               setDateFrom(event.target.value);
               resetToFirstPage();
             }}
-            aria-label={tr("من تاريخ", "From date")}
+            aria-label={t("secretary.appointments.fromDate")}
             className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white px-4 font-cairo text-[14px] font-bold text-[#111827] outline-none focus:border-primary lg:w-[150px]"
           />
           <input
@@ -551,7 +582,7 @@ export default function SecretaryAppointmentsPage() {
               setDateTo(event.target.value);
               resetToFirstPage();
             }}
-            aria-label={tr("إلى تاريخ", "To date")}
+            aria-label={t("secretary.appointments.toDate")}
             className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white px-4 font-cairo text-[14px] font-bold text-[#111827] outline-none focus:border-primary lg:w-[150px]"
           />
         </div>
@@ -578,30 +609,36 @@ export default function SecretaryAppointmentsPage() {
 
         <div className="hidden border-b border-[#EEF2F6] px-8 py-4 lg:block">
           <div className="grid grid-cols-12 gap-4 text-start font-cairo text-[14px] font-bold text-[#A1AAB9]">
-            <div className="col-span-4">{tr("المريض", "Patient")}</div>
-            <div className="col-span-3">{tr("التاريخ", "Date")}</div>
-            <div className="col-span-2">{tr("الوقت", "Time")}</div>
-            <div className="col-span-2">{tr("الحالة", "Status")}</div>
-            <div className="col-span-1">{tr("الإجراءات", "Actions")}</div>
+            <div className="col-span-4">
+              {t("secretary.appointments.patientColumn")}
+            </div>
+            <div className="col-span-3">{t("secretary.appointments.date")}</div>
+            <div className="col-span-2">{t("secretary.appointments.time")}</div>
+            <div className="col-span-2">
+              {t("secretary.appointments.statusLabel")}
+            </div>
+            <div className="col-span-1">
+              {t("secretary.appointments.actions")}
+            </div>
           </div>
         </div>
 
         {!canViewAppointments ? (
           <div className="flex min-h-[220px] items-center justify-center px-4 py-10 text-center sm:px-8">
             <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
-              {tr("ليست لديك صلاحية عرض المواعيد.", "You do not have permission to view appointments.")}
+              {t("secretary.appointments.noPermission")}
             </p>
           </div>
         ) : appointmentsQuery.isAwaitingData ? (
           <div className="flex min-h-[220px] items-center justify-center px-4 py-10 text-center">
             <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
-              {tr("جاري تحميل المواعيد...", "Loading appointments...")}
+              {t("secretary.appointments.loadingAppointments")}
             </p>
           </div>
         ) : appointmentsQuery.isError ? (
           <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
             <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
-              {tr("تعذر تحميل المواعيد حالياً.", "Could not load appointments right now.")}
+              {t("secretary.appointments.loadError")}
             </p>
             <button
               type="button"
@@ -610,16 +647,16 @@ export default function SecretaryAppointmentsPage() {
               className="rounded-[10px] border border-[#D0D5DD] bg-white px-4 py-2 font-cairo text-[14px] font-black text-[#344054] transition-colors hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {appointmentsQuery.isRefetching
-                ? tr("جاري إعادة المحاولة...", "Retrying...")
-                : tr("إعادة المحاولة", "Retry")}
+                ? t("secretary.appointments.retrying")
+                : t("secretary.appointments.retry")}
             </button>
           </div>
         ) : searchedAppointments.length === 0 ? (
           <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
             <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
               {searchInput
-                ? tr("لا توجد نتائج مطابقة لبحثك.", "No results match your search.")
-                : tr("لا يوجد مواعيد في هذه الفئة.", "No appointments in this category.")}
+                ? t("secretary.appointments.noSearchResults")
+                : t("secretary.appointments.noAppointmentsInCategory")}
             </p>
           </div>
         ) : (
@@ -631,6 +668,7 @@ export default function SecretaryAppointmentsPage() {
                   key={appointment.id}
                   appointment={appointment}
                   locale={locale}
+                  t={t}
                   expanded={isExpanded}
                   onToggle={handleToggle}
                   onCancel={setCancelTarget}
@@ -639,15 +677,20 @@ export default function SecretaryAppointmentsPage() {
                   canReschedule={canRescheduleAppointments}
                   detailsLoading={
                     isExpanded &&
-                    (detailsQuery.isAwaitingData || appointmentFilesQuery.isAwaitingData)
+                    (detailsQuery.isAwaitingData ||
+                      appointmentFilesQuery.isAwaitingData)
                   }
                   detailNotes={
                     isExpanded ? detailsQuery.appointment?.notes : undefined
                   }
                   detailFiles={isExpanded ? expandedDetailFiles : []}
                   fileActionKey={isExpanded ? fileActionKey : null}
-                  onOpenFile={(fileId) => void handleOpenAppointmentFile(fileId)}
-                  onDownloadFile={(fileId) => void handleDownloadAppointmentFile(fileId)}
+                  onOpenFile={(fileId) =>
+                    void handleOpenAppointmentFile(fileId)
+                  }
+                  onDownloadFile={(fileId) =>
+                    void handleDownloadAppointmentFile(fileId)
+                  }
                 />
               );
             })}
@@ -655,7 +698,10 @@ export default function SecretaryAppointmentsPage() {
         )}
       </SurfaceSection>
 
-      {canViewAppointments && !appointmentsQuery.isAwaitingData && !appointmentsQuery.isError && appointments.length > 0 ? (
+      {canViewAppointments &&
+      !appointmentsQuery.isAwaitingData &&
+      !appointmentsQuery.isError &&
+      appointments.length > 0 ? (
         <DoctorTablePagination
           page={page}
           totalPages={totalPages}
@@ -675,10 +721,10 @@ export default function SecretaryAppointmentsPage() {
         }}
         targetName={cancelTarget?.patientName ?? ""}
         confirmDisabled={cancelMutation.isPending}
-        confirmLabel={tr("تأكيد إلغاء الموعد", "Confirm cancellation")}
+        confirmLabel={t("secretary.appointments.confirmCancellation")}
         successToast={{
-          title: tr("تم إلغاء الموعد", "Appointment cancelled"),
-          message: tr("تم إلغاء الموعد وحفظ السبب بنجاح.", "The appointment was cancelled and the reason was saved."),
+          title: t("secretary.appointments.appointmentCancelled"),
+          message: t("secretary.appointments.cancellationSuccess"),
           variant: "success",
         }}
         onConfirm={async (reason) => {
@@ -691,7 +737,7 @@ export default function SecretaryAppointmentsPage() {
             setCancelTarget(null);
           } catch (error) {
             toast(getAppointmentWriteErrorMessage(error, "cancel"), {
-              title: tr("خطأ", "Error"),
+              title: t("secretary.appointments.error"),
               variant: "error",
               durationMs: 4800,
             });
@@ -722,15 +768,15 @@ export default function SecretaryAppointmentsPage() {
                 reason: values.reason || undefined,
               },
             });
-            toast(tr("تم تحديث موعد الحجز بنجاح.", "The appointment was rescheduled successfully."), {
-              title: tr("تم إعادة الجدولة", "Rescheduled"),
+            toast(t("secretary.appointments.rescheduleSuccess"), {
+              title: t("secretary.appointments.rescheduled"),
               variant: "success",
               durationMs: 4200,
             });
             setRescheduleTarget(null);
           } catch (error) {
             toast(getAppointmentWriteErrorMessage(error, "reschedule"), {
-              title: tr("خطأ", "Error"),
+              title: t("secretary.appointments.error"),
               variant: "error",
               durationMs: 4800,
             });

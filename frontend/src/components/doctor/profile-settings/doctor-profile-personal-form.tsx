@@ -91,7 +91,7 @@ export default function DoctorProfilePersonalForm({
   });
 
   const bioValue = form.watch("bio") ?? "";
-  const initial = doctorInitial(user?.fullName);
+  const initial = doctorInitial(user?.fullName, locale);
   const errors = form.formState.errors;
   const isDirty = form.formState.isDirty || photoFile != null;
 

@@ -19,8 +19,7 @@ export default function AccountStatusCard({
   price,
   currency,
 }: AccountStatusCardProps) {
-  const { locale } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t } = useI18n();
   return (
     <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#e8faf8] via-white to-[#f0fdf9] p-6 shadow-[0_14px_36px_-14px_rgba(15,143,139,0.2)]">
       <div
@@ -36,11 +35,13 @@ export default function AccountStatusCard({
             <div className="flex items-center gap-2 mb-4">
               <CheckCircle className="h-5 w-5 text-primary" />
               <span className="font-cairo text-sm font-bold text-primary">
-                {tr("حالة الحساب نشط /", "Account status active /")}
+                {t("secretary.dashboard.accountStatus.active")}
               </span>
             </div>
             <h2 className="font-cairo text-lg font-bold text-[#0f172a] mb-1">
-              {tr(`الطبيب المسؤول ${doctorName}`, `Responsible doctor ${doctorName}`)}
+              {t("secretary.dashboard.accountStatus.responsibleDoctor", {
+                name: doctorName,
+              })}
             </h2>
             <p className="font-cairo text-sm font-medium text-[#64748b] mb-3">
               {specialty}
@@ -51,7 +52,9 @@ export default function AccountStatusCard({
                   {rating}
                 </span>
                 <span className="font-cairo text-xs font-medium text-[#64748b]">
-                  {tr(`(${ratingCount} تقييم)`, `(${ratingCount} reviews)`)}
+                  {t("secretary.dashboard.accountStatus.reviews", {
+                    count: ratingCount,
+                  })}
                 </span>
               </div>
               <div className="font-cairo text-sm font-bold text-primary">

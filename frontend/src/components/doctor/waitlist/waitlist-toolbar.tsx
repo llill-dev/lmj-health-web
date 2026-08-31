@@ -59,9 +59,9 @@ export function WaitlistToolbar({
               className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white px-3 font-cairo text-[13px] font-bold text-[#111827] outline-none focus:border-primary sm:w-[160px]"
             >
               <option value="">{tr("كل الأولويات", "All urgencies")}</option>
-              <option value="low">{waitlistUrgencyLabel("low", tr)}</option>
-              <option value="medium">{waitlistUrgencyLabel("medium", tr)}</option>
-              <option value="high">{waitlistUrgencyLabel("high", tr)}</option>
+              <option value="low">{waitlistUrgencyLabel("low", t)}</option>
+              <option value="medium">{waitlistUrgencyLabel("medium", t)}</option>
+              <option value="high">{waitlistUrgencyLabel("high", t)}</option>
             </select>
           ) : null}
           {onDateFromChange ? (

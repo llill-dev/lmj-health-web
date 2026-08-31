@@ -1,3 +1,4 @@
+import type { AppLocale } from '@/i18n/runtime';
 import type { EncounterOrder, EncounterOrderItem } from '@/lib/doctor/encounters/encounterClinicalTypes';
 import {
   filterEncounterOrdersByCategory,
@@ -20,33 +21,43 @@ import type {
   EncounterWorkspaceSectionViewModel,
 } from './encounter-workspace-types';
 
-function formatIsoDate(value?: string | null): string {
+function formatIsoDate(value?: string | null, locale: AppLocale = 'ar'): string {
   if (!value) return '—';
   if (/^\d{4}-\d{2}-\d{2}/.test(value)) return value.slice(0, 10);
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
+  if (locale === 'en') {
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+  }
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
 
-function formatTime(value?: string | null): string {
+function formatTime(value?: string | null, locale: AppLocale = 'ar'): string {
   if (!value) return '—';
   if (/^\d{1,2}:\d{2}/.test(value)) return value.slice(0, 5);
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleTimeString('ar-SA', {
+  return date.toLocaleTimeString(locale === 'ar' ? 'ar-SA' : 'en-US', {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
   });
 }
 
-function formatStartedLabel(encounter: DoctorEncounterSummary): string {
+function formatStartedLabel(
+  encounter: DoctorEncounterSummary,
+  locale: AppLocale = 'ar',
+): string {
   const started = encounter.startedAt ?? encounter.createdAt;
-  const date = formatIsoDate(started);
-  const time = formatTime(started);
+  const date = formatIsoDate(started, locale);
+  const time = formatTime(started, locale);
   if (date === '—' && time === '—') return '—';
   if (time === '—') return date;
   const shortDate = date.length >= 10 ? `${date.slice(8, 10)}-${date.slice(5, 7)}` : date;
@@ -58,7 +69,20 @@ function isFinalizedPrescription(rx: EncounterPrescriptionRecord) {
   return status.includes('final') || Boolean(rx.finalizedAt);
 }
 
-function resolvePrescriptionStatusLabel(rx: EncounterPrescriptionRecord): string {
+function resolvePrescriptionStatusLabel(
+  rx: EncounterPrescriptionRecord,
+  locale: AppLocale = 'ar',
+): string {
+  if (locale === 'en') {
+    if (isFinalizedPrescription(rx)) return 'Finalized';
+    const status = (rx.status ?? '').toUpperCase();
+    const map: Record<string, string> = {
+      DRAFT: 'Draft',
+      PENDING: 'Pending',
+      FINALIZED: 'Finalized',
+    };
+    return map[status] ?? rx.status ?? 'Draft';
+  }
   if (isFinalizedPrescription(rx)) return 'معتمدة';
   const status = (rx.status ?? '').toUpperCase();
   const map: Record<string, string> = {
@@ -72,7 +96,18 @@ function resolvePrescriptionStatusLabel(rx: EncounterPrescriptionRecord): string
 function resolveSectionStatus(
   count: number,
   finalizedCount: number,
+  locale: AppLocale = 'ar',
 ): { status: EncounterWorkspaceSectionStatus; label: string; hint: string } {
+  if (locale === 'en') {
+    if (count === 0) {
+      return { status: 'empty', label: 'Empty', hint: 'Start by adding content to this section' };
+    }
+    if (finalizedCount === count) {
+      return { status: 'approved', label: 'Finalized', hint: 'Finalized and complete' };
+    }
+    return { status: 'draft', label: 'Draft', hint: 'Needs approval' };
+  }
+
   if (count === 0) {
     return {
       status: 'empty',
@@ -98,6 +133,7 @@ function resolveSectionStatus(
 
 function mapPrescriptionItems(
   prescriptions: EncounterPrescriptionRecord[],
+  locale: AppLocale = 'ar',
 ): EncounterWorkspaceLineItem[] {
   return prescriptions.flatMap((rx, rxIndex) => {
     const items = rx.items ?? [];
@@ -105,9 +141,9 @@ function mapPrescriptionItems(
       return [
         {
           id: rx._id ?? `rx-${rxIndex}`,
-          title: 'وصفة طبية',
-          subtitle: resolvePrescriptionStatusLabel(rx),
-          statusLabel: resolvePrescriptionStatusLabel(rx),
+          title: locale === 'en' ? 'Prescription' : 'وصفة طبية',
+          subtitle: resolvePrescriptionStatusLabel(rx, locale),
+          statusLabel: resolvePrescriptionStatusLabel(rx, locale),
         },
       ];
     }
@@ -117,7 +153,7 @@ function mapPrescriptionItems(
         id: item._id ?? `${rx._id}-item-${itemIndex}`,
         title: item.name!.trim(),
         subtitle: [item.dosage, item.frequency].filter(Boolean).join(' • ') || undefined,
-        statusLabel: resolvePrescriptionStatusLabel(rx),
+        statusLabel: resolvePrescriptionStatusLabel(rx, locale),
       }));
   });
 }
@@ -165,9 +201,12 @@ function resolveOrderItemLine(
   return { title, subtitle: subtitle?.trim() || undefined };
 }
 
-function mapOrderLineItems(orders: EncounterOrder[]): EncounterWorkspaceLineItem[] {
+function mapOrderLineItems(
+  orders: EncounterOrder[],
+  locale: AppLocale = 'ar',
+): EncounterWorkspaceLineItem[] {
   return orders.flatMap((order, orderIndex) => {
-    const statusLabel = resolveEncounterOrderStatusLabel(order);
+    const statusLabel = resolveEncounterOrderStatusLabel(order, locale);
     const orderItems = order.items ?? [];
     const category = normalizeEncounterOrderCategory(order);
 
@@ -206,12 +245,14 @@ function mapOrderLineItems(orders: EncounterOrder[]): EncounterWorkspaceLineItem
 
 function mapPrescriptionSection(
   prescriptions: EncounterPrescriptionRecord[],
+  locale: AppLocale = 'ar',
 ): EncounterWorkspaceSectionViewModel {
-  const items = mapPrescriptionItems(prescriptions);
+  const items = mapPrescriptionItems(prescriptions, locale);
   const finalizedCount = prescriptions.filter(isFinalizedPrescription).length;
   const { status, label, hint } = resolveSectionStatus(
     prescriptions.length,
     finalizedCount,
+    locale,
   );
 
   return {
@@ -228,13 +269,15 @@ function mapPrescriptionSection(
 function mapOrdersSection(
   key: 'lab' | 'radiology' | 'procedure' | 'referral',
   orders: EncounterOrder[],
+  locale: AppLocale = 'ar',
 ): EncounterWorkspaceSectionViewModel {
   const filtered = filterEncounterOrdersByCategory(orders, key);
-  const items = mapOrderLineItems(filtered);
+  const items = mapOrderLineItems(filtered, locale);
   const finalizedCount = filtered.filter(isFinalizedEncounterOrder).length;
   const { status, label, hint } = resolveSectionStatus(
     filtered.length,
     finalizedCount,
+    locale,
   );
 
   const referrals =
@@ -242,13 +285,18 @@ function mapOrdersSection(
       ? filtered.map((order, index) => ({
           id: order._id ?? `referral-${index}`,
           code: order._id?.slice(-6).toUpperCase() ?? `REF-${index + 1}`,
-          doctorName: order.referredDoctorName?.trim() || 'طبيب مختص',
-          specialty: order.specialty?.trim() || order.reason?.trim() || 'تحويل طبي',
+          doctorName:
+            order.referredDoctorName?.trim() ||
+            (locale === 'en' ? 'Specialist doctor' : 'طبيب مختص'),
+          specialty:
+            order.specialty?.trim() ||
+            order.reason?.trim() ||
+            (locale === 'en' ? 'Medical referral' : 'تحويل طبي'),
           urgency:
             `${order.urgency ?? ''} ${order.priority ?? ''}`.toLowerCase().includes('urgent')
               ? ('urgent' as const)
               : undefined,
-          statusLabel: resolveEncounterOrderStatusLabel(order),
+          statusLabel: resolveEncounterOrderStatusLabel(order, locale),
         }))
       : undefined;
 
@@ -271,6 +319,7 @@ export function mapEncounterWorkspacePatient(
   encounter: DoctorEncounterSummary,
   patient?: DoctorPatientFullProfile,
   publicId?: string,
+  locale: AppLocale = 'ar',
 ): EncounterWorkspacePatientViewModel {
   const isActive = encounter.status !== 'closed';
   const apptDate = encounter.appointment?.date;
@@ -286,8 +335,13 @@ export function mapEncounterWorkspacePatient(
     name:
       patient?.user?.fullName?.trim() ||
       embedded?.user?.fullName?.trim() ||
-      'مريض',
-    ageLabel: resolvedAge != null ? `${resolvedAge} سنة` : '—',
+      (locale === 'en' ? 'Patient' : 'مريض'),
+    ageLabel:
+      resolvedAge != null
+        ? locale === 'en'
+          ? `${resolvedAge} yrs`
+          : `${resolvedAge} سنة`
+        : '—',
     fileNumber: resolvedPublicId
       ? `#${resolvedPublicId}`
       : patient?._id
@@ -295,28 +349,37 @@ export function mapEncounterWorkspacePatient(
         : embedded?._id
           ? `#${embedded._id.slice(-6)}`
           : '—',
-    statusLabel: isActive ? 'نشطة' : 'مغلقة',
+    statusLabel: isActive
+      ? locale === 'en'
+        ? 'Active'
+        : 'نشطة'
+      : locale === 'en'
+        ? 'Closed'
+        : 'مغلقة',
     isActive,
-    startedLabel: formatStartedLabel(encounter),
-    appointmentTimeLabel: formatTime(apptTime ?? encounter.startedAt),
-    linkedAppointmentDate: formatIsoDate(apptDate),
-    linkedAppointmentTime: formatTime(apptTime),
+    startedLabel: formatStartedLabel(encounter, locale),
+    appointmentTimeLabel: formatTime(apptTime ?? encounter.startedAt, locale),
+    linkedAppointmentDate: formatIsoDate(apptDate, locale),
+    linkedAppointmentTime: formatTime(apptTime, locale),
   };
 }
 
-export function mapEncounterWorkspaceSections(input: {
-  prescriptions: EncounterPrescriptionRecord[];
-  orders: EncounterOrder[];
-}): EncounterWorkspaceSectionViewModel[] {
+export function mapEncounterWorkspaceSections(
+  input: {
+    prescriptions: EncounterPrescriptionRecord[];
+    orders: EncounterOrder[];
+  },
+  locale: AppLocale = 'ar',
+): EncounterWorkspaceSectionViewModel[] {
   const encounterOrders = input.orders.filter(
     (order) => normalizeEncounterOrderCategory(order) !== 'other',
   );
 
   return [
-    mapPrescriptionSection(input.prescriptions),
-    mapOrdersSection('lab', encounterOrders),
-    mapOrdersSection('radiology', encounterOrders),
-    mapOrdersSection('procedure', encounterOrders),
-    mapOrdersSection('referral', encounterOrders),
+    mapPrescriptionSection(input.prescriptions, locale),
+    mapOrdersSection('lab', encounterOrders, locale),
+    mapOrdersSection('radiology', encounterOrders, locale),
+    mapOrdersSection('procedure', encounterOrders, locale),
+    mapOrdersSection('referral', encounterOrders, locale),
   ];
 }

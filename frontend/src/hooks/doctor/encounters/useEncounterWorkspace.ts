@@ -2,6 +2,7 @@
 
 import { useQueries, type QueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
+import { useI18n } from '@/i18n/provider';
 import {
   isAwaitingAnyInitialQueryData,
   isAwaitingInitialQueryData,
@@ -82,6 +83,7 @@ export function useEncounterWorkspace(
   encounterId: string,
   enabled = true,
 ) {
+  const { locale } = useI18n();
   const isEnabled =
     enabled && Boolean(doctorId) && Boolean(patientId) && Boolean(encounterId);
 
@@ -171,11 +173,14 @@ export function useEncounterWorkspace(
 
   const sections: EncounterWorkspaceSectionViewModel[] = useMemo(
     () =>
-      mapEncounterWorkspaceSections({
-        prescriptions: prescriptionsQuery.data?.prescriptions ?? [],
-        orders: normalizeEncounterOrdersList(ordersQuery.data),
-      }),
-    [prescriptionsQuery.data?.prescriptions, ordersQuery.data],
+      mapEncounterWorkspaceSections(
+        {
+          prescriptions: prescriptionsQuery.data?.prescriptions ?? [],
+          orders: normalizeEncounterOrdersList(ordersQuery.data),
+        },
+        locale,
+      ),
+    [prescriptionsQuery.data?.prescriptions, ordersQuery.data, locale],
   );
 
   const patientVm = useMemo(() => {
@@ -184,8 +189,9 @@ export function useEncounterWorkspace(
       encounterQuery.data.encounter,
       profile,
       publicId,
+      locale,
     );
-  }, [encounterQuery.data?.encounter, profile, publicId]);
+  }, [encounterQuery.data?.encounter, profile, publicId, locale]);
 
   /** يمنع عرض الصفحة — فقط تفاصيل الزيارة (الأساس) */
   const isAwaitingEncounterData = isAwaitingInitialQueryData(

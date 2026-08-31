@@ -1,27 +1,26 @@
-import { useEffect, useMemo } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useMemo } from "react";
+import { Helmet } from "react-helmet-async";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   ENCOUNTER_ORDER_CONFIG,
   EncounterOrderWorkspaceShell,
   type CatalogOrderCategory,
-} from '@/components/doctor/encounters/orders';
-import { useToast } from '@/components/ui/ToastProvider';
-import { useEncounterOrderWorkspace } from '@/hooks/doctor/encounters/useEncounterOrderWorkspace';
-import { readAuthUser } from '@/lib/cookies';
-import { useI18n } from '@/i18n/provider';
+} from "@/components/doctor/encounters/orders";
+import { useToast } from "@/components/ui/ToastProvider";
+import { useEncounterOrderWorkspace } from "@/hooks/doctor/encounters/useEncounterOrderWorkspace";
+import { readAuthUser } from "@/lib/cookies";
+import { useI18n } from "@/i18n/provider";
 
 export default function DoctorEncounterOrderWorkspacePage({
   category,
 }: {
   category: CatalogOrderCategory;
 }) {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const { t, locale, dir } = useI18n();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { patientId = '', encounterId = '' } = useParams();
-  const doctorId = readAuthUser()?.actorIds?.doctorId ?? '';
+  const { patientId = "", encounterId = "" } = useParams();
+  const doctorId = readAuthUser()?.actorIds?.doctorId ?? "";
   const config = ENCOUNTER_ORDER_CONFIG[category];
 
   const workspace = useEncounterOrderWorkspace(
@@ -32,14 +31,14 @@ export default function DoctorEncounterOrderWorkspacePage({
   );
 
   const patientName = useMemo(
-    () => workspace.encounter?.patient?.user?.fullName?.trim() ?? '',
+    () => workspace.encounter?.patient?.user?.fullName?.trim() ?? "",
     [workspace.encounter?.patient?.user?.fullName],
   );
 
   const fileNumber = useMemo(() => {
     const id = workspace.encounter?.patient?.publicId?.trim();
     if (!id) return undefined;
-    return id.startsWith('P-') || id.startsWith('#') ? id : `P-${id}`;
+    return id.startsWith("P-") || id.startsWith("#") ? id : `P-${id}`;
   }, [workspace.encounter?.patient?.publicId]);
 
   const appliedTemplateDraftName = workspace.appliedTemplateDraftName;
@@ -50,18 +49,17 @@ export default function DoctorEncounterOrderWorkspacePage({
   useEffect(() => {
     if (!appliedTemplateDraftName) return;
     toast(
-      tr(
-        `تم تطبيق قالب «${appliedTemplateDraftName}» على الطلب.`,
-        `The "${appliedTemplateDraftName}" template has been applied to the order.`,
-      ),
-      { variant: 'success' },
+      locale === "ar"
+        ? `تم تطبيق قالب «${appliedTemplateDraftName}» على الطلب.`
+        : `The "${appliedTemplateDraftName}" template has been applied to the order.`,
+      { variant: "success" },
     );
     clearAppliedTemplateDraftName();
-  }, [appliedTemplateDraftName, clearAppliedTemplateDraftName, toast]);
+  }, [appliedTemplateDraftName, clearAppliedTemplateDraftName, toast, locale]);
 
   useEffect(() => {
     if (!templateDraftNotice) return;
-    toast(templateDraftNotice, { variant: 'warning' });
+    toast(templateDraftNotice, { variant: "warning" });
     clearTemplateDraftNotice();
   }, [clearTemplateDraftNotice, templateDraftNotice, toast]);
 
@@ -69,8 +67,8 @@ export default function DoctorEncounterOrderWorkspacePage({
     <>
       <Helmet>
         <title>
-          {patientName ? `${config.title} — ${patientName}` : config.title} • LMJ
-          Health
+          {patientName ? `${config.title} — ${patientName}` : config.title} •
+          LMJ Health
         </title>
       </Helmet>
 

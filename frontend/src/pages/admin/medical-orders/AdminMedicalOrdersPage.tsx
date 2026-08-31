@@ -33,21 +33,17 @@ type AdminMedicalOrdersPageProps = {
   roleVariant?: "admin" | "data-entry";
 };
 
-function kindLabel(
-  kind: MedicalOrderCatalogKind,
-  tr: (ar: string, en: string) => string,
-) {
-  if (kind === "lab") return tr("مختبر", "Lab");
-  if (kind === "imaging") return tr("تصوير", "Imaging");
-  if (kind === "procedure") return tr("إجراء", "Procedure");
-  return tr("تحويل", "Referral");
+function kindLabel(kind: MedicalOrderCatalogKind, t: (key: string) => string) {
+  if (kind === "lab") return t("admin.medicalOrders.kind.lab");
+  if (kind === "imaging") return t("admin.medicalOrders.kind.imaging");
+  if (kind === "procedure") return t("admin.medicalOrders.kind.procedure");
+  return t("admin.medicalOrders.kind.referral");
 }
 
 export default function AdminMedicalOrdersPage({
   roleVariant = "admin",
 }: AdminMedicalOrdersPageProps) {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
   const numberLocale = locale === "ar" ? "ar-SA" : "en-US";
   const isDataEntry = roleVariant === "data-entry";
 
@@ -147,11 +143,8 @@ export default function AdminMedicalOrdersPage({
       <Helmet>
         <title>
           {isDataEntry
-            ? tr(
-                "كتالوج الطلبات الطبية • مدخل البيانات",
-                "Medical orders catalog • Data Entry",
-              )
-            : tr("كتالوج الطلبات الطبية", "Medical orders catalog")}{" "}
+            ? t("admin.medicalOrders.page.title.dataEntry")
+            : t("admin.medicalOrders.page.title.admin")}{" "}
           • LMJ Health
         </title>
       </Helmet>
@@ -160,36 +153,28 @@ export default function AdminMedicalOrdersPage({
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title={
-            isDataEntry
-              ? tr("كتالوج الطلبات الطبية", "Medical orders catalog")
-              : tr("كتالوج الطلبات الطبية", "Medical orders catalog")
-          }
+          title={t("admin.medicalOrders.overview.title")}
           subtitle={
             isDataEntry
-              ? tr(
-                  "إدارة عناصر الكتالوج التي يستخدمها فريق مدخل البيانات مع نفس القيود المدعومة من الواجهة.",
-                  "Manage catalog items used by the data entry team within the same supported UI constraints.",
-                )
-              : tr(
-                  "إدارة الطلبات الطبية التي يحتاجها الطبيب من المريض",
-                  "Manage medical orders doctors request from patients",
-                )
+              ? t("admin.medicalOrders.overview.subtitle.dataEntry")
+              : t("admin.medicalOrders.overview.subtitle.admin")
           }
           headerIcon={<ClipboardList className="h-8 w-8 text-white" />}
           actionLabel={
             isDataEntry
-              ? tr("إضافة عنصر جديد", "Add new item")
-              : tr("إضافة نوع جديد", "Add new item")
+              ? t("admin.medicalOrders.overview.actionLabel.dataEntry")
+              : t("admin.medicalOrders.overview.actionLabel.admin")
           }
-          actionDisabled={isAwaitingData || !medicalOrderCatalogKindSupported(kind)}
+          actionDisabled={
+            isAwaitingData || !medicalOrderCatalogKindSupported(kind)
+          }
           onActionClick={openAdd}
           kpis={[
             {
               key: "items",
               icon: <ClipboardList className="h-5 w-5 shrink-0" />,
               value: isAwaitingData ? "—" : total,
-              label: tr("إجمالي العناصر المطابقة", "Total matching items"),
+              label: t("admin.medicalOrders.overview.kpi.totalItems"),
             },
           ]}
         />
@@ -198,30 +183,18 @@ export default function AdminMedicalOrdersPage({
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
           <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
             {isDataEntry
-              ? tr(
-                  "هذه الشاشة مخصّصة لإدارة عناصر كتالوج الطلبات الطبية المرجعية ضمن الصلاحيات المتاحة لمدخل البيانات. ما يظهر هنا يخص تعريف العنصر وفهرسته فقط، وليس تنفيذ طلب طبي على مريض بعينه.",
-                  "This page is for managing reference medical-order catalog items within the data entry role’s supported permissions. What appears here is only the item definition and cataloging, not the execution of a medical order for a specific patient.",
-                )
-              : tr(
-                  "هذه الشاشة مخصّصة لإدارة كتالوج الطلبات الطبية المرجعية فقط. الإضافة أو التعديل هنا يغيّر العناصر المتاحة للأطباء لاحقًا، لكنه لا ينشئ طلبًا طبيًا فعليًا داخل ملف مريض محدد.",
-                  "This page is for managing the reference medical-order catalog only. Additions or edits here change the items available to doctors later, but do not create an actual medical order inside a specific patient record.",
-                )}
+              ? t("admin.medicalOrders.disclaimer.dataEntry")
+              : t("admin.medicalOrders.disclaimer.admin")}
           </div>
         </div>
 
         {isDataEntry ? (
           <div className="rounded-[10px] border border-[#D5E8E6] bg-[#F8FFFE] px-4 py-3 text-start">
             <p className="font-cairo text-[13px] font-bold text-[#0F766E]">
-              {tr(
-                "تعمل هذه الشاشة ضمن صلاحيات مدخل البيانات فقط.",
-                "This screen runs within the data entry role scope only.",
-              )}
+              {t("admin.medicalOrders.dataEntryScope.title")}
             </p>
             <p className="mt-1 font-cairo text-[12px] font-semibold text-[#0F766E]">
-              {tr(
-                "ستظهر فقط الإجراءات المدعومة فعليًا من الواجهة والعقد الحالي، مع إخفاء أي مسارات غير مكتملة أو غير آمنة.",
-                "Only actions supported by the current UI and verified contract are shown, while incomplete or unsafe paths stay hidden.",
-              )}
+              {t("admin.medicalOrders.dataEntryScope.description")}
             </p>
           </div>
         ) : null}
@@ -269,13 +242,10 @@ export default function AdminMedicalOrdersPage({
         {!medicalOrderCatalogKindSupported(kind) && (
           <div className="rounded-[10px] border border-amber-200 bg-amber-50 px-4 py-3 text-start">
             <p className="font-cairo text-[13px] font-bold text-amber-900">
-              {tr("قسم التحويلات غير مدعوم حالياً من الواجهة.", "Referral catalog is currently unsupported in the UI.")}
+              {t("admin.medicalOrders.unsupportedKind.title")}
             </p>
             <p className="mt-1 font-cairo text-[12px] font-semibold text-amber-800">
-              {tr(
-                "تم إخفاء هذا المسار من التبويبات النشطة لمنع الوصول إلى تكامل غير صحيح.",
-                "This route is kept out of active tabs to avoid an invalid integration path.",
-              )}
+              {t("admin.medicalOrders.unsupportedKind.description")}
             </p>
           </div>
         )}
@@ -283,15 +253,12 @@ export default function AdminMedicalOrdersPage({
         {isError && (
           <div className="rounded-[10px] border border-red-200 bg-red-50 px-4 py-3 text-start">
             <p className="font-cairo text-[13px] font-bold text-red-800">
-              {tr("تعذر تحميل الكتالوج.", "Failed to load the catalog.")}
+              {t("admin.medicalOrders.error.loadCatalog")}
             </p>
             <p className="mt-1 font-cairo text-[12px] font-semibold text-red-700">
               {userFacingErrorMessage(
                 error,
-                tr(
-                  "تحقق من الاتصال أو من واجهة الـ API.",
-                  "Check your connection or the API.",
-                ),
+                t("admin.medicalOrders.error.checkConnection"),
               )}
             </p>
             <button
@@ -300,7 +267,9 @@ export default function AdminMedicalOrdersPage({
               disabled={isRefetching}
               className="mt-2 font-cairo text-[12px] font-extrabold text-primary underline disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isRefetching ? tr("جارٍ إعادة المحاولة…", "Retrying...") : tr("إعادة المحاولة", "Retry")}
+              {isRefetching
+                ? t("admin.medicalOrders.error.retrying")
+                : t("admin.medicalOrders.error.retry")}
             </button>
           </div>
         )}
@@ -308,7 +277,7 @@ export default function AdminMedicalOrdersPage({
         {!isAwaitingData && !isError && isRefetching ? (
           <div className="rounded-[10px] border border-[#D0D5DD] bg-white px-4 py-3 text-start">
             <p className="font-cairo text-[12px] font-semibold text-[#667085]">
-              {tr("جارٍ تحديث بيانات الكتالوج…", "Refreshing catalog data...")}
+              {t("admin.medicalOrders.refreshing")}
             </p>
           </div>
         ) : null}
@@ -335,10 +304,10 @@ export default function AdminMedicalOrdersPage({
           <section className="rounded-[10px] border border-[#E5E7EB] bg-white px-5 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.08)]">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div className="font-cairo text-[12px] font-bold text-[#667085]">
-                {tr(
-                  `عرض ${rangeStart.toLocaleString(numberLocale)}–${rangeEnd.toLocaleString(numberLocale)} من ${total.toLocaleString(numberLocale)} عنصر`,
-                  `Showing ${rangeStart.toLocaleString(numberLocale)}–${rangeEnd.toLocaleString(numberLocale)} of ${total.toLocaleString(numberLocale)} items`,
-                )}
+                {t("admin.medicalOrders.pagination.showing")
+                  .replace("{start}", rangeStart.toLocaleString(numberLocale))
+                  .replace("{end}", rangeEnd.toLocaleString(numberLocale))
+                  .replace("{total}", total.toLocaleString(numberLocale))}
               </div>
 
               <div className="flex flex-wrap items-center justify-end gap-3">
@@ -353,9 +322,8 @@ export default function AdminMedicalOrdersPage({
                       value: String(value),
                       label: String(value),
                     }))}
-                    listboxAriaLabel={tr(
-                      "عدد العناصر في الصفحة",
-                      "Items per page",
+                    listboxAriaLabel={t(
+                      "admin.medicalOrders.pagination.itemsPerPage",
                     )}
                     triggerClassName="h-[36px] rounded-[10px]"
                   />

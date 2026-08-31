@@ -42,21 +42,20 @@ import { cn } from "@/lib/utils/utils";
 import { useI18n } from "@/i18n/provider";
 
 function buildStatusTabs(
-  tr: (ar: string, en: string) => string,
+  t: (key: string) => string,
 ): Array<{ id: SecretaryStatusFilter; label: string }> {
   return [
-    { id: "all", label: tr("الكل", "All") },
-    { id: "active", label: tr("المفعلة", "Active") },
-    { id: "disabled", label: tr("المعطلة", "Disabled") },
+    { id: "all", label: t("doctor.secretaries.statusAll") },
+    { id: "active", label: t("doctor.secretaries.statusActive") },
+    { id: "disabled", label: t("doctor.secretaries.statusDisabled") },
   ];
 }
 
 const MAX_SECRETARIES = MAX_DOCTOR_SECRETARIES;
 
 export default function DoctorSecretariesPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
-  const statusTabs = buildStatusTabs(tr);
+  const { t, locale, dir } = useI18n();
+  const statusTabs = buildStatusTabs(t);
   const { toast } = useToast();
   const listQuery = useDoctorSecretaries();
   const createSecretary = useCreateDoctorSecretary();
@@ -114,12 +113,11 @@ export default function DoctorSecretariesPage() {
   const handleCreate = async (input: DoctorSecretaryCreateFormValues) => {
     if (listQuery.secretaries.length >= MAX_SECRETARIES) {
       toast(
-        tr(
-          `الحد الأقصى ${MAX_SECRETARIES} سكرتيرين لكل طبيب.`,
-          `The maximum is ${MAX_SECRETARIES} secretaries per doctor.`,
-        ),
+        locale === "ar"
+          ? `الحد الأقصى ${MAX_SECRETARIES} سكرتيرين لكل طبيب.`
+          : `The maximum is ${MAX_SECRETARIES} secretaries per doctor.`,
         {
-          title: tr("لا يمكن الإضافة", "Cannot add"),
+          title: t("doctor.secretaries.cannotAdd"),
           variant: "error",
         },
       );
@@ -139,8 +137,8 @@ export default function DoctorSecretariesPage() {
         gender: input.gender,
         permissions: input.permissions,
       });
-      toast(tr("تم إنشاء السكرتير وربطه بحسابك.", "The secretary was created and linked to your account."), {
-        title: tr("تمت الإضافة", "Added"),
+      toast(t("doctor.secretaries.created"), {
+        title: t("doctor.secretaries.added"),
         variant: "success",
       });
       setCreateOpen(false);
@@ -150,7 +148,7 @@ export default function DoctorSecretariesPage() {
         "create",
       );
       toast(errorMessage, {
-        title: tr("تعذّر إنشاء السكرتير", "Could not create the secretary"),
+        title: t("doctor.secretaries.createFailed"),
         variant: "error",
       });
     }
@@ -174,14 +172,14 @@ export default function DoctorSecretariesPage() {
           permissions: input.permissions,
         },
       });
-      toast(tr("تم تحديث بيانات السكرتير.", "The secretary's data was updated."), {
-        title: tr("تم الحفظ", "Saved"),
+      toast(t("doctor.secretaries.updated"), {
+        title: t("doctor.secretaries.saved"),
         variant: "success",
       });
       setEditTarget(null);
     } catch (error) {
       toast(getDoctorSecretaryMutationErrorMessage(error, "update"), {
-        title: tr("تعذّر الحفظ", "Could not save"),
+        title: t("doctor.secretaries.saveFailed"),
         variant: "error",
       });
     }
@@ -192,14 +190,14 @@ export default function DoctorSecretariesPage() {
     if (!secretaryId) return;
     try {
       await unassignSecretary.mutateAsync(secretaryId);
-      toast(tr("تم إلغاء ربط السكرتير من حسابك.", "The secretary was unlinked from your account."), {
-        title: tr("تم الإلغاء", "Unlinked"),
+      toast(t("doctor.secretaries.unlinked"), {
+        title: t("doctor.secretaries.unlinkedTitle"),
         variant: "success",
       });
       setUnassignTarget(null);
     } catch (error) {
       toast(getDoctorSecretaryMutationErrorMessage(error, "unassign"), {
-        title: tr("تعذّر الإلغاء", "Could not unlink"),
+        title: t("doctor.secretaries.unlinkFailed"),
         variant: "error",
       });
       throw error;
@@ -209,9 +207,7 @@ export default function DoctorSecretariesPage() {
   return (
     <>
       <Helmet>
-        <title>
-          {tr("إدارة السكرتارية • LMJ Health", "Secretary Management • LMJ Health")}
-        </title>
+        <title>{t("doctor.secretaries.pageTitle")}</title>
       </Helmet>
 
       <div dir={dir} lang={locale} className="pb-8 sm:pb-10">
@@ -219,12 +215,9 @@ export default function DoctorSecretariesPage() {
           variant="patients"
           surface="mint"
           headerIcon={<UserCog className="h-8 w-8 text-white" />}
-          title={tr("إدارة السكرتارية", "Secretary Management")}
-          subtitle={tr(
-            "تحكم كامل بصلاحيات وإعدادات السكرتارية",
-            "Full control over secretary permissions and settings",
-          )}
-          actionLabel={tr("إضافة سكرتير", "Add secretary")}
+          title={t("doctor.secretaries.title")}
+          subtitle={t("doctor.secretaries.subtitle")}
+          actionLabel={t("doctor.secretaries.addSecretary")}
           actionIcon={<Plus className="h-4 w-4" />}
           onActionClick={() => setCreateOpen(true)}
           actionDisabled={listQuery.secretaries.length >= MAX_SECRETARIES}
@@ -233,19 +226,19 @@ export default function DoctorSecretariesPage() {
               key: "total",
               icon: <Users className="h-5 w-5 shrink-0" />,
               value: listQuery.isAwaitingData ? "—" : listQuery.total,
-              label: tr("إجمالي السكرتير", "Total secretaries"),
+              label: t("doctor.secretaries.totalSecretaries"),
             },
             {
               key: "active",
               icon: <UserCog className="h-5 w-5 shrink-0" />,
               value: listQuery.isAwaitingData ? "—" : activeCount,
-              label: tr("مفعل", "Active"),
+              label: t("doctor.secretaries.active"),
             },
             {
               key: "limit",
               icon: <Users className="h-5 w-5 shrink-0" />,
               value: MAX_SECRETARIES,
-              label: tr("الحد الأقصى", "Maximum"),
+              label: t("doctor.secretaries.maximum"),
             },
           ]}
         />
@@ -254,7 +247,7 @@ export default function DoctorSecretariesPage() {
           <ClinicAccountsSearchRow
             value={search}
             onChange={setSearch}
-            placeholder={tr("بحث...", "Search...")}
+            placeholder={t("doctor.secretaries.searchPlaceholder")}
             onClear={() => {
               setSearch("");
               setStatusFilter("all");
@@ -262,7 +255,7 @@ export default function DoctorSecretariesPage() {
             trailing={
               <ClinicAccountsSearchCount
                 count={filtered.length}
-                label={tr("سكرتير", "secretary")}
+                label={t("doctor.secretaries.secretary")}
               />
             }
           />
@@ -291,7 +284,7 @@ export default function DoctorSecretariesPage() {
 
         {listQuery.isError ? (
           <DoctorListErrorState
-            title={tr("تعذّر تحميل السكرتير", "Failed to load secretaries")}
+            title={t("doctor.secretaries.loadFailed")}
             brief={getUserFacingRequestErrorMessage(listQuery.error)}
             retrying={retryingList}
             onRetry={() => void retryList()}
@@ -308,18 +301,15 @@ export default function DoctorSecretariesPage() {
             imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.1)]"
             title={
               isFilteredEmpty
-                ? tr("لا توجد نتائج مطابقة للبحث أو الفلتر الحالي", "No results match the current search or filter")
-                : tr("لا يوجد سكرتير مرتبط بحسابك", "No secretary is linked to your account")
+                ? t("doctor.secretaries.noResultsFilter")
+                : t("doctor.secretaries.noResultsEmpty")
             }
             subtitle={
               isFilteredEmpty
-                ? tr("جرّب تعديل كلمات البحث أو إعادة ضبط الفلاتر لعرض النتائج", "Try adjusting the search terms or resetting the filters to see results")
-                : tr(
-                    "يمكنك إضافة حتى 3 سكرتيرين وتحديد صلاحياتهم للمساعدة في إدارة عيادتك.",
-                    "You can add up to 3 secretaries and set their permissions to help manage your clinic.",
-                  )
+                ? t("doctor.secretaries.noResultsFilterSubtitle")
+                : t("doctor.secretaries.noResultsEmptySubtitle")
             }
-            actionLabel={tr("إضافة سكرتير", "Add secretary")}
+            actionLabel={t("doctor.secretaries.addSecretary")}
             onAction={() => setCreateOpen(true)}
             actionIcon={<Plus className="h-4 w-4" />}
           />
@@ -357,19 +347,17 @@ export default function DoctorSecretariesPage() {
           onOpenChange={(open) => {
             if (!open) setUnassignTarget(null);
           }}
-          title={tr("إلغاء ربط السكرتير", "Unlink secretary")}
-          confirmLabel={tr("نعم، إلغاء الربط", "Yes, unlink")}
+          title={t("doctor.secretaries.unlinkTitle")}
+          confirmLabel={t("doctor.secretaries.unlinkConfirm")}
           confirmDisabled={unassignSecretary.isPending}
           description={
             <span className="block font-cairo text-[13px] font-semibold leading-[1.65]">
-              {tr("هل تريد إلغاء ربط", "Do you want to unlink")}{" "}
+              {t("doctor.secretaries.unlinkQuestion")}{" "}
               <span className="font-black text-[#101828]">
-                {unassignTarget?.user?.fullName ?? tr("هذا السكرتير", "this secretary")}
+                {unassignTarget?.user?.fullName ??
+                  t("doctor.secretaries.thisSecretary")}
               </span>{" "}
-              {tr(
-                "من عيادتك؟ لن يُحذف حساب المستخدم من النظام، لكنه لن يعود مرتبطاً بك.",
-                "from your clinic? The user account will not be deleted from the system, but it will no longer be linked to you.",
-              )}
+              {t("doctor.secretaries.unlinkDescription")}
             </span>
           }
           onConfirm={handleUnassign}

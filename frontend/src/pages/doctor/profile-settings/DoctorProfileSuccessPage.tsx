@@ -1,18 +1,17 @@
-import { useLayoutEffect, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { Navigate, useLocation } from 'react-router-dom';
-import DoctorProfileSuccessScreen from '@/components/doctor/profile-settings/doctor-profile-success-screen';
+import { useLayoutEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
+import { Navigate, useLocation } from "react-router-dom";
+import DoctorProfileSuccessScreen from "@/components/doctor/profile-settings/doctor-profile-success-screen";
 import {
   clearDoctorProfileSuccessNavState,
   peekDoctorProfileSuccessNavState,
   resolveDoctorProfileSuccessNavState,
   type DoctorProfileSuccessNavState,
-} from '@/lib/doctor/profile/doctorProfileSuccessNavState';
-import { useI18n } from '@/i18n/provider';
+} from "@/lib/doctor/profile/doctorProfileSuccessNavState";
+import { useI18n } from "@/i18n/provider";
 
 export default function DoctorProfileSuccessPage() {
-  const { locale } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const { t } = useI18n();
   const location = useLocation();
   const [state, setState] = useState<DoctorProfileSuccessNavState | null>(null);
   const [resolved, setResolved] = useState(false);
@@ -39,10 +38,10 @@ export default function DoctorProfileSuccessPage() {
   return (
     <>
       <Helmet>
-        <title>{tr('تم التحديث', 'Updated')} • LMJ Health</title>
+        <title>{t("doctor.profileSuccess.pageTitle")} • LMJ Health</title>
       </Helmet>
       <DoctorProfileSuccessScreen
-        redirectTo={state.redirectTo?.trim() || '/doctor/dashboard'}
+        redirectTo={state.redirectTo?.trim() || "/doctor/dashboard"}
       />
     </>
   );

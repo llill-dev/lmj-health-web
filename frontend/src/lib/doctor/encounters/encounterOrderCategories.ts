@@ -1,5 +1,5 @@
 import type { EncounterOrder } from '@/lib/doctor/encounters/encounterClinicalTypes';
-import { resolveOrderStatusLabelAr } from '@/lib/doctor/orders/orderStatusLabels';
+import { resolveOrderStatusLabel } from '@/lib/doctor/orders/orderStatusLabels';
 
 function readEncounterUpdatedAt(order: EncounterOrder): string | undefined {
   const record: unknown = order;
@@ -113,8 +113,11 @@ export function filterEncounterOrdersByCategory(
   );
 }
 
-export function resolveEncounterOrderStatusLabel(order: EncounterOrder): string {
-  return resolveOrderStatusLabelAr(order.statusCode, order.status);
+export function resolveEncounterOrderStatusLabel(
+  order: EncounterOrder,
+  locale: 'ar' | 'en' = 'ar',
+): string {
+  return resolveOrderStatusLabel(order.statusCode, order.status, locale);
 }
 
 export function resolveEncounterOrderTitle(order: EncounterOrder): string {

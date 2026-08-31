@@ -1,28 +1,31 @@
-import type { ExpenseCategory, InvoiceStatus } from '@/lib/doctor/clinicAccounts/types';
+import type {
+  ExpenseCategory,
+  InvoiceStatus,
+} from "@/lib/doctor/clinicAccounts/types";
 
 export function expenseCategoryLabel(
   category: ExpenseCategory,
-  tr: (ar: string, en: string) => string = (ar) => ar,
+  t: (key: string) => string = (key) => key,
 ): string {
-  const labels: Record<ExpenseCategory, [string, string]> = {
-    rent: ['إيجار', 'Rent'],
-    salaries: ['رواتب', 'Salaries'],
-    services: ['خدمات', 'Services'],
-    materials: ['مواد', 'Materials'],
+  const labels: Record<ExpenseCategory, string> = {
+    rent: t("doctor.clinicAccounts.expenseCategory.rent"),
+    salaries: t("doctor.clinicAccounts.expenseCategory.salaries"),
+    services: t("doctor.clinicAccounts.expenseCategory.services"),
+    materials: t("doctor.clinicAccounts.expenseCategory.materials"),
   };
-  return tr(...labels[category]);
+  return labels[category];
 }
 
 export function invoiceStatusLabel(
   status: InvoiceStatus,
-  tr: (ar: string, en: string) => string = (ar) => ar,
+  t: (key: string) => string = (key) => key,
 ): string {
-  const labels: Record<InvoiceStatus, [string, string]> = {
-    paid: ['مدفوع', 'Paid'],
-    unpaid: ['غير مدفوع', 'Unpaid'],
-    partial: ['مدفوع جزئياً', 'Partially paid'],
-    overdue: ['متأخرة', 'Overdue'],
-    cancelled: ['ملغاة', 'Cancelled'],
+  const labels: Record<InvoiceStatus, string> = {
+    paid: t("doctor.clinicAccounts.invoiceStatus.paid"),
+    unpaid: t("doctor.clinicAccounts.invoiceStatus.unpaid"),
+    partial: t("doctor.clinicAccounts.invoiceStatus.partial"),
+    overdue: t("doctor.clinicAccounts.invoiceStatus.overdue"),
+    cancelled: t("doctor.clinicAccounts.invoiceStatus.cancelled"),
   };
-  return tr(...labels[status]);
+  return labels[status];
 }

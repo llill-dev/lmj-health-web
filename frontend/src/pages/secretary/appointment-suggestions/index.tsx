@@ -16,8 +16,7 @@ function formatLocalDate(date: Date) {
 }
 
 export default function SecretaryAppointmentSuggestionsPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { locale, dir, t } = useI18n();
   const { toast } = useToast();
   const { hasPermission } = useSecretaryPermissions();
   const today = useMemo(() => formatLocalDate(new Date()), []);
@@ -44,13 +43,13 @@ export default function SecretaryAppointmentSuggestionsPage() {
         id: candidateId,
         body: { date, startTime },
       });
-      toast(tr("تم حجز الموعد من قائمة الانتظار بنجاح.", "The appointment was booked from the waitlist successfully."), {
-        title: tr("تم الحجز", "Booked"),
+      toast(t("secretary.appointmentSuggestions.bookSuccess"), {
+        title: t("secretary.appointmentSuggestions.booked"),
         variant: "success",
       });
     } catch {
-      toast(tr("تعذر حجز الموعد. حاول مرة أخرى.", "Could not book the appointment. Please try again."), {
-        title: tr("خطأ", "Error"),
+      toast(t("secretary.appointmentSuggestions.bookError"), {
+        title: t("secretary.appointmentSuggestions.error"),
         variant: "error",
       });
     }
@@ -67,12 +66,12 @@ export default function SecretaryAppointmentSuggestionsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-cairo text-2xl font-bold text-[#0f172a]">
-            {tr("اقتراحات المواعيد", "Appointment suggestions")}
+            {t("secretary.appointmentSuggestions.title")}
           </h1>
           <p className="mt-1 font-cairo text-sm font-medium text-[#64748b]">
-            {tr("اقتراحات مواعيد للمرضى", "Appointment suggestions for patients")}
+            {t("secretary.appointmentSuggestions.subtitle")}
             {suggestionsQuery.isRefetching
-              ? tr(" • جاري تحديث البيانات", " • Refreshing data")
+              ? t("secretary.appointmentSuggestions.refreshingData")
               : ""}
           </p>
         </div>
@@ -81,7 +80,7 @@ export default function SecretaryAppointmentSuggestionsPage() {
       <div className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
         <div className="mb-4">
           <label className="mb-2 block font-cairo text-sm font-bold text-[#0f172a]">
-            {tr("التاريخ", "Date")}
+            {t("secretary.appointmentSuggestions.date")}
           </label>
           <input
             type="date"
@@ -96,35 +95,24 @@ export default function SecretaryAppointmentSuggestionsPage() {
         </div>
         <div className="mb-4">
           <h3 className="font-cairo text-lg font-bold text-[#0f172a]">
-            {tr("اقتراحات متاحة", "Available suggestions")}
+            {t("secretary.appointmentSuggestions.availableSuggestions")}
           </h3>
           <p className="mt-1 font-cairo text-xs font-medium text-[#64748b]">
-            {tr(
-              "مرضى من قائمة الانتظار يناسبهم أحد الأوقات المتاحة أدناه.",
-              "Waitlisted patients whose preferences match one of the free slots below.",
-            )}
+            {t("secretary.appointmentSuggestions.description")}
           </p>
         </div>
         <div className="space-y-4">
           {!canViewSuggestions ? (
             <div className="rounded-lg bg-gray-50 p-4 text-center font-cairo text-sm font-semibold text-[#64748b]">
-              {tr(
-                "ليست لديك صلاحية عرض اقتراحات المواعيد.",
-                "You do not have permission to view appointment suggestions.",
-              )}
+              {t("secretary.appointmentSuggestions.noPermission")}
             </div>
           ) : suggestionsQuery.isLoading ? (
             <div className="rounded-lg bg-gray-50 p-4 text-center font-cairo text-sm font-semibold text-[#64748b]">
-              {tr("جاري تحميل الاقتراحات...", "Loading suggestions...")}
+              {t("secretary.appointmentSuggestions.loading")}
             </div>
           ) : suggestionsQuery.isError ? (
             <div className="rounded-lg bg-gray-50 p-4 text-center font-cairo text-sm font-semibold text-[#64748b]">
-              <p>
-                {tr(
-                  "تعذر تحميل اقتراحات المواعيد حالياً.",
-                  "Could not load appointment suggestions right now.",
-                )}
-              </p>
+              <p>{t("secretary.appointmentSuggestions.loadError")}</p>
               <button
                 type="button"
                 onClick={() => void suggestionsQuery.refetch()}
@@ -132,21 +120,19 @@ export default function SecretaryAppointmentSuggestionsPage() {
                 className="mt-3 rounded-lg border border-[#e2e8f0] bg-white px-4 py-2 font-cairo text-xs font-bold text-[#0f172a] transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {suggestionsQuery.isRefetching
-                  ? tr("جاري إعادة المحاولة...", "Retrying...")
-                  : tr("إعادة المحاولة", "Retry")}
+                  ? t("secretary.appointmentSuggestions.retrying")
+                  : t("secretary.appointmentSuggestions.retry")}
               </button>
             </div>
           ) : suggestionsBySlot.every(
               (slot) =>
                 !(slot.candidates ?? []).some(
-                  (candidate) => candidate.id && !dismissedIds.has(candidate.id),
+                  (candidate) =>
+                    candidate.id && !dismissedIds.has(candidate.id),
                 ),
             ) ? (
             <div className="rounded-lg bg-gray-50 p-4 text-center font-cairo text-sm font-semibold text-[#64748b]">
-              {tr(
-                "لا توجد اقتراحات متاحة لهذا التاريخ.",
-                "No suggestions available for this date.",
-              )}
+              {t("secretary.appointmentSuggestions.noSuggestions")}
             </div>
           ) : (
             suggestionsBySlot.map((slot, slotIndex) => {
@@ -175,12 +161,15 @@ export default function SecretaryAppointmentSuggestionsPage() {
                           </div>
                           <div>
                             <p className="font-cairo text-sm font-bold text-[#0f172a]">
-                              {candidate.patientName || tr("مريض", "Patient")}
+                              {candidate.patientName ||
+                                t("secretary.appointmentSuggestions.patient")}
                             </p>
                             <p className="font-cairo text-xs font-medium text-[#64748b]">
-                              {candidate.patientPublicId || candidate.patientId || "—"}
+                              {candidate.patientPublicId ||
+                                candidate.patientId ||
+                                "—"}
                               {candidate.urgencyLevel
-                                ? ` • ${tr("الأولوية", "Priority")}: ${candidate.urgencyLevel}`
+                                ? ` • ${t("secretary.appointmentSuggestions.priority")}: ${candidate.urgencyLevel}`
                                 : ""}
                             </p>
                           </div>
@@ -189,12 +178,18 @@ export default function SecretaryAppointmentSuggestionsPage() {
                           <button
                             type="button"
                             disabled={!canBookFromWaitlist || isBusy}
-                            onClick={() => void handleAccept(candidate.id!, slot.startTime)}
+                            onClick={() =>
+                              void handleAccept(candidate.id!, slot.startTime)
+                            }
                             className="rounded-lg bg-primary px-3 py-1.5 font-cairo text-xs font-bold text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
-                            aria-label={tr("حجز الموعد لهذا المريض", "Book this patient into the slot")}
+                            aria-label={t(
+                              "secretary.appointmentSuggestions.bookPatient",
+                            )}
                             title={
                               !canBookFromWaitlist
-                                ? tr("يتطلب صلاحية الحجز من قائمة الانتظار", "Requires waitlist booking permission")
+                                ? t(
+                                    "secretary.appointmentSuggestions.requiresPermission",
+                                  )
                                 : undefined
                             }
                           >
@@ -204,8 +199,12 @@ export default function SecretaryAppointmentSuggestionsPage() {
                             type="button"
                             onClick={() => handleDismiss(candidate.id!)}
                             className="rounded-lg border border-[#e2e8f0] bg-white px-3 py-1.5 font-cairo text-xs font-bold text-[#0f172a] transition hover:bg-gray-50"
-                            aria-label={tr("تجاهل الاقتراح", "Dismiss suggestion")}
-                            title={tr("إخفاء هذا الاقتراح فقط — لا يغيّر حالة قائمة الانتظار", "Only hides this suggestion — does not change waitlist state")}
+                            aria-label={t(
+                              "secretary.appointmentSuggestions.dismiss",
+                            )}
+                            title={t(
+                              "secretary.appointmentSuggestions.dismissHint",
+                            )}
                           >
                             <X className="h-4 w-4" />
                           </button>

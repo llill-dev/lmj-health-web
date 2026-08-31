@@ -44,7 +44,7 @@ function socialIconForUrl(url: string) {
 }
 
 export function PlatformFooter() {
-  const { locale, dir } = useI18n();
+  const { locale, dir, setLocale } = useI18n();
   const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const { openModal } = usePlatformSupport();
   const aboutQuery = usePlatformAboutContent(locale);
@@ -104,12 +104,12 @@ export function PlatformFooter() {
           </section>
 
           <section className="text-start">
-            <h3 className="mb-4 font-cairo text-[18px] font-extrabold">القسم القانوني</h3>
+            <h3 className="mb-4 font-cairo text-[18px] font-extrabold">{tr('القسم القانوني', 'Legal')}</h3>
             <ul className="space-y-3">
               {[
-                { label: 'الشروط والأحكام', modal: 'terms' as const },
-                { label: 'سياسة الخصوصية', modal: 'privacy' as const },
-                { label: 'سياسة الاستخدام', modal: 'usage' as const },
+                { label: tr('الشروط والأحكام', 'Terms & conditions'), modal: 'terms' as const },
+                { label: tr('سياسة الخصوصية', 'Privacy policy'), modal: 'privacy' as const },
+                { label: tr('سياسة الاستخدام', 'Usage policy'), modal: 'usage' as const },
               ].map((item) => (
                 <li key={item.modal}>
                   <button
@@ -118,7 +118,7 @@ export function PlatformFooter() {
                     className="inline-flex items-center gap-2 font-cairo text-[13px] font-semibold text-white/90 transition hover:text-white"
                   >
                     {item.label}
-                    <ChevronLeft className="h-4 w-4 opacity-70" aria-hidden />
+                    <ChevronLeft className="h-4 w-4 opacity-70 rtl:rotate-180" aria-hidden />
                   </button>
                 </li>
               ))}
@@ -126,7 +126,7 @@ export function PlatformFooter() {
           </section>
 
           <section className="text-start">
-            <h3 className="mb-4 font-cairo text-[18px] font-extrabold">الدعم والمساعدة</h3>
+            <h3 className="mb-4 font-cairo text-[18px] font-extrabold">{tr('الدعم والمساعدة', 'Support & help')}</h3>
             <ul className="mb-5 space-y-3">
               <li>
                 <button
@@ -134,7 +134,7 @@ export function PlatformFooter() {
                   onClick={() => openModal('faq')}
                   className="font-cairo text-[13px] font-semibold text-white/90 transition hover:text-white"
                 >
-                  الأسئلة الشائعة
+                  {tr('الأسئلة الشائعة', 'FAQ')}
                 </button>
               </li>
               <li>
@@ -142,7 +142,7 @@ export function PlatformFooter() {
                   to="/medical-library"
                   className="font-cairo text-[13px] font-semibold text-white/90 transition hover:text-white"
                 >
-                  المكتبة الطبية
+                  {tr('المكتبة الطبية', 'Medical library')}
                 </Link>
               </li>
               <li>
@@ -151,7 +151,7 @@ export function PlatformFooter() {
                   onClick={() => openModal('contact')}
                   className="font-cairo text-[13px] font-semibold text-white/90 transition hover:text-white"
                 >
-                  تواصل معنا
+                  {tr('تواصل معنا', 'Contact us')}
                 </button>
               </li>
             </ul>
@@ -162,7 +162,7 @@ export function PlatformFooter() {
                   type="button"
                   onClick={() => openModal('contact')}
                   className="flex h-9 w-9 items-center justify-center rounded-full border border-white/40 text-white transition hover:bg-white/10"
-                  aria-label="تواصل"
+                  aria-label={tr('تواصل', 'Contact')}
                 >
                   <Icon className="h-4 w-4" />
                 </button>
@@ -171,14 +171,14 @@ export function PlatformFooter() {
           </section>
 
           <section className="text-start">
-            <h3 className="mb-4 font-cairo text-[18px] font-extrabold">خدماتنا</h3>
+            <h3 className="mb-4 font-cairo text-[18px] font-extrabold">{tr('خدماتنا', 'Our services')}</h3>
             <ul className="space-y-3">
               <li>
                 <Link
                   to="/doctor/appointments"
                   className="font-cairo text-[13px] font-semibold text-white/90 transition hover:text-white"
                 >
-                  احجز موعد
+                  {tr('احجز موعد', 'Book an appointment')}
                 </Link>
               </li>
               <li>
@@ -186,7 +186,7 @@ export function PlatformFooter() {
                   to="/doctor/doctors-directory"
                   className="font-cairo text-[13px] font-semibold text-white/90 transition hover:text-white"
                 >
-                  الأطباء
+                  {tr('الأطباء', 'Doctors')}
                 </Link>
               </li>
               {services.map((service) => (
@@ -204,10 +204,11 @@ export function PlatformFooter() {
       <div className="flex flex-col items-center justify-between gap-4 border-t border-white/20 px-6 py-5 sm:flex-row sm:px-10">
         <button
           type="button"
+          onClick={() => setLocale(locale === 'ar' ? 'en' : 'ar')}
           className="inline-flex items-center gap-2 rounded-[8px] border border-white/40 px-4 py-2 font-cairo text-[13px] font-semibold text-white transition hover:bg-white/10"
         >
-          <ChevronLeft className="h-4 w-4" aria-hidden />
-          العربية
+          <ChevronLeft className="h-4 w-4 rtl:rotate-180" aria-hidden />
+          {tr('English', 'العربية')}
           <Globe className="h-4 w-4" aria-hidden />
         </button>
         <p className="font-cairo text-[12px] font-semibold text-white/85" dir="ltr">

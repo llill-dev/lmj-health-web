@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { Helmet } from 'react-helmet-async';
-import { useNavigate, useParams } from 'react-router-dom';
-import ConfirmActionDialog from '@/components/doctor/confirm-action-dialog';
-import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Helmet } from "react-helmet-async";
+import { useNavigate, useParams } from "react-router-dom";
+import ConfirmActionDialog from "@/components/doctor/confirm-action-dialog";
+import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
 import {
   EncounterWorkspaceHeader,
   EncounterWorkspacePageSkeleton,
@@ -11,18 +11,18 @@ import {
   EncounterWorkspaceSectionCard,
   EncounterWorkspaceSectionsSkeleton,
   type EncounterWorkspaceSectionKey,
-} from '@/components/doctor/encounters/workspace';
-import { ENCOUNTER_WORKSPACE_SECTION_PATHS } from '@/components/doctor/encounters/workspace/encounter-workspace-types';
-import { useToast } from '@/components/ui/ToastProvider';
+} from "@/components/doctor/encounters/workspace";
+import { ENCOUNTER_WORKSPACE_SECTION_PATHS } from "@/components/doctor/encounters/workspace/encounter-workspace-types";
+import { useToast } from "@/components/ui/ToastProvider";
 import {
   useCloseDoctorPatientEncounter,
   useEncounterWorkspace,
-} from '@/hooks/doctor';
-import { getUserFacingRequestErrorMessage } from '@/lib/api';
-import { useRetryAction } from '@/lib/query/useRetryAction';
-import { doctorPatientsQueryKeys } from '@/lib/doctor/client';
-import { readAuthUser } from '@/lib/cookies';
-import { useI18n } from '@/i18n/provider';
+} from "@/hooks/doctor";
+import { getUserFacingRequestErrorMessage } from "@/lib/api";
+import { useRetryAction } from "@/lib/query/useRetryAction";
+import { doctorPatientsQueryKeys } from "@/lib/doctor/client";
+import { readAuthUser } from "@/lib/cookies";
+import { useI18n } from "@/i18n/provider";
 
 const DEFAULT_EXPANDED_SECTIONS: Record<EncounterWorkspaceSectionKey, boolean> =
   {
@@ -34,18 +34,17 @@ const DEFAULT_EXPANDED_SECTIONS: Record<EncounterWorkspaceSectionKey, boolean> =
   };
 
 export default function DoctorEncounterWorkspacePage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const { t, locale, dir } = useI18n();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { patientId = '', encounterId = '' } = useParams();
-  const doctorId = readAuthUser()?.actorIds?.doctorId ?? '';
+  const { patientId = "", encounterId = "" } = useParams();
+  const doctorId = readAuthUser()?.actorIds?.doctorId ?? "";
   const authUser = readAuthUser();
   const doctorName = authUser?.fullName?.trim()
-    ? locale === 'ar' && !/^د\.?\s/u.test(authUser.fullName)
+    ? locale === "ar" && !/^د\.?\s/u.test(authUser.fullName)
       ? `د. ${authUser.fullName}`
       : authUser.fullName
-    : tr('الطبيب', 'Doctor');
+    : t("doctor.encounter.workspace.doctor");
 
   const [expandedSections, setExpandedSections] = useState(
     DEFAULT_EXPANDED_SECTIONS,
@@ -74,9 +73,9 @@ export default function DoctorEncounterWorkspacePage() {
 
   const handleSaveProgress = () => {
     void retryWorkspace();
-    toast(tr('تم تحديث عرض الزيارة من الخادم.', 'The encounter view was refreshed from the server.'), {
-      title: tr('حفظ التقدم', 'Save progress'),
-      variant: 'success',
+    toast(t("doctor.encounter.workspace.refreshed"), {
+      title: t("doctor.encounter.workspace.saveProgress"),
+      variant: "success",
     });
   };
 
@@ -87,9 +86,9 @@ export default function DoctorEncounterWorkspacePage() {
         patientId,
         encounterId,
       });
-      toast(response.message ?? tr('تم إغلاق الزيارة الطبية بنجاح.', 'The medical encounter was closed successfully.'), {
-        title: tr('إغلاق الزيارة', 'Close encounter'),
-        variant: 'success',
+      toast(response.message ?? t("doctor.encounter.workspace.closedSuccess"), {
+        title: t("doctor.encounter.workspace.closeEncounter"),
+        variant: "success",
       });
       setCloseOpen(false);
       await queryClient.invalidateQueries({
@@ -104,8 +103,8 @@ export default function DoctorEncounterWorkspacePage() {
       });
     } catch (requestError) {
       toast(getUserFacingRequestErrorMessage(requestError), {
-        title: tr('تعذّر إغلاق الزيارة', 'Could not close the encounter'),
-        variant: 'error',
+        title: t("doctor.encounter.workspace.closeFailed"),
+        variant: "error",
       });
       throw requestError;
     }
@@ -114,7 +113,7 @@ export default function DoctorEncounterWorkspacePage() {
   return (
     <>
       <Helmet>
-        <title>{tr('الزيارة الطبية', 'Medical encounter')} • LMJ Health</title>
+        <title>{t("doctor.encounter.workspace.pageTitle")} • LMJ Health</title>
       </Helmet>
 
       <div dir={dir} lang={locale} className="w-full">
@@ -122,9 +121,11 @@ export default function DoctorEncounterWorkspacePage() {
 
         {workspace.isAwaitingEncounterData ? (
           <EncounterWorkspacePageSkeleton />
-        ) : workspace.isError || !workspace.encounter || !workspace.patientVm ? (
+        ) : workspace.isError ||
+          !workspace.encounter ||
+          !workspace.patientVm ? (
           <DoctorListErrorState
-            title={tr('تعذّر تحميل مساحة الزيارة الطبية', 'Failed to load the encounter workspace')}
+            title={t("doctor.encounter.workspace.loadFailed")}
             brief={getUserFacingRequestErrorMessage(workspace.error)}
             detail={getUserFacingRequestErrorMessage(workspace.error)}
             retrying={retryingWorkspace}
@@ -140,41 +141,41 @@ export default function DoctorEncounterWorkspacePage() {
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <button
                 type="button"
-                onClick={() => openSection('prescription')}
+                onClick={() => openSection("prescription")}
                 className="flex h-12 w-full items-center justify-center rounded-[12px] border-2 border-primary bg-white font-cairo text-[14px] font-extrabold text-primary transition hover:bg-[#F0FAF9]"
               >
-                {tr('فتح الوصفة الطبية', 'Open prescription')}
+                {t("doctor.encounter.workspace.openPrescription")}
               </button>
               <button
                 type="button"
-                onClick={() => openSection('radiology')}
+                onClick={() => openSection("radiology")}
                 className="flex h-12 w-full items-center justify-center rounded-[12px] border-2 border-primary bg-white font-cairo text-[14px] font-extrabold text-primary transition hover:bg-[#F0FAF9]"
               >
-                {tr('فتح طلبات الأشعة', 'Open imaging orders')}
+                {t("doctor.encounter.workspace.openImaging")}
               </button>
             </div>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <button
                 type="button"
-                onClick={() => openSection('lab')}
+                onClick={() => openSection("lab")}
                 className="flex h-11 w-full items-center justify-center rounded-[12px] border border-[#BFEDEC] bg-[#F8FFFE] font-cairo text-[13px] font-extrabold text-primary transition hover:bg-[#E6F4F3]"
               >
-                {tr('طلبات التحاليل', 'Lab orders')}
+                {t("doctor.encounter.workspace.labOrders")}
               </button>
               <button
                 type="button"
-                onClick={() => openSection('procedure')}
+                onClick={() => openSection("procedure")}
                 className="flex h-11 w-full items-center justify-center rounded-[12px] border border-[#BFEDEC] bg-[#F8FFFE] font-cairo text-[13px] font-extrabold text-primary transition hover:bg-[#E6F4F3]"
               >
-                {tr('طلبات الإجراءات', 'Procedure orders')}
+                {t("doctor.encounter.workspace.procedureOrders")}
               </button>
               <button
                 type="button"
-                onClick={() => openSection('referral')}
+                onClick={() => openSection("referral")}
                 className="flex h-11 w-full items-center justify-center rounded-[12px] border border-[#BFEDEC] bg-[#F8FFFE] font-cairo text-[13px] font-extrabold text-primary transition hover:bg-[#E6F4F3]"
               >
-                {tr('التحويلات الطبية', 'Medical referrals')}
+                {t("doctor.encounter.workspace.referrals")}
               </button>
             </div>
 
@@ -193,7 +194,7 @@ export default function DoctorEncounterWorkspacePage() {
                     }
                     onToggle={() => toggleSection(section.key)}
                     onOpenSection={() => openSection(section.key)}
-                    onAddReferral={() => openSection('referral')}
+                    onAddReferral={() => openSection("referral")}
                   />
                 ))}
               </div>
@@ -204,14 +205,14 @@ export default function DoctorEncounterWorkspacePage() {
                 type="button"
                 onClick={() => setCloseOpen(true)}
                 disabled={
-                  workspace.encounter.status === 'closed' ||
+                  workspace.encounter.status === "closed" ||
                   closeEncounterMutation.isPending
                 }
                 className="inline-flex h-12 items-center justify-center rounded-[12px] border-2 border-primary bg-white font-cairo text-[14px] font-extrabold text-primary transition hover:bg-[#F0FAF9] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {closeEncounterMutation.isPending
-                  ? tr('جارٍ إغلاق الزيارة...', 'Closing the encounter...')
-                  : tr('إغلاق الزيارة', 'Close encounter')}
+                  ? t("doctor.encounter.workspace.closing")
+                  : t("doctor.encounter.workspace.closeEncounter")}
               </button>
               <button
                 type="button"
@@ -219,13 +220,15 @@ export default function DoctorEncounterWorkspacePage() {
                 disabled={retryingWorkspace}
                 className="inline-flex h-12 items-center justify-center rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_12px_28px_rgba(15,143,139,0.28)] transition hover:opacity-95 disabled:opacity-60"
               >
-                {retryingWorkspace ? tr('جارٍ التحديث...', 'Refreshing...') : tr('تحديث من الخادم', 'Refresh from server')}
+                {retryingWorkspace
+                  ? t("doctor.encounter.workspace.refreshing")
+                  : t("doctor.encounter.workspace.refreshFromServer")}
               </button>
             </div>
 
             {workspace.profileDenied ? (
               <div className="rounded-[12px] border border-[#FED7AA] bg-[#FFF7ED] px-4 py-3 text-start font-cairo text-[12px] font-semibold text-[#B45309]">
-                {tr('الوصول الكامل لملف المريض غير متاح؛ بيانات الأقسام من طلبات هذه الزيارة فقط.', "Full access to the patient file is not available; section data is limited to this encounter's own requests.")}
+                {t("doctor.encounter.workspace.profileDenied")}
               </div>
             ) : null}
           </div>
@@ -234,12 +237,9 @@ export default function DoctorEncounterWorkspacePage() {
         <ConfirmActionDialog
           open={closeOpen}
           onOpenChange={setCloseOpen}
-          title={tr('إغلاق الزيارة الطبية', 'Close the medical encounter')}
-          description={tr(
-            'هل أنت متأكد من إغلاق هذه الزيارة؟ تأكد من اعتماد الطلبات قبل المتابعة.',
-            'Are you sure you want to close this encounter? Make sure the orders are finalized before proceeding.',
-          )}
-          confirmLabel={tr('تأكيد الإغلاق', 'Confirm closing')}
+          title={t("doctor.encounter.workspace.confirmCloseTitle")}
+          description={t("doctor.encounter.workspace.confirmCloseDesc")}
+          confirmLabel={t("doctor.encounter.workspace.confirmCloseLabel")}
           confirmDisabled={closeEncounterMutation.isPending}
           onConfirm={handleCloseEncounter}
         />

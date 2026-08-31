@@ -181,6 +181,12 @@ export default function CancelAppointmentDialog({
                 <Dialog.Title className='text-start font-cairo text-[24px] font-extrabold leading-[30px] text-[#101828]'>
                   {title}
                 </Dialog.Title>
+                <Dialog.Description className='sr-only'>
+                  {tr(
+                    'تأكيد إلغاء الموعد المحدد.',
+                    'Confirm cancelling the selected appointment.',
+                  )}
+                </Dialog.Description>
 
                 <div className='mt-10 text-start'>
                   <div className='font-cairo text-[14px] font-bold text-[#101828]'>

@@ -1,4 +1,5 @@
 import { API_BASE_URL, ApiError } from '@/lib/api';
+import { getCurrentLocale } from '@/i18n/runtime';
 import { useAuthStore } from '@/store/authStore';
 
 export type GenerateDoctorDocumentBody = {
@@ -45,7 +46,7 @@ export async function generateDoctorDocumentPdf(
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/pdf',
-      'x-lang': 'ar',
+      'x-lang': getCurrentLocale(),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     body: JSON.stringify(body),

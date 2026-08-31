@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Activity, CheckCircle2, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils/utils";
+import { useI18n } from "@/i18n/provider";
 
 type EncountersStatsRowProps = {
   total: number;
@@ -13,25 +14,28 @@ export function EncountersStatsRow({
   active,
   closed,
 }: EncountersStatsRowProps) {
+  const { locale } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
       <StatCard
         variant="primary"
         icon={<ClipboardList className="h-5 w-5" aria-hidden />}
         value={total}
-        label="الكل"
+        label={tr("الكل", "All")}
       />
       <StatCard
         variant="active"
         icon={<Activity className="h-5 w-5" aria-hidden />}
         value={active}
-        label="نشطة"
+        label={tr("نشطة", "Active")}
       />
       <StatCard
         variant="closed"
         icon={<CheckCircle2 className="h-5 w-5" aria-hidden />}
         value={closed}
-        label="مغلقة"
+        label={tr("مغلقة", "Closed")}
       />
     </div>
   );

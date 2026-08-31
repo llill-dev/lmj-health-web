@@ -4,31 +4,52 @@ import type {
 } from '@/lib/doctor/profile/profileClient';
 import type { DoctorProfileChangeItem } from '@/lib/doctor/profile/profileChangeRequestsClient';
 import type { DoctorProfessionalEditForm } from '@/components/doctor/profile-settings/doctor-profile-schemas';
+import type { AppLocale } from '@/i18n/runtime';
 
-export function formatDoctorDisplayName(fullName?: string | null) {
-  const trimmed = fullName?.trim() || 'الطبيب';
+type TFn = (key: string, fallback?: string) => string;
+
+export function formatDoctorDisplayName(
+  fullName?: string | null,
+  t?: TFn,
+  locale: AppLocale = 'ar',
+) {
+  const fallbackName = t ? t('doctor.profileSettings.defaultDisplayName') : 'الطبيب';
+  const trimmed = fullName?.trim() || fallbackName;
+  if (locale === 'en') {
+    return /^dr\.?\s/iu.test(trimmed) ? trimmed : `Dr. ${trimmed}`;
+  }
   return /^د\.?\s/u.test(trimmed) ? trimmed : `د. ${trimmed}`;
 }
 
-export function doctorInitial(fullName?: string | null) {
+export function doctorInitial(fullName?: string | null, locale: AppLocale = 'ar') {
+  if (locale === 'en') {
+    const trimmed = fullName?.trim() || 'D';
+    return trimmed.replace(/^dr\.?\s*/iu, '').charAt(0) || 'D';
+  }
   const trimmed = fullName?.trim() || 'د';
   return trimmed.replace(/^د\.?\s*/u, '').charAt(0) || 'د';
 }
 
-export function formatProfileDate(value?: string | null) {
+export function formatProfileDate(
+  value?: string | null,
+  locale: AppLocale = 'ar',
+) {
   if (!value?.trim()) return '—';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString('ar-SY', {
+  return date.toLocaleDateString(locale === 'ar' ? 'ar-SY' : 'en-US', {
     day: 'numeric',
     month: 'numeric',
     year: 'numeric',
   });
 }
 
-export function formatConsultationFee(value?: number | null) {
+export function formatConsultationFee(
+  value?: number | null,
+  locale: AppLocale = 'ar',
+) {
   if (value == null || Number.isNaN(value)) return '—';
-  return value.toLocaleString('ar-SY');
+  return value.toLocaleString(locale === 'ar' ? 'ar-SY' : 'en-US');
 }
 
 export function maskPhone(phone?: string | null) {
@@ -79,9 +100,11 @@ export function modeToConsultationTypes(
 
 export function formatConsultationModeLabel(
   types?: (DoctorConsultationType | string)[] | null,
+  t?: TFn,
 ) {
   const normalized = normalizeConsultationTypes(types);
   const mode = consultationTypesToMode(normalized);
+  if (t) return t(`doctor.profileSettings.consultationMode.${mode}`);
   if (mode === 'both') return 'حضورية + عن بعد';
   if (mode === 'online') return 'عن بعد';
   return 'حضوري';
@@ -105,34 +128,80 @@ export function toDateInputValue(value?: string | null) {
 
 export function buildProfileFieldRows(
   doctor: DoctorProfileRecord | null | undefined,
+  t?: TFn,
+  locale: AppLocale = 'ar',
 ) {
   const user = doctor?.user;
+  const label = (key: string, fallback: string) => (t ? t(key) : fallback);
+
   return {
     personal: [
-      { label: 'الاسم الكامل', value: user?.fullName?.trim() || '—' },
-      { label: 'تاريخ الميلاد', value: formatProfileDate(user?.dateOfBirth) },
-      { label: 'التخصص', value: doctor?.specialization?.trim() || '—' },
-      { label: 'المدينة', value: doctor?.locationCity?.trim() || '—' },
-      { label: 'البلد', value: doctor?.locationCountry?.trim() || '—' },
-      { label: 'الهاتف', value: maskPhone(user?.phone) },
-      { label: 'البريد الإلكتروني', value: maskEmail(user?.email) },
-      { label: 'نبذة تعريفية', value: doctor?.bio?.trim() || '—' },
+      {
+        label: label('doctor.profileSettings.field.fullName', 'الاسم الكامل'),
+        value: user?.fullName?.trim() || '—',
+      },
+      {
+        label: label('doctor.profileSettings.field.dateOfBirth', 'تاريخ الميلاد'),
+        value: formatProfileDate(user?.dateOfBirth, locale),
+      },
+      {
+        label: label('doctor.profileSettings.field.specialization', 'التخصص'),
+        value: doctor?.specialization?.trim() || '—',
+      },
+      {
+        label: label('doctor.profileSettings.field.city', 'المدينة'),
+        value: doctor?.locationCity?.trim() || '—',
+      },
+      {
+        label: label('doctor.profileSettings.field.country', 'البلد'),
+        value: doctor?.locationCountry?.trim() || '—',
+      },
+      {
+        label: label('doctor.profileSettings.field.phone', 'الهاتف'),
+        value: maskPhone(user?.phone),
+      },
+      {
+        label: label('doctor.profileSettings.field.email', 'البريد الإلكتروني'),
+        value: maskEmail(user?.email),
+      },
+      {
+        label: label('doctor.profileSettings.field.bio', 'نبذة تعريفية'),
+        value: doctor?.bio?.trim() || '—',
+      },
     ],
     professional: [
       {
-        label: 'رقم الشهادة الطبية',
+        label: label(
+          'doctor.profileSettings.field.medicalLicenseNumber',
+          'رقم الشهادة الطبية',
+        ),
         value: doctor?.medicalLicenseNumber?.trim() || '—',
       },
-      { label: 'التخصص', value: doctor?.specialization?.trim() || '—' },
-      { label: 'العنوان', value: doctor?.clinicAddress?.trim() || '—' },
-      { label: 'المؤهل', value: doctor?.education?.trim() || '—' },
       {
-        label: 'نوع الاستشارة',
-        value: formatConsultationModeLabel(doctor?.consultationTypes),
+        label: label('doctor.profileSettings.field.specialization', 'التخصص'),
+        value: doctor?.specialization?.trim() || '—',
       },
       {
-        label: 'سعر الاستشارة',
-        value: formatConsultationFee(doctor?.consultationFee),
+        label: label('doctor.profileSettings.field.clinicAddress', 'العنوان'),
+        value: doctor?.clinicAddress?.trim() || '—',
+      },
+      {
+        label: label('doctor.profileSettings.field.education', 'المؤهل'),
+        value: doctor?.education?.trim() || '—',
+      },
+      {
+        label: label(
+          'doctor.profileSettings.field.consultationType',
+          'نوع الاستشارة',
+        ),
+        value: formatConsultationModeLabel(doctor?.consultationTypes, t),
+      },
+      {
+        label: label(
+          'doctor.profileSettings.field.consultationFee',
+          'سعر الاستشارة',
+        ),
+        value: formatConsultationFee(doctor?.consultationFee, locale),
       },
     ],
   };

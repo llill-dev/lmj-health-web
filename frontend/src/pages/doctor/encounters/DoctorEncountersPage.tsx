@@ -51,53 +51,46 @@ const DEFAULT_FILTERS: EncountersFiltersState = {
 
 function getEmptyStateCopy(
   status: MedicalVisitStatusFilter,
-  tr: (ar: string, en: string) => string,
+  t: (key: string) => string,
 ): {
   title: string;
   subtitle: string;
 } {
   if (status === "open") {
     return {
-      title: tr("لا توجد زيارات نشطة حاليًا", "No active encounters right now"),
-      subtitle: tr(
-        "ابدأ زيارة طبية جديدة لمتابعة المريض، إضافة الوصفات والتحاليل، وربط الموعد إن وجد.",
-        "Start a new medical encounter to follow the patient, add prescriptions/labs, and link an appointment if available.",
-      ),
+      title: t("doctor.encounters.empty.open.title"),
+      subtitle: t("doctor.encounters.empty.open.subtitle"),
     };
   }
   if (status === "closed") {
     return {
-      title: tr("لا توجد زيارات مغلقة", "No closed encounters"),
-      subtitle: tr(
-        "عند إغلاق الزيارات الطبية ستظهر هنا مع سجلها الكامل. يمكنك بدء زيارة جديدة في أي وقت.",
-        "Closed medical encounters will appear here with their full history. You can start a new encounter anytime.",
-      ),
+      title: t("doctor.encounters.empty.closed.title"),
+      subtitle: t("doctor.encounters.empty.closed.subtitle"),
     };
   }
   return {
-    title: tr("لا توجد زيارات لعرضها", "No encounters to show"),
-    subtitle: tr(
-      "أنشئ زيارة طبية جديدة لبدء التوثيق السريري للمريض، من الموعد أو مباشرة من العيادة.",
-      "Create a new medical encounter to start clinical documentation from an appointment or directly in clinic.",
-    ),
+    title: t("doctor.encounters.empty.all.title"),
+    subtitle: t("doctor.encounters.empty.all.subtitle"),
   };
 }
 
 export default function DoctorEncountersPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const doctorId = readAuthUser()?.actorIds?.doctorId ?? "";
 
-  const [filters, setFilters] = useState<EncountersFiltersState>(DEFAULT_FILTERS);
+  const [filters, setFilters] =
+    useState<EncountersFiltersState>(DEFAULT_FILTERS);
   const [expandedVisitId, setExpandedVisitId] = useState<string | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [createDialogPatientId, setCreateDialogPatientId] = useState<
     string | null
   >(null);
-  const [closeTarget, setCloseTarget] = useState<MedicalVisitCardData | null>(null);
+  const [closeTarget, setCloseTarget] = useState<MedicalVisitCardData | null>(
+    null,
+  );
 
   const { visits, stats, isAwaitingData, isError, error, refetch } =
     useDoctorMedicalEncountersPage(doctorId, filters);
@@ -133,8 +126,8 @@ export default function DoctorEncountersPage() {
   );
 
   const emptyCopy = useMemo(
-    () => getEmptyStateCopy(filters.status, tr),
-    [filters.status, locale],
+    () => getEmptyStateCopy(filters.status, t),
+    [filters.status, t],
   );
 
   const openCreateEncounterDialog = (patientId?: string) => {
@@ -184,14 +177,17 @@ export default function DoctorEncountersPage() {
       setCreateDialogPatientId(null);
       setExpandedVisitId(response.encounter._id);
       setFilters((prev) => ({ ...prev, status: "all" }));
-      toast(response.message ?? tr("تم إنشاء الزيارة الطبية بنجاح.", "The medical encounter was created successfully."), {
-        title: tr("إنشاء زيارة", "Create encounter"),
+      toast(response.message ?? t("doctor.encounters.createSuccess"), {
+        title: t("doctor.encounters.createTitle"),
         variant: "success",
       });
       void refetch();
     } catch (requestError) {
       const feedback = resolveCreateEncounterServerFeedback(requestError);
-      throw new CreateEncounterSubmitError(feedback.fields, feedback.toastMessage);
+      throw new CreateEncounterSubmitError(
+        feedback.fields,
+        feedback.toastMessage,
+      );
     }
   };
 
@@ -204,8 +200,8 @@ export default function DoctorEncountersPage() {
         encounterId: closeTarget.id,
       });
 
-      toast(response.message ?? tr("تم إغلاق الزيارة الطبية بنجاح.", "The medical encounter was closed successfully."), {
-        title: tr("إغلاق زيارة", "Close encounter"),
+      toast(response.message ?? t("doctor.encounters.closeSuccess"), {
+        title: t("doctor.encounters.closeTitle"),
         variant: "success",
       });
       const closedPatientId = closeTarget.patientId;
@@ -217,7 +213,7 @@ export default function DoctorEncountersPage() {
       );
     } catch (requestError) {
       toast(getUserFacingRequestErrorMessage(requestError), {
-        title: tr("تعذر إغلاق الزيارة", "Could not close the encounter"),
+        title: t("doctor.encounters.closeFailed"),
         variant: "error",
       });
       throw requestError;
@@ -227,17 +223,19 @@ export default function DoctorEncountersPage() {
   return (
     <>
       <Helmet>
-        <title>{tr("الزيارات الطبية • LMJ Health", "Encounters • LMJ Health")}</title>
+        <title>{t("doctor.encounters.page.title")}</title>
       </Helmet>
 
       <div dir={dir} lang={locale} className="w-full">
         <DoctorDashboardOverview
           variant="encounters"
           surface="mint"
-          title={tr("الزيارات الطبية", "Medical Encounters")}
-          subtitle={tr("جميع زياراتك", "All your encounters")}
-          headerIcon={<ClipboardList className="h-8 w-8 text-white" aria-hidden />}
-          actionLabel={tr("زيارة جديدة", "New encounter")}
+          title={t("doctor.encounters.title")}
+          subtitle={t("doctor.encounters.subtitle")}
+          headerIcon={
+            <ClipboardList className="h-8 w-8 text-white" aria-hidden />
+          }
+          actionLabel={t("doctor.encounters.newEncounter")}
           actionIcon={<Plus className="h-4 w-4" aria-hidden />}
           onActionClick={() => openCreateEncounterDialog()}
           kpis={[
@@ -245,19 +243,19 @@ export default function DoctorEncountersPage() {
               key: "all",
               icon: <ClipboardList className="h-5 w-5 shrink-0" />,
               value: displayStats.total,
-              label: tr("الكل", "All"),
+              label: t("doctor.encounters.kpi.all"),
             },
             {
               key: "open",
               icon: <Stethoscope className="h-5 w-5 shrink-0" />,
               value: displayStats.active,
-              label: tr("نشطة", "Active"),
+              label: t("doctor.encounters.kpi.active"),
             },
             {
               key: "closed",
               icon: <ClipboardList className="h-5 w-5 shrink-0" />,
               value: displayStats.closed,
-              label: tr("مغلقة", "Closed"),
+              label: t("doctor.encounters.kpi.closed"),
             },
           ]}
         />
@@ -279,24 +277,21 @@ export default function DoctorEncountersPage() {
           </motion.div>
         ) : isError ? (
           <DoctorListErrorState
-            title={tr("تعذّر تحميل الزيارات الطبية", "Failed to load medical encounters")}
+            title={t("doctor.encounters.loadFailed")}
             brief={getUserFacingRequestErrorMessage(error)}
             detail={getUserFacingRequestErrorMessage(error)}
             retrying={retryingEncounters}
             onRetry={() => void retryEncounters()}
           />
         ) : (
-          <EncountersListPanel
-            panelKey={filters.status}
-            isRefreshing={false}
-          >
+          <EncountersListPanel panelKey={filters.status} isRefreshing={false}>
             {visits.length === 0 ? (
               <PatientTabEmptyIllustration
                 variant="teal"
                 imageSrc="/images/photo-not-meduical-file.png"
                 title={emptyCopy.title}
                 subtitle={emptyCopy.subtitle}
-                actionLabel={tr("إضافة زيارة جديدة", "Add new encounter")}
+                actionLabel={t("doctor.encounters.empty.addNew")}
                 onAction={() => openCreateEncounterDialog()}
                 actionIcon={<Plus className="h-4 w-4" />}
               />
@@ -394,26 +389,28 @@ export default function DoctorEncountersPage() {
         onOpenChange={(open) => {
           if (!open) setCloseTarget(null);
         }}
-        title={tr("إغلاق الزيارة الطبية", "Close the medical encounter")}
+        title={t("doctor.encounters.confirmCloseTitle")}
         description={
           closeTarget ? (
             locale === "ar" ? (
               <>
-                سيتم إغلاق زيارة المريض <strong>{closeTarget.patientName}</strong>.
-                تأكد من عدم وجود مسودات وصفات أو طلبات غير مكتملة قبل المتابعة.
+                سيتم إغلاق زيارة المريض{" "}
+                <strong>{closeTarget.patientName}</strong>. تأكد من عدم وجود
+                مسودات وصفات أو طلبات غير مكتملة قبل المتابعة.
               </>
             ) : (
               <>
-                The encounter for patient <strong>{closeTarget.patientName}</strong> will
-                be closed. Make sure there are no incomplete prescription drafts or
-                orders before proceeding.
+                The encounter for patient{" "}
+                <strong>{closeTarget.patientName}</strong> will be closed. Make
+                sure there are no incomplete prescription drafts or orders
+                before proceeding.
               </>
             )
           ) : (
-            tr("سيتم إغلاق الزيارة الحالية.", "The current encounter will be closed.")
+            t("doctor.encounters.confirmCloseDescription")
           )
         }
-        confirmLabel={tr("تأكيد الإغلاق", "Confirm closing")}
+        confirmLabel={t("doctor.encounters.confirmCloseLabel")}
         confirmDisabled={closeEncounterMutation.isPending}
         onConfirm={handleCloseEncounter}
       />

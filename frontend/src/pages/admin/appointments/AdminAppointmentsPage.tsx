@@ -29,8 +29,7 @@ import type { AppointmentStatus } from "@/lib/admin/types";
 import { useI18n } from "@/i18n/provider";
 
 export default function AdminAppointmentsPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { locale, dir, t } = useI18n();
 
   const [confirmResetOpen, setConfirmResetOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -146,7 +145,7 @@ export default function AdminAppointmentsPage() {
 
   const stats = [
     {
-      title: tr("ملغية", "Cancelled"),
+      title: t("admin.appointments.stats.cancelled"),
       value: isAwaitingData ? "—" : String(statusCounts.cancelled),
       icon: Ban,
       tone: {
@@ -158,7 +157,7 @@ export default function AdminAppointmentsPage() {
       },
     },
     {
-      title: tr("عدم حضور", "No-show"),
+      title: t("admin.appointments.stats.noShow"),
       value: isAwaitingData ? "—" : String(statusCounts["no-show"]),
       icon: AlertCircle,
       tone: {
@@ -170,7 +169,7 @@ export default function AdminAppointmentsPage() {
       },
     },
     {
-      title: tr("مكتملة", "Completed"),
+      title: t("admin.appointments.stats.completed"),
       value: isAwaitingData ? "—" : String(statusCounts.completed),
       icon: CheckCircle2,
       tone: {
@@ -182,7 +181,7 @@ export default function AdminAppointmentsPage() {
       },
     },
     {
-      title: tr("مجدولة", "Scheduled"),
+      title: t("admin.appointments.stats.scheduled"),
       value:
         isAwaitingData
           ? "—"
@@ -201,18 +200,15 @@ export default function AdminAppointmentsPage() {
   return (
     <>
       <Helmet>
-        <title>{tr("إدارة المواعيد", "Appointments")} • LMJ Health</title>
+        <title>{t("admin.appointments.meta.title")} • LMJ Health</title>
       </Helmet>
 
       <div dir={dir} lang={locale}>
         <AdminDashboardOverview
           variant="appointments"
           surface="mint"
-          title={tr("إدارة المواعيد", "Appointments management")}
-          subtitle={tr(
-            "متابعة وجدولة مواعيد المرضى مع الأطباء",
-            "Monitor and schedule patient appointments with doctors",
-          )}
+          title={t("admin.appointments.page.title")}
+          subtitle={t("admin.appointments.page.subtitle")}
           headerIcon={<CalendarDays className="h-8 w-8 text-white" />}
           kpiColumns={4}
           kpis={stats.map((s) => {
@@ -229,10 +225,7 @@ export default function AdminAppointmentsPage() {
         <div className="mt-4 flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
           <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
-            {tr(
-              "هذه الشاشة مخصّصة لمتابعة سجل المواعيد وفتح التفاصيل المرجعية لكل موعد. البحث بالاسم غير متاح لأن الخادم لا يدعمه؛ استخدم الحالة والتاريخ للفرز. الفلاتر هنا تغيّر العرض فقط، ولا تنفّذ تعديلًا مباشرًا على بيانات الموعد من قائمة البطاقات.",
-              "This page is for monitoring the appointment record and opening each appointment’s reference details. Name search isn't available because the server doesn't support it; use status and date to narrow results. The filters here only change the view and do not directly modify appointment data from the cards list.",
-            )}
+            {t("admin.appointments.disclaimer")}
           </div>
         </div>
 
@@ -247,17 +240,29 @@ export default function AdminAppointmentsPage() {
                   onChange={handleStatusChange}
                   disabled={isAwaitingData}
                   options={[
-                    { value: "", label: tr("كل الحالات", "All statuses") },
-                    { value: "scheduled", label: tr("مجدولة", "Scheduled") },
+                    { value: "", label: t("admin.appointments.status.all") },
+                    {
+                      value: "scheduled",
+                      label: t("admin.appointments.status.scheduled"),
+                    },
                     {
                       value: "rescheduled",
-                      label: tr("معاد جدولتها", "Rescheduled"),
+                      label: t("admin.appointments.status.rescheduled"),
                     },
-                    { value: "completed", label: tr("مكتملة", "Completed") },
-                    { value: "cancelled", label: tr("ملغية", "Cancelled") },
-                    { value: "no-show", label: tr("عدم حضور", "No-show") },
+                    {
+                      value: "completed",
+                      label: t("admin.appointments.status.completed"),
+                    },
+                    {
+                      value: "cancelled",
+                      label: t("admin.appointments.status.cancelled"),
+                    },
+                    {
+                      value: "no-show",
+                      label: t("admin.appointments.status.noShow"),
+                    },
                   ]}
-                  listboxAriaLabel={tr("حالة الموعد", "Appointment status")}
+                  listboxAriaLabel={t("admin.appointments.statusAriaLabel")}
                 />
               </div>
 
@@ -277,15 +282,15 @@ export default function AdminAppointmentsPage() {
                 disabled={isAwaitingData}
                 className="inline-flex h-[34px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {tr("إعادة تعيين", "Reset")}
+                {t("admin.appointments.reset")}
               </button>
               <div className="font-cairo text-[12px] font-bold text-[#667085]">
-                {isAwaitingData ? "—" : results} {tr("نتيجة", "results")}
+                {isAwaitingData ? "—" : results} {t("admin.appointments.results")}
               </div>
               {isRefetching ? (
                 <div className="inline-flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]">
                   <RefreshCw className="h-3.5 w-3.5 animate-spin text-primary" />
-                  {tr("يتم تحديث النتائج", "Refreshing results")}
+                  {t("admin.appointments.refreshingResults")}
                 </div>
               ) : null}
             </div>
@@ -305,7 +310,7 @@ export default function AdminAppointmentsPage() {
                 <div className="text-start">
                   {userFacingErrorMessage(
                     error,
-                    tr("تعذّر تحميل المواعيد.", "Failed to load appointments."),
+                    t("admin.appointments.loadError"),
                   )}
                 </div>
                 <button
@@ -314,21 +319,15 @@ export default function AdminAppointmentsPage() {
                   disabled={isRefetching}
                   className="inline-flex h-[32px] shrink-0 items-center justify-center rounded-[10px] border border-[#FECACA] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#B42318] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {tr("إعادة المحاولة", "Retry")}
+                  {t("admin.appointments.retry")}
                 </button>
               </div>
             </div>
           ) : uiAppointments.length === 0 ? (
             <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 font-cairo text-[12px] font-semibold text-[#667085] shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
               {hasActiveFilters
-                ? tr(
-                    "لا توجد مواعيد مطابقة للفلاتر الحالية.",
-                    "No appointments match the current filters.",
-                  )
-                : tr(
-                    "لا توجد مواعيد متاحة حالياً.",
-                    "No appointments are available right now.",
-                  )}
+                ? t("admin.appointments.emptyFiltered")
+                : t("admin.appointments.emptyAll")}
             </div>
           ) : (
             uiAppointments.map((a) => (
@@ -354,7 +353,7 @@ export default function AdminAppointmentsPage() {
                         </span>
                       </div>
                       <div className="mt-1 font-cairo text-[12px] font-bold text-[#98A2B3]">
-                        {tr("موعد:", "Appointment:")} {a.code}
+                        {t("admin.appointments.appointmentLabel")} {a.code}
                       </div>
                     </div>
 
@@ -364,7 +363,7 @@ export default function AdminAppointmentsPage() {
                           <div className="flex flex-col items-start gap-2 font-cairo text-[12px] font-bold text-[#667085]">
                             <div className="flex items-center gap-2">
                               <User className="h-4 w-4 text-primary" />
-                              <span>{tr("المريض:", "Patient:")}</span>
+                              <span>{t("admin.appointments.patientLabel")}</span>
                               <span className="text-[#111827]">{a.patientLabel}</span>
                             </div>
                           </div>
@@ -378,13 +377,15 @@ export default function AdminAppointmentsPage() {
                           <div className="flex flex-col items-start gap-2 font-cairo text-[12px] font-bold text-[#667085]">
                             <div className="flex items-center gap-2">
                               <Stethoscope className="h-4 w-4 text-primary" />
-                              <span>{tr("الطبيب:", "Doctor:")}</span>
+                              <span>{t("admin.appointments.doctorLabel")}</span>
                               <span className="text-[#111827]">{a.doctorName}</span>
                             </div>
                             {a.doctorSpecialization ? (
                               <div className="flex items-center gap-2">
                                 <CalendarDays className="h-4 w-4 text-primary" />
-                                <span>{tr("التخصص:", "Specialization:")}</span>
+                                <span>
+                                  {t("admin.appointments.specializationLabel")}
+                                </span>
                                 <span className="text-[#111827]">
                                   {a.doctorSpecialization}
                                 </span>
@@ -408,7 +409,7 @@ export default function AdminAppointmentsPage() {
                           className="inline-flex h-[32px] items-center gap-2 rounded-[10px] bg-[#F2F4F7] px-4 font-cairo text-[12px] font-extrabold text-[#4B5563]"
                         >
                           <Eye className="h-4 w-4" />
-                          {tr("عرض التفاصيل", "View details")}
+                          {t("admin.appointments.viewDetails")}
                         </button>
                       </div>
                     </div>
@@ -421,7 +422,8 @@ export default function AdminAppointmentsPage() {
 
         <section className="mt-5 flex items-center justify-between rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
           <div className="font-cairo text-[12px] font-bold text-[#667085]">
-            {tr("الصفحة", "Page")} {filters.page} {tr("من", "of")} {totalPages}
+            {t("admin.appointments.page")} {filters.page}{" "}
+            {t("admin.appointments.of")} {totalPages}
           </div>
 
           <div className="flex items-center gap-3">
@@ -436,10 +438,7 @@ export default function AdminAppointmentsPage() {
                   value: String(v),
                   label: String(v),
                 }))}
-                listboxAriaLabel={tr(
-                  "عدد العناصر في الصفحة",
-                  "Items per page",
-                )}
+                listboxAriaLabel={t("admin.appointments.itemsPerPage")}
               />
             </div>
 
@@ -449,7 +448,7 @@ export default function AdminAppointmentsPage() {
               disabled={filters.page <= 1}
               className="inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {tr("السابق", "Previous")}
+              {t("admin.appointments.previous")}
             </button>
 
             <button
@@ -460,7 +459,7 @@ export default function AdminAppointmentsPage() {
               disabled={filters.page >= totalPages}
               className="inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {tr("التالي", "Next")}
+              {t("admin.appointments.next")}
             </button>
           </div>
         </section>
@@ -468,19 +467,13 @@ export default function AdminAppointmentsPage() {
         <ConfirmActionDialog
           open={confirmResetOpen}
           onOpenChange={setConfirmResetOpen}
-          title={tr("إعادة تعيين عرض المواعيد", "Reset appointments view")}
-          description={tr(
-            "سيتم إرجاع التصفية والتاريخ وعدد النتائج في الصفحة إلى الوضع الافتراضي. لا يُعدّل ذلك بيانات المواعيد المخزّنة.",
-            "Filters, date, and page size will reset to defaults. Stored appointment data is not changed.",
-          )}
-          confirmLabel={tr("إعادة التعيين", "Reset")}
+          title={t("admin.appointments.resetDialog.title")}
+          description={t("admin.appointments.resetDialog.description")}
+          confirmLabel={t("admin.appointments.resetDialog.confirm")}
           onConfirm={handleReset}
           successToast={{
-            title: tr("تمت إعادة التعيين", "Reset complete"),
-            message: tr(
-              "أُعيد ضبط عرض التصفية والتاريخ. لم تتغيّر المواعيد نفسها.",
-              "Filters and date view were reset. Appointments themselves were not changed.",
-            ),
+            title: t("admin.appointments.resetDialog.successTitle"),
+            message: t("admin.appointments.resetDialog.successMessage"),
             variant: "info",
           }}
         />

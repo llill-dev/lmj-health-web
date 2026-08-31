@@ -18,8 +18,7 @@ import type { ActivityLogPeriod } from "@/lib/doctor/activityLog/types";
 import { useI18n } from "@/i18n/provider";
 
 export default function DoctorActivityLogPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [period, setPeriod] = useState<ActivityLogPeriod>("all");
@@ -56,7 +55,7 @@ export default function DoctorActivityLogPage() {
     return (
       <>
         <Helmet>
-          <title>{tr("سجل النشاطات • LMJ Health", "Activity Log • LMJ Health")}</title>
+          <title>{t("doctor.activityLog.page.title")}</title>
         </Helmet>
         <div
           dir={dir}
@@ -65,7 +64,7 @@ export default function DoctorActivityLogPage() {
         >
           <div className="flex items-center gap-3 font-cairo text-[14px] font-semibold text-[#667085]">
             <Loader2 className="h-5 w-5 animate-spin text-primary" />
-            {tr("جارٍ تحميل سجل النشاطات…", "Loading activity log…")}
+            {t("doctor.activityLog.loading")}
           </div>
         </div>
       </>
@@ -76,17 +75,11 @@ export default function DoctorActivityLogPage() {
     return (
       <>
         <Helmet>
-          <title>{tr("سجل النشاطات • LMJ Health", "Activity Log • LMJ Health")}</title>
+          <title>{t("doctor.activityLog.page.title")}</title>
         </Helmet>
         <DoctorListErrorState
-          title={tr("تعذّر تحميل سجل النشاطات", "Could not load activity log")}
-          brief={
-            errorMessage ??
-            tr(
-              "حدث خطأ أثناء جلب السجل من الخادم. حاول مرة أخرى.",
-              "An error occurred while fetching the log from the server. Please try again.",
-            )
-          }
+          title={t("doctor.activityLog.error.load")}
+          brief={errorMessage ?? t("doctor.activityLog.error.message")}
           onRetry={() => void retryActivity()}
           retrying={retryingActivity}
         />
@@ -97,7 +90,9 @@ export default function DoctorActivityLogPage() {
   return (
     <>
       <Helmet>
-        <title>{tr("سجل النشاطات • LMJ Health", "Activity Log • LMJ Health")}</title>
+        <title>
+          <title>{t("doctor.activityLog.page.title")}</title>
+        </title>
       </Helmet>
 
       <div dir={dir} lang={locale}>
@@ -113,7 +108,7 @@ export default function DoctorActivityLogPage() {
         {activityQuery.isRefetching ? (
           <div className="mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]">
             <RefreshCw className="h-4 w-4 animate-spin" />
-            {tr("جارٍ تحديث سجل النشاطات...", "Refreshing activity log...")}
+            {t("doctor.activityLog.refreshing")}
           </div>
         ) : null}
 
@@ -123,7 +118,7 @@ export default function DoctorActivityLogPage() {
             className="mt-4 rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-start"
           >
             <div className="font-cairo text-[12px] font-semibold text-[#B42318]">
-              {errorMessage ?? tr("تعذّر تحديث سجل النشاطات. ما زالت آخر البيانات المتاحة معروضة.", "Failed to refresh the activity log. The latest available data is still shown.")}
+              {errorMessage ?? t("doctor.activityLog.error.refresh")}
             </div>
             <button
               type="button"
@@ -131,8 +126,12 @@ export default function DoctorActivityLogPage() {
               disabled={retryingActivity}
               className="mt-3 inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#FCA5A5] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#B42318] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <RefreshCw className={`h-4 w-4 ${retryingActivity ? "animate-spin" : ""}`} />
-              {retryingActivity ? tr("جارٍ إعادة المحاولة...", "Retrying...") : tr("إعادة المحاولة", "Retry")}
+              <RefreshCw
+                className={`h-4 w-4 ${retryingActivity ? "animate-spin" : ""}`}
+              />
+              {retryingActivity
+                ? t("doctor.activityLog.retrying")
+                : t("doctor.activityLog.retry")}
             </button>
           </div>
         ) : null}
@@ -147,7 +146,7 @@ export default function DoctorActivityLogPage() {
             pageSize={activityQuery.pageSize}
             disabled={activityQuery.searching}
             onPageChange={setPage}
-            itemLabel={tr("نشاط", "activity")}
+            itemLabel={t("doctor.activityLog.itemLabel")}
           />
         ) : null}
 

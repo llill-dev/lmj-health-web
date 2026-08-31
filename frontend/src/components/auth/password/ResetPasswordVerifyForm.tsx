@@ -12,6 +12,7 @@ import {
   formatVerifyFlowError,
 } from "@/lib/auth/signupMessaging";
 import { useToast } from "@/components/ui/ToastProvider";
+import { useI18n } from "@/i18n/provider";
 
 const verifySchema = z.object({
   code: z.string().regex(/^\d{6}$/, VERIFY_CODE_SCHEMA_HINT_AR),

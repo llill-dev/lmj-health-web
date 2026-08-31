@@ -1,6 +1,6 @@
 import type { EncounterOrder } from '@/lib/doctor/encounters/encounterClinicalTypes';
 import type { EncounterOrderItem } from '@/lib/doctor/encounters/encounterClinicalTypes';
-import { resolveOrderStatusLabelAr } from '@/lib/doctor/orders/orderStatusLabels';
+import { resolveOrderStatusLabel } from '@/lib/doctor/orders/orderStatusLabels';
 import { mapClinicalUrgencyFromApi } from '@/lib/doctor/referrals/referralPriority';
 import type { ImagingOrderItemBody } from '@/lib/doctor/encounters/encounterOrderTypes';
 import type {
@@ -224,8 +224,11 @@ export function mapOrderToClinicalForm(
   };
 }
 
-export function resolveRadiologyStatusLabel(order?: EncounterOrder | null) {
-  return resolveOrderStatusLabelAr(order?.statusCode, order?.status);
+export function resolveRadiologyStatusLabel(
+  order?: EncounterOrder | null,
+  locale: 'ar' | 'en' = 'ar',
+) {
+  return resolveOrderStatusLabel(order?.statusCode, order?.status, locale);
 }
 
 export function isRadiologyOrderEditable(

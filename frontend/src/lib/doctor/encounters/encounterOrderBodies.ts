@@ -211,7 +211,10 @@ function readValidationRowString(
   return typeof value === 'string' ? value.trim() || undefined : undefined;
 }
 
-function formatValidationErrors(error: ApiError): string | null {
+function formatValidationErrors(
+  error: ApiError,
+  locale: 'ar' | 'en' = 'ar',
+): string | null {
   const errors = error.body.errors;
   if (!Array.isArray(errors) || errors.length === 0) return null;
 
@@ -221,52 +224,69 @@ function formatValidationErrors(error: ApiError): string | null {
       const path = readValidationRowString(row, 'path');
       const msg = readValidationRowString(row, 'msg');
       if (path === 'patientId') {
-        return 'معرّف المريض (patientId) مطلوب أو غير صالح';
+        return locale === 'en'
+          ? 'The patient identifier (patientId) is required or invalid'
+          : 'معرّف المريض (patientId) مطلوب أو غير صالح';
       }
       if (path === 'encounterId') {
-        return 'معرّف الزيارة (encounterId) غير مقبول في جسم الطلب';
+        return locale === 'en'
+          ? 'The encounter identifier (encounterId) is not accepted in the request body'
+          : 'معرّف الزيارة (encounterId) غير مقبول في جسم الطلب';
       }
       if (path === 'orderType' || path === 'type' || path === 'category') {
-        return `حقل النوع (${path}) غير مقبول هنا`;
+        return locale === 'en'
+          ? `The type field (${path}) is not accepted here`
+          : `حقل النوع (${path}) غير مقبول هنا`;
       }
       if (
         path === 'catalogItems' ||
         path === 'manualItems' ||
         path === 'items'
       ) {
-        return 'يلزم بند تحليل/فحص واحد على الأقل (من الكتالوج أو يدوياً)';
+        return locale === 'en'
+          ? 'At least one lab/imaging item is required (from the catalog or manually)'
+          : 'يلزم بند تحليل/فحص واحد على الأقل (من الكتالوج أو يدوياً)';
       }
       if (path && msg) return `${path}: ${msg}`;
       if (path) return path;
       return msg;
     })
     .filter(Boolean)
-    .join('؛ ');
+    .join(locale === 'en' ? '; ' : '؛ ');
 
   return hint || null;
 }
 
-/** رسالة عربية أوضح عند فشل إنشاء/تحميل طلب الزيارة (خصوصاً 422). */
-export function getEncounterOrderRequestErrorMessage(error: unknown): string {
+/** رسالة أوضح (عربي/إنجليزي حسب اللغة النشطة) عند فشل إنشاء/تحميل طلب الزيارة (خصوصاً 422). */
+export function getEncounterOrderRequestErrorMessage(
+  error: unknown,
+  locale: 'ar' | 'en' = 'ar',
+): string {
   if (
     error instanceof Error &&
     error.message === 'errors.orders.finalizeRequiresItems'
   ) {
-    return 'يجب إضافة بند واحد على الأقل قبل الاعتماد النهائي.';
+    return locale === 'en'
+      ? 'You must add at least one item before final approval.'
+      : 'يجب إضافة بند واحد على الأقل قبل الاعتماد النهائي.';
   }
 
   if (!(error instanceof ApiError)) {
-    return getUserFacingRequestErrorMessage(error);
+    return getUserFacingRequestErrorMessage(error, locale);
   }
 
   if (error.status === 422 || error.status === 400) {
-    const validationHint = formatValidationErrors(error);
+    const validationHint = formatValidationErrors(error, locale);
     if (validationHint) {
-      return `تعذّر إنشاء الطلب: ${validationHint}.`;
+      return locale === 'en'
+        ? `Could not create the order: ${validationHint}.`
+        : `تعذّر إنشاء الطلب: ${validationHint}.`;
     }
   }
 
-  return localizeOrderStatusesInMessage(error.message);
+  return locale === 'ar'
+    ? localizeOrderStatusesInMessage(error.message)
+    : getUserFacingRequestErrorMessage(error, locale);
 }
 
 export function isEncounterOrderCreateValidationError(error: unknown): boolean {

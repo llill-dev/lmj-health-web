@@ -1,27 +1,26 @@
-import { useEffect, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
+import { useNavigate } from "react-router-dom";
 import {
   PrescriptionsHubPageHeader,
   PrescriptionsHubPagination,
   PrescriptionsHubSearchBar,
   PrescriptionsHubTable,
   type PrescriptionHubRowVm,
-} from '@/components/doctor/prescription/hub';
-import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
-import { DoctorTableSkeleton } from '@/components/doctor/shared/skeletons';
-import { useDoctorPrescriptionsHub } from '@/hooks/doctor/prescriptions/useDoctorPrescriptionsHub';
-import { getUserFacingRequestErrorMessage } from '@/lib/api';
-import { useRetryAction } from '@/lib/query/useRetryAction';
-import { readAuthUser } from '@/lib/cookies';
-import { useI18n } from '@/i18n/provider';
+} from "@/components/doctor/prescription/hub";
+import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
+import { DoctorTableSkeleton } from "@/components/doctor/shared/skeletons";
+import { useDoctorPrescriptionsHub } from "@/hooks/doctor/prescriptions/useDoctorPrescriptionsHub";
+import { getUserFacingRequestErrorMessage } from "@/lib/api";
+import { useRetryAction } from "@/lib/query/useRetryAction";
+import { readAuthUser } from "@/lib/cookies";
+import { useI18n } from "@/i18n/provider";
 
 export default function DoctorPrescriptionHubPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const { t, locale, dir } = useI18n();
   const navigate = useNavigate();
-  const doctorId = readAuthUser()?.actorIds?.doctorId ?? '';
-  const [search, setSearch] = useState('');
+  const doctorId = readAuthUser()?.actorIds?.doctorId ?? "";
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(8);
 
@@ -49,26 +48,24 @@ export default function DoctorPrescriptionHubPage() {
   return (
     <>
       <Helmet>
-        <title>
-          {tr('الوصفات الطبية • LMJ Health', 'Prescriptions • LMJ Health')}
-        </title>
+        <title>{t("doctor.prescriptionHub.pageTitle")}</title>
       </Helmet>
 
       <div dir={dir} lang={locale} className="w-full pb-8 sm:pb-10">
         <PrescriptionsHubPageHeader />
 
         <section className="rounded-[12px] border border-[#EEF2F6] bg-white p-5 shadow-[0_8px_24px_-12px_rgba(15,23,42,0.08)] sm:p-6">
-          <PrescriptionsHubSearchBar search={search} onSearchChange={setSearch} />
+          <PrescriptionsHubSearchBar
+            search={search}
+            onSearchChange={setSearch}
+          />
 
           <div className="mt-6">
             {list.isAwaitingData && !list.rows.length ? (
               <DoctorTableSkeleton rows={8} columns={5} />
             ) : list.isError ? (
               <DoctorListErrorState
-                title={tr(
-                  'تعذّر تحميل الوصفات الطبية',
-                  'Failed to load prescriptions',
-                )}
+                title={t("doctor.prescriptionHub.loadFailed")}
                 brief={getUserFacingRequestErrorMessage(list.error)}
                 retrying={retryingList}
                 onRetry={() => void retryList()}

@@ -44,8 +44,7 @@ function normalizeGeneralSettings(
 }
 
 export default function AdminSettingsPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
 
   const { settings, setSettings } = useAdminAppSettings();
   const [confirmGeneralOpen, setConfirmGeneralOpen] = useState(false);
@@ -186,7 +185,8 @@ export default function AdminSettingsPage() {
         setPendingLogoFile(null);
         resolve();
       };
-      reader.onerror = () => reject(new Error(tr("فشل قراءة الملف", "Failed to read the file")));
+      reader.onerror = () =>
+        reject(new Error(t("admin.settings.error.fileRead")));
       reader.readAsDataURL(file);
     });
   }
@@ -199,7 +199,8 @@ export default function AdminSettingsPage() {
     <>
       <Helmet>
         <title>
-          {tr("الإعدادات", "Settings")} • {draftGeneral.platformName || "LMJ Health"}
+          {t("admin.settings.page.title")} •{" "}
+          {draftGeneral.platformName || "LMJ Health"}
         </title>
       </Helmet>
 
@@ -208,11 +209,8 @@ export default function AdminSettingsPage() {
           <AdminDashboardOverview
             variant="admin"
             surface="mint"
-            title={tr("الإعدادات", "Settings")}
-            subtitle={tr(
-              "إدارة اسم المنصة واللغة، مع إبقاء الشعار المحلي منفصلًا مؤقتًا",
-              "Manage platform name and language while keeping local logo settings temporary",
-            )}
+            title={t("admin.settings.overview.title")}
+            subtitle={t("admin.settings.overview.subtitle")}
             headerIcon={<Settings className="h-8 w-8 text-white" />}
             kpiColumns={3}
             kpis={[
@@ -222,33 +220,33 @@ export default function AdminSettingsPage() {
                 value: healthAwaiting
                   ? "…"
                   : healthQuery.isError
-                    ? tr("غير متاح", "Unavailable")
+                    ? t("admin.settings.kpi.unavailable")
                     : `${healthQuery.data?.status ?? "—"}`,
-                label: tr("حالة النظام", "System health"),
+                label: t("admin.settings.kpi.health"),
               },
               {
                 key: "notifications",
                 icon: <CloudUpload className="h-5 w-5 shrink-0" />,
                 value: unreadAwaiting ? "…" : unreadCount,
-                label: tr("إشعارات غير مقروءة", "Unread notifications"),
+                label: t("admin.settings.kpi.notifications"),
               },
               {
                 key: "audit",
                 icon: <Settings className="h-5 w-5 shrink-0" />,
                 value: auditSummaryAwaiting ? "…" : weeklyAuditCount,
-                label: tr("سجلات (7 أيام)", "Logs (7 days)"),
+                label: t("admin.settings.kpi.logs"),
               },
             ]}
           />
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
             <SettingsSectionCard
-              title={tr("الإعدادات العامة", "General settings")}
+              title={t("admin.settings.section.general")}
               icon={Settings}
               className="xl:col-span-7"
             >
               <div className="space-y-4">
                 <SettingsField
-                  label={tr("اسم المنصة", "Platform name")}
+                  label={t("admin.settings.general.platformName")}
                   value={draftGeneral.platformName}
                   onChange={(v) =>
                     setDraftGeneral((prev) => ({ ...prev, platformName: v }))
@@ -257,7 +255,7 @@ export default function AdminSettingsPage() {
 
                 <div className="space-y-2">
                   <div className="text-start font-cairo text-sm font-bold text-[#344054]">
-                    {tr("اللغة الافتراضية", "Default language")}
+                    {t("admin.settings.general.defaultLanguage")}
                   </div>
                   <StyledSelect
                     value={draftGeneral.lang}
@@ -282,22 +280,19 @@ export default function AdminSettingsPage() {
                     onClick={() => setConfirmGeneralOpen(true)}
                     className="inline-flex h-[36px] items-center gap-2 rounded-[8px] bg-primary px-5 font-cairo text-sm font-extrabold text-white shadow-[0_12px_24px_rgba(15,143,139,0.20)] disabled:opacity-50"
                   >
-                    {tr("حفظ الإعدادات", "Save settings")}
+                    {t("admin.settings.general.save")}
                   </button>
                 </div>
                 {saveStates.general === "saved" ? (
                   <div className="text-start font-cairo text-[12px] font-semibold text-[#16A34A]">
-                    {tr(
-                      "تم حفظ الإعدادات العامة محليًا",
-                      "General settings saved locally",
-                    )}
+                    {t("admin.settings.general.saved")}
                   </div>
                 ) : null}
               </div>
             </SettingsSectionCard>
 
             <SettingsSectionCard
-              title={tr("الشعار المحلي", "Local logo")}
+              title={t("admin.settings.section.logo")}
               icon={CloudUpload}
               className="xl:col-span-5"
             >
@@ -321,7 +316,7 @@ export default function AdminSettingsPage() {
                     onClick={triggerLogoUpload}
                     className="inline-flex h-[36px] items-center gap-2 rounded-[8px] border border-primary bg-white px-3 font-cairo text-sm font-extrabold text-primary"
                   >
-                    {tr("تحميل شعار جديد", "Upload new logo")}
+                    {t("admin.settings.logo.upload")}
                   </button>
                   <input
                     ref={logoInputRef}
@@ -331,14 +326,11 @@ export default function AdminSettingsPage() {
                     className="hidden"
                   />
                   <div className="mt-2 text-start font-cairo text-[12px] font-medium text-[#98A2B3]">
-                    {tr(
-                      "الحجم المفضل 512×512 • الصيغة (PNG)",
-                      "Preferred size 512×512 • format (PNG)",
-                    )}
+                    {t("admin.settings.logo.format")}
                   </div>
                   {saveStates.logo === "saved" ? (
                     <div className="mt-1 text-start font-cairo text-[12px] font-semibold text-[#16A34A]">
-                      {tr("تم حفظ الشعار محليًا", "Logo saved locally")}
+                      {t("admin.settings.logo.saved")}
                     </div>
                   ) : null}
                 </div>
@@ -352,20 +344,23 @@ export default function AdminSettingsPage() {
         open={confirmGeneralOpen}
         onOpenChange={setConfirmGeneralOpen}
         variant="primary"
-        title={tr("تأكيد حفظ الإعدادات العامة", "Confirm saving general settings")}
+        title={t("admin.settings.confirm.generalTitle")}
         icon={<Settings className="h-6 w-6" strokeWidth={2} aria-hidden />}
         description={
           <>
-            {tr("سيتم حفظ الحقول التالية محليًا:", "The following fields will be saved locally:")}{" "}
+            {t("admin.settings.confirm.generalDescription")}{" "}
             <span className="font-extrabold text-[#344054]">
-              {tr("اسم المنصة", "Platform name")}
+              {t("admin.settings.confirm.platformName")}
             </span>{" "}
-            {tr("و", "and")}{" "}
-            <span className="font-extrabold text-[#344054]">{tr("اللغة", "language")}</span>.
+            {t("admin.settings.confirm.and")}{" "}
+            <span className="font-extrabold text-[#344054]">
+              {t("admin.settings.confirm.language")}
+            </span>
+            .
           </>
         }
-        cancelLabel={tr("ليس الآن", "Not now")}
-        confirmLabel={tr("نعم، احفظ", "Yes, save")}
+        cancelLabel={t("admin.settings.confirm.cancel")}
+        confirmLabel={t("admin.settings.confirm.save")}
         onConfirm={() => {
           saveGeneralSettings({
             platformName: draftGeneral.platformName.trim() || "LMJ Health",
@@ -373,11 +368,8 @@ export default function AdminSettingsPage() {
           });
         }}
         successToast={{
-          title: tr("تم حفظ الإعدادات", "Settings saved"),
-          message: tr(
-            "تم تحديث الإعدادات العامة محليًا بنجاح.",
-            "General settings updated locally successfully.",
-          ),
+          title: t("admin.settings.toast.settingsSaved"),
+          message: t("admin.settings.toast.settingsMessage"),
           variant: "success",
         }}
       />
@@ -389,21 +381,15 @@ export default function AdminSettingsPage() {
           if (!o) setPendingLogoFile(null);
         }}
         variant="primary"
-        title={tr("تأكيد تغيير شعار التطبيق", "Confirm app logo change")}
+        title={t("admin.settings.confirm.logoTitle")}
         icon={<CloudUpload className="h-6 w-6" strokeWidth={2} aria-hidden />}
-        description={tr(
-          "سيُستبدل الشعار الحالي بالصورة التي اخترتها (PNG) وسيُحفظ محليًا مؤقتًا إلى أن يتوفر له دعم backend.",
-          "The current logo will be replaced with your selected PNG and saved locally until backend support is available.",
-        )}
-        cancelLabel={tr("إلغاء", "Cancel")}
-        confirmLabel={tr("نعم، استخدم هذا الشعار", "Yes, use this logo")}
+        description={t("admin.settings.confirm.logoDescription")}
+        cancelLabel={t("admin.settings.confirm.cancel")}
+        confirmLabel={t("admin.settings.confirm.useLogo")}
         onConfirm={() => applyPendingLogo()}
         successToast={{
-          title: tr("تم تحديث الشعار", "Logo updated"),
-          message: tr(
-            "يظهر شعارك الجديد فورًا في واجهة الإعدادات.",
-            "Your new logo appears immediately in settings.",
-          ),
+          title: t("admin.settings.toast.logoUpdated"),
+          message: t("admin.settings.toast.logoMessage"),
           variant: "success",
         }}
       />

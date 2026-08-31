@@ -24,22 +24,25 @@ import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import { useRetryAction } from "@/lib/query/useRetryAction";
 import { useI18n } from "@/i18n/provider";
 
-function tagChipClassName(tag: string, active: boolean) {
-  if (!active) {
-    return "border-[#E5E7EB] bg-[#F9FAFB] text-[#CBD5E1]";
-  }
-  if (tag === "حضوري" || tag === "In-person") {
-    return "border-[#2E90FA] text-[#2E90FA]";
-  }
-  return "border-primary text-primary";
-}
-
 export default function DoctorDoctorsDirectoryPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
+
+  function tagChipClassName(tag: string, active: boolean) {
+    if (!active) {
+      return "border-[#E5E7EB] bg-[#F9FAFB] text-[#CBD5E1]";
+    }
+    if (
+      tag === t("doctor.directory.consultation.inPerson") ||
+      tag === "In-person"
+    ) {
+      return "border-[#2E90FA] text-[#2E90FA]";
+    }
+    return "border-primary text-primary";
+  }
+
   const consultationTags = [
-    tr("أونلاين", "Online"),
-    tr("حضوري", "In-person"),
+    t("doctor.directory.consultation.online"),
+    t("doctor.directory.consultation.inPerson"),
   ] as const;
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -72,7 +75,7 @@ export default function DoctorDoctorsDirectoryPage() {
       radiusKm: geoCoords ? 25 : undefined,
     },
     true,
-    tr,
+    t,
   );
   const { retry: retryDirectory, retrying: retryingDirectory } = useRetryAction(
     () => directoryQuery.refetch(),
@@ -112,9 +115,7 @@ export default function DoctorDoctorsDirectoryPage() {
     return (
       <>
         <Helmet>
-          <title>
-            {tr("دليل الأطباء • LMJ Health", "Doctors Directory • LMJ Health")}
-          </title>
+          <title>{t("doctor.directory.page.title")}</title>
         </Helmet>
         <DoctorDirectoryCardsSkeleton cardCount={6} />
       </>
@@ -125,22 +126,11 @@ export default function DoctorDoctorsDirectoryPage() {
     return (
       <>
         <Helmet>
-          <title>
-            {tr("دليل الأطباء • LMJ Health", "Doctors Directory • LMJ Health")}
-          </title>
+          <title>{t("doctor.directory.page.title")}</title>
         </Helmet>
         <DoctorListErrorState
-          title={tr(
-            "تعذّر تحميل دليل الأطباء",
-            "Failed to load doctors directory",
-          )}
-          brief={
-            errorMessage ??
-            tr(
-              "حدث خطأ أثناء تحميل القائمة.",
-              "An error occurred while loading the list.",
-            )
-          }
+          title={t("doctor.directory.error.loadFailed")}
+          brief={errorMessage ?? t("doctor.directory.error.loadFailedBrief")}
           onRetry={() => void retryDirectory()}
           retrying={retryingDirectory}
         />
@@ -151,9 +141,7 @@ export default function DoctorDoctorsDirectoryPage() {
   return (
     <>
       <Helmet>
-        <title>
-          {tr("دليل الأطباء • LMJ Health", "Doctors Directory • LMJ Health")}
-        </title>
+        <title>{t("doctor.directory.page.title")}</title>
       </Helmet>
 
       <div dir={dir} lang={locale} className="pb-8 sm:pb-10">
@@ -161,18 +149,15 @@ export default function DoctorDoctorsDirectoryPage() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="text-start">
               <div className="font-cairo text-[18px] font-extrabold text-[#111827]">
-                {tr("دليل الأطباء", "Doctors Directory")}
+                {t("doctor.directory.title")}
               </div>
               <div className="mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                {tr(
-                  "تصفح وابحث عن الأطباء المعتمدين",
-                  "Browse and search approved doctors",
-                )}
+                {t("doctor.directory.subtitle")}
               </div>
             </div>
 
             <span className="inline-flex h-[32px] items-center justify-center rounded-[6px] bg-primary px-4 font-cairo text-[12px] font-extrabold text-white">
-              {tr(`${total} طبيب`, `${total} doctors`)}
+              {locale === "ar" ? `${total} طبيب` : `${total} doctors`}
             </span>
           </div>
 
@@ -184,10 +169,7 @@ export default function DoctorDoctorsDirectoryPage() {
               <input
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder={tr(
-                  "ابحث باسم الطبيب أو تخصصه أو مدينته...",
-                  "Search by doctor name, specialty, or city...",
-                )}
+                placeholder={t("doctor.directory.searchPlaceholder")}
                 className="h-[44px] w-full rounded-[12px] border border-[#E5E7EB] bg-white pe-4 ps-10 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3]"
               />
             </div>
@@ -204,18 +186,18 @@ export default function DoctorDoctorsDirectoryPage() {
                 <Navigation className="w-4 h-4 text-primary" />
               )}
               {geoCoords
-                ? tr("تم تحديد الموقع", "Location set")
-                : tr("استخدم موقعي", "Use my location")}
+                ? t("doctor.directory.locationSet")
+                : t("doctor.directory.useLocation")}
             </button>
 
             <button
               type="button"
               disabled
-              title={tr("قريباً", "Coming soon")}
+              title={t("doctor.directory.comingSoon")}
               className="flex h-[44px] items-center justify-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 font-cairo text-[12px] font-extrabold text-[#98A2B3] shadow-[0_10px_20px_rgba(0,0,0,0.06)]"
             >
               <SlidersHorizontal className="w-4 h-4" />
-              {tr("فلاتر متقدمة", "Advanced filters")}
+              {t("doctor.directory.advancedFilters")}
             </button>
           </div>
         </section>
@@ -223,10 +205,7 @@ export default function DoctorDoctorsDirectoryPage() {
         <section className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 md:items-stretch">
           {doctors.length === 0 ? (
             <div className="col-span-full rounded-[12px] border border-dashed border-[#D0D5DD] bg-white px-6 py-16 text-center font-cairo text-[14px] font-semibold text-[#667085]">
-              {tr(
-                "لا توجد نتائج مطابقة لبحثك حالياً.",
-                "No results match your search right now.",
-              )}
+              {t("doctor.directory.noResults")}
             </div>
           ) : (
             doctors.map((d) => (
@@ -262,7 +241,11 @@ export default function DoctorDoctorsDirectoryPage() {
                     <Star className="h-4 w-4 text-[#FACC15]" fill="#FACC15" />
                   </span>
                   <span className="font-semibold text-[#98A2B3]">
-                    ({tr(`${d.reviews} تقييم`, `${d.reviews} reviews`)})
+                    (
+                    {locale === "ar"
+                      ? `${d.reviews} تقييم`
+                      : `${d.reviews} reviews`}
+                    )
                   </span>
                 </div>
 
@@ -275,7 +258,7 @@ export default function DoctorDoctorsDirectoryPage() {
                         key={tag}
                         className={`flex h-[22px] items-center justify-center gap-1 rounded-full border-[1.82px] px-3 font-cairo text-[11px] font-extrabold ${tagChipClassName(tag, active)}`}
                       >
-                        {tag === tr("أونلاين", "Online") ? (
+                        {tag === t("doctor.directory.consultation.online") ? (
                           <Video
                             className={`h-4 w-4 ${active ? "text-primary" : "text-[#CBD5E1]"}`}
                           />
@@ -319,7 +302,7 @@ export default function DoctorDoctorsDirectoryPage() {
                     onClick={() => setSelectedDoctor(d)}
                     className="mx-auto flex h-[36px] w-full max-w-[290px] items-center justify-center rounded-[6px] bg-gradient-to-b from-[#0F8F8B] to-[#14B3AE] font-cairo text-[14px] font-semibold text-white transition-colors hover:from-[#14B3AE] hover:to-[#12A8A4]"
                   >
-                    {tr("عرض التفاصيل", "View details")}
+                    {t("doctor.directory.viewDetails")}
                   </button>
                 </div>
               </div>
@@ -336,10 +319,9 @@ export default function DoctorDoctorsDirectoryPage() {
         <section className="mt-8 rounded-[6px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_18px_30px_rgba(0,0,0,0.10)]">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="font-cairo text-[12px] font-semibold text-[#667085]">
-              {tr(
-                `عرض ${showingFrom}-${showingTo} من أصل ${total} طبيب`,
-                `Showing ${showingFrom}-${showingTo} of ${total} doctors`,
-              )}
+              {locale === "ar"
+                ? `عرض ${showingFrom}-${showingTo} من أصل ${total} طبيب`
+                : `Showing ${showingFrom}-${showingTo} of ${total} doctors`}
             </div>
 
             <div className="flex gap-3 justify-center items-center">
@@ -348,17 +330,19 @@ export default function DoctorDoctorsDirectoryPage() {
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1 || directoryQuery.isAwaitingData}
                 className="flex h-[34px] w-[34px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#667085] disabled:opacity-40"
-                aria-label={tr("السابق", "Previous")}
+                aria-label={t("doctor.directory.previous")}
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
 
               <div className="flex items-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-2">
                 <div className="font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                  {tr("صفحة", "Page")}
+                  {t("doctor.directory.page")}
                 </div>
                 <div className="font-cairo text-[12px] font-extrabold text-[#111827]">
-                  {tr(`${page} من ${totalPages}`, `${page} of ${totalPages}`)}
+                  {locale === "ar"
+                    ? `${page} من ${totalPages}`
+                    : `${page} of ${totalPages}`}
                 </div>
               </div>
 
@@ -367,7 +351,7 @@ export default function DoctorDoctorsDirectoryPage() {
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page >= totalPages || directoryQuery.isAwaitingData}
                 className="flex h-[34px] w-[34px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#667085] disabled:opacity-40"
-                aria-label={tr("التالي", "Next")}
+                aria-label={t("doctor.directory.next")}
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
@@ -375,7 +359,7 @@ export default function DoctorDoctorsDirectoryPage() {
 
             <div className="flex gap-2 justify-end items-center">
               <div className="font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                {tr("عدد النتائج:", "Results count:")}
+                {t("doctor.directory.resultsCount")}
               </div>
               <div className="rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[12px] font-extrabold text-[#111827]">
                 {total}

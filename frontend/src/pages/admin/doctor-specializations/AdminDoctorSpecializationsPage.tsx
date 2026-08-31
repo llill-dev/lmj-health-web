@@ -39,8 +39,7 @@ import { useI18n } from "@/i18n/provider";
 const PAGE_SIZE = 9;
 
 export default function AdminDoctorSpecializationsPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { locale, dir, t } = useI18n();
   const numberLocale = locale === "ar" ? "ar-SA" : "en-US";
 
   const [search, setSearch] = useState("");
@@ -126,12 +125,12 @@ export default function AdminDoctorSpecializationsPage() {
   function exportFilteredTableToExcel() {
     if (filtered.length === 0) return;
     const headers = [
-      tr("المفتاح", "Key"),
-      tr("الترتيب", "Order"),
-      tr("الحالة", "Status"),
-      tr("الاسم بالعربية", "Arabic name"),
-      tr("الاسم بالإنجليزية", "English name"),
-      tr("المعرف", "ID"),
+      t("admin.doctorSpecializations.export.key"),
+      t("admin.doctorSpecializations.export.order"),
+      t("admin.doctorSpecializations.export.status"),
+      t("admin.doctorSpecializations.export.arabicName"),
+      t("admin.doctorSpecializations.export.englishName"),
+      t("admin.doctorSpecializations.export.id"),
     ];
     const rows = filtered.map((row) => {
       const titleAr = resolveLookupText(row.text, "ar");
@@ -139,7 +138,9 @@ export default function AdminDoctorSpecializationsPage() {
       return [
         row.key,
         String(row.order ?? 0),
-        row.isActive ? tr("نشط", "Active") : tr("غير نشط", "Inactive"),
+        row.isActive
+          ? t("admin.doctorSpecializations.status.active")
+          : t("admin.doctorSpecializations.status.inactive"),
         titleAr || titleEn || row.key,
         titleEn || "",
         row._id,
@@ -153,13 +154,13 @@ export default function AdminDoctorSpecializationsPage() {
     error != null
       ? error instanceof ApiError
         ? userFacingErrorMessage(error)
-        : tr("تعذّر تحميل الكتالوج.", "Failed to load catalog.")
+        : t("admin.doctorSpecializations.loadError")
       : null;
 
   return (
     <>
       <Helmet>
-        <title>{tr("تخصصات الأطباء", "Doctor specializations")} • LMJ Health</title>
+        <title>{t("admin.doctorSpecializations.page.title")} • LMJ Health</title>
       </Helmet>
 
       <div
@@ -170,13 +171,10 @@ export default function AdminDoctorSpecializationsPage() {
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title={tr("تخصصات الأطباء", "Doctor specializations")}
-          subtitle={tr(
-            "إدارة كتالوج التخصصات الطبية في الإدارة وكتالوج التسجيل",
-            "Manage the medical specialization catalog for admin and registration",
-          )}
+          title={t("admin.doctorSpecializations.page.title")}
+          subtitle={t("admin.doctorSpecializations.page.subtitle")}
           headerIcon={<Tags className="h-8 w-8 text-white" />}
-          actionLabel={tr("إضافة تخصص", "Add specialization")}
+          actionLabel={t("admin.doctorSpecializations.actionLabel")}
           onActionClick={openCreate}
           kpiColumns={3}
           kpis={[
@@ -184,19 +182,19 @@ export default function AdminDoctorSpecializationsPage() {
               key: "total",
               icon: <Tags className="h-5 w-5 shrink-0" />,
               value: busy ? "…" : lookups.length,
-              label: tr("عناصر الكتالوج", "Catalog items"),
+              label: t("admin.doctorSpecializations.kpi.totalItems"),
             },
             {
               key: "active",
               icon: <Stethoscope className="h-5 w-5 shrink-0" />,
               value: busy ? "…" : activeCount,
-              label: tr("نشطة", "Active"),
+              label: t("admin.doctorSpecializations.kpi.active"),
             },
             {
               key: "inactive",
               icon: <Tags className="h-5 w-5 shrink-0" />,
               value: busy ? "…" : inactiveCount,
-              label: tr("غير نشطة", "Inactive"),
+              label: t("admin.doctorSpecializations.kpi.inactive"),
             },
           ]}
         />
@@ -204,10 +202,7 @@ export default function AdminDoctorSpecializationsPage() {
         <div className="mt-4 flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
           <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
-            {tr(
-              "هذه الصفحة مخصّصة لإدارة كتالوج تخصصات الأطباء المرجعي المستخدم في التسجيل ولوحات الإدارة، وليست لإدارة تخصص طبيب بعينه من ملفه الشخصي. أي تعديل هنا ينعكس على خيارات الاختيار المرجعية في النظام كله.",
-              "This page is for managing the reference doctor-specialization catalog used in signup and admin flows, not for editing one specific doctor’s specialty from their profile. Any change here affects the system-wide reference options.",
-            )}
+            {t("admin.doctorSpecializations.disclaimer")}
           </div>
         </div>
 
@@ -217,13 +212,10 @@ export default function AdminDoctorSpecializationsPage() {
             onClick={exportFilteredTableToExcel}
             disabled={busy || filtered.length === 0}
             className="inline-flex h-[40px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#344054] shadow-[0_10px_22px_rgba(0,0,0,0.05)] transition hover:border-primary/40 disabled:opacity-50"
-            title={tr(
-              "ملف CSV يفتح كجدول في Microsoft Excel",
-              "CSV file opens as a table in Microsoft Excel",
-            )}
+            title={t("admin.doctorSpecializations.exportExcel.title")}
           >
             <FileSpreadsheet className="h-4 w-4 text-[#16A34A]" aria-hidden />
-            {tr("جدول Excel", "Excel table")}
+            {t("admin.doctorSpecializations.exportExcel")}
           </button>
           <button
             type="button"
@@ -235,13 +227,13 @@ export default function AdminDoctorSpecializationsPage() {
               className={`h-4 w-4 ${retryingLookups ? "animate-spin" : ""}`}
               aria-hidden
             />
-            {tr("تحديث", "Refresh")}
+            {t("admin.doctorSpecializations.refresh")}
           </button>
           <Link
             to="/admin/doctors"
             className="inline-flex h-[40px] items-center gap-1 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827] shadow-[0_10px_22px_rgba(0,0,0,0.05)] transition hover:border-primary/40 hover:text-primary"
           >
-            {tr("قائمة الأطباء", "Doctors list")}
+            {t("admin.doctorSpecializations.doctorsList")}
             <ChevronLeft className="w-4 h-4" aria-hidden />
           </Link>
         </div>
@@ -249,7 +241,7 @@ export default function AdminDoctorSpecializationsPage() {
         {retryingLookups && !busy ? (
           <div className="mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]">
             <RefreshCw className="h-4 w-4 animate-spin" aria-hidden />
-            {tr("جارٍ تحديث الكتالوج...", "Refreshing catalog...")}
+            {t("admin.doctorSpecializations.refreshing")}
           </div>
         ) : null}
 
@@ -263,10 +255,7 @@ export default function AdminDoctorSpecializationsPage() {
               type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder={tr(
-                "ابحث بالمفتاح أو الاسم العربي أو الإنجليزي…",
-                "Search by key, Arabic name, or English name…",
-              )}
+              placeholder={t("admin.doctorSpecializations.searchPlaceholder")}
               className="h-[44px] w-full rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] py-2 ps-10 pe-4 text-start font-cairo text-[13px] font-semibold text-[#111827] outline-none ring-primary/0 transition placeholder:text-[#98A2B3] focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/12"
             />
           </label>
@@ -278,7 +267,7 @@ export default function AdminDoctorSpecializationsPage() {
               checked={includeInactive}
               onChange={(e) => setIncludeInactive(e.target.checked)}
             />
-            {tr("عرض العناصر المعطّلة", "Show disabled items")}
+            {t("admin.doctorSpecializations.showDisabled")}
           </label>
 
           <label className="flex cursor-pointer select-none items-center gap-2 rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-2.5 font-cairo text-[12px] font-bold text-[#344054]">
@@ -288,7 +277,7 @@ export default function AdminDoctorSpecializationsPage() {
               checked={langOnly}
               onChange={(e) => setLangOnly(e.target.checked)}
             />
-            {tr("نص اللغة الحالية فقط", "Current language text only")}
+            {t("admin.doctorSpecializations.currentLangOnly")}
           </label>
         </div>
 
@@ -309,21 +298,15 @@ export default function AdminDoctorSpecializationsPage() {
               className="mt-4 inline-flex h-[40px] items-center gap-2 rounded-[10px] border border-[#FCA5A5] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#B42318] hover:bg-[#FFF5F5]"
             >
               <RefreshCw className="h-4 w-4" aria-hidden />
-              {tr("إعادة المحاولة", "Retry")}
+              {t("admin.doctorSpecializations.retry")}
             </button>
           </div>
         ) : filtered.length === 0 ? (
           <div className="mt-8 rounded-[14px] border border-dashed border-[#E5E7EB] bg-[#FAFBFC] px-6 py-16 text-center">
             <p className="font-cairo text-[14px] font-bold text-[#475467]">
               {hasActiveFilters
-                ? tr(
-                    "لا توجد عناصر مطابقة للبحث أو الفلاتر الحالية.",
-                    "No items match the current search or filters.",
-                  )
-                : tr(
-                    "الكتالوج فارغ حالياً.",
-                    "The catalog is currently empty.",
-                  )}
+                ? t("admin.doctorSpecializations.emptyFiltered")
+                : t("admin.doctorSpecializations.emptyAll")}
             </p>
             <button
               type="button"
@@ -331,7 +314,7 @@ export default function AdminDoctorSpecializationsPage() {
               className="mt-4 inline-flex h-[40px] items-center gap-2 rounded-[10px] bg-primary px-5 font-cairo text-[12px] font-extrabold text-white"
             >
               <Plus className="w-4 h-4" />
-              {tr("إضافة أول تخصص", "Add first specialization")}
+              {t("admin.doctorSpecializations.addFirst")}
             </button>
           </div>
         ) : (
@@ -370,8 +353,10 @@ export default function AdminDoctorSpecializationsPage() {
                               }`}
                             >
                               {row.isActive
-                                ? tr("نشط", "Active")
-                                : tr("غير نشط", "Inactive")}
+                                ? t("admin.doctorSpecializations.status.active")
+                                : t(
+                                    "admin.doctorSpecializations.status.inactive",
+                                  )}
                             </span>
                             <span className="rounded-full bg-[#F0FDFA] px-2.5 py-0.5 font-mono text-[10px] font-bold text-primary ring-1 ring-[#CCFBF1]">
                               #{row.order ?? 0}
@@ -401,14 +386,14 @@ export default function AdminDoctorSpecializationsPage() {
                               to={filterLink}
                               className="inline-flex flex-1 min-w-[120px] items-center justify-center gap-1 rounded-[10px] bg-[#ECFEFF] px-3 py-2 font-cairo text-[11px] font-extrabold text-primary ring-1 ring-[#CFFAFE] transition hover:bg-[#DCFDFD]"
                             >
-                              {tr("أطباء مطابقون", "Matching doctors")}
+                              {t("admin.doctorSpecializations.matchingDoctors")}
                               <ChevronLeft className="h-3.5 w-3.5" />
                             </Link>
                             <button
                               type="button"
                               onClick={() => openEdit(row)}
                               className="inline-flex h-[36px] w-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#475467] shadow-sm transition hover:border-primary/35 hover:text-primary"
-                              aria-label={tr("تعديل", "Edit")}
+                              aria-label={t("admin.doctorSpecializations.edit")}
                             >
                               <Pencil className="w-4 h-4" />
                             </button>
@@ -416,7 +401,9 @@ export default function AdminDoctorSpecializationsPage() {
                               type="button"
                               onClick={() => setDeleteTarget(row)}
                               className="inline-flex h-[36px] w-[36px] items-center justify-center rounded-[10px] border border-[#FEE2E2] bg-[#FFF7F7] text-[#DC2626] transition hover:bg-[#FEF2F2]"
-                              aria-label={tr("تعطيل", "Disable")}
+                              aria-label={t(
+                                "admin.doctorSpecializations.disable",
+                              )}
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -431,16 +418,16 @@ export default function AdminDoctorSpecializationsPage() {
 
             <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-[#F2F4F7] pt-6 sm:flex-row">
               <p className="font-cairo text-[12px] font-semibold text-[#667085]">
-                {tr("عرض", "Showing")}{" "}
+                {t("admin.doctorSpecializations.showing")}{" "}
                 <span className="tabular-nums font-bold text-[#111827]">
                   {filtered.length === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1}–
                   {(safePage - 1) * PAGE_SIZE + pageRows.length}
                 </span>{" "}
-                {tr("من", "of")}{" "}
+                {t("admin.doctorSpecializations.of")}{" "}
                 <span className="font-bold text-[#111827]">
                   {filtered.length.toLocaleString(numberLocale)}
                 </span>{" "}
-                {tr("عنصراً مطابقاً", "matching items")}
+                {t("admin.doctorSpecializations.matchingItems")}
               </p>
 
               <Pagination
@@ -464,24 +451,23 @@ export default function AdminDoctorSpecializationsPage() {
         open={Boolean(deleteTarget)}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
         variant="destructive"
-        title={tr("تعطيل عنصر التخصص", "Disable specialization item")}
+        title={t("admin.doctorSpecializations.disableDialog.title")}
         icon={<Trash2 className="w-6 h-6" strokeWidth={2} aria-hidden />}
         description={
           deleteTarget ? (
             <>
-              {tr(
-                "سيتم تعطيل هذا العنصر ولن يظهر بعد الآن، ويمكن استرجاعه لاحقاً. العنصر:",
-                "This item will be disabled and hidden going forward; it can be restored later. Item:"
+              {t(
+                "admin.doctorSpecializations.disableDialog.descriptionBefore",
               )}{" "}
               <strong>{resolveLookupText(deleteTarget.text, locale)}</strong>
             </>
           ) : null
         }
-        cancelLabel={tr("إلغاء", "Cancel")}
+        cancelLabel={t("admin.doctorSpecializations.cancel")}
         confirmLabel={
           removeMut.isPending
-            ? tr("جاري التعطيل…", "Disabling…")
-            : tr("تأكيد التعطيل", "Confirm disable")
+            ? t("admin.doctorSpecializations.disabling")
+            : t("admin.doctorSpecializations.confirmDisable")
         }
         confirmDisabled={removeMut.isPending}
         onConfirm={async () => {
@@ -490,8 +476,8 @@ export default function AdminDoctorSpecializationsPage() {
           setDeleteTarget(null);
         }}
         successToast={{
-          title: tr("تم", "Done"),
-          message: tr("عُطّل عنصر الكتالوج.", "Catalog item disabled."),
+          title: t("admin.doctorSpecializations.successTitle"),
+          message: t("admin.doctorSpecializations.successMessage"),
           variant: "success",
         }}
       />

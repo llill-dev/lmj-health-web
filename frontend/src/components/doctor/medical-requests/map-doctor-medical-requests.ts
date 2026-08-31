@@ -225,7 +225,14 @@ function normalizeCategory(order: DoctorOrderRecord): DoctorOrderCategory {
 
 export function resolveMedicalRequestTypeLabel(
   category: DoctorOrderCategory,
+  locale: 'ar' | 'en' = 'ar',
 ): string {
+  if (locale === 'en') {
+    if (category === 'radiology') return 'Imaging';
+    if (category === 'procedure') return 'Procedures';
+    if (category === 'referral') return 'Referral';
+    return 'Lab tests';
+  }
   if (category === 'radiology') return 'أشعة';
   if (category === 'procedure') return 'إجراءات';
   if (category === 'referral') return 'إحالة';
@@ -238,7 +245,10 @@ function typeDotClass(category: DoctorOrderCategory): string {
   return 'bg-primary';
 }
 
-function normalizeStatus(order: DoctorOrderRecord): {
+function normalizeStatus(
+  order: DoctorOrderRecord,
+  locale: 'ar' | 'en' = 'ar',
+): {
   key: MedicalRequestStatusKey;
   label: string;
   code: string;
@@ -246,6 +256,7 @@ function normalizeStatus(order: DoctorOrderRecord): {
   const meta = resolveDoctorOrderStatusUiMeta(
     order.statusCode,
     order.status,
+    locale,
   );
   return {
     key: meta.key,
@@ -254,11 +265,14 @@ function normalizeStatus(order: DoctorOrderRecord): {
   };
 }
 
-export function formatMedicalRequestDate(value?: string): string {
+export function formatMedicalRequestDate(
+  value?: string,
+  locale: 'ar' | 'en' = 'ar',
+): string {
   if (!value) return '—';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString('ar-SA', {
+  return date.toLocaleDateString(locale === 'ar' ? 'ar-SA' : 'en-US', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -411,32 +425,39 @@ export function resolveMedicalRequestReorderPath(
   return `/doctor/patients/${patientId}`;
 }
 
-function resolveTitle(order: DoctorOrderRecord): string {
+function resolveTitle(
+  order: DoctorOrderRecord,
+  locale: 'ar' | 'en' = 'ar',
+): string {
   return (
     order.orderTitle?.trim() ||
     order.orderName?.trim() ||
     order.items?.[0]?.title?.trim() ||
     order.items?.[0]?.name?.trim() ||
     order.items?.[0]?.testName?.trim() ||
-    'طلب طبي'
+    (locale === 'en' ? 'Medical order' : 'طلب طبي')
   );
 }
 
-export function mapDoctorOrderToRow(order: DoctorOrderRecord): MedicalRequestRowVm {
+export function mapDoctorOrderToRow(
+  order: DoctorOrderRecord,
+  locale: 'ar' | 'en' = 'ar',
+): MedicalRequestRowVm {
   const category = normalizeCategory(order);
-  const status = normalizeStatus(order);
+  const status = normalizeStatus(order, locale);
   const patientName =
-    order.patient?.user?.fullName?.trim() || 'مريض غير معروف';
+    order.patient?.user?.fullName?.trim() ||
+    (locale === 'en' ? 'Unknown patient' : 'مريض غير معروف');
 
   return {
     id: order._id,
     systemId: formatMedicalRequestSystemId(order),
     patientName,
     patientPhone: order.patient?.user?.phone?.trim() || '—',
-    typeLabel: resolveMedicalRequestTypeLabel(category),
+    typeLabel: resolveMedicalRequestTypeLabel(category, locale),
     category,
     typeDotClass: typeDotClass(category),
-    dateLabel: formatMedicalRequestDate(order.createdAt),
+    dateLabel: formatMedicalRequestDate(order.createdAt, locale),
     statusKey: status.key,
     statusLabel: status.label,
     raw: order,
@@ -445,14 +466,17 @@ export function mapDoctorOrderToRow(order: DoctorOrderRecord): MedicalRequestRow
 
 export function mapDoctorOrderToDetail(
   order: DoctorOrderRecord,
+  locale: 'ar' | 'en' = 'ar',
 ): MedicalRequestDetailVm {
-  const row = mapDoctorOrderToRow(order);
-  const title = resolveTitle(order);
+  const row = mapDoctorOrderToRow(order, locale);
+  const title = resolveTitle(order, locale);
   const firstResult = order.results?.[0];
   const category = row.category;
 
-  const status = normalizeStatus(order);
+  const status = normalizeStatus(order, locale);
   const downloadUrl = extractOrderResultDownloadUrl(order);
+  const imageLabel =
+    locale === 'en' ? `Image: ${title}` : `صورة : ${title}`;
 
   return {
     ...row,
@@ -463,11 +487,12 @@ export function mapDoctorOrderToDetail(
     canUploadResults: canAppendDoctorOrderResults(status.code),
     pdfSourceType:
       category === 'radiology' ? 'imaging_order' : 'order',
-    patientInitial: row.patientName.trim().charAt(0) || 'م',
+    patientInitial:
+      row.patientName.trim().charAt(0) || (locale === 'en' ? 'P' : 'م'),
     typeDetail:
       category === 'radiology'
-        ? `صورة : ${title}`
-        : `${resolveMedicalRequestTypeLabel(category)} ${title}`,
+        ? imageLabel
+        : `${resolveMedicalRequestTypeLabel(category, locale)} ${title}`,
     additionalNotes:
       order.notes?.trim() ||
       order.labInstructions?.trim() ||
@@ -479,11 +504,11 @@ export function mapDoctorOrderToDetail(
     resultTitle: firstResult?.title ?? firstResult?.name ?? title,
     resultDownloadUrl: downloadUrl ?? firstResult?.downloadUrl ?? firstResult?.url,
     resultViewUrl: downloadUrl ?? firstResult?.url ?? firstResult?.downloadUrl,
-    radiologyImageLabel: `صورة : ${title}`,
+    radiologyImageLabel: imageLabel,
     radiologyReport:
       firstResult?.reportText?.trim() ||
       firstResult?.summary?.trim() ||
-      'لا توجد أي تشوهات',
+      (locale === 'en' ? 'No abnormalities found' : 'لا توجد أي تشوهات'),
     radiologyFileName: firstResult?.fileName?.trim() || `${title}.pdf`,
     radiologyFileUrl: firstResult?.downloadUrl ?? firstResult?.url,
   };
@@ -497,8 +522,11 @@ export function filterOrdersByCategory(
   return orders.filter((order) => normalizeCategory(order) === tab);
 }
 
-export function countOrdersByCategory(orders: DoctorOrderRecord[]) {
-  const rows = orders.map(mapDoctorOrderToRow);
+export function countOrdersByCategory(
+  orders: DoctorOrderRecord[],
+  locale: 'ar' | 'en' = 'ar',
+) {
+  const rows = orders.map((order) => mapDoctorOrderToRow(order, locale));
   return {
     all: rows.length,
     lab: rows.filter((r) => r.category === 'lab').length,
@@ -524,8 +552,11 @@ export function resolveOrdersForUi(
 }
 
 /** @deprecated استخدم buildDoctorOrderStatusUpdateOptions من orderStatusLabels */
-export function buildStatusUpdateOptions(currentCode: string) {
-  return buildDoctorOrderStatusUpdateOptions(currentCode);
+export function buildStatusUpdateOptions(
+  currentCode: string,
+  locale: 'ar' | 'en' = 'ar',
+) {
+  return buildDoctorOrderStatusUpdateOptions(currentCode, locale);
 }
 
 export function orderTypeQueryForTab(

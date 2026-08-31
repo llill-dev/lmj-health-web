@@ -18,6 +18,7 @@ import {
   step2PersonalSchema,
   type Step2PersonalValues,
 } from './signup-schemas';
+import { useI18n } from '@/i18n/provider';
 
 export default function SignUpStep2Personal({
   onPrev,
@@ -28,11 +29,12 @@ export default function SignUpStep2Personal({
   onNext: (values: Step2PersonalValues) => void;
   defaultValues?: Partial<Step2PersonalValues>;
 }) {
+  const { locale } = useI18n();
   const maxBirthIso = useMemo(() => {
-    const t = new Date();
-    const y = t.getFullYear();
-    const m = String(t.getMonth() + 1).padStart(2, '0');
-    const d = String(t.getDate()).padStart(2, '0');
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
     return `${y}-${m}-${d}`;
   }, []);
   const minBirthIso = '1900-01-01';
@@ -44,7 +46,7 @@ export default function SignUpStep2Personal({
     watch,
     formState: { errors },
   } = useForm<Step2PersonalValues>({
-    resolver: zodResolver(step2PersonalSchema),
+    resolver: zodResolver(step2PersonalSchema(locale)),
     defaultValues: {
       gender: defaultValues?.gender as any,
       birthDate: defaultValues?.birthDate ?? '',

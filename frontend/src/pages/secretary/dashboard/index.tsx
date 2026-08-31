@@ -130,8 +130,7 @@ function QuickActionCard({
 }
 
 export default function SecretaryDashboardPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { locale, dir, t } = useI18n();
   const numberLocale = locale === "ar" ? "ar-SA" : "en-US";
   const { hasPermission } = useSecretaryPermissions();
   const canViewAppointments = hasPermission("appointments:view");
@@ -164,10 +163,7 @@ export default function SecretaryDashboardPage() {
         lang={locale}
         className="rounded-[20px] border border-[#E8EEF6] bg-white px-6 py-12 text-center font-cairo text-[15px] font-semibold text-[#667085]"
       >
-        {tr(
-          "جاري تحميل الطبيب المسؤول ولوحة السكرتير...",
-          "Loading assigned doctor and secretary dashboard...",
-        )}
+        {t("secretary.dashboard.loadingAssignedDoctor")}
       </div>
     );
   }
@@ -180,16 +176,10 @@ export default function SecretaryDashboardPage() {
         className="space-y-4 rounded-[20px] border border-[#F1D6D6] bg-white px-6 py-10 text-center"
       >
         <div className="font-cairo text-[18px] font-black text-[#243044]">
-          {tr(
-            "تعذر تحميل الطبيب المسؤول حالياً",
-            "Assigned doctor is unavailable right now",
-          )}
+          {t("secretary.dashboard.assignedDoctorUnavailable")}
         </div>
         <div className="font-cairo text-[14px] font-semibold text-[#667085]">
-          {tr(
-            "لا يمكن عرض بيانات المواعيد والمرضى قبل تأكيد ارتباط السكرتير بطبيب مسؤول.",
-            "Appointment and patient data stay hidden until the secretary assignment is confirmed.",
-          )}
+          {t("secretary.dashboard.assignmentRequired")}
         </div>
         <button
           type="button"
@@ -198,8 +188,8 @@ export default function SecretaryDashboardPage() {
           className="inline-flex items-center justify-center rounded-[12px] bg-primary px-4 py-2 font-cairo text-[14px] font-bold text-white transition disabled:cursor-not-allowed disabled:opacity-60"
         >
           {assignedDoctorQuery.isRefetching
-            ? tr("جاري إعادة المحاولة...", "Retrying...")
-            : tr("إعادة المحاولة", "Retry")}
+            ? t("secretary.dashboard.retrying")
+            : t("secretary.dashboard.retry")}
         </button>
       </div>
     );
@@ -208,9 +198,9 @@ export default function SecretaryDashboardPage() {
   const kpis: KpiCard[] = [
     {
       key: "today",
-      label: tr("مواعيد اليوم", "Today's appointments"),
+      label: t("secretary.dashboard.todayAppointments"),
       value: appointmentsQuery.total ?? 0,
-      delta: `${(appointmentsQuery.total ?? 0).toLocaleString(numberLocale)} ${tr("مجدول", "scheduled")}`,
+      delta: `${(appointmentsQuery.total ?? 0).toLocaleString(numberLocale)} ${t("secretary.dashboard.scheduled")}`,
       icon: Calendar,
       accent: "#129A98",
       soft: "#E9F7F6",
@@ -218,9 +208,9 @@ export default function SecretaryDashboardPage() {
     },
     {
       key: "patients",
-      label: tr("المرضى", "Patients"),
+      label: t("secretary.dashboard.patients"),
       value: patientsQuery.total ?? 0,
-      delta: `${(patientsQuery.total ?? 0).toLocaleString(numberLocale)} ${tr("مريض", "patients")}`,
+      delta: `${(patientsQuery.total ?? 0).toLocaleString(numberLocale)} ${t("secretary.dashboard.patient")}`,
       icon: Users,
       accent: "#2D74F5",
       soft: "#EAF1FF",
@@ -228,9 +218,9 @@ export default function SecretaryDashboardPage() {
     },
     {
       key: "waitlist",
-      label: tr("قائمة الانتظار", "Waitlist"),
+      label: t("secretary.dashboard.waitlist"),
       value: waitlistQuery.total ?? 0,
-      delta: `${(waitlistQuery.total ?? 0).toLocaleString(numberLocale)} ${tr("طلب", "requests")}`,
+      delta: `${(waitlistQuery.total ?? 0).toLocaleString(numberLocale)} ${t("secretary.dashboard.requests")}`,
       icon: Check,
       accent: "#22C55E",
       soft: "#EAFBF0",
@@ -238,9 +228,9 @@ export default function SecretaryDashboardPage() {
     },
     {
       key: "available",
-      label: tr("الأوقات المتاحة", "Available slots"),
+      label: t("secretary.dashboard.availableSlots"),
       value: "—",
-      delta: tr("غير متاحة بعد", "Not available yet"),
+      delta: t("secretary.dashboard.notAvailableYet"),
       icon: Clock,
       accent: "#FF6A00",
       soft: "#FFF2E8",
@@ -248,31 +238,37 @@ export default function SecretaryDashboardPage() {
     },
   ];
 
-  const todayAppointments = (appointmentsQuery.appointments ?? []).map((appointment) => ({
-    id: appointment._id || appointment.startDateTime || appointment.date || "",
-    time: appointment.startTime || "—",
-    patientName: appointment.patient?.userId?.fullName || tr("مريض", "Patient"),
-    status: appointment.status === "rescheduled" ? "postponed" : appointment.status,
-  }));
+  const todayAppointments = (appointmentsQuery.appointments ?? []).map(
+    (appointment) => ({
+      id:
+        appointment._id || appointment.startDateTime || appointment.date || "",
+      time: appointment.startTime || "—",
+      patientName:
+        appointment.patient?.userId?.fullName ||
+        t("secretary.dashboard.patient"),
+      status:
+        appointment.status === "rescheduled" ? "postponed" : appointment.status,
+    }),
+  );
 
   const quickActions = [
     {
       icon: Search,
-      label: tr("بحث عن مريض", "Search patient"),
+      label: t("secretary.dashboard.searchPatient"),
       variant: "default" as const,
       href: "/secretary/patients",
       visible: canViewPatients,
     },
     {
       icon: UserPlus,
-      label: tr("إضافة مريض مؤقت", "Add temporary patient"),
+      label: t("secretary.dashboard.addTemporaryPatient"),
       variant: "default" as const,
       href: "/secretary/create-temporary-patient",
       visible: canCreateTemporaryPatient,
     },
     {
       icon: Plus,
-      label: tr("حجز موعد جديد", "Book new appointment"),
+      label: t("secretary.dashboard.bookNewAppointment"),
       variant: "primary" as const,
       href: "/secretary/book-appointment",
       visible: canBookAppointment,
@@ -282,51 +278,56 @@ export default function SecretaryDashboardPage() {
   const secondaryStats = [
     {
       key: "rating",
-      label: tr("التقييم", "Rating"),
+      label: t("secretary.dashboard.rating"),
       value: rating != null ? `${rating.toFixed(1)}/5` : "—",
       icon: TrendingUp,
       iconClass: "bg-[#ECFDF3] text-[#22C55E]",
     },
     {
       key: "attendance",
-      label: tr("نسبة الحضور", "Attendance rate"),
+      label: t("secretary.dashboard.attendanceRate"),
       value: "—",
-      caption: tr("هذا المؤشر غير متاح حالياً.", "This metric isn't available yet."),
+      caption: t("secretary.dashboard.metricNotAvailable"),
       icon: Activity,
       iconClass: "bg-[#F4EBFF] text-[#A855F7]",
     },
     {
       key: "records",
-      label: tr("السجلات الطبية", "Medical records"),
+      label: t("secretary.dashboard.medicalRecords"),
       value: "—",
-      caption: tr("هذا المؤشر غير متاح حالياً.", "This metric isn't available yet."),
+      caption: t("secretary.dashboard.metricNotAvailable"),
       icon: FileText,
       iconClass: "bg-[#EAF1FF] text-[#3B82F6]",
     },
   ];
 
   return (
-    <div dir={dir} lang={locale} className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
+    <div
+      dir={dir}
+      lang={locale}
+      className="space-y-6 pb-6 sm:space-y-7 sm:pb-8"
+    >
       <section className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4 xl:gap-8">
         {kpis
           .filter((card) => {
-            if (card.key === "today" || card.key === "available") return canViewAppointments;
+            if (card.key === "today" || card.key === "available")
+              return canViewAppointments;
             if (card.key === "patients") return canViewPatients;
             if (card.key === "waitlist") return canViewWaitlist;
             return true;
           })
           .map((card) => (
-          <KpiStatCard
-            key={card.key}
-            label={card.label}
-            value={card.value}
-            delta={card.delta}
-            icon={card.icon}
-            accent={card.accent}
-            soft={card.soft}
-            iconColor={card.iconColor}
-          />
-        ))}
+            <KpiStatCard
+              key={card.key}
+              label={card.label}
+              value={card.value}
+              delta={card.delta}
+              icon={card.icon}
+              accent={card.accent}
+              soft={card.soft}
+              iconColor={card.iconColor}
+            />
+          ))}
       </section>
 
       <section className="grid gap-4 sm:grid-cols-3">
@@ -343,67 +344,67 @@ export default function SecretaryDashboardPage() {
 
       {assignedDoctorQuery.isRefetching ? (
         <div className="rounded-[14px] border border-[#D8E2EE] bg-white px-4 py-3 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-          {tr("جاري تحديث بيانات الطبيب المسؤول...", "Refreshing assigned doctor data...")}
+          {t("secretary.dashboard.refreshingDoctorData")}
         </div>
       ) : null}
 
       {canViewAppointments ? (
-        <SurfaceSection title={tr("مواعيد اليوم", "Today's appointments")}>
-        <div className="space-y-4 px-4 py-5 sm:px-5 sm:py-6">
-          {todayAppointments.length > 0 ? (
-            todayAppointments.map((row, index) => (
-              <article
-                key={row.id || `${row.time}-${row.patientName}-${index}`}
-                className="flex flex-col gap-4 rounded-[16px] bg-[#F8FAFC] px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="flex h-[45px] w-[45px] items-center justify-center rounded-[10px] bg-primary text-white">
-                    <span className="font-cairo text-[20px] font-black">
-                      {row.patientName.charAt(0)}
-                    </span>
+        <SurfaceSection title={t("secretary.dashboard.todayAppointments")}>
+          <div className="space-y-4 px-4 py-5 sm:px-5 sm:py-6">
+            {todayAppointments.length > 0 ? (
+              todayAppointments.map((row, index) => (
+                <article
+                  key={row.id || `${row.time}-${row.patientName}-${index}`}
+                  className="flex flex-col gap-4 rounded-[16px] bg-[#F8FAFC] px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-[45px] w-[45px] items-center justify-center rounded-[10px] bg-primary text-white">
+                      <span className="font-cairo text-[20px] font-black">
+                        {row.patientName.charAt(0)}
+                      </span>
+                    </div>
+                    <div className="text-start">
+                      <div className="font-cairo text-[18px] font-black text-[#243044]">
+                        {row.patientName}
+                      </div>
+                      <div className="font-cairo text-[14px] font-medium lowercase text-[#98A2B3]">
+                        {t("secretary.dashboard.clinic")}
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-start">
+                  <div className="text-start sm:text-end">
                     <div className="font-cairo text-[18px] font-black text-[#243044]">
-                      {row.patientName}
+                      {row.time}
                     </div>
-                    <div className="font-cairo text-[14px] font-medium lowercase text-[#98A2B3]">
-                      {tr("عيادة", "Clinic")}
-                    </div>
-                  </div>
-                </div>
-                <div className="text-start sm:text-end">
-                  <div className="font-cairo text-[18px] font-black text-[#243044]">
-                    {row.time}
-                  </div>
-                  <div
-                    className={`mt-2 inline-flex rounded-[8px] px-3 py-1 font-cairo text-[13px] font-black ${
-                      row.status === "completed"
-                        ? "bg-[#EAFBF0] text-[#22C55E]"
+                    <div
+                      className={`mt-2 inline-flex rounded-[8px] px-3 py-1 font-cairo text-[13px] font-black ${
+                        row.status === "completed"
+                          ? "bg-[#EAFBF0] text-[#22C55E]"
+                          : row.status === "postponed"
+                            ? "bg-[#FFF2E8] text-[#FF6A00]"
+                            : "bg-[#DDF4F1] text-primary"
+                      }`}
+                    >
+                      {row.status === "completed"
+                        ? t("secretary.dashboard.completed")
                         : row.status === "postponed"
-                          ? "bg-[#FFF2E8] text-[#FF6A00]"
-                          : "bg-[#DDF4F1] text-primary"
-                    }`}
-                  >
-                    {row.status === "completed"
-                      ? tr("مكتمل", "Completed")
-                      : row.status === "postponed"
-                        ? tr("مؤجل", "Postponed")
-                        : tr("مجدول", "Scheduled")}
+                          ? t("secretary.dashboard.postponed")
+                          : t("secretary.dashboard.scheduled")}
+                    </div>
                   </div>
-                </div>
-              </article>
-            ))
-          ) : appointmentsQuery.isAwaitingData ? (
-            <div className="py-8 text-center font-cairo text-[14px] font-semibold text-[#98A2B3]">
-              {tr("جاري تحميل مواعيد اليوم...", "Loading today's appointments...")}
-            </div>
-          ) : (
-            <div className="flex min-h-[250px] items-center justify-center rounded-[18px] border border-dashed border-[#D8E2EE] bg-[#FBFDFE] px-6 text-center font-cairo text-[15px] font-semibold leading-7 text-[#8A94A6]">
-              {tr("لا توجد مواعيد مجدولة لهذا اليوم بعد.", "No appointments scheduled for today yet.")}
-            </div>
-          )}
-        </div>
-      </SurfaceSection>
+                </article>
+              ))
+            ) : appointmentsQuery.isAwaitingData ? (
+              <div className="py-8 text-center font-cairo text-[14px] font-semibold text-[#98A2B3]">
+                {t("secretary.dashboard.loadingTodayAppointments")}
+              </div>
+            ) : (
+              <div className="flex min-h-[250px] items-center justify-center rounded-[18px] border border-dashed border-[#D8E2EE] bg-[#FBFDFE] px-6 text-center font-cairo text-[15px] font-semibold leading-7 text-[#8A94A6]">
+                {t("secretary.dashboard.noAppointmentsToday")}
+              </div>
+            )}
+          </div>
+        </SurfaceSection>
       ) : null}
 
       <div className="grid gap-4 sm:gap-6 md:grid-cols-3 lg:gap-8">
@@ -413,35 +414,35 @@ export default function SecretaryDashboardPage() {
             return true;
           })
           .map((card) => {
-          const Icon = card.icon;
-          return (
-            <div
-              key={card.key}
-              className="rounded-[10px] bg-[#FFFFFF] px-4 py-5 shadow-[0px_1px_2px_-1px_rgba(0,0,0,0.10),0px_1px_3px_0px_rgba(0,0,0,0.10)] sm:px-6 sm:py-6 lg:px-8 lg:py-8"
-            >
-              <div className="flex items-center justify-between">
-                <div className="text-start">
-                  <div className="font-cairo text-[22px] font-black text-[#243044]">
-                    {card.value}
-                  </div>
-                  <div className="mt-2 font-cairo text-[18px] font-semibold text-[#98A2B3]">
-                    {card.label}
-                  </div>
-                  {"caption" in card && card.caption ? (
-                    <div className="mt-1 font-cairo text-[12px] font-medium text-[#98A2B3]">
-                      {card.caption}
+            const Icon = card.icon;
+            return (
+              <div
+                key={card.key}
+                className="rounded-[10px] bg-[#FFFFFF] px-4 py-5 shadow-[0px_1px_2px_-1px_rgba(0,0,0,0.10),0px_1px_3px_0px_rgba(0,0,0,0.10)] sm:px-6 sm:py-6 lg:px-8 lg:py-8"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="text-start">
+                    <div className="font-cairo text-[22px] font-black text-[#243044]">
+                      {card.value}
                     </div>
-                  ) : null}
-                </div>
-                <div
-                  className={`flex h-16 w-16 items-center justify-center rounded-[16px] ${card.iconClass}`}
-                >
-                  <Icon className="h-8 w-8" />
+                    <div className="mt-2 font-cairo text-[18px] font-semibold text-[#98A2B3]">
+                      {card.label}
+                    </div>
+                    {"caption" in card && card.caption ? (
+                      <div className="mt-1 font-cairo text-[12px] font-medium text-[#98A2B3]">
+                        {card.caption}
+                      </div>
+                    ) : null}
+                  </div>
+                  <div
+                    className={`flex h-16 w-16 items-center justify-center rounded-[16px] ${card.iconClass}`}
+                  >
+                    <Icon className="h-8 w-8" />
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
       </div>
     </div>
   );

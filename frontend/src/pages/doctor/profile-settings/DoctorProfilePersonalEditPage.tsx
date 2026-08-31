@@ -1,24 +1,23 @@
-import { Helmet } from 'react-helmet-async';
-import { useNavigate } from 'react-router-dom';
-import { DoctorPageBackButton } from '@/components/doctor/shared/doctor-page-back-button';
+import { Helmet } from "react-helmet-async";
+import { useNavigate } from "react-router-dom";
+import { DoctorPageBackButton } from "@/components/doctor/shared/doctor-page-back-button";
 import DoctorProfilePersonalForm, {
   modeToConsultationTypes,
-} from '@/components/doctor/profile-settings/doctor-profile-personal-form';
-import type { DoctorPersonalEditForm } from '@/components/doctor/profile-settings/doctor-profile-schemas';
+} from "@/components/doctor/profile-settings/doctor-profile-personal-form";
+import type { DoctorPersonalEditForm } from "@/components/doctor/profile-settings/doctor-profile-schemas";
 import {
   DoctorProfilePageError,
   DoctorProfilePageLoading,
-} from '@/components/doctor/profile-settings/doctor-profile-page-states';
-import { useToast } from '@/components/ui/ToastProvider';
-import { getUserFacingRequestErrorMessage } from '@/lib/api';
-import { persistDoctorProfileSuccessNavState } from '@/lib/doctor/profile/doctorProfileSuccessNavState';
-import { useDoctorProfile, useUpdateDoctorProfile } from '@/hooks';
-import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
-import { useI18n } from '@/i18n/provider';
+} from "@/components/doctor/profile-settings/doctor-profile-page-states";
+import { useToast } from "@/components/ui/ToastProvider";
+import { getUserFacingRequestErrorMessage } from "@/lib/api";
+import { persistDoctorProfileSuccessNavState } from "@/lib/doctor/profile/doctorProfileSuccessNavState";
+import { useDoctorProfile, useUpdateDoctorProfile } from "@/hooks";
+import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
+import { useI18n } from "@/i18n/provider";
 
 export default function DoctorProfilePersonalEditPage() {
-  const { locale } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { toast } = useToast();
   const profileQuery = useDoctorProfile();
@@ -41,18 +40,18 @@ export default function DoctorProfilePersonalEditPage() {
         photo,
       });
       const successState = {
-        flow: 'personal_updated' as const,
-        redirectTo: '/doctor/dashboard',
+        flow: "personal_updated" as const,
+        redirectTo: "/doctor/dashboard",
       };
       persistDoctorProfileSuccessNavState(successState);
-      navigate('/doctor/profile-update-success', {
+      navigate("/doctor/profile-update-success", {
         replace: true,
         state: successState,
       });
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
-        title: tr('تعذّر حفظ التغييرات', 'Failed to save changes'),
-        variant: 'error',
+        title: t("doctor.profilePersonalEdit.saveFailed"),
+        variant: "error",
       });
       throw error;
     }
@@ -69,7 +68,7 @@ export default function DoctorProfilePersonalEditPage() {
   return (
     <>
       <Helmet>
-        <title>{tr('تعديل المعلومات الشخصية', 'Edit personal information')} • LMJ Health</title>
+        <title>{t("doctor.profilePersonalEdit.pageTitle")} • LMJ Health</title>
       </Helmet>
       <div className="mb-4">
         <DoctorPageBackButton fallbackTo="/doctor/dashboard" />

@@ -1,25 +1,28 @@
-'use client';
+"use client";
 
-import { motion } from 'framer-motion';
-import type { ApiBillingPayment } from '@/lib/doctor/billing/apiTypes';
-import { formatBillingAmount, formatBillingDate } from '@/lib/doctor/billing/format';
-import { useI18n } from '@/i18n/provider';
+import { motion } from "framer-motion";
+import type { ApiBillingPayment } from "@/lib/doctor/billing/apiTypes";
+import {
+  formatBillingAmount,
+  formatBillingDate,
+} from "@/lib/doctor/billing/format";
+import { useI18n } from "@/i18n/provider";
 
 function paymentMethodLabel(
   method: string | undefined,
-  tr: (ar: string, en: string) => string,
+  t: (key: string) => string,
 ): string {
   switch (method) {
-    case 'cash':
-      return tr('نقدي', 'Cash');
-    case 'card':
-      return tr('بطاقة', 'Card');
-    case 'bank_transfer':
-      return tr('تحويل بنكي', 'Bank transfer');
-    case 'insurance':
-      return tr('تأمين', 'Insurance');
+    case "cash":
+      return t("doctor.clinicAccounts.paymentMethod.cash");
+    case "card":
+      return t("doctor.clinicAccounts.paymentMethod.card");
+    case "bank_transfer":
+      return t("doctor.clinicAccounts.paymentMethod.bankTransfer");
+    case "insurance":
+      return t("doctor.clinicAccounts.paymentMethod.insurance");
     default:
-      return method || '—';
+      return method || "—";
   }
 }
 
@@ -32,8 +35,7 @@ export function PaymentListItem({
   index: number;
   currency?: string;
 }) {
-  const { locale } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const { t } = useI18n();
   const hasRefund = (payment.refundedAmount ?? 0) > 0;
 
   return (
@@ -50,20 +52,23 @@ export function PaymentListItem({
           </span>
           {payment.invoiceNumber ? (
             <span className="inline-flex items-center rounded-full bg-[#F0FDFA] px-2.5 py-0.5 font-cairo text-[11px] font-extrabold text-primary">
-              {tr('فاتورة', 'Invoice')} {payment.invoiceNumber}
+              {t("doctor.clinicAccounts.payment.invoice")}{" "}
+              {payment.invoiceNumber}
             </span>
           ) : null}
           {hasRefund ? (
             <span className="inline-flex items-center rounded-full bg-[#FEF3F2] px-2.5 py-0.5 font-cairo text-[11px] font-extrabold text-[#B42318]">
-              {tr('مسترجع جزئياً/كلياً', 'Refunded')}
+              {t("doctor.clinicAccounts.payment.refunded")}
             </span>
           ) : null}
         </div>
         <p className="font-cairo text-[13px] font-bold text-[#111827]">
-          {payment.patient?.fullName || tr('مريض غير معروف', 'Unknown patient')}
+          {payment.patient?.fullName ||
+            t("doctor.clinicAccounts.payment.unknownPatient")}
         </p>
         <p className="mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]">
-          {paymentMethodLabel(payment.method, tr)} · {formatBillingDate(payment.paidAt)}
+          {paymentMethodLabel(payment.method, t)} ·{" "}
+          {formatBillingDate(payment.paidAt)}
         </p>
       </div>
       <span className="font-cairo text-[22px] font-black text-primary">

@@ -20,18 +20,18 @@ function tt(locale: AppLocale, key: string): string {
 export const PAGE_SIZE = 20;
 
 export type UiContentStatus =
-  | "الكل"
-  | "منشور"
-  | "قيد المراجعة"
-  | "مسودة"
-  | "مؤرشف";
+  | "all"
+  | "published"
+  | "in_review"
+  | "draft"
+  | "archived";
 
 export type LangFilter = "all" | "ar" | "en";
 
 export const MINE_STATUS_FILTERS: readonly UiContentStatus[] = [
-  "الكل",
-  "مسودة",
-  "قيد المراجعة",
+  "all",
+  "draft",
+  "in_review",
 ];
 
 export function isMineStatusFilter(status: UiContentStatus): boolean {

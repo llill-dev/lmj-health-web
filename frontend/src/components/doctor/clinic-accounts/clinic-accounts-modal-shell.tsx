@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { AnimatePresence, motion } from 'framer-motion';
-import { X } from 'lucide-react';
-import { useEffect, type ReactNode } from 'react';
-import { useI18n } from '@/i18n/provider';
+import { AnimatePresence, motion } from "framer-motion";
+import { X } from "lucide-react";
+import { useEffect, type ReactNode } from "react";
+import { useI18n } from "@/i18n/provider";
 
 export function ClinicAccountsModalShell({
   open,
   onClose,
   title,
   children,
-  maxWidthClass = 'max-w-[720px]',
+  maxWidthClass = "max-w-[720px]",
   headerPattern = false,
 }: {
   open: boolean;
@@ -20,23 +20,22 @@ export function ClinicAccountsModalShell({
   maxWidthClass?: string;
   headerPattern?: boolean;
 }) {
-  const { locale } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const { t } = useI18n();
 
   useEffect(() => {
     if (!open) return;
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === "Escape") onClose();
     };
 
     const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    window.addEventListener('keydown', onKeyDown);
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
 
     return () => {
       document.body.style.overflow = prevOverflow;
-      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener("keydown", onKeyDown);
     };
   }, [open, onClose]);
 
@@ -67,8 +66,8 @@ export function ClinicAccountsModalShell({
             <div
               className={
                 headerPattern
-                  ? 'relative overflow-hidden border-b border-[#EEF2F6] px-4 pb-4 pt-5 sm:px-6 sm:pb-5 sm:pt-6 lg:px-8 lg:pb-5 lg:pt-8'
-                  : 'border-b border-[#EEF2F6] px-4 pb-4 pt-5 sm:px-6 sm:pb-5 sm:pt-6 lg:px-8 lg:pb-5 lg:pt-8'
+                  ? "relative overflow-hidden border-b border-[#EEF2F6] px-4 pb-4 pt-5 sm:px-6 sm:pb-5 sm:pt-6 lg:px-8 lg:pb-5 lg:pt-8"
+                  : "border-b border-[#EEF2F6] px-4 pb-4 pt-5 sm:px-6 sm:pb-5 sm:pt-6 lg:px-8 lg:pb-5 lg:pt-8"
               }
             >
               {headerPattern ? (
@@ -87,7 +86,7 @@ export function ClinicAccountsModalShell({
                 type="button"
                 onClick={onClose}
                 className="absolute start-4 top-4 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] sm:start-5 sm:top-5 lg:start-6 lg:top-6"
-                aria-label={tr('إغلاق', 'Close')}
+                aria-label={t("doctor.clinicAccounts.modal.close")}
               >
                 <X className="h-5 w-5" aria-hidden />
               </button>

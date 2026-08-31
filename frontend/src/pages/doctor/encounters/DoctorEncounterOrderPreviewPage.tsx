@@ -1,38 +1,37 @@
-import { useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { useNavigate, useParams } from 'react-router-dom';
-import ConfirmActionDialog from '@/components/doctor/confirm-action-dialog';
-import type { CatalogOrderCategory } from '@/components/doctor/encounters/orders/encounter-order-config';
+import { useState } from "react";
+import { Helmet } from "react-helmet-async";
+import { useNavigate, useParams } from "react-router-dom";
+import ConfirmActionDialog from "@/components/doctor/confirm-action-dialog";
+import type { CatalogOrderCategory } from "@/components/doctor/encounters/orders/encounter-order-config";
 import {
   RadiologyPreviewActions,
   RadiologyPreviewBanner,
   RadiologyPreviewDocument,
-} from '@/components/doctor/radiology/preview';
-import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
-import { DoctorDocumentPreviewSkeleton } from '@/components/doctor/shared/skeletons';
-import { useToast } from '@/components/ui/ToastProvider';
-import { useEncounterOrderPreviewPage } from '@/hooks/doctor/encounters/useEncounterOrderPreviewPage';
-import { useEncounterOrderWorkspace } from '@/hooks/doctor/encounters/useEncounterOrderWorkspace';
+} from "@/components/doctor/radiology/preview";
+import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
+import { DoctorDocumentPreviewSkeleton } from "@/components/doctor/shared/skeletons";
+import { useToast } from "@/components/ui/ToastProvider";
+import { useEncounterOrderPreviewPage } from "@/hooks/doctor/encounters/useEncounterOrderPreviewPage";
+import { useEncounterOrderWorkspace } from "@/hooks/doctor/encounters/useEncounterOrderWorkspace";
 import {
   generateDoctorOrderDocumentPdf,
   openPdfBlobInNewTab,
-} from '@/lib/doctor/orders/doctorOrderDocuments';
-import { getUserFacingRequestErrorMessage } from '@/lib/api';
-import { useRetryAction } from '@/lib/query/useRetryAction';
-import { readAuthUser } from '@/lib/cookies';
-import { useI18n } from '@/i18n/provider';
+} from "@/lib/doctor/orders/doctorOrderDocuments";
+import { getUserFacingRequestErrorMessage } from "@/lib/api";
+import { useRetryAction } from "@/lib/query/useRetryAction";
+import { readAuthUser } from "@/lib/cookies";
+import { useI18n } from "@/i18n/provider";
 
 export default function DoctorEncounterOrderPreviewPage({
   category,
 }: {
   category: CatalogOrderCategory;
 }) {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const { t, locale, dir } = useI18n();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { patientId = '', encounterId = '' } = useParams();
-  const doctorId = readAuthUser()?.actorIds?.doctorId ?? '';
+  const { patientId = "", encounterId = "" } = useParams();
+  const doctorId = readAuthUser()?.actorIds?.doctorId ?? "";
 
   const preview = useEncounterOrderPreviewPage(
     category,
@@ -66,16 +65,16 @@ export default function DoctorEncounterOrderPreviewPage({
         response.preview?.pdfUrl ??
         response.preview?.url;
       if (url) {
-        window.open(url, '_blank', 'noopener,noreferrer');
+        window.open(url, "_blank", "noopener,noreferrer");
         return;
       }
       const blob = await generateDoctorOrderDocumentPdf({
-        sourceType: preview.config.pdfSourceType as 'order' | 'imaging_order',
+        sourceType: preview.config.pdfSourceType as "order" | "imaging_order",
         sourceId: preview.previewVm.orderId,
       });
       openPdfBlobInNewTab(blob, `${preview.config.title}.pdf`);
     } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), { variant: 'error' });
+      toast(getUserFacingRequestErrorMessage(error), { variant: "error" });
     } finally {
       setBusy(false);
     }
@@ -84,9 +83,9 @@ export default function DoctorEncounterOrderPreviewPage({
   if (!patientId || !encounterId) {
     return (
       <DoctorListErrorState
-        title={tr('رابط غير صالح', 'Invalid link')}
-        brief={tr('معرّف المريض أو الزيارة مفقود.', 'The patient or encounter identifier is missing.')}
-        onRetry={() => navigate('/doctor/encounters')}
+        title={t("doctor.encounter.orderPreview.invalidLink")}
+        brief={t("doctor.encounter.orderPreview.missingId")}
+        onRetry={() => navigate("/doctor/encounters")}
       />
     );
   }
@@ -94,7 +93,10 @@ export default function DoctorEncounterOrderPreviewPage({
   return (
     <>
       <Helmet>
-        <title>{tr('معاينة', 'Preview')} {preview.config.title} • LMJ Health</title>
+        <title>
+          {t("doctor.encounter.orderPreview.preview")} {preview.config.title} •
+          LMJ Health
+        </title>
       </Helmet>
 
       <div dir={dir} lang={locale} className="w-full pb-8 sm:pb-10">
@@ -108,7 +110,7 @@ export default function DoctorEncounterOrderPreviewPage({
           <DoctorDocumentPreviewSkeleton />
         ) : preview.isError || !preview.previewVm ? (
           <DoctorListErrorState
-            title={tr('تعذّر تحميل المعاينة', 'Failed to load the preview')}
+            title={t("doctor.encounter.orderPreview.loadFailed")}
             brief={getUserFacingRequestErrorMessage(preview.error)}
             retrying={retryingPreview}
             onRetry={() => void retryPreview()}
@@ -129,25 +131,30 @@ export default function DoctorEncounterOrderPreviewPage({
         <ConfirmActionDialog
           open={finalizeOpen}
           onOpenChange={setFinalizeOpen}
-          title={tr('اعتماد نهائي', 'Final approval')}
-          description={tr(
-            `اعتماد ${preview.config.title} للمريض ${preview.previewVm?.patientName ?? '—'}`,
-            `Approve ${preview.config.title} for patient ${preview.previewVm?.patientName ?? '—'}`,
-          )}
-          confirmLabel={tr('تأكيد', 'Confirm')}
+          title={t("doctor.encounter.orderPreview.finalApproval")}
+          description={
+            locale === "ar"
+              ? `اعتماد ${preview.config.title} للمريض ${preview.previewVm?.patientName ?? "—"}`
+              : `Approve ${preview.config.title} for patient ${preview.previewVm?.patientName ?? "—"}`
+          }
+          confirmLabel={t("doctor.encounter.orderPreview.confirm")}
           confirmDisabled={busy || workspace.isBusy}
           onConfirm={async () => {
             setBusy(true);
             try {
               await workspace.finalize();
-              toast(tr('تم اعتماد الطلب.', 'The order has been approved.'), { variant: 'success' });
+              toast(t("doctor.encounter.orderPreview.approved"), {
+                variant: "success",
+              });
               setFinalizeOpen(false);
               navigate(
                 `/doctor/encounters/${patientId}/${encounterId}/summary`,
                 { replace: true },
               );
             } catch (error) {
-              toast(getUserFacingRequestErrorMessage(error), { variant: 'error' });
+              toast(getUserFacingRequestErrorMessage(error), {
+                variant: "error",
+              });
             } finally {
               setBusy(false);
             }
