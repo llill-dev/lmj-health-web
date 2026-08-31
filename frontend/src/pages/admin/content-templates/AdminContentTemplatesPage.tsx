@@ -31,6 +31,7 @@ import type {
 } from "@/lib/admin/types";
 import { cn } from "@/lib/utils/utils";
 import { useI18n } from "@/i18n/provider";
+import { getTranslationValue } from "@/i18n/translations";
 
 type ParentFilter = "all" | AdminContentTemplateParentType;
 type ActiveFilter = "all" | "active" | "disabled";
@@ -55,11 +56,31 @@ function parentTypeLabel(
   if (!t) return "—";
   if (typeof t === "string") {
     if (t === "CONDITION")
-      return locale === "ar" ? "الحالات الطبية" : "Conditions";
-    if (t === "SYMPTOM") return locale === "ar" ? "الأعراض" : "Symptoms";
+      return getTranslationValue(
+        locale,
+        "admin.contentTemplates.parentTypeCondition",
+      ) ?? t;
+    if (t === "SYMPTOM")
+      return (
+        getTranslationValue(
+          locale,
+          "admin.contentTemplates.parentTypeSymptom",
+        ) ?? t
+      );
     if (t === "GENERAL_ADVICE")
-      return locale === "ar" ? "نصائح عامة" : "General advice";
-    if (t === "MEDICATION") return locale === "ar" ? "الأدوية" : "Medications";
+      return (
+        getTranslationValue(
+          locale,
+          "admin.contentTemplates.parentTypeGeneralAdvice",
+        ) ?? t
+      );
+    if (t === "MEDICATION")
+      return (
+        getTranslationValue(
+          locale,
+          "admin.contentTemplates.parentTypeMedication",
+        ) ?? t
+      );
     return t;
   }
 
