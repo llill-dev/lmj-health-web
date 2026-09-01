@@ -1,14 +1,16 @@
 'use client';
 
 import { DoctorLoadingShell, SkeletonBlock } from './doctor-skeleton-primitives';
+import { useI18n } from '@/i18n/provider';
 
 export function DoctorWorkspaceFormSkeleton({
   medicationCards = 2,
 }: {
   medicationCards?: number;
 }) {
+  const { t } = useI18n();
   return (
-    <DoctorLoadingShell label="جارٍ تحميل مساحة العمل…">
+    <DoctorLoadingShell label={t('doctor.skeleton.workspaceForm')}>
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="space-y-2 text-start">

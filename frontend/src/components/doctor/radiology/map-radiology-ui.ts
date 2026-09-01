@@ -44,8 +44,11 @@ function parseItemNotes(notes?: string) {
   return {};
 }
 
+type TFn = (key: string, fallback?: string) => string;
+
 export function resolveImagingOrderItemFields(
   item: EncounterOrderItem,
+  t?: TFn,
 ): Omit<RadiologyOrderItemUi, 'id'> {
   const meta = parseItemNotes(item.notes);
   const details = asRecord(item.details);
@@ -67,7 +70,7 @@ export function resolveImagingOrderItemFields(
       details.displayName,
       details.displayNameAr,
       meta.name,
-    ) ?? 'فحص أشعة';
+    ) ?? (t ? t('doctor.radiology.defaultItemName') : 'فحص أشعة');
 
   const category =
     readString(
@@ -139,12 +142,13 @@ export function formatRadiologyItemBrief(
 
 export function mapRadiologyItemsToUi(
   order?: EncounterOrder | null,
+  t?: TFn,
 ): RadiologyOrderItemUi[] {
   return (order?.items ?? [])
     .filter((item) => item._id)
     .map((item) => ({
       id: item._id!,
-      ...resolveImagingOrderItemFields(item),
+      ...resolveImagingOrderItemFields(item, t),
     }));
 }
 
@@ -240,10 +244,16 @@ export function isRadiologyOrderEditable(
   return !status.includes('final') && !status.includes('complete');
 }
 
-export function buildRadiologyPatientSubtitle(patientName?: string) {
+export function buildRadiologyPatientSubtitle(patientName?: string, t?: TFn) {
   const name = patientName?.trim();
-  if (!name || name === '—') return 'طلبات الأشعة';
-  return `طلب الأشعة الخاص بالمريض ${name}`;
+  if (!name || name === '—') {
+    return t
+      ? t('doctor.radiology.defaultPatientSubtitle')
+      : 'طلبات الأشعة';
+  }
+  return t
+    ? t('doctor.radiology.patientSubtitle').replace('{name}', name)
+    : `طلب الأشعة الخاص بالمريض ${name}`;
 }
 
 export function formatRadiologyOrderCode(orderId: string) {

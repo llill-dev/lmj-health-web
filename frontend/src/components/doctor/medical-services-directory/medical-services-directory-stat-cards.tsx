@@ -19,6 +19,7 @@ export type MedicalServicesDirectoryKpi = {
 
 export function buildMedicalServicesDirectoryKpis(
   counts: Record<MedicalServiceCategory, number>,
+  t: (key: string, fallback?: string) => string,
 ): MedicalServicesDirectoryKpi[] {
   const formatCount = (value: number) =>
     formatBillingNumber(value, { maximumFractionDigits: 0 });
@@ -28,25 +29,25 @@ export function buildMedicalServicesDirectoryKpis(
       key: 'clinics',
       icon: <Stethoscope className="h-5 w-5 shrink-0" />,
       value: formatCount(counts.clinics),
-      label: 'عيادات',
+      label: t('doctor.medicalServicesDirectory.kpi.clinics'),
     },
     {
       key: 'imaging',
       icon: <ScanLine className="h-5 w-5 shrink-0" />,
       value: formatCount(counts.imaging),
-      label: 'تصوير طبي',
+      label: t('doctor.medicalServicesDirectory.kpi.imaging'),
     },
     {
       key: 'treatment',
       icon: <Building2 className="h-5 w-5 shrink-0" />,
       value: formatCount(counts.treatment),
-      label: 'مراكز علاج',
+      label: t('doctor.medicalServicesDirectory.kpi.treatment'),
     },
     {
       key: 'labs',
       icon: <FlaskConical className="h-5 w-5 shrink-0" />,
       value: formatCount(counts.labs),
-      label: 'مخابر',
+      label: t('doctor.medicalServicesDirectory.kpi.labs'),
     },
   ];
 }

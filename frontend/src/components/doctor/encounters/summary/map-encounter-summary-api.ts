@@ -14,6 +14,8 @@ import type {
   EncounterSummaryViewModel,
 } from './encounter-summary-types';
 
+type TFn = (key: string, fallback?: string) => string;
+
 export type EncounterSummaryApiSources = {
   encounter?: DoctorEncounterSummary | null;
   profile?: DoctorPatientFullProfile | null;
@@ -24,16 +26,19 @@ export type EncounterSummaryApiSources = {
 };
 
 function formatAgeFromProfile(
+  t: TFn,
   profile?: DoctorPatientFullProfile | null,
   encounter?: DoctorEncounterSummary | null,
   publicProfile?: DoctorPatientPublicProfile | null,
 ): string {
+  const ageLabel = (age: number) =>
+    t('doctor.encounterSummary.ageSuffix').replace('{age}', String(age));
   if (typeof profile?.age === 'number' && profile.age > 0) {
-    return `${profile.age} سنة`;
+    return ageLabel(profile.age);
   }
   const encounterAge = encounter?.patient?.age;
   if (typeof encounterAge === 'number' && encounterAge > 0) {
-    return `${encounterAge} سنة`;
+    return ageLabel(encounterAge);
   }
   const dob =
     profile?.dateOfBirth ??
@@ -44,7 +49,7 @@ function formatAgeFromProfile(
   const years = Math.floor(
     (Date.now() - birth.getTime()) / (365.25 * 24 * 60 * 60 * 1000),
   );
-  return years > 0 ? `${years} سنة` : '—';
+  return years > 0 ? ageLabel(years) : '—';
 }
 
 function resolvePatientName(
@@ -93,7 +98,7 @@ function isUrgentOrder(order: EncounterOrder): boolean {
   );
 }
 
-function orderTitle(order: EncounterOrder): string {
+function orderTitle(t: TFn, order: EncounterOrder): string {
   const itemTitle = order.items?.[0]?.title ?? order.items?.[0]?.name;
   if (itemTitle?.trim()) return itemTitle.trim();
   return (
@@ -101,17 +106,21 @@ function orderTitle(order: EncounterOrder): string {
     order.orderName?.trim() ??
     order.clinicalSummary?.trim() ??
     order.reason?.trim() ??
-    'طلب طبي'
+    t('doctor.encounterSummary.defaultOrderTitle')
   );
 }
 
 function mapDiagnosisBadges(
+  t: TFn,
   diagnosis: string,
   index: number,
 ): EncounterSummaryDiagnosisBadge[] {
   const badges: EncounterSummaryDiagnosisBadge[] = [
     {
-      label: index === 0 ? 'رئيسي' : 'ثانوي',
+      label:
+        index === 0
+          ? t('doctor.encounterSummary.diagnosis.primary')
+          : t('doctor.encounterSummary.diagnosis.secondary'),
       tone: index === 0 ? 'primary' : 'secondary',
     },
   ];
@@ -122,7 +131,10 @@ function mapDiagnosisBadges(
     lower.includes('سكري') ||
     lower.includes('ضغط')
   ) {
-    badges.push({ label: 'مزمن', tone: 'warning' });
+    badges.push({
+      label: t('doctor.encounterSummary.diagnosis.chronic'),
+      tone: 'warning',
+    });
   }
   if (
     lower.includes('حاد') ||
@@ -130,7 +142,10 @@ function mapDiagnosisBadges(
     lower.includes('خطير') ||
     lower.includes('unstable')
   ) {
-    badges.push({ label: 'خطورة عالية', tone: 'danger' });
+    badges.push({
+      label: t('doctor.encounterSummary.diagnosis.highSeverity'),
+      tone: 'danger',
+    });
   }
   return badges;
 }
@@ -200,6 +215,8 @@ function mapMedicationsFromProfile(
 
 export function mapEncounterSummaryFromApi(
   sources: EncounterSummaryApiSources,
+  t: TFn,
+  locale: 'ar' | 'en' = 'ar',
 ): EncounterSummaryViewModel {
   const {
     encounter,
@@ -222,7 +239,7 @@ export function mapEncounterSummaryFromApi(
     .map((title, index) => ({
       id: `dx-${index}`,
       title,
-      badges: mapDiagnosisBadges(title, index),
+      badges: mapDiagnosisBadges(t, title, index),
     }));
 
   const historyCurrent =
@@ -253,7 +270,7 @@ export function mapEncounterSummaryFromApi(
     .filter((order) => normalizeOrderCategory(order) === 'lab')
     .map((order) => ({
       id: order._id,
-      title: orderTitle(order),
+      title: orderTitle(t, order),
       urgent: isUrgentOrder(order),
     }));
 
@@ -261,7 +278,7 @@ export function mapEncounterSummaryFromApi(
     .filter((order) => normalizeOrderCategory(order) === 'radiology')
     .map((order) => ({
       id: order._id,
-      title: orderTitle(order),
+      title: orderTitle(t, order),
       urgent: isUrgentOrder(order),
     }));
 
@@ -269,7 +286,7 @@ export function mapEncounterSummaryFromApi(
     .filter((order) => normalizeOrderCategory(order) === 'referral')
     .map((order) => ({
       id: order._id,
-      specialty: order.specialty?.trim() || orderTitle(order),
+      specialty: order.specialty?.trim() || orderTitle(t, order),
       doctorName: order.referredDoctorName?.trim() || '—',
       urgent: isUrgentOrder(order),
     }));
@@ -277,7 +294,7 @@ export function mapEncounterSummaryFromApi(
   const closedAt = encounter?.closedAt;
   const closedAtLabel =
     closedAt && !Number.isNaN(new Date(closedAt).getTime())
-      ? new Date(closedAt).toLocaleString('ar-SA', {
+      ? new Date(closedAt).toLocaleString(locale === 'ar' ? 'ar-SA' : 'en-US', {
           dateStyle: 'medium',
           timeStyle: 'short',
         })
@@ -286,7 +303,7 @@ export function mapEncounterSummaryFromApi(
   return {
     patient: {
       name: resolvePatientName(encounter, profile, publicProfile),
-      ageLabel: formatAgeFromProfile(profile, encounter, publicProfile),
+      ageLabel: formatAgeFromProfile(t, profile, encounter, publicProfile),
       fileNumber: resolveFileNumber(encounter, profile, publicProfile),
     },
     chiefComplaint: encounter?.notes?.trim() || '—',

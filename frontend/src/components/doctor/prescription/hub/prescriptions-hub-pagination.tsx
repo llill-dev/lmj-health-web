@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import StyledSelect from '@/components/ui/styled-select';
+import { useI18n } from '@/i18n/provider';
 
 export function PrescriptionsHubPagination({
   page,
@@ -22,17 +23,23 @@ export function PrescriptionsHubPagination({
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
 }) {
+  const { t } = useI18n();
   const safeTotalPages = Math.max(1, totalPages);
 
   return (
     <section className="flex flex-col gap-4 rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)] sm:flex-row sm:items-center sm:justify-between">
       <div className="font-cairo text-[12px] font-bold text-[#667085]">
-        عرض {showingFrom}-{showingTo} من أصل {total} وصفة
+        {t('doctor.prescriptionsHub.pagination.showingRange')
+          .replace('{from}', String(showingFrom))
+          .replace('{to}', String(showingTo))
+          .replace('{total}', String(total))}
       </div>
 
       <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-end">
         <div className="font-cairo text-[12px] font-bold text-[#667085]">
-          صفحة {page} من {safeTotalPages}
+          {t('doctor.prescriptionsHub.pagination.pageOf')
+            .replace('{page}', String(page))
+            .replace('{totalPages}', String(safeTotalPages))}
         </div>
 
         <div className="w-[118px] shrink-0">
@@ -46,7 +53,7 @@ export function PrescriptionsHubPagination({
               value: String(size),
               label: String(size),
             }))}
-            listboxAriaLabel="عدد الوصفات في الصفحة"
+            listboxAriaLabel={t('doctor.prescriptionsHub.pagination.perPageLabel')}
           />
         </div>
 
@@ -55,7 +62,7 @@ export function PrescriptionsHubPagination({
           onClick={() => onPageChange(Math.max(1, page - 1))}
           disabled={disabled || page <= 1}
           className="inline-flex h-[36px] w-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#667085] transition hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60"
-          aria-label="الصفحة السابقة"
+          aria-label={t('doctor.prescriptionsHub.pagination.previous')}
         >
           <ChevronRight className="h-4 w-4" aria-hidden />
         </button>
@@ -65,7 +72,7 @@ export function PrescriptionsHubPagination({
           onClick={() => onPageChange(Math.min(safeTotalPages, page + 1))}
           disabled={disabled || page >= safeTotalPages}
           className="inline-flex h-[36px] w-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#667085] transition hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60"
-          aria-label="الصفحة التالية"
+          aria-label={t('doctor.prescriptionsHub.pagination.next')}
         >
           <ChevronLeft className="h-4 w-4" aria-hidden />
         </button>

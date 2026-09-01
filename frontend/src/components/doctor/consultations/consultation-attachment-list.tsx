@@ -7,6 +7,7 @@ import { openConsultationAttachmentDownload } from '@/lib/consultations/download
 import { getPatientFileAccessErrorMessage } from '@/lib/doctor/writeFlowErrors';
 import type { ConsultationAttachmentFile } from '@/lib/consultations/types';
 import { cn } from '@/lib/utils/utils';
+import { useI18n } from '@/i18n/provider';
 
 export type ConsultationAttachmentItem = ConsultationAttachmentFile & {
   senderLabel?: string;
@@ -16,7 +17,7 @@ export default function ConsultationAttachmentList({
   attachments,
   doctorId,
   patientId,
-  title = 'المرفقات',
+  title,
   variant = 'chips',
 }: {
   attachments: ConsultationAttachmentItem[];
@@ -25,6 +26,8 @@ export default function ConsultationAttachmentList({
   title?: string;
   variant?: 'chips' | 'cards';
 }) {
+  const { t } = useI18n();
+  const resolvedTitle = title ?? t('doctor.consultations.attachment.defaultTitle');
   const { toast } = useToast();
   const [loadingRef, setLoadingRef] = useState<string | null>(null);
 
@@ -47,7 +50,10 @@ export default function ConsultationAttachmentList({
       );
     } catch (error) {
       toast(getPatientFileAccessErrorMessage(error, mode), {
-        title: mode === 'download' ? 'تعذّر تنزيل المرفق' : 'تعذّر فتح المرفق',
+        title:
+          mode === 'download'
+            ? t('doctor.consultations.attachment.downloadFailed')
+            : t('doctor.consultations.attachment.openFailed'),
         variant: 'error',
       });
     } finally {
@@ -59,7 +65,7 @@ export default function ConsultationAttachmentList({
     return (
       <div className="mt-3">
         <div className="font-cairo text-[12px] font-extrabold text-[#111827]">
-          {title}
+          {resolvedTitle}
         </div>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
           {attachments.map((attachment) => {
@@ -71,7 +77,7 @@ export default function ConsultationAttachmentList({
             const label =
               attachment.fileName?.trim() ||
               attachment.ref?.split('/').pop() ||
-              'ملف مرفق';
+              t('doctor.consultations.attachment.fallbackLabel');
             const isLoading = loadingRef === key;
 
             return (
@@ -80,7 +86,7 @@ export default function ConsultationAttachmentList({
                 className="rounded-[10px] border border-[#E2E8F0] bg-[#F9FAFB] px-3 py-3"
               >
                 <div className="font-cairo text-[11px] font-semibold text-[#667085]">
-                  الجهة المرسلة:{' '}
+                  {t('doctor.consultations.attachment.senderLabel')}{' '}
                   <span className="font-extrabold text-[#111827]">
                     {attachment.senderLabel ?? '—'}
                   </span>
@@ -107,7 +113,7 @@ export default function ConsultationAttachmentList({
                     ) : (
                       <Eye className="h-3.5 w-3.5" />
                     )}
-                    عرض
+                    {t('doctor.consultations.attachment.view')}
                   </button>
                   <button
                     type="button"
@@ -124,7 +130,7 @@ export default function ConsultationAttachmentList({
                     ) : (
                       <Download className="h-3.5 w-3.5" />
                     )}
-                    تحميل
+                    {t('doctor.consultations.attachment.download')}
                   </button>
                 </div>
               </div>
@@ -137,7 +143,9 @@ export default function ConsultationAttachmentList({
 
   return (
     <div className="mt-3">
-      <div className="font-cairo text-[11px] font-bold text-[#98A2B3]">{title}</div>
+      <div className="font-cairo text-[11px] font-bold text-[#98A2B3]">
+        {resolvedTitle}
+      </div>
       <div className="mt-2 flex flex-wrap gap-2">
         {attachments.map((attachment) => {
           const key =
@@ -145,7 +153,7 @@ export default function ConsultationAttachmentList({
           const label =
             attachment.fileName?.trim() ||
             attachment.ref?.split('/').pop() ||
-            'ملف مرفق';
+            t('doctor.consultations.attachment.fallbackLabel');
 
           return (
             <button

@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { ClipboardList } from "lucide-react";
 
 import { PatientTabEmptyIllustration } from "@/components/doctor/patients/patient-tab-empty-illustration";
+import { useI18n } from "@/i18n/provider";
 
 import { MedicalHistoryRecordCard } from "../cards";
 import { TAB_STAGGER_CONTAINER, TAB_STAGGER_ITEM } from "../constants";
@@ -14,6 +15,8 @@ export function HistoryTab({
   fullProfileData: FullProfileData;
   onAddRecord: () => void;
 }) {
+  const { t } = useI18n();
+
   if (!fullProfileData.medicalHistory.length) {
     return (
       <motion.div
@@ -27,9 +30,9 @@ export function HistoryTab({
             variant="teal"
             imageSrc="/images/photo-not-meduical-file.png"
             imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.12)]"
-            title="لا توجد سجلات طبية بعد"
-            subtitle="يمكنك إضافة أول سجل طبي لهذا المريض الآن"
-            actionLabel="إضافة سجل طبي"
+            title={t("doctor.historyTab.emptyTitle")}
+            subtitle={t("doctor.historyTab.emptySubtitle")}
+            actionLabel={t("doctor.historyTab.addRecord")}
             onAction={onAddRecord}
             actionIcon={<ClipboardList className="h-4 w-4" />}
           />

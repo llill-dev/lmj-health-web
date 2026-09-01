@@ -1,6 +1,7 @@
 'use client';
 
 import { DoctorLoadingShell, SkeletonBlock } from './doctor-skeleton-primitives';
+import { useI18n } from '@/i18n/provider';
 
 export function DoctorTableSkeleton({
   rows = 6,
@@ -9,8 +10,9 @@ export function DoctorTableSkeleton({
   rows?: number;
   columns?: number;
 }) {
+  const { t } = useI18n();
   return (
-    <DoctorLoadingShell label="جارٍ تحميل الجدول…">
+    <DoctorLoadingShell label={t('doctor.skeleton.table')}>
       <div className="overflow-hidden rounded-[12px] border border-[#E2E8F0] bg-white">
         <div className="border-b border-[#E2E8F0] bg-[#F0FDFA] px-4 py-3">
           <div className="flex items-center justify-center gap-4">

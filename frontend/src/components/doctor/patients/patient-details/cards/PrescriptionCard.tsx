@@ -3,6 +3,7 @@ import { AlertTriangle, Clock, FileText, Pill } from "lucide-react";
 import { cn } from "@/lib/utils/utils";
 import { TAB_STAGGER_ITEM } from "../constants";
 import type { FullProfileData } from "../types";
+import { useI18n } from "@/i18n/provider";
 
 interface PrescriptionCardProps {
   prescription: FullProfileData["prescriptions"][number];
@@ -13,24 +14,25 @@ export function PrescriptionCard({
   prescription,
   index,
 }: PrescriptionCardProps) {
+  const { t } = useI18n();
   const statusStyles = {
     draft: {
       bg: "bg-[#F3F4F6]/80",
       text: "text-[#374151]",
       ring: "ring-[#D1D5DB]/60",
-      label: "مسودة",
+      label: t("doctor.prescriptionCard.statusDraft"),
     },
     finalized: {
       bg: "bg-[#D1FAE5]/80",
       text: "text-[#065F46]",
       ring: "ring-[#86EFAC]/60",
-      label: "معتمدة",
+      label: t("doctor.prescriptionCard.statusFinalized"),
     },
     cancelled: {
       bg: "bg-[#FEE2E2]/80",
       text: "text-[#991B1B]",
       ring: "ring-[#FCA5A5]/60",
-      label: "ملغاة",
+      label: t("doctor.prescriptionCard.statusCancelled"),
     },
   };
 
@@ -40,7 +42,7 @@ export function PrescriptionCard({
     bg: "bg-[#F3F4F6]/80",
     text: "text-[#374151]",
     ring: "ring-[#D1D5DB]/60",
-    label: prescription.status || "غير محدد",
+    label: prescription.status || t("doctor.patientQuickInfo.unspecified"),
   };
 
   return (
@@ -74,7 +76,7 @@ export function PrescriptionCard({
                     #{index}
                   </span>
                   <span className="inline-flex rounded-full bg-[#F5F3FF] px-2.5 py-0.5 font-cairo text-[10px] font-extrabold uppercase tracking-wider text-[#6D28D9] ring-1 ring-[#DDD6FE]/50">
-                    وصفة طبية
+                    {t("doctor.prescriptionCard.badge")}
                   </span>
                   <span
                     className={cn(
@@ -88,14 +90,14 @@ export function PrescriptionCard({
                   </span>
                 </div>
                 <h3 className="mt-2 font-cairo text-[16px] font-black leading-snug text-[#0f172a]">
-                  وصفة طبية
+                  {t("doctor.prescriptionCard.badge")}
                 </h3>
               </div>
             </div>
             <div className="rounded-xl border border-[#E2E8F0] bg-white/80 px-3 py-2 text-start shadow-sm backdrop-blur-sm">
               <div className="flex items-center gap-1.5 font-cairo text-[10px] font-bold text-[#667085]">
                 <Clock className="w-3 h-3" />
-                التاريخ
+                {t("doctor.prescriptionCard.date")}
               </div>
               <div className="mt-1 font-cairo text-[12px] font-extrabold tabular-nums text-[#101828]">
                 {prescription.createdAt}
@@ -106,7 +108,10 @@ export function PrescriptionCard({
           {prescription.items.length > 0 && (
             <div className="space-y-2">
               <div className="font-cairo text-[12px] font-black text-[#475467]">
-                الأدوية المدرجة ({prescription.items.length})
+                {t("doctor.prescriptionCard.medicationsIncluded").replace(
+                  "{count}",
+                  String(prescription.items.length),
+                )}
               </div>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {prescription.items.map((item, idx) => (
@@ -141,7 +146,7 @@ export function PrescriptionCard({
             <div className="rounded-xl border border-[#FED7AA]/60 bg-[#FFFBEB]/50 px-4 py-3">
               <div className="flex items-center gap-1.5 font-cairo text-[11px] font-bold text-[#B45309]">
                 <AlertTriangle className="h-3.5 w-3.5" />
-                ملاحظات الطبيب
+                {t("doctor.prescriptionCard.doctorNotes")}
               </div>
               <p className="mt-2 font-cairo text-[12px] font-semibold leading-relaxed text-[#78350f]">
                 {prescription.notes}

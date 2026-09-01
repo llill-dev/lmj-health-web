@@ -98,9 +98,9 @@ export default function DataEntryServiceProvidersPage() {
           variant="admin"
           surface="mint"
           title={t("dataEntry.serviceProviders.hero.title")}
-          subtitle={
-            locale === "ar" ? `${total} مسودة` : `${total} draft${total === 1 ? "" : "s"}`
-          }
+          subtitle={t("dataEntry.serviceProviders.draftCount")
+            .replace("{count}", String(total))
+            .replace("{suffix}", total === 1 ? "" : "s")}
           headerIcon={<Building2 className="h-8 w-8 text-white" />}
           actionLabel={t("dataEntry.serviceProviders.hero.addAction")}
           actionIcon={<Plus className="h-4 w-4" />}
@@ -133,7 +133,7 @@ export default function DataEntryServiceProvidersPage() {
                 value={selectedTypeId}
                 onChange={(value) => updateFilters({ serviceType: value })}
                 options={[
-                  { value: "", label: locale === "ar" ? "كل الأنواع" : "All types" },
+                  { value: "", label: t("dataEntry.serviceProviders.allTypes") },
                   ...typeOptions,
                 ]}
                 listboxAriaLabel={t("dataEntry.serviceProviders.filters.serviceType")}
@@ -141,7 +141,7 @@ export default function DataEntryServiceProvidersPage() {
             </div>
             <div className="lg:col-span-4">
               <div className="mb-2 font-cairo text-[12px] font-extrabold text-[#667085]">
-                {locale === "ar" ? "بحث" : "Search"}
+                {t("dataEntry.serviceProviders.search")}
               </div>
               <form
                 onSubmit={(e) => {
@@ -154,12 +154,12 @@ export default function DataEntryServiceProvidersPage() {
                   type="text"
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
-                  placeholder={locale === "ar" ? "ابحث بالاسم أو المدينة…" : "Search name or city…"}
+                  placeholder={t("dataEntry.serviceProviders.searchPlaceholder")}
                   className="h-[40px] w-full rounded-[8px] border border-[#E5E7EB] bg-white px-4 pe-10 font-cairo text-[12px] font-bold text-[#101828] outline-none focus-visible:border-primary"
                 />
                 <button
                   type="submit"
-                  aria-label={locale === "ar" ? "بحث" : "Search"}
+                  aria-label={t("dataEntry.serviceProviders.search")}
                   className="absolute inset-y-0 end-2 flex items-center text-[#98A2B3]"
                 >
                   <Search className="h-4 w-4" />
@@ -180,7 +180,7 @@ export default function DataEntryServiceProvidersPage() {
                 <button
                   type="button"
                   onClick={clearFilters}
-                  aria-label={locale === "ar" ? "مسح الفلاتر" : "Clear filters"}
+                  aria-label={t("dataEntry.serviceProviders.clearFilters")}
                   className="inline-flex h-[40px] items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white px-3 text-[#667085]"
                 >
                   <X className="h-4 w-4" />
@@ -204,9 +204,7 @@ export default function DataEntryServiceProvidersPage() {
           ) : providers.length === 0 ? (
             <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-10 text-center">
               <p className="font-cairo text-[13px] font-semibold text-[#667085]">
-                {locale === "ar"
-                  ? "لا يوجد مزودون يطابقون هذه الفلاتر."
-                  : "No providers match these filters."}
+                {t("dataEntry.serviceProviders.list.noMatch")}
               </p>
               <button
                 type="button"
@@ -258,19 +256,21 @@ export default function DataEntryServiceProvidersPage() {
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1}
                 className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white text-[#344054] disabled:opacity-40"
-                aria-label={locale === "ar" ? "الصفحة السابقة" : "Previous page"}
+                aria-label={t("dataEntry.serviceProviders.pagination.previous")}
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
               <span className="font-cairo text-[12px] font-bold text-[#344054]">
-                {locale === "ar" ? `صفحة ${page} من ${totalPages}` : `Page ${page} of ${totalPages}`}
+                {t("dataEntry.serviceProviders.pagination.pageOf")
+                  .replace("{page}", String(page))
+                  .replace("{totalPages}", String(totalPages))}
               </span>
               <button
                 type="button"
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page >= totalPages}
                 className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white text-[#344054] disabled:opacity-40"
-                aria-label={locale === "ar" ? "الصفحة التالية" : "Next page"}
+                aria-label={t("dataEntry.serviceProviders.pagination.next")}
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>

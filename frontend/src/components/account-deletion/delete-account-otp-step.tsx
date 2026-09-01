@@ -2,6 +2,7 @@ import { deleteAccountOtpSchema } from '@/lib/auth/accountDeletionSchemas';
 import { ArrowLeft } from 'lucide-react';
 import type { ClipboardEvent, KeyboardEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
+import { useI18n } from '@/i18n/provider';
 
 export function DeleteAccountOtpStep({
   destination,
@@ -12,8 +13,8 @@ export function DeleteAccountOtpStep({
   onResend,
   onBack,
   onChangeChannel,
-  title = 'التأكيد النهائي',
-  subtitle = 'هذه فرصتك الأخيرة قبل الحذف الدائم',
+  title,
+  subtitle,
   verifyLabel,
 }: {
   destination: string;
@@ -28,6 +29,9 @@ export function DeleteAccountOtpStep({
   subtitle?: string;
   verifyLabel?: string;
 }) {
+  const { t } = useI18n();
+  const resolvedTitle = title ?? t('accountDeletion.otp.defaultTitle');
+  const resolvedSubtitle = subtitle ?? t('accountDeletion.otp.defaultSubtitle');
   const [digits, setDigits] = useState<string[]>(
     Array.from({ length: 6 }, () => ''),
   );
@@ -43,7 +47,9 @@ export function DeleteAccountOtpStep({
   const submitOtp = () => {
     const parsed = deleteAccountOtpSchema.safeParse({ otp: merged });
     if (!parsed.success) {
-      setFieldError(parsed.error.issues[0]?.message ?? 'رمز التحقق غير صالح');
+      setFieldError(
+        parsed.error.issues[0]?.message ?? t('accountDeletion.otp.invalidCode'),
+      );
       return;
     }
     setFieldError(null);
@@ -84,18 +90,18 @@ export function DeleteAccountOtpStep({
   return (
     <div className="text-center">
       <h2 className="font-cairo text-[18px] font-extrabold text-[#111827]">
-        {title}
+        {resolvedTitle}
       </h2>
       <p className="mt-1 font-cairo text-[13px] font-semibold text-[#667085]">
-        {subtitle}
+        {resolvedSubtitle}
       </p>
 
       <div className="mt-6 flex flex-col items-center justify-center text-center">
         <h3 className="font-cairo text-[18px] font-extrabold text-[#111827]">
-          أدخل رمز التحقق
+          {t('accountDeletion.otp.enterCode')}
         </h3>
         <p className="mt-1 font-cairo text-[12px] font-semibold leading-[20px] text-[#667085]">
-          أرسلنا رمزاً مكوناً من 6 أرقام إلى
+          {t('accountDeletion.otp.sentTo')}
           <br />
           <span className="font-extrabold text-[#111827]">{destination}</span>
         </p>
@@ -115,7 +121,10 @@ export function DeleteAccountOtpStep({
             onKeyDown={(event) => handleKeyDown(index, event)}
             onPaste={handlePaste}
             className="h-[52px] w-[46px] rounded-[10px] border border-[#E5E7EB] bg-white text-center font-cairo text-[20px] font-extrabold text-[#111827] outline-none ring-[#F87171]/25 focus:border-[#F87171] focus:ring-2 sm:h-[56px] sm:w-[50px]"
-            aria-label={`رقم ${index + 1} من رمز التحقق`}
+            aria-label={t('accountDeletion.otp.digitAriaLabel').replace(
+              '{index}',
+              String(index + 1),
+            )}
           />
         ))}
       </div>
@@ -141,13 +150,17 @@ export function DeleteAccountOtpStep({
         onClick={submitOtp}
         className="mt-6 flex h-[48px] w-full items-center justify-center gap-2 rounded-[10px] bg-[#F88379] font-cairo text-[14px] font-extrabold text-white shadow-[0_10px_24px_rgba(248,131,121,0.35)] transition hover:bg-[#F87171] disabled:opacity-60"
       >
-        <span>{busy ? 'جارٍ التحقق…' : verifyLabel ?? 'تحقق من الرمز'}</span>
+        <span>
+          {busy
+            ? t('accountDeletion.otp.verifying')
+            : verifyLabel ?? t('accountDeletion.otp.verifyDefault')}
+        </span>
         <ArrowLeft className="h-4 w-4" aria-hidden />
       </button>
 
       <div className="mt-5 flex flex-col items-center justify-center space-y-2 text-center">
         <p className="font-cairo text-[12px] font-semibold text-[#98A2B3]">
-          لم تستلم الرمز؟
+          {t('accountDeletion.otp.noCodeReceived')}
         </p>
         <button
           type="button"
@@ -155,7 +168,9 @@ export function DeleteAccountOtpStep({
           onClick={() => void onResend()}
           className="font-cairo text-[13px] font-extrabold text-[#EF4444] transition hover:text-[#DC2626] disabled:opacity-60"
         >
-          {resendBusy ? 'جارٍ الإرسال…' : 'إعادة إرسال الرمز'}
+          {resendBusy
+            ? t('accountDeletion.otp.resending')
+            : t('accountDeletion.otp.resendCode')}
         </button>
         {onChangeChannel ? (
           <button
@@ -164,7 +179,7 @@ export function DeleteAccountOtpStep({
             className="mx-auto flex items-center justify-center gap-1 font-cairo text-[12px] font-bold text-[#667085] transition hover:text-[#111827]"
           >
             <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
-            <span>تغيير قناة التحقق</span>
+            <span>{t('accountDeletion.otp.changeChannel')}</span>
           </button>
         ) : null}
       </div>
@@ -174,7 +189,7 @@ export function DeleteAccountOtpStep({
         onClick={onBack}
         className="mt-4 font-cairo text-[13px] font-extrabold text-[#667085] transition hover:text-[#111827]"
       >
-        الرجوع ←
+        {t('accountDeletion.otp.back')}
       </button>
     </div>
   );

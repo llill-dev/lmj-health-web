@@ -2,10 +2,15 @@
  * Skeleton للتحميل داخل التبويبات
  */
 
+import { useI18n } from "@/i18n/provider";
+
 export function PatientDetailsTabSkeleton({ rows = 4 }: { rows?: number }) {
+  const { t } = useI18n();
   return (
     <div className="space-y-3" aria-busy="true" aria-live="polite">
-      <span className="sr-only">جارٍ تحميل محتوى القسم…</span>
+      <span className="sr-only">
+        {t("doctor.patientDetailsSkeleton.loadingSection")}
+      </span>
       {Array.from({ length: rows }).map((_, i) => (
         <div
           key={i}

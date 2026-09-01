@@ -14,10 +14,12 @@ import { useState } from 'react';
 import {
   countGrantedCardPermissions,
   isSecretaryActive,
+  secretaryPermissionLabel,
   SECRETARY_CARD_PERMISSION_ROWS,
 } from '@/lib/doctor/secretaries/permissionsUi';
 import type { DoctorSecretary } from '@/lib/doctor/secretaries/types';
 import { cn } from '@/lib/utils/utils';
+import { useI18n } from '@/i18n/provider';
 
 export function DoctorSecretaryCard({
   secretary,
@@ -28,6 +30,8 @@ export function DoctorSecretaryCard({
   onEdit: (secretary: DoctorSecretary) => void;
   onUnassign: (secretary: DoctorSecretary) => void;
 }) {
+  const { t, locale } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const [expanded, setExpanded] = useState(true);
   const permissions = secretary.permissions ?? [];
   const { granted, total } = countGrantedCardPermissions(permissions);
@@ -57,7 +61,9 @@ export function DoctorSecretaryCard({
                       : 'bg-[#FEF2F2] text-[#DC2626]',
                   )}
                 >
-                  {active ? 'مفعل' : 'معطل'}
+                  {active
+                    ? t('doctor.secretaryCard.active')
+                    : t('doctor.secretaryCard.inactive')}
                 </span>
               </div>
               <div className="mt-2 flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:gap-4">
@@ -82,7 +88,7 @@ export function DoctorSecretaryCard({
               type="button"
               onClick={() => onUnassign(secretary)}
               className="inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-[#FECACA] bg-[#FEF2F2] text-[#DC2626] transition hover:bg-[#FEE2E2]"
-              title="إلغاء الربط"
+              title={t('doctor.secretaryCard.unassign')}
             >
               <Trash2 className="h-4 w-4" aria-hidden />
             </button>
@@ -90,7 +96,7 @@ export function DoctorSecretaryCard({
               type="button"
               onClick={() => onEdit(secretary)}
               className="inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-[#9EE8E0] bg-[#F0FDFA] text-primary transition hover:bg-[#E6F4F3]"
-              title="تعديل"
+              title={t('doctor.secretaryCard.edit')}
             >
               <Pencil className="h-4 w-4" aria-hidden />
             </button>
@@ -107,7 +113,9 @@ export function DoctorSecretaryCard({
           <div className="flex items-center gap-2">
             <Shield className="h-4 w-4 text-primary" aria-hidden />
             <span className="font-cairo text-[14px] font-extrabold text-[#111827]">
-              الصلاحيات ({granted} من {total})
+              {t('doctor.secretaryCard.permissionsCount')
+                .replace('{granted}', String(granted))
+                .replace('{total}', String(total))}
             </span>
           </div>
           {expanded ? (
@@ -127,7 +135,7 @@ export function DoctorSecretaryCard({
                   className="flex flex-col gap-2 border-b border-[#F2F4F7] pb-3 last:border-b-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
                 >
                   <span className="font-cairo text-[13px] font-semibold text-[#111827]">
-                    {row.label}
+                    {secretaryPermissionLabel(row.apiKey, tr)}
                   </span>
                   {grantedRow ? (
                     <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#F0FDFA] text-primary">

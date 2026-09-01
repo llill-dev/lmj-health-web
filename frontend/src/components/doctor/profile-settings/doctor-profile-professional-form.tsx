@@ -14,8 +14,7 @@ import {
   profileTextareaClass,
 } from '@/components/doctor/profile-settings/doctor-profile-form-field';
 import {
-  doctorProfessionalEditSchema,
-  PROFILE_FIELD_MESSAGES,
+  buildDoctorProfessionalEditSchema,
   type DoctorProfessionalEditForm,
 } from '@/components/doctor/profile-settings/doctor-profile-schemas';
 import { useDoctorProfileConfirm } from '@/components/doctor/profile-settings/use-doctor-profile-confirm';
@@ -45,7 +44,7 @@ export default function DoctorProfileProfessionalForm({
   } = useDoctorProfileConfirm();
 
   const form = useForm<DoctorProfessionalEditForm>({
-    resolver: zodResolver(doctorProfessionalEditSchema),
+    resolver: zodResolver(buildDoctorProfessionalEditSchema(t)),
     mode: 'onTouched',
     defaultValues: {
       medicalLicenseNumber: doctor.medicalLicenseNumber?.trim() ?? '',
@@ -81,7 +80,7 @@ export default function DoctorProfileProfessionalForm({
   const handleValidatedSubmit = (values: DoctorProfessionalEditForm) => {
     if (!isDirty) {
       form.setError('root', {
-        message: PROFILE_FIELD_MESSAGES.noProfessionalChanges,
+        message: t('doctor.profileSettings.field.noProfessionalChanges'),
       });
       onNoChanges?.();
       return;

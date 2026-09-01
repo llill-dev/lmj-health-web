@@ -191,7 +191,7 @@ export default function DataEntryContentTemplatesPage() {
                 className="inline-flex h-9 items-center gap-1 rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-extrabold text-[#344054]"
               >
                 <FilterX className="h-4 w-4" />
-                {t("common.clearFilters", "مسح الفلاتر")}
+                {t("common.clearFilters")}
               </button>
             </div>
           ) : null}
@@ -243,7 +243,7 @@ export default function DataEntryContentTemplatesPage() {
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       <h3 className="font-cairo text-[14px] font-black text-[#111827]">
-                        {templateName || "بدون اسم"}
+                        {templateName || t("dataEntry.contentTemplates.unnamed")}
                       </h3>
                       <span className="inline-flex h-[22px] items-center rounded-[8px] border border-[#E5E7EB] bg-[#F9FAFB] px-3 font-cairo text-[11px] font-extrabold text-[#475467]">
                         {parentTypeLabel(template.parentType, t)}

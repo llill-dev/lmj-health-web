@@ -9,6 +9,7 @@ import {
   CONSULTATIONS_EXPAND_CONTENT_STAGGER,
   CONSULTATIONS_EXPAND_TRANSITION,
 } from "@/components/doctor/consultations/consultations-motion";
+import { useI18n } from "@/i18n/provider";
 
 type ConsultationStatus = UiConsultationListItem["status"];
 
@@ -32,6 +33,7 @@ export default function DoctorConsultationExpandableCard({
   onToggle: () => void;
   children?: ReactNode;
 }) {
+  const { t } = useI18n();
   return (
     <motion.article
       layout
@@ -68,7 +70,7 @@ export default function DoctorConsultationExpandableCard({
                     animate={{ scale: 1, opacity: 1 }}
                     className="inline-flex h-[22px] items-center justify-center rounded-[6px] bg-primary px-2 font-cairo text-[11px] font-extrabold text-white"
                   >
-                    جديد
+                    {t('doctor.consultations.card.new')}
                   </motion.span>
                 ) : null}
               </div>
@@ -106,7 +108,9 @@ export default function DoctorConsultationExpandableCard({
             type="button"
             aria-expanded={expanded}
             aria-label={
-              expanded ? "طي تفاصيل الاستشارة" : "عرض تفاصيل الاستشارة"
+              expanded
+                ? t('doctor.consultations.card.collapse')
+                : t('doctor.consultations.card.expand')
             }
             onClick={onToggle}
             whileHover={{ scale: 1.04 }}

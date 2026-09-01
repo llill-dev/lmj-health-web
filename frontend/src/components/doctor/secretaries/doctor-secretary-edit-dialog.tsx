@@ -24,6 +24,7 @@ import {
   type DoctorSecretaryEditFormValues,
 } from '@/lib/doctor/secretaries/schema';
 import type { DoctorSecretary } from '@/lib/doctor/secretaries/types';
+import { useI18n } from '@/i18n/provider';
 
 function buildEditFormValues(
   secretary: DoctorSecretary,
@@ -47,6 +48,7 @@ function DoctorSecretaryEditForm({
   onSave: (input: DoctorSecretaryEditFormValues) => Promise<void> | void;
 }) {
   const { toast } = useToast();
+  const { t } = useI18n();
   const secretaryId = getSecretaryId(secretary)!;
   const initialValues = useMemo(
     () => buildEditFormValues(secretary),
@@ -134,7 +136,9 @@ function DoctorSecretaryEditForm({
         onClick={() => void submit()}
         className="mt-4 flex h-[48px] w-full items-center justify-center rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
       >
-        {saving ? 'جاري الحفظ...' : 'حفظ التعديلات'}
+        {saving
+          ? t('doctor.secretaryDialog.saving')
+          : t('doctor.secretaryDialog.saveChanges')}
       </button>
     </>
   );
@@ -153,13 +157,14 @@ export function DoctorSecretaryEditDialog({
   onClose: () => void;
   onSave: (input: DoctorSecretaryEditFormValues) => Promise<void> | void;
 }) {
+  const { t } = useI18n();
   const secretaryId = getSecretaryId(secretary);
 
   return (
     <ClinicAccountsModalShell
       open={open}
       onClose={onClose}
-      title="تعديل السكرتير"
+      title={t('doctor.secretaryDialog.editTitle')}
       maxWidthClass="max-w-[640px]"
     >
       {open && secretary && secretaryId ? (

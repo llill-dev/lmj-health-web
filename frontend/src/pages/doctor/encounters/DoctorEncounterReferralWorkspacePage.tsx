@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  REFERRAL_WORKSPACE_CONFIG,
+  getReferralWorkspaceConfig,
   ReferralWorkspaceShell,
 } from "@/components/doctor/encounters/orders";
 import { useToast } from "@/components/ui/ToastProvider";
@@ -48,7 +48,7 @@ export default function DoctorEncounterReferralWorkspacePage() {
   return (
     <>
       <Helmet>
-        <title>{REFERRAL_WORKSPACE_CONFIG.title} • LMJ Health</title>
+        <title>{getReferralWorkspaceConfig(t).title} • LMJ Health</title>
       </Helmet>
 
       <div dir={dir} lang={locale} className="w-full pb-8 sm:pb-10">

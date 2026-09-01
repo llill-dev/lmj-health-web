@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils/utils';
+import { useI18n } from '@/i18n/provider';
 import {
   OrderClinicalFormSubmitError,
   OrderItemsRequiredError,
@@ -17,7 +18,7 @@ import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-s
 import { useToast } from '@/components/ui/ToastProvider';
 import type { useEncounterOrderWorkspace } from '@/hooks/doctor/encounters/useEncounterOrderWorkspace';
 import {
-  ENCOUNTER_ORDER_CONFIG,
+  getEncounterOrderConfig,
   type CatalogOrderCategory,
 } from './encounter-order-config';
 import { OrderClinicalFields } from './order-clinical-fields';
@@ -41,7 +42,8 @@ export function EncounterOrderWorkspaceShell({
   fileNumber?: string;
   onNavigate: (path: string, options?: { replace?: boolean }) => void;
 }) {
-  const config = ENCOUNTER_ORDER_CONFIG[category];
+  const { t } = useI18n();
+  const config = useMemo(() => getEncounterOrderConfig(t)[category], [t, category]);
   const { toast } = useToast();
   const [finalizeOpen, setFinalizeOpen] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);

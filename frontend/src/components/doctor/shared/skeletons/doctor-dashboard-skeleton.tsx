@@ -1,11 +1,13 @@
 'use client';
 
 import { DoctorLoadingShell, SkeletonBlock } from './doctor-skeleton-primitives';
+import { useI18n } from '@/i18n/provider';
 
 export function DoctorDashboardSkeleton() {
+  const { t } = useI18n();
   return (
     <DoctorLoadingShell
-      label="جارٍ تحميل لوحة التحكم…"
+      label={t('doctor.skeleton.dashboard')}
       className="space-y-7 pb-8"
     >
       <section className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">

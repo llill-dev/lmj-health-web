@@ -2,10 +2,12 @@
 
 import { DoctorLoadingShell, SkeletonBlock } from './doctor-skeleton-primitives';
 import { DoctorExpandableCardSkeleton } from './doctor-expandable-card-skeleton';
+import { useI18n } from '@/i18n/provider';
 
 export function DoctorSummaryPageSkeleton() {
+  const { t } = useI18n();
   return (
-    <DoctorLoadingShell label="جارٍ تحميل ملخص الزيارة…">
+    <DoctorLoadingShell label={t('doctor.skeleton.summaryPage')}>
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="space-y-2 text-start">

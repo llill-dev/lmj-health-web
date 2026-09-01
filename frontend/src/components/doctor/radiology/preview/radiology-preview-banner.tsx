@@ -1,10 +1,11 @@
 import { Check, ChevronLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { buildRadiologyPatientSubtitle } from '../map-radiology-ui';
+import { useI18n } from '@/i18n/provider';
 
 export function RadiologyPreviewBanner({
   patientName,
-  statusLabel = 'مسودة',
+  statusLabel,
   backTo = '/doctor/radiology',
   loading = false,
 }: {
@@ -13,9 +14,12 @@ export function RadiologyPreviewBanner({
   backTo?: string;
   loading?: boolean;
 }) {
+  const { t } = useI18n();
+  const resolvedStatusLabel =
+    statusLabel ?? t('doctor.radiologyPreviewBanner.defaultStatus');
   const subtitle = loading
-    ? 'جارٍ تحميل بيانات المريض...'
-    : buildRadiologyPatientSubtitle(patientName);
+    ? t('doctor.radiologyPreviewBanner.loadingPatient')
+    : buildRadiologyPatientSubtitle(patientName, t);
 
   return (
     <section className="relative mb-6 overflow-hidden rounded-[6px] px-4 py-6 shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)] sm:px-6 sm:py-7 lg:px-8 lg:py-8">
@@ -31,12 +35,12 @@ export function RadiologyPreviewBanner({
           </div>
           <div className="min-w-0">
             <h1 className="font-cairo text-[26px] font-black text-primary sm:text-[30px]">
-              معاينة طلب الأشعة
+              {t('doctor.radiologyPreviewBanner.title')}
             </h1>
             <p className="mt-1 font-cairo text-[14px] font-bold text-primary/90">{subtitle}</p>
             {!loading && patientName?.trim() ? (
               <p className="mt-0.5 font-cairo text-[13px] font-semibold text-primary/75">
-                تأكد من المعلومات قبل الإرسال
+                {t('doctor.radiologyPreviewBanner.confirmBeforeSending')}
               </p>
             ) : null}
           </div>
@@ -46,11 +50,11 @@ export function RadiologyPreviewBanner({
             to={backTo}
             className="inline-flex items-center gap-1 font-cairo text-[13px] font-extrabold text-primary"
           >
-            <span>رجوع</span>
+            <span>{t('doctor.radiologyPreviewBanner.back')}</span>
             <ChevronLeft className="h-4 w-4" aria-hidden />
           </Link>
           <span className="rounded-full bg-[#FEF3C7] px-3 py-1 font-cairo text-[11px] font-extrabold text-[#B45309]">
-            {statusLabel}
+            {resolvedStatusLabel}
           </span>
         </div>
       </div>

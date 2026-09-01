@@ -3,6 +3,7 @@
 import { UserRound } from 'lucide-react';
 import { cn } from '@/lib/utils/utils';
 import type { EncounterWorkspacePatientViewModel } from './encounter-workspace-types';
+import { useI18n } from '@/i18n/provider';
 
 function DetailLine({ label, value }: { label: string; value: string }) {
   return (
@@ -34,6 +35,7 @@ export function EncounterWorkspacePatientCard({
   /** تحميل خلفي لملف المريض (الاسم/العمر قد يتحدّثان) */
   isEnriching?: boolean;
 }) {
+  const { t } = useI18n();
   return (
     <article className="relative overflow-hidden rounded-[14px] border border-[#0F8F8B] bg-[#E6F4F3] px-4 py-5 shadow-[0_12px_32px_-14px_rgba(15,23,42,0.1)] sm:px-5">
       <span
@@ -53,24 +55,39 @@ export function EncounterWorkspacePatientCard({
             <UserRound className="w-5 h-5 text-primary" aria-hidden />
           </div>
           <h2 className="font-cairo text-[15px] font-extrabold">
-            معلومات المريض
+            {t('doctor.encounterWorkspace.patientCard.title')}
           </h2>
         </div>
       </div>
       <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
         <div className="space-y-1 text-start sm:ms-6">
-          <DetailLine label="الاسم" value={patient.name} />
-          <DetailLine label="العمر" value={patient.ageLabel} />
-          <DetailLine label="رقم الملف" value={patient.fileNumber} />
+          <DetailLine
+            label={t('doctor.encounterWorkspace.patientCard.name')}
+            value={patient.name}
+          />
+          <DetailLine
+            label={t('doctor.encounterWorkspace.patientCard.age')}
+            value={patient.ageLabel}
+          />
+          <DetailLine
+            label={t('doctor.encounterWorkspace.patientCard.fileNumber')}
+            value={patient.fileNumber}
+          />
           {isEnriching ? (
             <p className="font-cairo text-[11px] font-semibold text-primary/75">
-              جارٍ تحميل بيانات الملف…
+              {t('doctor.encounterWorkspace.patientCard.enriching')}
             </p>
           ) : null}
         </div>
         <div className="flex flex-wrap items-stretch justify-start gap-3 sm:items-center">
-          <TimeBox label="بدأت" value={patient.startedLabel} />
-          <TimeBox label="موعد" value={patient.appointmentTimeLabel} />
+          <TimeBox
+            label={t('doctor.encounterWorkspace.patientCard.started')}
+            value={patient.startedLabel}
+          />
+          <TimeBox
+            label={t('doctor.encounterWorkspace.patientCard.appointment')}
+            value={patient.appointmentTimeLabel}
+          />
         </div>
       </div>
     </article>

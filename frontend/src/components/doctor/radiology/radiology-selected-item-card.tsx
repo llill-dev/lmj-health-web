@@ -5,6 +5,7 @@ import { ENCOUNTERS_EXPAND_TRANSITION } from '@/components/doctor/encounters/enc
 import { cn } from '@/lib/utils/utils';
 import { formatRadiologyItemBrief } from './map-radiology-ui';
 import type { RadiologyOrderItemUi } from './radiology-types';
+import { useI18n } from '@/i18n/provider';
 
 function MetaRow({ label, value }: { label: string; value: string }) {
   if (!value || value === '—' || value === 'غير محدد') return null;
@@ -27,6 +28,7 @@ export function RadiologySelectedItemCard({
   onDelete?: () => void;
   readOnly?: boolean;
 }) {
+  const { t } = useI18n();
   const [expanded, setExpanded] = useState(false);
   const brief = formatRadiologyItemBrief(item);
 
@@ -39,7 +41,7 @@ export function RadiologySelectedItemCard({
           </h3>
           {!expanded ? (
             <p className="mt-1 font-cairo text-[12px] font-semibold text-primary/80">
-              {brief || 'اضغط السهم لعرض التفاصيل'}
+              {brief || t('doctor.radiologyItemCard.tapToExpand')}
             </p>
           ) : item.category !== '—' &&
             item.category !== 'كتالوج' &&
@@ -57,7 +59,7 @@ export function RadiologySelectedItemCard({
                 type="button"
                 onClick={onEdit}
                 className="flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#BFEDEC] text-primary hover:bg-[#F0FAF9]"
-                aria-label="تعديل"
+                aria-label={t('doctor.radiologyItemCard.editAria')}
               >
                 <Pencil className="h-4 w-4" aria-hidden />
               </button>
@@ -67,7 +69,7 @@ export function RadiologySelectedItemCard({
                 className="inline-flex items-center gap-1 font-cairo text-[12px] font-extrabold text-[#E11D48]"
               >
                 <Trash2 className="h-4 w-4" aria-hidden />
-                حذف
+                {t('doctor.radiologyItemCard.delete')}
               </button>
             </>
           ) : null}
@@ -97,11 +99,11 @@ export function RadiologySelectedItemCard({
             transition={ENCOUNTERS_EXPAND_TRANSITION}
             className={cn('overflow-hidden', 'mt-2 space-y-0.5')}
           >
-            <MetaRow label="النوع" value={item.type} />
-            <MetaRow label="منطقة الجسم" value={item.bodyArea} />
-            <MetaRow label="الجهة" value={item.side} />
-            <MetaRow label="الوضعية" value={item.position} />
-            <MetaRow label="ملاحظات" value={item.notes} />
+            <MetaRow label={t('doctor.radiologyItemCard.type')} value={item.type} />
+            <MetaRow label={t('doctor.radiologyItemCard.bodyArea')} value={item.bodyArea} />
+            <MetaRow label={t('doctor.radiologyItemCard.side')} value={item.side} />
+            <MetaRow label={t('doctor.radiologyItemCard.position')} value={item.position} />
+            <MetaRow label={t('doctor.radiologyItemCard.notes')} value={item.notes} />
           </motion.div>
         ) : null}
       </AnimatePresence>

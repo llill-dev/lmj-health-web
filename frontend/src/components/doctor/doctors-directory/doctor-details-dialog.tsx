@@ -14,6 +14,7 @@ import {
   Video,
   X,
 } from 'lucide-react';
+import { useI18n } from '@/i18n/provider';
 
 export type DoctorCardItem = {
   id: string;
@@ -41,6 +42,7 @@ export default function DoctorDetailsDialog({
   doctor: DoctorCardItem | null;
   onClose: () => void;
 }) {
+  const { t } = useI18n();
   useEffect(() => {
     if (!open) return;
 
@@ -90,14 +92,14 @@ export default function DoctorDetailsDialog({
               type="button"
               onClick={onClose}
               className="absolute start-4 top-4 text-[#667085]"
-              aria-label="إغلاق"
+              aria-label={t('doctor.directory.details.close')}
             >
               <X className="h-4 w-4" />
             </button>
 
             <div className="px-5 pb-6 pt-6 sm:px-7">
               <div className="text-start font-cairo text-[24px] font-bold text-[#101828]">
-                تفاصيل الطبيب
+                {t('doctor.directory.details.title')}
               </div>
 
               <div className="mt-6 flex flex-col gap-5 sm:flex-row sm:gap-6">
@@ -120,7 +122,7 @@ export default function DoctorDetailsDialog({
                       {doctor.name}
                     </div>
                     <span className="inline-flex h-[24px] items-center justify-center gap-2 rounded-full bg-[#00C950] px-4 font-cairo text-[11px] text-[#fff]">
-                      معتمد
+                      {t('doctor.directory.details.verified')}
                       <CircleCheck className="h-4 w-4" />
                     </span>
                   </div>
@@ -137,20 +139,23 @@ export default function DoctorDetailsDialog({
                       {doctor.rating.toFixed(1)}
                     </span>
                     <span className="font-semibold text-[#98A2B3]">
-                      ({doctor.reviews} تقييم)
+                      {t('doctor.directory.details.reviewsCount').replace(
+                        '{count}',
+                        String(doctor.reviews),
+                      )}
                     </span>
                   </div>
                   <div className="flex flex-wrap items-center justify-center gap-2">
                     {hasOnline ? (
                       <span className="flex h-[24px] items-center justify-center gap-2 rounded-full border-[1.82px] border-primary bg-[#FFFFFF] px-2 font-cairo text-[12px] font-semibold text-primary">
                         <Video className="h-[12px] w-[12px]" />
-                        استشارة أونلاين
+                        {t('doctor.directory.details.onlineConsultation')}
                       </span>
                     ) : null}
                     {hasOffline ? (
                       <span className="flex h-[24px] items-center justify-center gap-2 rounded-full border-[1.82px] border-primary bg-primary px-2 font-cairo text-[12px] font-semibold text-[#E9FFFE]">
                         <Building className="h-[12px] w-[12px]" />
-                        استشارة حضورية
+                        {t('doctor.directory.details.inPersonConsultation')}
                       </span>
                     ) : null}
                   </div>
@@ -170,7 +175,7 @@ export default function DoctorDetailsDialog({
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
                 <div className="text-start">
                   <div className="font-cairo text-[11px] font-semibold text-[#98A2B3]">
-                    البريد الإلكتروني
+                    {t('doctor.directory.details.email')}
                   </div>
                   <div
                     className="mt-2 font-cairo text-[12px] font-bold text-[#111827]"
@@ -184,7 +189,7 @@ export default function DoctorDetailsDialog({
                     <Phone className="h-4 w-4 text-primary" />
                     <div>
                       <p className="font-cairo text-[11px] font-semibold text-[#98A2B3]">
-                        رقم الهاتف
+                        {t('doctor.directory.details.phone')}
                       </p>
                       <p
                         className="mt-1 font-cairo text-[12px] font-bold text-[#111827]"
@@ -202,7 +207,7 @@ export default function DoctorDetailsDialog({
                   <DollarSign className="h-5 w-5 text-[#16A34A]" />
                   <div>
                     <div className="font-cairo text-[11px] font-semibold text-[#98A2B3]">
-                      سعر الكشف
+                      {t('doctor.directory.details.consultationPrice')}
                     </div>
                     <span className="font-cairo text-[16px] font-extrabold text-[#16A34A]">
                       {doctor.price}
@@ -219,7 +224,7 @@ export default function DoctorDetailsDialog({
                 <MapPin className="h-5 w-5 shrink-0 text-primary" />
                 <div className="space-y-2">
                   <div className="font-cairo text-[16px] font-extrabold text-[#111827]">
-                    موقع العيادة
+                    {t('doctor.directory.details.clinicLocation')}
                   </div>
                   {doctor.clinicAddress ? (
                     <div className="text-start font-cairo text-[13px] font-semibold text-[#667085]">
@@ -240,7 +245,7 @@ export default function DoctorDetailsDialog({
                   className="flex h-[46px] items-center justify-center gap-2 rounded-[6px] border border-primary bg-white font-cairo text-[13px] font-extrabold text-primary"
                 >
                   <Mail className="h-4 w-4" />
-                  إرسال رسالة
+                  {t('doctor.directory.details.sendMessage')}
                 </a>
               ) : (
                 <button
@@ -249,7 +254,7 @@ export default function DoctorDetailsDialog({
                   className="flex h-[46px] items-center justify-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-[#F9FAFB] font-cairo text-[13px] font-extrabold text-[#98A2B3]"
                 >
                   <Mail className="h-4 w-4" />
-                  إرسال رسالة
+                  {t('doctor.directory.details.sendMessage')}
                 </button>
               )}
 
@@ -259,7 +264,7 @@ export default function DoctorDetailsDialog({
                   className="flex h-[46px] items-center justify-center gap-2 rounded-[6px] bg-gradient-to-b from-[#0F8F8B] to-[#14B3AE] font-cairo text-[13px] font-extrabold text-white"
                 >
                   <Phone className="h-4 w-4" />
-                  اتصال
+                  {t('doctor.directory.details.call')}
                 </a>
               ) : (
                 <button
@@ -268,7 +273,7 @@ export default function DoctorDetailsDialog({
                   className="flex h-[46px] items-center justify-center gap-2 rounded-[6px] bg-[#E5E7EB] font-cairo text-[13px] font-extrabold text-[#98A2B3]"
                 >
                   <Phone className="h-4 w-4" />
-                  اتصال
+                  {t('doctor.directory.details.call')}
                 </button>
               )}
             </div>

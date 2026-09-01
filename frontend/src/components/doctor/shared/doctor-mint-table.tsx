@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useI18n } from '@/i18n/provider';
 
 export const DOCTOR_MINT_TABLE_TH =
   'px-3 py-3 text-center align-middle font-cairo text-[11px] font-extrabold text-[#0F766E] sm:px-4 sm:text-[12px]';
@@ -8,7 +9,7 @@ export const DOCTOR_MINT_TABLE_TD =
 export function DoctorMintTableShell({
   columns,
   children,
-  emptyMessage = 'لا توجد نتائج تطابق البحث أو الفلتر الحالي',
+  emptyMessage,
   isEmpty = false,
 }: {
   columns: string[];
@@ -16,10 +17,12 @@ export function DoctorMintTableShell({
   emptyMessage?: string;
   isEmpty?: boolean;
 }) {
+  const { t } = useI18n();
+
   if (isEmpty) {
     return (
       <div className="rounded-[12px] border border-dashed border-[#E2E8F0] bg-white px-6 py-14 text-center font-cairo text-[14px] font-semibold text-[#667085]">
-        {emptyMessage}
+        {emptyMessage ?? t('doctor.mintTable.emptyMessage')}
       </div>
     );
   }

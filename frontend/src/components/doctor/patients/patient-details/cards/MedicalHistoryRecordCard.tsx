@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { CalendarDays, ClipboardList } from "lucide-react";
 import { TAB_STAGGER_ITEM } from "../constants";
 import type { FullProfileData } from "../types";
+import { useI18n } from "@/i18n/provider";
 
 interface MedicalHistoryRecordCardProps {
   record: FullProfileData["medicalHistory"][number];
@@ -16,6 +17,7 @@ export function MedicalHistoryRecordCard({
   record,
   index,
 }: MedicalHistoryRecordCardProps) {
+  const { t } = useI18n();
   return (
     <motion.article
       variants={TAB_STAGGER_ITEM}
@@ -57,7 +59,7 @@ export function MedicalHistoryRecordCard({
                     #{index}
                   </span>
                   <span className="inline-flex rounded-full bg-[#ecfdf9] px-2.5 py-0.5 font-cairo text-[10px] font-extrabold uppercase tracking-wider text-primary ring-1 ring-primary/18">
-                    سجل سريري
+                    {t("doctor.medicalHistoryCard.badge")}
                   </span>
                 </div>
                 <h3 className="font-cairo text-[16px] font-black leading-snug text-[#0f172a] sm:text-[17px]">
@@ -72,7 +74,7 @@ export function MedicalHistoryRecordCard({
                   #{index}
                 </span>
                 <span className="font-cairo text-[11px] font-extrabold uppercase tracking-wide text-[#64748b]">
-                  التشخيص والملاحظات السريرية
+                  {t("doctor.medicalHistoryCard.diagnosisLabel")}
                 </span>
               </div>
               <p className="font-cairo text-[13px] font-semibold leading-[1.65] text-[#334155]">

@@ -16,7 +16,7 @@ import {
   profileTextareaClass,
 } from "@/components/doctor/profile-settings/doctor-profile-form-field";
 import {
-  doctorPersonalEditSchema,
+  buildDoctorPersonalEditSchema,
   type DoctorPersonalEditForm,
 } from "@/components/doctor/profile-settings/doctor-profile-schemas";
 import { useDoctorProfileConfirm } from "@/components/doctor/profile-settings/use-doctor-profile-confirm";
@@ -75,7 +75,7 @@ export default function DoctorProfilePersonalForm({
   } = useDoctorProfileConfirm();
 
   const form = useForm<DoctorPersonalEditForm>({
-    resolver: zodResolver(doctorPersonalEditSchema),
+    resolver: zodResolver(buildDoctorPersonalEditSchema(t)),
     mode: "onTouched",
     defaultValues: {
       fullName: user?.fullName?.trim() ?? "",

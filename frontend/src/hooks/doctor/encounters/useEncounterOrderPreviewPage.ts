@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { isAwaitingAnyInitialQueryData } from '@/lib/query/queryUi';
 import {
-  ENCOUNTER_ORDER_CONFIG,
+  getEncounterOrderConfig,
   type CatalogOrderCategory,
 } from '@/components/doctor/encounters/orders/encounter-order-config';
 import { mapRadiologyPreviewVm } from '@/components/doctor/radiology/preview/map-radiology-preview';
@@ -19,7 +19,7 @@ export function useEncounterOrderPreviewPage(
   encounterId: string,
   enabled = true,
 ) {
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
   const isEnabled =
     enabled && Boolean(doctorId) && Boolean(patientId) && Boolean(encounterId);
 
@@ -81,12 +81,14 @@ export function useEncounterOrderPreviewPage(
       encounter: encounterQuery.data?.encounter,
       publicProfile: publicProfileQuery.data?.patient,
       locale,
+      t,
     });
   }, [
     orderQuery.data,
     encounterQuery.data?.encounter,
     publicProfileQuery.data?.patient,
     locale,
+    t,
   ]);
 
   const isAwaitingData = isAwaitingAnyInitialQueryData([
@@ -96,7 +98,7 @@ export function useEncounterOrderPreviewPage(
   ]);
 
   return {
-    config: ENCOUNTER_ORDER_CONFIG[category],
+    config: getEncounterOrderConfig(t)[category],
     previewVm,
     order: orderQuery.data,
     isAwaitingData,

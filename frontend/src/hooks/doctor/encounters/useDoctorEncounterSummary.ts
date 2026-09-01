@@ -15,6 +15,7 @@ import type { EncounterDocumentLinkBody } from '@/lib/doctor/encounters/encounte
 import {
   normalizeEncounterOrderCategory,
 } from '@/lib/doctor/encounters/encounterOrderCategories';
+import { useI18n } from '@/i18n/provider';
 
 export function useDoctorEncounterSummary(
   doctorId: string,
@@ -22,6 +23,7 @@ export function useDoctorEncounterSummary(
   encounterId: string,
   enabled = true,
 ) {
+  const { t, locale } = useI18n();
   const isEnabled =
     enabled && Boolean(doctorId) && Boolean(patientId) && Boolean(encounterId);
 
@@ -121,14 +123,18 @@ export function useDoctorEncounterSummary(
 
   const summary: EncounterSummaryViewModel | null = useMemo(() => {
     if (!encounterQuery.data?.encounter) return null;
-    return mapEncounterSummaryFromApi({
-      encounter: encounterQuery.data.encounter,
-      profile,
-      publicProfile: publicProfileQuery.data?.patient,
-      prescriptions: prescriptionsQuery.data?.prescriptions ?? [],
-      orders: encounterOrders,
-      medicalRecords: recordsQuery.data?.records ?? [],
-    });
+    return mapEncounterSummaryFromApi(
+      {
+        encounter: encounterQuery.data.encounter,
+        profile,
+        publicProfile: publicProfileQuery.data?.patient,
+        prescriptions: prescriptionsQuery.data?.prescriptions ?? [],
+        orders: encounterOrders,
+        medicalRecords: recordsQuery.data?.records ?? [],
+      },
+      t,
+      locale,
+    );
   }, [
     encounterQuery.data?.encounter,
     profile,
@@ -136,6 +142,8 @@ export function useDoctorEncounterSummary(
     prescriptionsQuery.data?.prescriptions,
     encounterOrders,
     recordsQuery.data?.records,
+    t,
+    locale,
   ]);
 
   const exportPdfSource = useMemo(

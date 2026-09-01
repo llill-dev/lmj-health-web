@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { useToast } from '@/components/ui/ToastProvider';
 import { useDoctorUnreadNotificationCount } from '@/hooks/doctor/notifications/useDoctorNotifications';
+import { useI18n } from '@/i18n/provider';
 
 /**
  * عند زيادة عدد غير المقروء (استطلاع/تركيز النافذة) يُعلَم المستخدم بإشعار جديد.
@@ -10,6 +11,7 @@ import { useDoctorUnreadNotificationCount } from '@/hooks/doctor/notifications/u
 export default function DoctorInboxToastBridge() {
   const { data: unread } = useDoctorUnreadNotificationCount();
   const { toast } = useToast();
+  const { t } = useI18n();
   const prev = useRef<number | undefined>(undefined);
 
   useEffect(() => {
@@ -18,13 +20,13 @@ export default function DoctorInboxToastBridge() {
       const delta = unread - prev.current;
       toast(
         delta === 1
-          ? 'وصلك إشعار جديد. افتح صفحة «الإشعارات» لمراجعته.'
-          : `وصلتك ${delta} إشعارات جديدة غير مقروءة.`,
-        { title: 'تنبيه — إشعار جديد', variant: 'info', durationMs: 4200 },
+          ? t('doctor.inboxToast.single')
+          : t('doctor.inboxToast.multiple').replace('{count}', String(delta)),
+        { title: t('doctor.inboxToast.title'), variant: 'info', durationMs: 4200 },
       );
     }
     prev.current = unread;
-  }, [unread, toast]);
+  }, [unread, toast, t]);
 
   return null;
 }

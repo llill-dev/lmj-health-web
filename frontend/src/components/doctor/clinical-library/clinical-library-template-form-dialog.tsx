@@ -23,23 +23,36 @@ import type {
 } from '@/lib/doctor/templates/templateTypes';
 import { useI18n } from '@/i18n/provider';
 
-const TEMPLATE_TYPE_LABELS: Record<DoctorTemplateType, string> = {
-  PRESCRIPTION: 'وصفة',
-  LAB_ORDER: 'طلب مخبري',
-  IMAGING_ORDER: 'طلب أشعة',
-  PROCEDURE_ORDER: 'طلب إجراء',
-  REFERRAL_ORDER: 'إحالة',
-};
+function getTemplateTypeLabels(
+  t: (key: string) => string,
+): Record<DoctorTemplateType, string> {
+  return {
+    PRESCRIPTION: t('doctor.templateApplyDialog.type.prescription'),
+    LAB_ORDER: t('doctor.templateApplyDialog.type.labOrder'),
+    IMAGING_ORDER: t('doctor.templateApplyDialog.type.imagingOrder'),
+    PROCEDURE_ORDER: t('doctor.templateApplyDialog.type.procedureOrder'),
+    REFERRAL_ORDER: t('doctor.templateApplyDialog.type.referralOrder'),
+  };
+}
 
-const TEMPLATE_TYPE_OPTIONS = (
-  Object.entries(TEMPLATE_TYPE_LABELS) as Array<[DoctorTemplateType, string]>
-).map(([value, label]) => ({ value, label }));
+function getTemplateTypeOptions(t: (key: string) => string) {
+  return (
+    Object.entries(getTemplateTypeLabels(t)) as Array<
+      [DoctorTemplateType, string]
+    >
+  ).map(([value, label]) => ({ value, label }));
+}
 
-const PRIORITY_OPTIONS = [
-  { value: 'normal', label: 'عادي' },
-  { value: 'urgent', label: 'عاجل' },
-  { value: 'emergency', label: 'طارئ' },
-];
+function getPriorityOptions(t: (key: string) => string) {
+  return [
+    { value: 'normal', label: t('doctor.templateFormDialog.priority.normal') },
+    { value: 'urgent', label: t('doctor.templateFormDialog.priority.urgent') },
+    {
+      value: 'emergency',
+      label: t('doctor.templateFormDialog.priority.emergency'),
+    },
+  ];
+}
 
 let rowIdCounter = 0;
 function genRowId(): string {
@@ -105,7 +118,10 @@ export function ClinicalLibraryTemplateFormDialog({
   onClose: () => void;
   onSubmit: (values: ClinicalLibraryTemplateFormValues) => Promise<void>;
 }) {
-  const { locale, dir } = useI18n();
+  const { locale, dir, t } = useI18n();
+  const templateTypeLabels = getTemplateTypeLabels(t);
+  const templateTypeOptions = getTemplateTypeOptions(t);
+  const priorityOptions = getPriorityOptions(t);
   const [templateType, setTemplateType] =
     useState<DoctorTemplateType>('PRESCRIPTION');
   const [name, setName] = useState('');
@@ -197,11 +213,13 @@ export function ClinicalLibraryTemplateFormDialog({
     }
   }, [open, mode, initialTemplate]);
 
-  const title = mode === 'edit' ? 'تعديل القالب' : 'قالب جديد';
+  const title = mode === 'edit'
+    ? t('doctor.templateFormDialog.editTitle')
+    : t('doctor.templateFormDialog.createTitle');
   const hint =
     mode === 'edit'
-      ? 'عدّل بيانات القالب — التفاصيل أدناه هي ما سيُطبَّق تلقائياً عند استخدام القالب لاحقاً.'
-      : 'أنشئ قالباً جاهزاً وأدخل تفاصيله؛ هذه التفاصيل هي ما سيُملأ تلقائياً عند تطبيق القالب على وصفة أو طلب.';
+      ? t('doctor.templateFormDialog.editHint')
+      : t('doctor.templateFormDialog.createHint');
 
   const payload: DoctorTemplateApplication = useMemo(() => {
     if (templateType === 'PRESCRIPTION') {
@@ -305,21 +323,21 @@ export function ClinicalLibraryTemplateFormDialog({
         </p>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <DoctorProfileFormField label="نوع القالب" required>
+          <DoctorProfileFormField label={t('doctor.templateFormDialog.typeLabel')} required>
             <StyledSelect
               size="sm"
               tone="muted"
               value={templateType}
               onChange={(value) => setTemplateType(value as DoctorTemplateType)}
-              options={TEMPLATE_TYPE_OPTIONS}
-              placeholder="اختر نوع القالب"
-              listboxAriaLabel="نوع القالب"
+              options={templateTypeOptions}
+              placeholder={t('doctor.templateFormDialog.typePlaceholder')}
+              listboxAriaLabel={t('doctor.templateFormDialog.typeAria')}
               listboxZIndex={200}
               disabled={mode === 'edit'}
             />
           </DoctorProfileFormField>
 
-          <DoctorProfileFormField label="اسم القالب" required>
+          <DoctorProfileFormField label={t('doctor.templateFormDialog.nameLabel')} required>
             <div className="relative">
               <FileText
                 className="pointer-events-none absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]"
@@ -328,18 +346,18 @@ export function ClinicalLibraryTemplateFormDialog({
               <input
                 value={name}
                 onChange={(event) => setName(event.target.value)}
-                placeholder="مثال: قالب وصفة عامة"
+                placeholder={t('doctor.templateFormDialog.namePlaceholder')}
                 className={`${profileInputClass} pe-4 ps-11`}
               />
             </div>
           </DoctorProfileFormField>
         </div>
 
-        <DoctorProfileFormField label="الوصف">
+        <DoctorProfileFormField label={t('doctor.templateFormDialog.descriptionLabel')}>
           <textarea
             value={description}
             onChange={(event) => setDescription(event.target.value)}
-            placeholder="وصف اختياري للقالب"
+            placeholder={t('doctor.templateFormDialog.descriptionPlaceholder')}
             rows={2}
             className={`${profileTextareaClass} min-h-[64px]`}
           />
@@ -347,16 +365,19 @@ export function ClinicalLibraryTemplateFormDialog({
 
         <div className="space-y-4 rounded-[14px] border border-[#EEF2F6] bg-[#FAFAFA] p-4">
           <h3 className="font-cairo text-[13px] font-extrabold text-[#111827]">
-            تفاصيل {TEMPLATE_TYPE_LABELS[templateType]} — ما سيُطبَّق تلقائياً
+            {t('doctor.templateFormDialog.detailsTitle').replace(
+              '{type}',
+              templateTypeLabels[templateType],
+            )}
           </h3>
 
           {templateType === 'PRESCRIPTION' ? (
             <>
-              <DoctorProfileFormField label="تعليمات عامة">
+              <DoctorProfileFormField label={t('doctor.templateFormDialog.generalInstructionsLabel')}>
                 <textarea
                   value={generalInstructions}
                   onChange={(event) => setGeneralInstructions(event.target.value)}
-                  placeholder="مثال: يؤخذ بعد الطعام"
+                  placeholder={t('doctor.templateFormDialog.generalInstructionsPlaceholder')}
                   rows={2}
                   className={`${profileTextareaClass} min-h-[64px] bg-white`}
                 />
@@ -365,7 +386,7 @@ export function ClinicalLibraryTemplateFormDialog({
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="font-cairo text-[12px] font-extrabold text-[#344054]">
-                    الأدوية
+                    {t('doctor.templateFormDialog.medicationsLabel')}
                   </span>
                   <button
                     type="button"
@@ -375,7 +396,7 @@ export function ClinicalLibraryTemplateFormDialog({
                     className="inline-flex items-center gap-1 font-cairo text-[12px] font-extrabold text-primary hover:text-[#14B3AE]"
                   >
                     <Plus className="h-3.5 w-3.5" aria-hidden />
-                    إضافة دواء
+                    {t('doctor.templateFormDialog.addMedication')}
                   </button>
                 </div>
                 {medications.map((row, index) => (
@@ -392,7 +413,7 @@ export function ClinicalLibraryTemplateFormDialog({
                           ),
                         )
                       }
-                      placeholder="اسم الدواء"
+                      placeholder={t('doctor.templateFormDialog.medicationNamePlaceholder')}
                       className={rowInputClass}
                     />
                     <input
@@ -404,7 +425,7 @@ export function ClinicalLibraryTemplateFormDialog({
                           ),
                         )
                       }
-                      placeholder="الجرعة"
+                      placeholder={t('doctor.templateFormDialog.dosagePlaceholder')}
                       className={rowInputClass}
                     />
                     <input
@@ -418,7 +439,7 @@ export function ClinicalLibraryTemplateFormDialog({
                           ),
                         )
                       }
-                      placeholder="التكرار"
+                      placeholder={t('doctor.templateFormDialog.frequencyPlaceholder')}
                       className={rowInputClass}
                     />
                     <input

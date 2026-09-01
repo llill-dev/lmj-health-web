@@ -8,7 +8,7 @@ import { resolveOrderManualServerFeedback } from "@/lib/doctor/orders/orderFormE
 import { Helmet } from "react-helmet-async";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  ENCOUNTER_ORDER_CONFIG,
+  getEncounterOrderConfig,
   type CatalogOrderCategory,
 } from "@/components/doctor/encounters/orders/encounter-order-config";
 import {
@@ -42,7 +42,7 @@ export default function DoctorEncounterOrderManualPage({
   const { toast } = useToast();
   const { patientId = "", encounterId = "" } = useParams();
   const doctorId = readAuthUser()?.actorIds?.doctorId ?? "";
-  const config = ENCOUNTER_ORDER_CONFIG[category];
+  const config = getEncounterOrderConfig(t)[category];
 
   const workspace = useEncounterOrderWorkspace(
     category,

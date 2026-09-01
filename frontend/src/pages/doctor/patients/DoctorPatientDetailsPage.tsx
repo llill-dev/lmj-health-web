@@ -61,7 +61,7 @@ import type {
   PatientDetailsTab,
 } from "@/components/doctor/patients/patient-details";
 import {
-  TABS,
+  getPatientDetailsTabs,
   TAB_PANEL_TRANSITION,
   PatientDetailsTabSkeleton,
   PatientHeaderSkeleton,
@@ -162,6 +162,7 @@ function getPatientAccessErrorMessage(
 
 export default function DoctorPatientDetailsPage() {
   const { t, locale, dir } = useI18n();
+  const TABS = useMemo(() => getPatientDetailsTabs(t), [t]);
   const { patientId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();

@@ -35,6 +35,7 @@ import {
   resolveRestorePath,
 } from '@/lib/auth/accountDeletionSession';
 import { getRoleRoot } from '@/routes/ProtectedRoute';
+import { useI18n } from '@/i18n/provider';
 import type {
   AccountDeletionReasonCode,
   AccountDeletionScope,
@@ -56,24 +57,30 @@ type FeedbackDraft = {
   feedback?: string;
 };
 
-function formatRecoverUntil(value?: string | null): string | null {
+function formatRecoverUntil(
+  value: string | null | undefined,
+  locale: 'ar' | 'en',
+): string | null {
   if (!value) return null;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString('ar-SY', {
+  return date.toLocaleDateString(locale === 'ar' ? 'ar-SY' : 'en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   });
 }
 
-function resolveReasonText(input?: FeedbackDraft): string | undefined {
+function resolveReasonText(
+  input: FeedbackDraft | undefined,
+  t: (key: string) => string,
+): string | undefined {
   const labels: Record<AccountDeletionReasonCode, string> = {
-    privacy: 'مخاوف تتعلق بالخصوصية',
-    not_useful: 'التطبيق غير مفيد لي',
-    better_alternative: 'وجدت بديل أفضل',
-    technical: 'مشاكل تقنية',
-    other: 'أسباب أخرى',
+    privacy: t('accountDeletion.reasons.privacy'),
+    not_useful: t('accountDeletion.reasons.notUseful'),
+    better_alternative: t('accountDeletion.reasons.betterAlternative'),
+    technical: t('accountDeletion.reasons.technical'),
+    other: t('accountDeletion.reasons.other'),
   };
 
   const parts = [
@@ -97,6 +104,7 @@ export function DeleteAccountFlow({
 }) {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t, locale } = useI18n();
   const authUser = readAuthUser();
 
   const [step, setStep] = useState<DeleteAccountStep>(1);
@@ -134,12 +142,12 @@ export function DeleteAccountFlow({
   const subtitle = useMemo(() => {
     if (restoreOtpMode) {
       return isDoctorRestoreRequestMode
-        ? 'طلب استعادة الحساب'
-        : 'استعادة الحساب';
+        ? t('accountDeletion.subtitle.restoreRequest')
+        : t('accountDeletion.subtitle.restore');
     }
-    if (step === 4) return 'عملية لا يمكن التراجع عنها';
+    if (step === 4) return t('accountDeletion.subtitle.irreversible');
     return undefined;
-  }, [isDoctorRestoreRequestMode, restoreOtpMode, step]);
+  }, [isDoctorRestoreRequestMode, restoreOtpMode, step, t]);
 
   const handleError = (
     cause: unknown,
@@ -220,11 +228,11 @@ export function DeleteAccountFlow({
       otp: otpRequired ? otp : undefined,
       reasonCode: feedbackDraft.reasonCode,
       feedback: feedbackDraft.feedback,
-      reason: resolveReasonText(feedbackDraft),
+      reason: resolveReasonText(feedbackDraft, t),
     });
     persistDeletionResult(response);
     setRecoverUntilRaw(response.recoverUntil ?? null);
-    setRecoverUntilLabel(formatRecoverUntil(response.recoverUntil));
+    setRecoverUntilLabel(formatRecoverUntil(response.recoverUntil, locale));
     setStep(5);
   };
 
@@ -236,7 +244,7 @@ export function DeleteAccountFlow({
       setPassword(value);
       setStep(3);
     } catch (cause) {
-      handleError(cause, 'تعذر التحقق من كلمة المرور.', 'password');
+      handleError(cause, t('accountDeletion.error.passwordVerifyFailed'), 'password');
     } finally {
       setBusy(false);
     }
@@ -254,7 +262,7 @@ export function DeleteAccountFlow({
       }
       setPendingConfirm({ kind: 'delete-final' });
     } catch (cause) {
-      handleError(cause, 'تعذر إرسال رمز التحقق.');
+      handleError(cause, t('accountDeletion.error.otpSendFailed'));
     } finally {
       setBusy(false);
     }
@@ -285,8 +293,8 @@ export function DeleteAccountFlow({
           });
           clearAccountDeletionSessionMeta();
           await useAuthStore.getState().logout({ skipRemoteRevoke: true });
-          toast('تم إرسال طلب الاستعادة بنجاح. ستراجع الإدارة الطلب وتتواصل معك عند الموافقة.', {
-            title: 'طلب قيد المراجعة',
+          toast(t('accountDeletion.toast.restoreRequestSentBody'), {
+            title: t('accountDeletion.toast.restoreRequestSentTitle'),
             variant: 'success',
           });
           setRestoreOtpMode(false);
@@ -300,8 +308,8 @@ export function DeleteAccountFlow({
           otp: pendingConfirm.otp,
         });
         clearAccountDeletionSessionMeta();
-        toast('تم استعادة حسابك بنجاح.', {
-          title: 'مرحباً بعودتك',
+        toast(t('accountDeletion.toast.accountRestoredBody'), {
+          title: t('accountDeletion.toast.accountRestoredTitle'),
           variant: 'success',
         });
         setRestoreOtpMode(false);
@@ -313,9 +321,9 @@ export function DeleteAccountFlow({
         cause,
         pendingConfirm.kind === 'restore-otp'
           ? isDoctorRestoreRequestMode
-            ? 'تعذر إرسال طلب الاستعادة.'
-            : 'تعذر التحقق من رمز الاسترجاع.'
-          : 'تعذر إكمال طلب الحذف.',
+            ? t('accountDeletion.error.restoreRequestFailed')
+            : t('accountDeletion.error.restoreOtpVerifyFailed')
+          : t('accountDeletion.error.deletionRequestFailed'),
         pendingConfirm.kind === 'restore-otp' ? 'restore-otp' : 'otp',
       );
       setPendingConfirm(null);
@@ -330,26 +338,23 @@ export function DeleteAccountFlow({
     if (pendingConfirm.kind === 'restore-otp') {
       if (isDoctorRestoreRequestMode) {
         return {
-          title: 'تأكيد طلب الاستعادة',
-          description:
-            'بعد التحقق من الرمز سيُرسل طلب الاستعادة للمراجعة الإدارية. هل تريد المتابعة؟',
-          confirmLabel: 'نعم، إرسال الطلب',
+          title: t('accountDeletion.confirm.restoreRequestTitle'),
+          description: t('accountDeletion.confirm.restoreRequestDescription'),
+          confirmLabel: t('accountDeletion.confirm.restoreRequestConfirm'),
         };
       }
 
       return {
-        title: 'تأكيد استعادة الحساب',
-        description:
-          'بعد التحقق من الرمز سيتم إلغاء طلب الحذف واستعادة حسابك. هل تريد المتابعة؟',
-        confirmLabel: 'نعم، استعادة الحساب',
+        title: t('accountDeletion.confirm.restoreAccountTitle'),
+        description: t('accountDeletion.confirm.restoreAccountDescription'),
+        confirmLabel: t('accountDeletion.confirm.restoreAccountConfirm'),
       };
     }
 
     return {
-      title: 'تأكيد حذف الحساب نهائياً',
-      description:
-        'سيُقدَّم طلب الحذف ويدخل حسابك حالة «بانتظار الحذف» لمدة 7 أيام. هل أنت متأكد؟',
-      confirmLabel: 'تأكيد الحذف',
+      title: t('accountDeletion.confirm.deleteTitle'),
+      description: t('accountDeletion.confirm.deleteDescription'),
+      confirmLabel: t('accountDeletion.confirm.deleteConfirm'),
     };
   })();
 
@@ -359,12 +364,12 @@ export function DeleteAccountFlow({
     setError(null);
     try {
       await dispatchOtp(otpChannel);
-      toast('أُعيد إرسال رمز التحقق.', {
-        title: 'تم الإرسال',
+      toast(t('accountDeletion.toast.otpResentBody'), {
+        title: t('accountDeletion.toast.otpResentTitle'),
         variant: 'success',
       });
     } catch (cause) {
-      handleError(cause, 'تعذر إعادة إرسال الرمز.', 'resend');
+      handleError(cause, t('accountDeletion.error.resendFailed'), 'resend');
     } finally {
       setResendBusy(false);
     }
@@ -378,12 +383,12 @@ export function DeleteAccountFlow({
     setError(null);
     try {
       await dispatchOtp(next);
-      toast('تم إرسال الرمز عبر القناة الجديدة.', {
-        title: 'تم التحديث',
+      toast(t('accountDeletion.toast.channelChangedBody'), {
+        title: t('accountDeletion.toast.channelChangedTitle'),
         variant: 'success',
       });
     } catch (cause) {
-      handleError(cause, 'تعذر تغيير قناة التحقق.', 'resend');
+      handleError(cause, t('accountDeletion.error.channelChangeFailed'), 'resend');
     } finally {
       setResendBusy(false);
     }
@@ -394,12 +399,12 @@ export function DeleteAccountFlow({
     setError(null);
     try {
       await dispatchRestoreOtp(restoreOtpChannel);
-      toast('أُعيد إرسال رمز التحقق.', {
-        title: 'تم الإرسال',
+      toast(t('accountDeletion.toast.otpResentBody'), {
+        title: t('accountDeletion.toast.otpResentTitle'),
         variant: 'success',
       });
     } catch (cause) {
-      handleError(cause, 'تعذر إعادة إرسال الرمز.', 'resend');
+      handleError(cause, t('accountDeletion.error.resendFailed'), 'resend');
     } finally {
       setResendBusy(false);
     }
@@ -413,12 +418,12 @@ export function DeleteAccountFlow({
     setError(null);
     try {
       await dispatchRestoreOtp(next);
-      toast('تم إرسال الرمز عبر القناة الجديدة.', {
-        title: 'تم التحديث',
+      toast(t('accountDeletion.toast.channelChangedBody'), {
+        title: t('accountDeletion.toast.channelChangedTitle'),
         variant: 'success',
       });
     } catch (cause) {
-      handleError(cause, 'تعذر تغيير قناة التحقق.', 'resend');
+      handleError(cause, t('accountDeletion.error.channelChangeFailed'), 'resend');
     } finally {
       setResendBusy(false);
     }
@@ -432,13 +437,13 @@ export function DeleteAccountFlow({
       try {
         await accountDeletionApi.cancel(scope);
         clearAccountDeletionSessionMeta();
-        toast('تم استعادة حسابك بنجاح.', {
-          title: 'مرحباً بعودتك',
+        toast(t('accountDeletion.toast.accountRestoredBody'), {
+          title: t('accountDeletion.toast.accountRestoredTitle'),
           variant: 'success',
         });
         navigate(dashboardHref, { replace: true });
       } catch (cause) {
-        handleError(cause, 'تعذر استعادة الحساب.');
+        handleError(cause, t('accountDeletion.error.restoreFailed'));
       } finally {
         setBusy(false);
       }
@@ -451,10 +456,10 @@ export function DeleteAccountFlow({
       setRestoreOtpMode(true);
       toast(
         isDoctorRestoreRequestMode
-          ? 'أُرسل رمز التحقق. أدخله لتقديم طلب الاستعادة.'
-          : 'أُرسل رمز التحقق. أدخله لاستعادة حسابك.',
+          ? t('accountDeletion.toast.otpSentForRestoreRequest')
+          : t('accountDeletion.toast.otpSentForRestore'),
         {
-          title: 'تحقق من الرمز',
+          title: t('accountDeletion.toast.verifyCodeTitle'),
           variant: 'info',
         },
       );
@@ -462,8 +467,8 @@ export function DeleteAccountFlow({
       handleError(
         cause,
         isDoctorRestoreRequestMode
-          ? 'تعذر إرسال رمز طلب الاستعادة.'
-          : 'تعذر إرسال رمز الاسترجاع.',
+          ? t('accountDeletion.error.restoreRequestOtpFailed')
+          : t('accountDeletion.error.restoreOtpFailed'),
       );
     } finally {
       setBusy(false);
@@ -486,18 +491,18 @@ export function DeleteAccountFlow({
             error={error}
             title={
               isDoctorRestoreRequestMode
-                ? 'طلب استعادة الحساب'
-                : 'استعادة الحساب'
+                ? t('accountDeletion.subtitle.restoreRequest')
+                : t('accountDeletion.subtitle.restore')
             }
             subtitle={
               isDoctorRestoreRequestMode
-                ? 'أدخل رمز التحقق لتقديم طلب الاستعادة للمراجعة الإدارية'
-                : 'أدخل رمز التحقق لإلغاء طلب الحذف واستعادة حسابك'
+                ? t('accountDeletion.restoreOtp.requestSubtitle')
+                : t('accountDeletion.restoreOtp.restoreSubtitle')
             }
             verifyLabel={
               isDoctorRestoreRequestMode
-                ? 'تأكيد طلب الاستعادة'
-                : 'تأكيد الاستعادة'
+                ? t('accountDeletion.restoreOtp.requestVerifyLabel')
+                : t('accountDeletion.restoreOtp.restoreVerifyLabel')
             }
             onVerify={(value) =>
               setPendingConfirm({ kind: 'restore-otp', otp: value })

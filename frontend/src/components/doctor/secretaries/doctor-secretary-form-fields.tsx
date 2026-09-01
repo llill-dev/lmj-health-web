@@ -4,12 +4,13 @@ import { Eye, EyeOff } from "lucide-react";
 import StyledSelect from "@/components/ui/styled-select";
 import {
   ASSIGNABLE_SECRETARY_PERMISSIONS,
-  SECRETARY_PERMISSION_LABELS,
+  secretaryPermissionLabel,
 } from "@/lib/doctor/secretaries/permissionsUi";
 import type { SecretaryGender } from "@/lib/doctor/secretaries/formUtils";
 import type { SecretaryFormFieldErrors } from "@/lib/doctor/secretaries/schema";
 import { PHONE_DIAL_CODE_OPTIONS } from "@/lib/phone/dialCodes";
 import { cn } from "@/lib/utils/utils";
+import { useI18n } from "@/i18n/provider";
 
 const inputClass =
   "h-[44px] w-full rounded-[10px] border px-4 font-cairo text-[13px] font-semibold outline-none transition focus:border-primary";
@@ -68,13 +69,15 @@ export function DoctorSecretaryFormFields({
   onTogglePermission,
   fieldErrors,
 }: SecretaryFormFieldsProps) {
+  const { t, locale } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const isEdit = mode === "edit";
 
   return (
     <div className="space-y-4">
       <div>
         <label className="mb-2 block text-start font-cairo text-[12px] font-bold text-[#667085]">
-          الاسم الكامل
+          {t("doctor.secretaryFormFields.fullName")}
         </label>
         <input
           value={fullName}
@@ -90,7 +93,7 @@ export function DoctorSecretaryFormFields({
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
           <label className="mb-2 block text-start font-cairo text-[12px] font-bold text-[#667085]">
-            البريد الإلكتروني
+            {t("doctor.secretaryFormFields.email")}
           </label>
           <input
             type="email"
@@ -111,12 +114,12 @@ export function DoctorSecretaryFormFields({
 
         <div>
           <label className="mb-2 block text-start font-cairo text-[12px] font-bold text-[#667085]">
-            كلمة المرور
+            {t("doctor.secretaryFormFields.password")}
           </label>
           {isEdit ? (
             <div className="flex h-[44px] items-center rounded-[10px] border border-[#E5E7EB] bg-[#F9FAFB] px-4">
               <span className="font-cairo text-[12px] font-semibold text-[#667085]">
-                لا يمكن تغييرها من هنا
+                {t("doctor.secretaryFormFields.passwordUneditable")}
               </span>
             </div>
           ) : (
@@ -139,10 +142,14 @@ export function DoctorSecretaryFormFields({
                   onClick={onToggleShowPassword}
                   className="absolute start-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[8px] text-primary transition hover:bg-[#F0FDFA] hover:text-[#0b766e]"
                   aria-label={
-                    showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"
+                    showPassword
+                      ? t("doctor.secretaryFormFields.hidePassword")
+                      : t("doctor.secretaryFormFields.showPassword")
                   }
                   title={
-                    showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"
+                    showPassword
+                      ? t("doctor.secretaryFormFields.hidePassword")
+                      : t("doctor.secretaryFormFields.showPassword")
                   }
                 >
                   {showPassword ? (
@@ -161,7 +168,7 @@ export function DoctorSecretaryFormFields({
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
           <label className="mb-2 block text-start font-cairo text-[12px] font-bold text-[#667085]">
-            الهاتف
+            {t("doctor.secretaryFormFields.phone")}
           </label>
           <div className="flex gap-2">
             <StyledSelect
@@ -176,7 +183,7 @@ export function DoctorSecretaryFormFields({
               size="sm"
               tone="muted"
               className="w-[140px]"
-              listboxAriaLabel="اختيار رمز الدولة"
+              listboxAriaLabel={t("doctor.secretaryFormFields.dialCodeAria")}
               error={Boolean(fieldErrors?.phone)}
             />
             <input
@@ -187,7 +194,7 @@ export function DoctorSecretaryFormFields({
                   localNumber: e.target.value,
                 })
               }
-              placeholder="912345678"
+              placeholder={t("doctor.secretaryFormFields.phonePlaceholder")}
               className={cn(
                 inputClass,
                 "flex-1",
@@ -198,14 +205,14 @@ export function DoctorSecretaryFormFields({
           <FieldError message={fieldErrors?.phone} />
           {!fieldErrors?.phone && (
             <p className="mt-1.5 text-start font-cairo text-[11px] font-medium text-[#667085]">
-              أدخل الرقم المحلي (بدون رمز الدولة)
+              {t("doctor.secretaryFormFields.phoneHint")}
             </p>
           )}
         </div>
 
         <div>
           <label className="mb-2 block text-start font-cairo text-[12px] font-bold text-[#667085]">
-            الجنس
+            {t("doctor.secretaryFormFields.gender")}
           </label>
           <StyledSelect
             value={gender}
@@ -213,12 +220,12 @@ export function DoctorSecretaryFormFields({
             size="sm"
             tone="muted"
             className="w-full"
-            placeholder="اختر الجنس"
-            listboxAriaLabel="اختيار الجنس"
+            placeholder={t("doctor.secretaryFormFields.genderPlaceholder")}
+            listboxAriaLabel={t("doctor.secretaryFormFields.genderAria")}
             error={Boolean(fieldErrors?.gender)}
             options={[
-              { value: "Female", label: "أنثى" },
-              { value: "Male", label: "ذكر" },
+              { value: "Female", label: t("doctor.secretaryFormFields.genderFemale") },
+              { value: "Male", label: t("doctor.secretaryFormFields.genderMale") },
             ]}
           />
           <FieldError message={fieldErrors?.gender} />
@@ -227,7 +234,7 @@ export function DoctorSecretaryFormFields({
 
       <div>
         <p className="mb-3 text-start font-cairo text-[13px] font-extrabold text-[#111827]">
-          الصلاحيات
+          {t("doctor.secretaryFormFields.permissions")}
         </p>
         <div
           className={cn(
@@ -250,7 +257,7 @@ export function DoctorSecretaryFormFields({
                     : "border-[#EEF2F6] bg-white text-[#667085] hover:border-primary/30",
                 )}
               >
-                {SECRETARY_PERMISSION_LABELS[key] ?? key}
+                {secretaryPermissionLabel(key, tr)}
               </button>
             );
           })}

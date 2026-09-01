@@ -1,5 +1,7 @@
 'use client';
 
+import { useI18n } from '@/i18n/provider';
+
 type PatientQuickInfoProps = {
   bloodType: string;
   heightLabel?: string;
@@ -30,23 +32,34 @@ export function PatientQuickInfo({
   medicalConditionsCount,
   relationshipLabel,
 }: PatientQuickInfoProps) {
+  const { t } = useI18n();
+  const itemsCount = (count: number) =>
+    t('doctor.patientCard.itemsCount').replace('{count}', String(count));
+
   return (
     <div className="grid w-full grid-cols-2 gap-3">
-      <QuickInfoTile label="فصيلة الدم" value={bloodType || 'غير محدد'} />
       <QuickInfoTile
-        label="الحساسية"
-        value={allergiesCount > 0 ? `${allergiesCount} عنصر` : 'لا توجد'}
+        label={t('doctor.patientCard.bloodType')}
+        value={bloodType || t('doctor.patientQuickInfo.unspecified')}
       />
       <QuickInfoTile
-        label="الأمراض المزمنة"
+        label={t('doctor.patientCard.allergies')}
         value={
-          medicalConditionsCount > 0
-            ? `${medicalConditionsCount} عنصر`
-            : 'لا توجد'
+          allergiesCount > 0
+            ? itemsCount(allergiesCount)
+            : t('doctor.patientCard.none')
         }
       />
       <QuickInfoTile
-        label="الطول / الوزن"
+        label={t('doctor.patientCard.chronicConditions')}
+        value={
+          medicalConditionsCount > 0
+            ? itemsCount(medicalConditionsCount)
+            : t('doctor.patientCard.none')
+        }
+      />
+      <QuickInfoTile
+        label={t('doctor.patientQuickInfo.heightWeight')}
         value={
           heightLabel && heightLabel !== '—' && weightLabel && weightLabel !== '—'
             ? `${heightLabel} · ${weightLabel}`

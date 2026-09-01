@@ -17,23 +17,24 @@ export function PrescriptionGeneralInstructions({
   disabled?: boolean;
   error?: string;
 }) {
-  const { locale, dir } = useI18n();
+  const { locale, dir, t } = useI18n();
   return (
     <section className="mb-6">
       <h2 className="mb-1 text-start font-cairo text-[14px] font-extrabold text-[#667085]">
-        التعليمات العامة
-        <span className="ms-1 font-semibold text-[#98A2B3]">(اختياري)</span>
+        {t("doctor.generalInstructions.title")}
+        <span className="ms-1 font-semibold text-[#98A2B3]">
+          {t("doctor.generalInstructions.optionalBadge")}
+        </span>
       </h2>
       <p className="mb-3 text-start font-cairo text-[12px] font-semibold text-[#98A2B3]">
-        يمكنك ترك هذا الحقل فارغاً. الأدوية تُحفظ عند إضافتها؛ «حفظ المسودة»
-        يحفظ التعليمات العامة فقط عند تعديلها.
+        {t("doctor.generalInstructions.hint")}
       </p>
       <textarea
         dir={dir}
         lang={locale}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        placeholder="أضف تعليمات عامة للمريض (اختياري)..."
+        placeholder={t("doctor.generalInstructions.placeholder")}
         disabled={disabled}
         aria-invalid={Boolean(error)}
         className={cn(

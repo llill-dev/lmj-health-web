@@ -172,21 +172,27 @@ export default function SuspendAccountDialog({
                         reason: values.reason,
                       });
                     }
-                    setDone("تم تعليق الحساب بنجاح");
+                    setDone(t("adminPatients.suspend.doneMessage"));
                     if (kind === "patient") {
                       toast(
-                        `تم تعليق حساب المريض «${targetLabel}». لن يتمكّن من تسجيل الدخول حتى تُعاد مزامنة الحساب من الإدارة.`,
+                        t("adminPatients.suspend.toast.patientBody").replace(
+                          "{name}",
+                          targetLabel,
+                        ),
                         {
-                          title: "تعليق الحساب",
+                          title: t("adminPatients.suspend.toast.title"),
                           variant: "warning",
                           durationMs: 4500,
                         },
                       );
                     } else {
                       toast(
-                        `تم تعليق الحساب «${targetLabel}». يرتبط الوصول بسياسات الإدارة لكل دور.`,
+                        t("adminPatients.suspend.toast.genericBody").replace(
+                          "{name}",
+                          targetLabel,
+                        ),
                         {
-                          title: "تعليق الحساب",
+                          title: t("adminPatients.suspend.toast.title"),
                           variant: "warning",
                           durationMs: 4200,
                         },
@@ -195,18 +201,23 @@ export default function SuspendAccountDialog({
                     onSuccess?.();
                     setTimeout(() => onOpenChange(false), 900);
                   } catch (e: any) {
-                    setError(userFacingErrorMessage(e, "فشل تعليق الحساب"));
+                    setError(
+                      userFacingErrorMessage(
+                        e,
+                        t("adminPatients.suspend.error.failed"),
+                      ),
+                    );
                   }
                 })}
               >
                 <div>
                   <div className="mb-2 text-start font-cairo text-[13px] font-extrabold text-[#101828]">
-                    سبب التعليق:
+                    {t("adminPatients.suspend.reason.label")}
                     <span className="ms-1 text-[#F04438]">*</span>
                   </div>
                   <textarea
                     {...register("reason")}
-                    placeholder="اكتب سبب التعليق..."
+                    placeholder={t("adminPatients.suspend.reason.placeholder")}
                     className="min-h-[110px] w-full resize-none rounded-[12px] border border-[#D0D5DD] bg-white px-4 py-3 font-cairo text-[13px] font-semibold text-[#101828] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3]"
                     required
                   />
@@ -230,7 +241,7 @@ export default function SuspendAccountDialog({
                       type="button"
                       className="h-[40px] rounded-[10px] border border-[#E5E7EB] bg-white px-7 font-cairo text-[12px] font-extrabold text-[#111827]"
                     >
-                      إلغاء
+                      {t("adminPatients.suspend.cancel")}
                     </button>
                   </Dialog.Close>
                   <button
@@ -239,7 +250,7 @@ export default function SuspendAccountDialog({
                     className="inline-flex h-[40px] items-center gap-2 rounded-[10px] border border-[#FB923C] bg-white px-7 font-cairo text-[12px] font-extrabold text-[#F97316] disabled:opacity-60"
                   >
                     <Ban className="h-4 w-4" />
-                    تعليق
+                    {t("adminPatients.suspend.submit")}
                   </button>
                 </div>
               </form>

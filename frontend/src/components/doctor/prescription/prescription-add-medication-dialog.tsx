@@ -14,12 +14,20 @@ import {
 import type { PrescriptionDraftForm } from './prescription-types';
 import { useI18n } from '@/i18n/provider';
 
-const schema = z.object({
-  name: z.string().trim().min(1, 'اسم الدواء مطلوب'),
-  dosage: z.string().trim().min(1, 'الجرعة مطلوبة'),
-  frequency: z.string().trim().min(1, 'التكرار مطلوب'),
-  duration: z.string().trim().min(1, 'المدة مطلوبة'),
-});
+function buildSchema(t: (key: string) => string) {
+  return z.object({
+    name: z.string().trim().min(1, t('doctor.medicationDialog.nameRequired')),
+    dosage: z.string().trim().min(1, t('doctor.medicationDialog.dosageRequired')),
+    frequency: z
+      .string()
+      .trim()
+      .min(1, t('doctor.medicationDialog.frequencyRequired')),
+    duration: z
+      .string()
+      .trim()
+      .min(1, t('doctor.medicationDialog.durationRequired')),
+  });
+}
 
 export default function PrescriptionAddMedicationDialog({
   open,
@@ -36,9 +44,9 @@ export default function PrescriptionAddMedicationDialog({
   confirmLabel: string;
   onSubmit: (values: PrescriptionDraftForm) => void | Promise<void>;
 }) {
-  const { locale, dir } = useI18n();
+  const { locale, dir, t } = useI18n();
   const form = useForm<PrescriptionDraftForm>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(buildSchema(t)),
     mode: 'onTouched',
     defaultValues: {
       name: '',
@@ -90,7 +98,7 @@ export default function PrescriptionAddMedicationDialog({
             <Dialog.Close
               type="button"
               className="flex h-9 w-9 items-center justify-center rounded-[8px] text-[#667085] hover:bg-[#F2F4F7]"
-              aria-label="إغلاق"
+              aria-label={t('doctor.medicationDialog.closeAria')}
             >
               <X className="h-5 w-5" />
             </Dialog.Close>
@@ -98,7 +106,7 @@ export default function PrescriptionAddMedicationDialog({
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <DoctorProfileFormField
-              label="اسم الدواء"
+              label={t('doctor.medicationDialog.nameLabel')}
               required
               error={form.formState.errors.name?.message}
             >
@@ -112,7 +120,7 @@ export default function PrescriptionAddMedicationDialog({
             </DoctorProfileFormField>
 
             <DoctorProfileFormField
-              label="الجرعة"
+              label={t('doctor.medicationCard.dosageLabel')}
               required
               error={form.formState.errors.dosage?.message}
             >
@@ -126,7 +134,7 @@ export default function PrescriptionAddMedicationDialog({
             </DoctorProfileFormField>
 
             <DoctorProfileFormField
-              label="التكرار"
+              label={t('doctor.medicationCard.frequencyLabel')}
               required
               error={form.formState.errors.frequency?.message}
             >
@@ -140,7 +148,7 @@ export default function PrescriptionAddMedicationDialog({
             </DoctorProfileFormField>
 
             <DoctorProfileFormField
-              label="المدة"
+              label={t('doctor.medicationCard.durationLabel')}
               required
               error={form.formState.errors.duration?.message}
             >

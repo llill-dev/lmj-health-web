@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils/utils";
 import { ENCOUNTERS_EXPAND_TRANSITION } from "@/components/doctor/encounters/encounters-motion";
 import type { PrescriptionMedicationItem } from "./prescription-types";
+import { useI18n } from "@/i18n/provider";
 
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
@@ -31,6 +32,7 @@ export function PrescriptionMedicationCard({
   defaultExpanded?: boolean;
   readOnly?: boolean;
 }) {
+  const { t } = useI18n();
   const [expanded, setExpanded] = useState(defaultExpanded);
   const showDetails = !collapsible || expanded;
 
@@ -56,7 +58,7 @@ export function PrescriptionMedicationCard({
                   type="button"
                   onClick={onDuplicate}
                   className="flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#BFEDEC] text-primary transition hover:bg-[#F0FAF9]"
-                  aria-label="نسخ الدواء"
+                  aria-label={t("doctor.medicationCard.copyAria")}
                 >
                   <Copy className="w-4 h-4" aria-hidden />
                 </button>
@@ -65,7 +67,7 @@ export function PrescriptionMedicationCard({
                 type="button"
                 onClick={onEdit}
                 className="flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#BFEDEC] text-primary transition hover:bg-[#F0FAF9]"
-                aria-label="تعديل الدواء"
+                aria-label={t("doctor.medicationCard.editAria")}
               >
                 <Pencil className="w-4 h-4" aria-hidden />
               </button>
@@ -75,7 +77,7 @@ export function PrescriptionMedicationCard({
                 className="me-4 inline-flex items-center gap-1 font-cairo text-[12px] font-extrabold text-[#E11D48] transition hover:text-[#BE123C]"
               >
                 <Trash2 className="w-4 h-4" aria-hidden />
-                <span>حذف</span>
+                <span>{t("doctor.medicationCard.delete")}</span>
               </button>
             </>
           ) : null}
@@ -85,7 +87,9 @@ export function PrescriptionMedicationCard({
               onClick={() => setExpanded((current) => !current)}
               aria-expanded={expanded}
               aria-label={
-                expanded ? "إخفاء تفاصيل الدواء" : "عرض تفاصيل الدواء"
+                expanded
+                  ? t("doctor.medicationCard.hideDetailsAria")
+                  : t("doctor.medicationCard.showDetailsAria")
               }
               className="flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#BFEDEC]  text-primary transition hover:bg-[#F0FAF9]"
             >
@@ -112,9 +116,9 @@ export function PrescriptionMedicationCard({
             className={cn("overflow-hidden", collapsible && "mt-2")}
           >
             <div className="space-y-0.5 pt-1">
-              <DetailRow label="الجرعة" value={item.dosage} />
-              <DetailRow label="التكرار" value={item.frequency} />
-              <DetailRow label="المدة" value={item.duration} />
+              <DetailRow label={t("doctor.medicationCard.dosageLabel")} value={item.dosage} />
+              <DetailRow label={t("doctor.medicationCard.frequencyLabel")} value={item.frequency} />
+              <DetailRow label={t("doctor.medicationCard.durationLabel")} value={item.duration} />
             </div>
           </motion.div>
         ) : null}

@@ -33,7 +33,7 @@ export function AppointmentTypeFormDialog({
   onClose: () => void;
   onSubmit: (values: AppointmentTypeFormValues) => Promise<void>;
 }) {
-  const { locale, dir } = useI18n();
+  const { locale, dir, t } = useI18n();
   const priceVisibleId = useId();
   const activeId = useId();
 
@@ -51,7 +51,9 @@ export function AppointmentTypeFormDialog({
   }, [open, initial]);
 
   const title =
-    mode === 'create' ? 'إضافة نوع موعد جديد' : 'تعديل نوع الموعد';
+    mode === 'create'
+      ? t('doctor.appointmentTypeDialog.createTitle')
+      : t('doctor.appointmentTypeDialog.editTitle');
 
   return (
     <ClinicAccountsModalShell
@@ -64,11 +66,14 @@ export function AppointmentTypeFormDialog({
       <div dir={dir} lang={locale} className="space-y-5 text-start">
         <p className="rounded-[12px] border border-[#E6F4F3] bg-[#F0FDFA] px-4 py-3 font-cairo text-[13px] font-semibold leading-relaxed text-[#667085]">
           {mode === 'create'
-            ? 'أنشئ نوع موعد جديداً مع تحديد السعر وإظهاره للمريض عند الحجز.'
-            : 'عدّل بيانات نوع الموعد والحالة الظاهرة للمرضى.'}
+            ? t('doctor.appointmentTypeDialog.createHint')
+            : t('doctor.appointmentTypeDialog.editHint')}
         </p>
 
-        <DoctorProfileFormField label="اسم نوع الموعد" required>
+        <DoctorProfileFormField
+          label={t('doctor.appointmentTypeDialog.nameLabel')}
+          required
+        >
           <div className="relative">
             <Tags
               className="pointer-events-none absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]"
@@ -77,15 +82,15 @@ export function AppointmentTypeFormDialog({
             <input
               value={name}
               onChange={(event) => setName(event.target.value)}
-              placeholder="مثال: كشفية عامة"
+              placeholder={t('doctor.appointmentTypeDialog.namePlaceholder')}
               className={`${profileInputClass} pe-4 ps-11`}
             />
           </div>
         </DoctorProfileFormField>
 
         <DoctorProfileFormField
-          label="السعر"
-          hint="اتركه فارغاً إذا لم يكن هناك سعر ثابت لهذا النوع."
+          label={t('doctor.appointmentTypeDialog.priceLabel')}
+          hint={t('doctor.appointmentTypeDialog.priceHint')}
         >
           <div className="relative">
             <BadgeDollarSign
@@ -110,14 +115,14 @@ export function AppointmentTypeFormDialog({
               id={priceVisibleId}
               className="font-cairo text-[13px] font-extrabold text-[#344054]"
             >
-              إظهار السعر للمريض
+              {t('doctor.appointmentTypeDialog.priceVisibleToPatient')}
             </span>
             <ToggleSwitch
               id={`${priceVisibleId}-switch`}
               size="sm"
               checked={priceVisibleToPatient}
               onChange={setPriceVisibleToPatient}
-              label="إظهار السعر للمريض"
+              label={t('doctor.appointmentTypeDialog.priceVisibleToPatient')}
               aria-labelledby={priceVisibleId}
             />
           </div>
@@ -128,14 +133,14 @@ export function AppointmentTypeFormDialog({
                 id={activeId}
                 className="font-cairo text-[13px] font-extrabold text-[#344054]"
               >
-                نوع الموعد نشط
+                {t('doctor.appointmentTypeDialog.typeActive')}
               </span>
               <ToggleSwitch
                 id={`${activeId}-switch`}
                 size="sm"
                 checked={isActive}
                 onChange={setIsActive}
-                label="نوع الموعد نشط"
+                label={t('doctor.appointmentTypeDialog.typeActive')}
                 aria-labelledby={activeId}
               />
             </div>
@@ -149,7 +154,7 @@ export function AppointmentTypeFormDialog({
             disabled={busy}
             className="inline-flex h-[48px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white font-cairo text-[14px] font-extrabold text-[#667085] transition hover:bg-[#F9FAFB] disabled:opacity-60"
           >
-            إلغاء
+            {t('doctor.appointmentTypeDialog.cancel')}
           </button>
           <button
             type="button"
@@ -164,7 +169,11 @@ export function AppointmentTypeFormDialog({
             }
             className="inline-flex h-[48px] items-center justify-center rounded-[10px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_12px_24px_-4px_rgba(15,143,139,0.35)] transition hover:bg-[#14B3AE] disabled:opacity-60"
           >
-            {busy ? 'جارٍ الحفظ...' : mode === 'create' ? 'إضافة النوع' : 'حفظ التعديلات'}
+            {busy
+              ? t('doctor.appointmentTypeDialog.saving')
+              : mode === 'create'
+                ? t('doctor.appointmentTypeDialog.addType')
+                : t('doctor.appointmentTypeDialog.saveChanges')}
           </button>
         </div>
       </div>

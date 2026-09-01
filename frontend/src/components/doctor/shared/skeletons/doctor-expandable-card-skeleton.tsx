@@ -1,6 +1,7 @@
 'use client';
 
 import { DoctorLoadingShell, SkeletonBlock } from './doctor-skeleton-primitives';
+import { useI18n } from '@/i18n/provider';
 
 export function DoctorExpandableCardSkeleton({
   count = 3,
@@ -9,8 +10,9 @@ export function DoctorExpandableCardSkeleton({
   count?: number;
   expanded?: boolean;
 }) {
+  const { t } = useI18n();
   return (
-    <DoctorLoadingShell label="جارٍ تحميل البطاقات…">
+    <DoctorLoadingShell label={t('doctor.skeleton.expandableCards')}>
       <div className="space-y-4">
         {Array.from({ length: count }).map((_, index) => (
           <article

@@ -1,12 +1,14 @@
 import { Link2, Pill, UserRound } from "lucide-react";
 import type { PrescriptionPreviewVm } from "./prescription-preview-types";
 import { PrescriptionPreviewMedicationCard } from "./prescription-preview-medication-card";
+import { useI18n } from "@/i18n/provider";
 
 export function PrescriptionPreviewDocument({
   vm,
 }: {
   vm: PrescriptionPreviewVm;
 }) {
+  const { t } = useI18n();
   return (
     <article className="relative rounded-[16px] border border-[#E4E7EC] bg-white px-5 py-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)] sm:px-8">
       <div className="absolute -top-5 start-1/2 flex h-10 w-10 -translate-x-1/2 items-center justify-center rounded-full border-2 border-white bg-primary shadow-[0_8px_20px_rgba(15,143,139,0.35)]">
@@ -29,13 +31,13 @@ export function PrescriptionPreviewDocument({
               {vm.patientPhone}
             </div>
             <div className="mt-3 font-cairo text-[14px] font-extrabold text-primary">
-              الطبيب {vm.doctorName}
+              {t('doctor.prescriptionPreviewDocument.doctorPrefix')} {vm.doctorName}
             </div>
           </div>
         </div>
         <div className="text-start sm:min-w-[200px]">
           <div className="font-cairo text-[12px] font-bold text-[#667085]">
-            رقم الوصفة
+            {t('doctor.prescriptionPreviewDocument.prescriptionNumber')}
           </div>
           <div className="mt-1 font-cairo text-[18px] font-black text-[#101828]">
             {vm.prescriptionCode}
@@ -50,13 +52,13 @@ export function PrescriptionPreviewDocument({
         <div className="flex gap-2 justify-start items-center mb-4">
           <Pill className="w-5 h-5 text-primary" aria-hidden />
           <h2 className="font-cairo text-[16px] font-extrabold text-[#101828]">
-            الأدوية الموصوفة:
+            {t('doctor.prescriptionPreviewDocument.prescribedMedications')}
           </h2>
         </div>
 
         {vm.medications.length === 0 ? (
           <div className="rounded-[12px] border border-dashed border-[#BFEDEC] bg-[#F8FFFE] px-4 py-10 text-center font-cairo text-[14px] font-semibold text-[#667085]">
-            لا توجد أدوية في هذه الوصفة.
+            {t('doctor.prescriptionPreviewDocument.noMedications')}
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -69,7 +71,7 @@ export function PrescriptionPreviewDocument({
         {vm.generalInstructions ? (
           <div className="mt-6 rounded-[12px] border-[0.5px] border-[#0F8F8B] bg-[#F8FFFE] px-4 py-4 text-start">
             <div className="font-cairo text-[13px] font-extrabold text-primary">
-              التعليمات العامة
+              {t('doctor.prescriptionPreviewDocument.generalInstructions')}
             </div>
             <p className="mt-2 font-cairo text-[14px] font-semibold leading-[24px] text-[#344054]">
               {vm.generalInstructions}

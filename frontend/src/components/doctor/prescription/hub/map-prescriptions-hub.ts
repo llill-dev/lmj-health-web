@@ -71,10 +71,12 @@ export function formatPrescriptionHubSystemId(input: {
   return `MR-SY-${year}-${tail || '00000000'}`;
 }
 
-export function resolvePrescriptionHubFacilityLabel(profile?: {
-  locationCity?: string;
-  clinicAddress?: string;
-}): string {
+type TFn = (key: string, fallback?: string) => string;
+
+export function resolvePrescriptionHubFacilityLabel(
+  profile: { locationCity?: string; clinicAddress?: string } | undefined,
+  t: TFn,
+): string {
   const city = profile?.locationCity?.trim();
   const address = profile?.clinicAddress?.trim();
   if (city && address) {
@@ -82,14 +84,17 @@ export function resolvePrescriptionHubFacilityLabel(profile?: {
   }
   if (city) return city;
   if (address) return address.length > 60 ? `${address.slice(0, 60)}…` : address;
-  return 'عيادة LMJ Health';
+  return t('doctor.prescriptionsHub.defaultFacility');
 }
 
-export function resolvePrescriptionHubStatus(input: {
-  prescriptionStatus?: string;
-  encounterStatus?: string;
-  encounterOrigin?: string;
-}): { key: PrescriptionHubStatusKey; label: string } {
+export function resolvePrescriptionHubStatus(
+  input: {
+    prescriptionStatus?: string;
+    encounterStatus?: string;
+    encounterOrigin?: string;
+  },
+  t: TFn,
+): { key: PrescriptionHubStatusKey; label: string } {
   const prescriptionStatus = (input.prescriptionStatus ?? '').toLowerCase();
   const encounterStatus = (input.encounterStatus ?? '').toLowerCase();
 
@@ -97,18 +102,18 @@ export function resolvePrescriptionHubStatus(input: {
     prescriptionStatus.includes('archiv') ||
     encounterStatus.includes('archiv')
   ) {
-    return { key: 'archived', label: 'مؤرشف' };
+    return { key: 'archived', label: t('doctor.prescriptionsHub.status.archived') };
   }
 
   if (encounterStatus === 'closed') {
-    return { key: 'closed', label: 'مغلق' };
+    return { key: 'closed', label: t('doctor.prescriptionsHub.status.closed') };
   }
 
   if (
     input.encounterOrigin === 'walk_in' &&
     (prescriptionStatus === 'draft' || !prescriptionStatus.includes('final'))
   ) {
-    return { key: 'emergency', label: 'طارئة' };
+    return { key: 'emergency', label: t('doctor.prescriptionsHub.status.emergency') };
   }
 
   if (
@@ -116,20 +121,21 @@ export function resolvePrescriptionHubStatus(input: {
     prescriptionStatus.includes('draft') ||
     (!prescriptionStatus.includes('final') && prescriptionStatus !== 'active')
   ) {
-    return { key: 'follow_up', label: 'يحتاج متابعة' };
+    return { key: 'follow_up', label: t('doctor.prescriptionsHub.status.followUp') };
   }
 
-  return { key: 'active', label: 'نشط' };
+  return { key: 'active', label: t('doctor.prescriptionsHub.status.active') };
 }
 
 export function buildEncounterRef(
   encounter: DoctorEncounterSummary,
   patient: Pick<DoctorPatientListItem, '_id' | 'publicId' | 'user'>,
+  t: TFn,
 ): PrescriptionHubEncounterRef {
   return {
     encounterId: encounter._id,
     patientId: patient._id,
-    patientName: patient.user?.fullName?.trim() || 'مريض',
+    patientName: patient.user?.fullName?.trim() || t('doctor.prescriptionsHub.defaultPatientName'),
     patientPhone: patient.user?.phone?.trim() || '—',
     patientPublicId: patient.publicId ?? '',
     encounterStatus: encounter.status ?? 'open',
@@ -142,6 +148,7 @@ export function mapPrescriptionToHubRow(
   ref: PrescriptionHubEncounterRef,
   prescription: EncounterPrescriptionRecord,
   facilityLabel: string,
+  t: TFn,
 ): PrescriptionHubRowVm {
   const dateSource =
     prescription.finalizedAt ??
@@ -151,7 +158,7 @@ export function mapPrescriptionToHubRow(
     prescriptionStatus: prescription.status,
     encounterStatus: ref.encounterStatus,
     encounterOrigin: ref.encounterOrigin,
-  });
+  }, t);
 
   return {
     id: prescription._id,
@@ -176,12 +183,13 @@ export function mapPrescriptionToHubRow(
 export function mapEncounterDraftToHubRow(
   ref: PrescriptionHubEncounterRef,
   facilityLabel: string,
+  t: TFn,
 ): PrescriptionHubRowVm {
   const status = resolvePrescriptionHubStatus({
     prescriptionStatus: 'draft',
     encounterStatus: ref.encounterStatus,
     encounterOrigin: ref.encounterOrigin,
-  });
+  }, t);
 
   return {
     id: `${ref.encounterId}-draft`,

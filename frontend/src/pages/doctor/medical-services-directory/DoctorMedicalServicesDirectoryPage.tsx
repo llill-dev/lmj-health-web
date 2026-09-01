@@ -75,9 +75,9 @@ export default function DoctorMedicalServicesDirectoryPage() {
   );
 
   const directoryKpis = useMemo(
-    () => buildMedicalServicesDirectoryKpis(directoryQuery.counts),
+    () => buildMedicalServicesDirectoryKpis(directoryQuery.counts, t),
 
-    [directoryQuery.counts],
+    [directoryQuery.counts, t],
   );
 
   const handleCategoryChange = (category: MedicalServiceCategory) => {

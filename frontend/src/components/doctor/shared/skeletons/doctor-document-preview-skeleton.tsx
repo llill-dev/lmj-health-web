@@ -1,10 +1,12 @@
 'use client';
 
 import { DoctorLoadingShell, SkeletonBlock } from './doctor-skeleton-primitives';
+import { useI18n } from '@/i18n/provider';
 
 export function DoctorDocumentPreviewSkeleton() {
+  const { t } = useI18n();
   return (
-    <DoctorLoadingShell label="جارٍ تحميل المعاينة…">
+    <DoctorLoadingShell label={t('doctor.skeleton.documentPreview')}>
       <div className="space-y-4">
         <div className="rounded-[16px] border border-[#E2E8F0] bg-white p-6 shadow-[0_8px_24px_-12px_rgba(15,23,42,0.08)]">
           <div className="mb-6 flex flex-wrap items-start justify-between gap-4 border-b border-[#EEF2F6] pb-5">

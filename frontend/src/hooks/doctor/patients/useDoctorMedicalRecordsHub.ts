@@ -13,6 +13,7 @@ import {
 import { doctorApi, doctorPatientsQueryKeys } from "@/lib/doctor/client";
 import { useDoctorPatients } from "@/hooks/doctor/patients/useDoctorPatients";
 import { useDoctorProfile } from "@/hooks/doctor/profile/useDoctorProfile";
+import { useI18n } from "@/i18n/provider";
 
 const MAX_PATIENTS = 100;
 
@@ -34,6 +35,7 @@ export function useDoctorMedicalRecordsHub(
   doctorId: string,
   filters: MedicalRecordsHubFilters,
 ) {
+  const { t } = useI18n();
   const patientsQuery = useDoctorPatients({
     page: 1,
     limit: MAX_PATIENTS,
@@ -53,8 +55,8 @@ export function useDoctorMedicalRecordsHub(
   });
 
   const facilityLabel = useMemo(
-    () => resolvePrescriptionHubFacilityLabel(profileQuery.data?.doctor),
-    [profileQuery.data?.doctor],
+    () => resolvePrescriptionHubFacilityLabel(profileQuery.data?.doctor, t),
+    [profileQuery.data?.doctor, t],
   );
 
   const allRows = useMemo(() => {
@@ -63,12 +65,12 @@ export function useDoctorMedicalRecordsHub(
     patients.forEach((patient, index) => {
       const records = recordQueries[index]?.data?.records ?? [];
       for (const record of records) {
-        rows.push(mapMedicalRecordToRow(patient, record, facilityLabel));
+        rows.push(mapMedicalRecordToRow(patient, record, facilityLabel, t));
       }
     });
 
     return sortRows(rows);
-  }, [patients, recordQueries, facilityLabel]);
+  }, [patients, recordQueries, facilityLabel, t]);
 
   const filteredRows = useMemo(
     () =>

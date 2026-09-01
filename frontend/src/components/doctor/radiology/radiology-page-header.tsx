@@ -26,7 +26,7 @@ export function RadiologyPageHeader({
   const resolvedStatusLabel =
     statusLabel ?? t("doctor.radiology.defaultStatus");
   const resolvedSubtitle =
-    subtitle ?? buildRadiologyPatientSubtitle(patientName);
+    subtitle ?? buildRadiologyPatientSubtitle(patientName, t);
 
   return (
     <section className="relative mb-6 overflow-hidden rounded-[6px] px-4 py-6 shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)] sm:px-6 sm:py-7 lg:px-8 lg:py-8">

@@ -9,9 +9,15 @@ import {
 } from '../map-radiology-ui';
 import type { RadiologyPreviewVm } from './radiology-preview-types';
 
+type TFn = (key: string, fallback?: string) => string;
+
 function formatPatientMeta(
-  encounter?: DoctorEncounterSummary | null,
-  publicProfile?: { user?: { dateOfBirth?: string; fullName?: string } } | null,
+  encounter: DoctorEncounterSummary | null | undefined,
+  publicProfile:
+    | { user?: { dateOfBirth?: string; fullName?: string } }
+    | null
+    | undefined,
+  t?: TFn,
 ) {
   const dob =
     encounter?.patient?.dateOfBirth ??
@@ -22,7 +28,10 @@ function formatPatientMeta(
   const years = Math.floor(
     (Date.now() - birth.getTime()) / (365.25 * 24 * 60 * 60 * 1000),
   );
-  return years > 0 ? `${years} سنة • ذكر` : '—';
+  if (years <= 0) return '—';
+  return t
+    ? t('doctor.radiologyPreview.ageYears').replace('{years}', String(years))
+    : `${years} سنة • ذكر`;
 }
 
 export function mapRadiologyPreviewVm({
@@ -30,13 +39,15 @@ export function mapRadiologyPreviewVm({
   encounter,
   publicProfile,
   locale = 'ar',
+  t,
 }: {
   order: EncounterOrder;
   encounter?: DoctorEncounterSummary | null;
   publicProfile?: { user?: { fullName?: string } } | null;
   locale?: 'ar' | 'en';
+  t?: TFn;
 }): RadiologyPreviewVm {
-  const items = mapRadiologyItemsToUi(order);
+  const items = mapRadiologyItemsToUi(order, t);
   const status = resolveRadiologyStatusLabel(order, locale);
 
   return {
@@ -46,7 +57,7 @@ export function mapRadiologyPreviewVm({
       encounter?.patient?.user?.fullName?.trim() ??
       publicProfile?.user?.fullName?.trim() ??
       '—',
-    patientMeta: formatPatientMeta(encounter, publicProfile),
+    patientMeta: formatPatientMeta(encounter, publicProfile, t),
     statusLabel: status,
     clinical: mapOrderToClinicalForm(order),
     items,

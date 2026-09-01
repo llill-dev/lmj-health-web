@@ -5,6 +5,7 @@ import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-s
 import { PatientTabEmptyIllustration } from "@/components/doctor/patients/patient-tab-empty-illustration";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import type { DoctorEncounterSummary } from "@/lib/doctor/types";
+import { useI18n } from "@/i18n/provider";
 
 import { EncounterCard } from "../cards";
 import { PatientDetailsTabSkeleton } from "../skeletons";
@@ -31,12 +32,14 @@ export function EncountersTab({
   onOpenEncountersPage,
   formatIsoDate,
 }: EncountersTabProps) {
+  const { t } = useI18n();
+
   if (isAwaitingData) return <PatientDetailsTabSkeleton rows={4} />;
 
   if (isError) {
     return (
       <DoctorListErrorState
-        title="تعذّر تحميل الزيارات الطبية"
+        title={t("doctor.encountersTab.loadError")}
         brief={getUserFacingRequestErrorMessage(error)}
         detail={getUserFacingRequestErrorMessage(error)}
         retrying={retrying}
@@ -53,9 +56,9 @@ export function EncountersTab({
             variant="teal"
             imageSrc="/images/photo-not-meduical-file.png"
             imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.12)]"
-            title="لا توجد زيارات مسجّلة بعد"
-            subtitle="تابع وفتح الزيارات السريرية من مركز الزيارات الطبية؛ ستنعكس هنا بمجرد الربط مع ملف هذا المريض."
-            actionLabel="الانتقال إلى الزيارات الطبية"
+            title={t("doctor.encountersTab.emptyTitle")}
+            subtitle={t("doctor.encountersTab.emptySubtitle")}
+            actionLabel={t("doctor.encountersTab.goToEncounters")}
             onAction={onOpenEncountersPage}
             actionIcon={<Stethoscope className="h-4 w-4" />}
           />
@@ -74,12 +77,18 @@ export function EncountersTab({
       >
         <div className="text-start">
           <p className="font-cairo text-[13px] font-extrabold text-[#0F172A]">
-            {encounters.length} زيارة مسجّلة
+            {t("doctor.encountersTab.recordedCount").replace(
+              "{count}",
+              String(encounters.length),
+            )}
           </p>
           <p className="mt-0.5 font-cairo text-[12px] font-semibold text-[#64748B]">
             {openCount > 0
-              ? `${openCount} زيارة مفتوحة حالياً`
-              : "جميع الزيارات مغلقة"}
+              ? t("doctor.encountersTab.openCount").replace(
+                  "{count}",
+                  String(openCount),
+                )
+              : t("doctor.encountersTab.allClosed")}
           </p>
         </div>
         {openCount > 0 ? (
@@ -88,7 +97,7 @@ export function EncountersTab({
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#10B981] opacity-70" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-[#10B981]" />
             </span>
-            زيارة نشطة
+            {t("doctor.encountersTab.activeVisit")}
           </span>
         ) : null}
       </motion.div>

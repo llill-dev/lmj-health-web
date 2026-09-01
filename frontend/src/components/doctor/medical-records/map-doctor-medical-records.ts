@@ -30,8 +30,11 @@ export type MedicalRecordRowVm = {
   raw: DoctorPatientMedicalRecord;
 };
 
+type TFn = (key: string, fallback?: string) => string;
+
 export function resolveMedicalRecordStatus(
   record: DoctorPatientMedicalRecord,
+  t: TFn,
 ): {
   key: MedicalRecordStatusKey;
   label: string;
@@ -40,23 +43,24 @@ export function resolveMedicalRecordStatus(
     `${record.title ?? ""} ${record.diagnosis ?? ""}`.toLowerCase();
 
   if (haystack.includes("طار") || haystack.includes("emergency")) {
-    return { key: "emergency", label: "طارئة" };
+    return { key: "emergency", label: t("doctor.medicalRecords.status.emergency") };
   }
 
   if (record.followUpRequired) {
-    return { key: "follow_up", label: "يحتاج متابعة" };
+    return { key: "follow_up", label: t("doctor.medicalRecords.status.followUp") };
   }
 
-  return { key: "active", label: "نشط" };
+  return { key: "active", label: t("doctor.medicalRecords.status.active") };
 }
 
 export function mapMedicalRecordToRow(
   patient: Pick<DoctorPatientListItem, "_id" | "publicId" | "user">,
   record: DoctorPatientMedicalRecord,
   facilityLabel: string,
+  t: TFn,
 ): MedicalRecordRowVm {
   const dateSource = record.date ?? record.createdAt;
-  const status = resolveMedicalRecordStatus(record);
+  const status = resolveMedicalRecordStatus(record, t);
 
   return {
     id: record._id,
@@ -66,9 +70,14 @@ export function mapMedicalRecordToRow(
       patientPublicId: patient.publicId,
       date: dateSource,
     }),
-    patientName: patient.user?.fullName?.trim() || "مريض",
+    patientName:
+      patient.user?.fullName?.trim() ||
+      t("doctor.medicalRecords.fallback.patientName"),
     patientPhone: patient.user?.phone?.trim() || "—",
-    diagnosis: record.diagnosis?.trim() || record.title?.trim() || "بدون تشخيص",
+    diagnosis:
+      record.diagnosis?.trim() ||
+      record.title?.trim() ||
+      t("doctor.medicalRecords.fallback.noDiagnosis"),
     facilityLabel,
     dateLabel: formatPrescriptionHubDate(dateSource),
     statusKey: status.key,

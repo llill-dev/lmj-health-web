@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { PatientQuickInfo } from '@/components/doctor/patients/patient-details/cards/PatientQuickInfo';
 import { cn } from '@/lib/utils/utils';
+import { useI18n } from '@/i18n/provider';
 
 type PatientProfileHeaderPatient = {
   name: string;
@@ -53,6 +54,7 @@ export function PatientProfileHeader({
   relationshipTone,
   relationshipIcon: RelationshipIcon,
 }: PatientProfileHeaderProps) {
+  const { t } = useI18n();
   const statusTone =
     patient.accountStatusKey === 'temporary'
       ? 'bg-[#FFF4ED] text-[#C4320A] ring-[#FED7AA]'
@@ -76,7 +78,7 @@ export function PatientProfileHeader({
 
         <div className="min-w-0 flex-1 space-y-3 text-start">
           <p className="font-cairo text-[12px] font-bold text-[#64748B]">
-            ملف المريض
+            {t('doctor.patientProfileHeader.title')}
           </p>
 
           <h1 className="font-cairo text-[24px] font-black leading-tight text-[#0F172A] sm:text-[28px]">
@@ -111,7 +113,10 @@ export function PatientProfileHeader({
           </div>
 
           <p className="font-cairo text-[13px] font-semibold text-[#98A2B3]">
-            ملف #{patient.fileNo}
+            {t('doctor.patientCard.fileNumber').replace(
+              '{fileNo}',
+              patient.fileNo,
+            )}
           </p>
 
           <div className="flex flex-wrap items-center justify-start gap-x-4 gap-y-2 font-cairo text-[13px] font-semibold text-[#667085]">
@@ -124,7 +129,7 @@ export function PatientProfileHeader({
             <span className="inline-flex items-center gap-1.5">
               <Calendar className="h-4 w-4 shrink-0 text-primary" aria-hidden />
               <span>
-                آخر زيارة:{' '}
+                {t('doctor.patientCard.lastVisit')}{' '}
                 <span className="text-[#1F2937]">{patient.lastVisit}</span>
               </span>
             </span>

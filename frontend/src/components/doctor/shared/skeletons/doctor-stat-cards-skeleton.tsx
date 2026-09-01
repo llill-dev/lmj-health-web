@@ -1,6 +1,7 @@
 'use client';
 
 import { DoctorLoadingShell, SkeletonBlock } from './doctor-skeleton-primitives';
+import { useI18n } from '@/i18n/provider';
 
 export function DoctorStatCardsSkeleton({
   count = 4,
@@ -16,8 +17,10 @@ export function DoctorStatCardsSkeleton({
         ? 'grid-cols-1 sm:grid-cols-3'
         : 'grid-cols-2 sm:grid-cols-4';
 
+  const { t } = useI18n();
+
   return (
-    <DoctorLoadingShell label="جارٍ تحميل البطاقات الإحصائية…">
+    <DoctorLoadingShell label={t('doctor.skeleton.statCards')}>
       <div className={`grid gap-3 sm:gap-4 ${gridClass}`}>
         {Array.from({ length: count }).map((_, index) => (
           <div

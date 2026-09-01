@@ -76,7 +76,7 @@ export function EncounterWorkspacePageSkeleton() {
       aria-live="polite"
       role="status"
     >
-      <span className="sr-only">جارٍ تحميل مساحة الزيارة الطبية…</span>
+      <span className="sr-only">جارٍ تحيل مساحة الزيارة الطبية…</span>
       <PatientCardSkeleton />
       <QuickActionsSkeleton />
       <div className="space-y-4">

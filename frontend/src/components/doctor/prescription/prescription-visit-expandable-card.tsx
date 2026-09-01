@@ -20,6 +20,7 @@ import type { MedicalVisitCardData } from '@/components/doctor/encounters/types'
 import { mapPrescriptionItemsToUi } from './map-prescription-ui';
 import { PrescriptionMedicationCard } from './prescription-medication-card';
 import type { PrescriptionPreviewVm } from './preview/prescription-preview-types';
+import { useI18n } from '@/i18n/provider';
 
 type PrescriptionVisitExpandableCardProps = {
   visit: MedicalVisitCardData;
@@ -53,13 +54,15 @@ export function PrescriptionVisitExpandableCard({
   onOpenPreview,
   onOpenEdit,
 }: PrescriptionVisitExpandableCardProps) {
+  const { t } = useI18n();
   const medications = previewVm
     ? mapPrescriptionItemsToUi(previewVm.raw)
     : [];
   const medsCount =
     previewVm?.medications.length ??
     medications.length;
-  const statusLabel = previewVm?.statusLabel ?? 'مسودة';
+  const statusLabel =
+    previewVm?.statusLabel ?? t('doctor.prescriptionVisitCard.draftFallback');
 
   return (
     <motion.article
@@ -109,8 +112,12 @@ export function PrescriptionVisitExpandableCard({
                 <span className="inline-flex items-center gap-1 rounded-full bg-[#E6F4F3] px-2.5 py-1 font-cairo text-[11px] font-extrabold text-primary">
                   <Pill className="h-3.5 w-3.5" aria-hidden />
                   {medsCount > 0
-                    ? `${medsCount} ${medsCount === 1 ? 'دواء' : 'أدوية'}`
-                    : 'لا أدوية بعد'}
+                    ? `${medsCount} ${
+                        medsCount === 1
+                          ? t('doctor.prescriptionVisitCard.medSingular')
+                          : t('doctor.prescriptionVisitCard.medPlural')
+                      }`
+                    : t('doctor.prescriptionVisitCard.noMedsYet')}
                 </span>
                 <span className="inline-flex rounded-full bg-[#FEF3C7] px-2.5 py-1 font-cairo text-[11px] font-extrabold text-[#B45309]">
                   {statusLabel}
@@ -124,7 +131,11 @@ export function PrescriptionVisitExpandableCard({
           type="button"
           onClick={onToggle}
           aria-expanded={expanded}
-          aria-label={expanded ? 'إخفاء تفاصيل الوصفة' : 'عرض تفاصيل الوصفة'}
+          aria-label={
+            expanded
+              ? t('doctor.prescriptionVisitCard.hideDetailsAria')
+              : t('doctor.prescriptionVisitCard.showDetailsAria')
+          }
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] border border-[#BFEDEC] bg-white text-primary transition hover:bg-[#F0FAF9]"
         >
           <motion.span
@@ -173,23 +184,29 @@ export function PrescriptionVisitExpandableCard({
                 <>
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     <InfoCell
-                      label="رقم الوصفة"
+                      label={t('doctor.prescriptionVisitCard.prescriptionNumber')}
                       value={previewVm.prescriptionCode}
                     />
-                    <InfoCell label="الحالة" value={previewVm.statusLabel} />
                     <InfoCell
-                      label="الطبيب"
+                      label={t('doctor.prescriptionVisitCard.status')}
+                      value={previewVm.statusLabel}
+                    />
+                    <InfoCell
+                      label={t('doctor.prescriptionVisitCard.doctor')}
                       value={previewVm.doctorName}
                     />
                   </div>
 
                   <motion.section variants={ENCOUNTERS_EXPAND_CONTENT_ITEM}>
                     <h4 className="mb-3 text-start font-cairo text-[14px] font-extrabold text-[#667085]">
-                      الأدوية الموصوفة ({medications.length})
+                      {t('doctor.prescriptionVisitCard.prescribedMedications').replace(
+                        '{count}',
+                        String(medications.length),
+                      )}
                     </h4>
                     {medications.length === 0 ? (
                       <div className="rounded-[12px] border border-dashed border-[#BFEDEC] bg-[#F8FFFE] px-4 py-8 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-                        لم تُضف أدوية بعد في هذه الوصفة.
+                        {t('doctor.prescriptionVisitCard.noMedsInPrescription')}
                       </div>
                     ) : (
                       <div className="space-y-3">
@@ -211,7 +228,7 @@ export function PrescriptionVisitExpandableCard({
                       className="rounded-[12px] border-[0.5px] border-[#0F8F8B] bg-[#F8FFFE] px-4 py-4 text-start"
                     >
                       <div className="font-cairo text-[13px] font-extrabold text-primary">
-                        التعليمات العامة
+                        {t('doctor.prescriptionVisitCard.generalInstructions')}
                       </div>
                       <p className="mt-2 font-cairo text-[14px] font-semibold leading-[24px] text-[#344054]">
                         {previewVm.generalInstructions}
@@ -231,7 +248,7 @@ export function PrescriptionVisitExpandableCard({
                   className="inline-flex h-12 items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_12px_28px_rgba(15,143,139,0.28)] transition hover:opacity-95"
                 >
                   <Eye className="w-4 h-4" aria-hidden />
-                  معاينة الوصفة
+                  {t('doctor.prescriptionVisitCard.previewPrescription')}
                   <ChevronLeft className="w-4 h-4" aria-hidden />
                 </button>
                 <button
@@ -240,7 +257,7 @@ export function PrescriptionVisitExpandableCard({
                   className="inline-flex h-12 items-center justify-center gap-2 rounded-[12px] border-2 border-primary bg-[#E6F4F3] font-cairo text-[14px] font-extrabold text-primary transition hover:bg-[#D8F0EE]"
                 >
                   <Pencil className="w-4 h-4" aria-hidden />
-                  تعديل الوصفة
+                  {t('doctor.prescriptionVisitCard.editPrescription')}
                 </button>
               </motion.div>
             </motion.div>

@@ -3,6 +3,7 @@ import {
   Hexagon,
   RotateCcw,
 } from 'lucide-react';
+import { useI18n } from '@/i18n/provider';
 
 export function DeleteAccountMechanismStep({
   busy,
@@ -13,6 +14,8 @@ export function DeleteAccountMechanismStep({
   onContinue: () => void;
   onCancel: () => void;
 }) {
+  const { t } = useI18n();
+
   return (
     <div className="text-center">
       <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border-2 border-[#FCA5A5] bg-[#FEF2F2]">
@@ -20,10 +23,10 @@ export function DeleteAccountMechanismStep({
       </div>
 
       <h2 className="font-cairo text-[18px] font-extrabold text-[#EF4444]">
-        آلية حذف الحساب
+        {t('accountDeletion.mechanism.title')}
       </h2>
       <p className="mt-2 font-cairo text-[12px] font-semibold leading-[20px] text-[#667085]">
-        قبل المتابعة، اقرأ بعناية كيف تعمل عملية الحذف
+        {t('accountDeletion.mechanism.subtitle')}
       </p>
 
       <div className="mt-5 rounded-[12px] bg-[#FFF5F5] px-4 py-4 text-start">
@@ -34,12 +37,12 @@ export function DeleteAccountMechanismStep({
             </span>
             <div>
               <div className="font-cairo text-[13px] font-extrabold text-[#111827]">
-                طلب الحذف
+                {t('accountDeletion.mechanism.step1.title')}
               </div>
               <p className="mt-0.5 font-cairo text-[12px] font-semibold text-[#667085]">
-                حسابك سيصبح في حالة{' '}
+                {t('accountDeletion.mechanism.step1.body')}{' '}
                 <span className="font-extrabold text-[#EF4444]">
-                  «بانتظار الحذف»
+                  {t('accountDeletion.mechanism.step1.status')}
                 </span>
               </p>
             </div>
@@ -51,10 +54,10 @@ export function DeleteAccountMechanismStep({
             </span>
             <div>
               <div className="font-cairo text-[13px] font-extrabold text-[#111827]">
-                فترة الاسترجاع (7 أيام)
+                {t('accountDeletion.mechanism.step2.title')}
               </div>
               <p className="mt-0.5 font-cairo text-[12px] font-semibold text-[#667085]">
-                يمكنك استعادة حسابك خلال أسبوع كامل
+                {t('accountDeletion.mechanism.step2.body')}
               </p>
             </div>
           </li>
@@ -65,10 +68,10 @@ export function DeleteAccountMechanismStep({
             </span>
             <div>
               <div className="font-cairo text-[13px] font-extrabold text-[#111827]">
-                الحذف النهائي
+                {t('accountDeletion.mechanism.step3.title')}
               </div>
               <p className="mt-0.5 font-cairo text-[12px] font-semibold text-[#667085]">
-                بعد أسبوع
+                {t('accountDeletion.mechanism.step3.body')}
               </p>
             </div>
           </li>
@@ -82,7 +85,7 @@ export function DeleteAccountMechanismStep({
           onClick={onContinue}
           className="flex h-[48px] w-full items-center justify-center rounded-[10px] bg-[#EF4444] font-cairo text-[14px] font-extrabold text-white shadow-[0_10px_24px_rgba(239,68,68,0.28)] transition hover:bg-[#DC2626] disabled:opacity-60"
         >
-          فهمت، أريد المتابعة
+          {t('accountDeletion.mechanism.continue')}
         </button>
         <button
           type="button"
@@ -90,7 +93,7 @@ export function DeleteAccountMechanismStep({
           onClick={onCancel}
           className="flex h-[48px] w-full items-center justify-center rounded-[10px] bg-[#22C55E] font-cairo text-[14px] font-extrabold text-white shadow-[0_10px_24px_rgba(34,197,94,0.22)] transition hover:bg-[#16A34A] disabled:opacity-60"
         >
-          إلغاء - الاحتفاظ بالحساب
+          {t('accountDeletion.mechanism.cancel')}
         </button>
       </div>
     </div>

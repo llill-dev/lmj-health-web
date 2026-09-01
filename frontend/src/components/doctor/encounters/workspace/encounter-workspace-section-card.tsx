@@ -7,13 +7,13 @@ import { useI18n } from '@/i18n/provider';
 import { ENCOUNTERS_EXPAND_TRANSITION } from '@/components/doctor/encounters/encounters-motion';
 import {
   ENCOUNTER_WORKSPACE_ADD_ICON,
-  ENCOUNTER_WORKSPACE_SECTION_THEMES,
+  getEncounterWorkspaceSectionThemes,
 } from './encounter-workspace-themes';
 import type { EncounterWorkspaceSectionViewModel } from './encounter-workspace-types';
 
 function statusClass(
   status: EncounterWorkspaceSectionViewModel['status'],
-  theme: (typeof ENCOUNTER_WORKSPACE_SECTION_THEMES)['prescription'],
+  theme: ReturnType<typeof getEncounterWorkspaceSectionThemes>['prescription'],
 ) {
   if (status === 'approved') return theme.statusApprovedClass;
   if (status === 'empty') return theme.statusEmptyClass;
@@ -33,8 +33,8 @@ export function EncounterWorkspaceSectionCard({
   onOpenSection?: () => void;
   onAddReferral?: () => void;
 }) {
-  const { dir } = useI18n();
-  const theme = ENCOUNTER_WORKSPACE_SECTION_THEMES[section.key];
+  const { dir, t } = useI18n();
+  const theme = getEncounterWorkspaceSectionThemes(t)[section.key];
   const Icon = theme.icon;
   const AddIcon = ENCOUNTER_WORKSPACE_ADD_ICON;
   const showReferrals =

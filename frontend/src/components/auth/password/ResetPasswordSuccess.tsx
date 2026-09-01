@@ -1,5 +1,6 @@
 import { Check } from 'lucide-react';
 import PasswordResetShell from '@/components/auth/password/PasswordResetShell';
+import { useI18n } from '@/i18n/provider';
 
 export default function ResetPasswordSuccess({
   onLogin,
@@ -8,6 +9,8 @@ export default function ResetPasswordSuccess({
   onLogin: () => void;
   onResetAnother: () => void;
 }) {
+  const { t } = useI18n();
+
   return (
     <PasswordResetShell step={4}>
       <div className='flex flex-col items-center py-2 text-center'>
@@ -20,13 +23,13 @@ export default function ResetPasswordSuccess({
         </div>
 
         <h2 className='mt-5 font-cairo text-[20px] font-extrabold text-[#1F2937]'>
-          تم بنجاح
+          {t('auth.resetPassword.success.title')}
         </h2>
         <p className='mt-2 font-cairo text-[14px] font-semibold text-[#667085]'>
-          تم تغيير كلمة المرور بنجاح
+          {t('auth.resetPassword.success.subtitle')}
         </p>
         <p className='mt-1 font-cairo text-[13px] font-semibold text-[#667085]'>
-          يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة
+          {t('auth.resetPassword.success.hint')}
         </p>
 
         <button
@@ -34,7 +37,7 @@ export default function ResetPasswordSuccess({
           onClick={onLogin}
           className='mt-8 flex h-[42px] w-full items-center justify-center rounded-[8px] bg-primary font-cairo text-[14px] font-bold text-white shadow-[0_18px_40px_rgba(15,143,139,0.32)] transition-colors hover:bg-[#14B3AE]'
         >
-          تسجيل الدخول الآن
+          {t('auth.resetPassword.success.loginNow')}
         </button>
 
         <button
@@ -42,7 +45,7 @@ export default function ResetPasswordSuccess({
           onClick={onResetAnother}
           className='mt-4 font-cairo text-[13px] font-semibold text-primary transition-colors hover:text-[#14B3AE]'
         >
-          إعادة تعيين كلمة مرور أخرى
+          {t('auth.resetPassword.success.resetAnother')}
         </button>
       </div>
     </PasswordResetShell>

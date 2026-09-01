@@ -1,10 +1,12 @@
 import { Users } from 'lucide-react';
+import { useI18n } from '@/i18n/provider';
 
 export function EncounterWorkspaceHeader({
   doctorName,
 }: {
   doctorName: string;
 }) {
+  const { t } = useI18n();
   return (
     <section className="relative mb-6 overflow-hidden rounded-[6px] px-4 py-6 shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)] sm:px-6 sm:py-7 lg:px-8 lg:py-8">
       <div
@@ -21,10 +23,13 @@ export function EncounterWorkspaceHeader({
         </div>
         <div className="text-start">
           <h1 className="font-cairo text-[24px] font-black leading-[30px] text-primary sm:text-[30px] sm:leading-[36px]">
-            الزيارة الطبية
+            {t('doctor.encounterWorkspace.header.title')}
           </h1>
           <p className="mt-1 font-cairo text-[14px] leading-[22px] text-primary/85 sm:text-[16px] sm:leading-[24px]">
-            متابعة التوثيق السريري للمريض — {doctorName}
+            {t('doctor.encounterWorkspace.header.subtitle').replace(
+              '{doctorName}',
+              doctorName,
+            )}
           </p>
         </div>
       </div>

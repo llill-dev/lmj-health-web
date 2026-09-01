@@ -16,7 +16,7 @@ import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-s
 import { useToast } from '@/components/ui/ToastProvider';
 import { useI18n } from '@/i18n/provider';
 import type { useEncounterReferralWorkspace } from '@/hooks/doctor/encounters/useEncounterReferralWorkspace';
-import { REFERRAL_WORKSPACE_CONFIG } from './encounter-order-config';
+import { getReferralWorkspaceConfig } from './encounter-order-config';
 import { ReferralCreateForm } from './referral-create-form';
 
 type Workspace = ReturnType<typeof useEncounterReferralWorkspace>;
@@ -32,8 +32,8 @@ export function ReferralWorkspaceShell({
   workspace: Workspace;
   onNavigate: (path: string, options?: { replace?: boolean }) => void;
 }) {
-  const config = REFERRAL_WORKSPACE_CONFIG;
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
+  const config = getReferralWorkspaceConfig(t);
   const { toast } = useToast();
   const [finalizeOpen, setFinalizeOpen] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<ReferralFormFieldMessages>({});

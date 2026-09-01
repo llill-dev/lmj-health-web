@@ -1,6 +1,7 @@
 'use client';
 
 import { DoctorLoadingShell, SkeletonBlock } from './doctor-skeleton-primitives';
+import { useI18n } from '@/i18n/provider';
 
 export function DoctorToolbarSkeleton({
   tabs = 4,
@@ -9,8 +10,9 @@ export function DoctorToolbarSkeleton({
   tabs?: number;
   withSearch?: boolean;
 }) {
+  const { t } = useI18n();
   return (
-    <DoctorLoadingShell label="جارٍ تحميل شريط الأدوات…">
+    <DoctorLoadingShell label={t('doctor.skeleton.toolbar')}>
       <div className="space-y-4">
         {withSearch ? (
           <div className="flex flex-wrap items-center justify-between gap-3">

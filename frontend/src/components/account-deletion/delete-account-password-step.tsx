@@ -6,6 +6,7 @@ import {
   deleteAccountPasswordSchema,
   type DeleteAccountPasswordValues,
 } from '@/lib/auth/accountDeletionSchemas';
+import { useI18n } from '@/i18n/provider';
 
 export function DeleteAccountPasswordStep({
   busy,
@@ -18,6 +19,7 @@ export function DeleteAccountPasswordStep({
   onContinue: (password: string) => void | Promise<void>;
   onBack: () => void;
 }) {
+  const { t } = useI18n();
   const [visible, setVisible] = useState(false);
   const {
     register,
@@ -32,10 +34,10 @@ export function DeleteAccountPasswordStep({
   return (
     <div className="text-center">
       <h2 className="font-cairo text-[18px] font-extrabold text-[#111827]">
-        تأكيد الهوية
+        {t('accountDeletion.password.title')}
       </h2>
       <p className="mt-1 font-cairo text-[13px] font-semibold text-[#667085]">
-        أدخل كلمة المرور للمتابعة
+        {t('accountDeletion.password.subtitle')}
       </p>
 
       <form
@@ -49,7 +51,7 @@ export function DeleteAccountPasswordStep({
           htmlFor="delete-account-password"
           className="mb-2 block font-cairo text-[12px] font-extrabold text-[#344054]"
         >
-          كلمة المرور الحالية
+          {t('accountDeletion.password.currentPasswordLabel')}
         </label>
         <div className="relative">
           <Lock
@@ -60,7 +62,11 @@ export function DeleteAccountPasswordStep({
             type="button"
             onClick={() => setVisible((value) => !value)}
             className="absolute end-3 top-1/2 -translate-y-1/2 text-[#98A2B3] transition hover:text-[#667085]"
-            aria-label={visible ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+            aria-label={
+              visible
+                ? t('accountDeletion.password.hidePassword')
+                : t('accountDeletion.password.showPassword')
+            }
           >
             {visible ? (
               <EyeOff className="h-4 w-4" aria-hidden />
@@ -86,8 +92,8 @@ export function DeleteAccountPasswordStep({
 
         <div className="mt-4 rounded-[10px] border border-[#FECACA] bg-[#FFFBEB] px-4 py-3 text-start">
           <p className="font-cairo text-[12px] font-semibold leading-[20px] text-[#92400E]">
-            <span className="font-extrabold text-[#EF4444]">!</span> لحماية حسابك،
-            نحتاج إلى التأكد من هويتك قبل إتمام عملية الحذف
+            <span className="font-extrabold text-[#EF4444]">!</span>{' '}
+            {t('accountDeletion.password.securityNotice')}
           </p>
         </div>
 
@@ -105,7 +111,9 @@ export function DeleteAccountPasswordStep({
           disabled={busy}
           className="mt-5 flex h-[48px] w-full items-center justify-center rounded-[10px] bg-[#EF4444] font-cairo text-[14px] font-extrabold text-white shadow-[0_10px_24px_rgba(239,68,68,0.28)] transition hover:bg-[#DC2626] disabled:opacity-60"
         >
-          {busy ? 'جارٍ التحقق…' : 'متابعة'}
+          {busy
+            ? t('accountDeletion.otp.verifying')
+            : t('accountDeletion.password.continue')}
         </button>
 
         <button
@@ -113,7 +121,7 @@ export function DeleteAccountPasswordStep({
           onClick={onBack}
           className="mt-4 font-cairo text-[13px] font-extrabold text-[#667085] transition hover:text-[#111827]"
         >
-          الرجوع ←
+          {t('accountDeletion.otp.back')}
         </button>
       </form>
     </div>

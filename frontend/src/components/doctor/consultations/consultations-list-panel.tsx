@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import { CONSULTATIONS_PANEL_TRANSITION } from './consultations-motion';
+import { useI18n } from '@/i18n/provider';
 
 export function ConsultationsListPanel({
   panelKey,
@@ -12,6 +13,7 @@ export function ConsultationsListPanel({
   isRefreshing: boolean;
   children: ReactNode;
 }) {
+  const { t } = useI18n();
   return (
     <div className="relative min-h-[280px]">
       <AnimatePresence mode="wait" initial={false}>
@@ -47,7 +49,7 @@ export function ConsultationsListPanel({
             >
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
               <span className="font-cairo text-[12px] font-bold text-[#475467]">
-                جاري التحديث...
+                {t('doctor.consultations.refreshing')}
               </span>
             </motion.div>
           </motion.div>

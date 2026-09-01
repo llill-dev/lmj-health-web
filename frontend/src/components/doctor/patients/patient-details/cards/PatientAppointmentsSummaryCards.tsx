@@ -1,4 +1,5 @@
 import type { PatientAppointmentCounts } from "@/lib/doctor/dashboard/countPatientAppointments";
+import { useI18n } from "@/i18n/provider";
 
 type PatientAppointmentsSummaryCardsProps = {
   counts: PatientAppointmentCounts;
@@ -38,6 +39,7 @@ export function PatientAppointmentsSummaryCards({
   isLoading,
   showBreakdown = true,
 }: PatientAppointmentsSummaryCardsProps) {
+  const { t } = useI18n();
   return (
     <section
       className={
@@ -47,7 +49,7 @@ export function PatientAppointmentsSummaryCards({
       }
     >
       <SummaryCard
-        label="إجمالي المواعيد"
+        label={t("doctor.appointmentsSummary.total")}
         value={counts.total}
         borderClass="border-primary/30"
         bgClass="bg-[#F0FDFA]"
@@ -57,7 +59,7 @@ export function PatientAppointmentsSummaryCards({
       {showBreakdown ? (
         <>
           <SummaryCard
-            label="مواعيد قادمة"
+            label={t("doctor.appointmentsSummary.upcoming")}
             value={counts.upcoming}
             borderClass="border-[#BBF7D0]"
             bgClass="bg-[#F0FDF4]"
@@ -65,7 +67,7 @@ export function PatientAppointmentsSummaryCards({
             isLoading={isLoading}
           />
           <SummaryCard
-            label="مواعيد مكتملة"
+            label={t("doctor.appointmentsSummary.completed")}
             value={counts.completed}
             borderClass="border-[#67E8F9]"
             bgClass="bg-[#ECFEFF]"
@@ -73,7 +75,7 @@ export function PatientAppointmentsSummaryCards({
             isLoading={isLoading}
           />
           <SummaryCard
-            label="مواعيد ملغاة"
+            label={t("doctor.appointmentsSummary.cancelled")}
             value={counts.cancelled}
             borderClass="border-[#FECACA]"
             bgClass="bg-[#FEF2F2]"
@@ -81,7 +83,7 @@ export function PatientAppointmentsSummaryCards({
             isLoading={isLoading}
           />
           <SummaryCard
-            label="لم يحضر"
+            label={t("doctor.appointmentsSummary.noShow")}
             value={counts.noShow}
             borderClass="border-[#E9D4FF]"
             bgClass="bg-[#FAF5FF]"

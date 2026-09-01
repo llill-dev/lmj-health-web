@@ -179,6 +179,7 @@ export function clearDoctorTemplateDraft(): void {
 
 export function summarizeTemplateApplication(
   application: DoctorTemplateApplication | undefined,
+  t?: (key: string, fallback?: string) => string,
 ): string[] {
   if (!application) return [];
 
@@ -194,7 +195,13 @@ export function summarizeTemplateApplication(
       continue;
     }
     if (Array.isArray(value)) {
-      lines.push(`${key}: ${value.length} عنصر`);
+      const itemCount = t
+        ? t('doctor.templateApplyDialog.itemCount').replace(
+            '{count}',
+            String(value.length),
+          )
+        : `${value.length} عنصر`;
+      lines.push(`${key}: ${itemCount}`);
       continue;
     }
     lines.push(`${key}: …`);

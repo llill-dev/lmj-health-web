@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Activity, Clock, Pill } from "lucide-react";
 import { TAB_STAGGER_ITEM } from "../constants";
 import type { FullProfileData } from "../types";
+import { useI18n } from "@/i18n/provider";
 
 interface MedicationRecordCardProps {
   medication: FullProfileData["medications"][number];
@@ -10,6 +11,7 @@ interface MedicationRecordCardProps {
 export function MedicationRecordCard({
   medication,
 }: MedicationRecordCardProps) {
+  const { t } = useI18n();
   return (
     <motion.article
       variants={TAB_STAGGER_ITEM}
@@ -38,7 +40,7 @@ export function MedicationRecordCard({
               <div className="">
                 <div className="flex flex-wrap gap-2 justify-start items-center">
                   <span className="rounded-full bg-white/90 px-2.5 py-0.5 font-cairo text-[10px] font-extrabold uppercase tracking-wide text-[#4338ca] ring-1 ring-[#e0e7ff] shadow-sm">
-                    علاج دوائي
+                    {t("doctor.medicationCard.badge")}
                   </span>
                 </div>
                 <h3 className="mt-2 font-cairo text-[16px] font-black leading-snug text-[#0f172a] sm:text-[17px]">
@@ -55,7 +57,7 @@ export function MedicationRecordCard({
                     aria-hidden
                   />
                   <span className="font-cairo text-[11px] font-extrabold uppercase tracking-wide opacity-90">
-                    الجرعة
+                    {t("doctor.medicationCard.dosage")}
                   </span>
                 </div>
                 <p className="mt-2 font-cairo text-[13px] font-bold leading-relaxed text-[#1e293b]">
@@ -69,7 +71,7 @@ export function MedicationRecordCard({
                     aria-hidden
                   />
                   <span className="font-cairo text-[11px] font-extrabold uppercase tracking-wide opacity-90">
-                    التكرار والجدولة
+                    {t("doctor.medicationCard.frequency")}
                   </span>
                 </div>
                 <p className="mt-2 font-cairo text-[13px] font-bold leading-relaxed text-[#78350f]">

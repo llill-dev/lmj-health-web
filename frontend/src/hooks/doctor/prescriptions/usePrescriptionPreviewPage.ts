@@ -7,6 +7,7 @@ import { mapPrescriptionPreviewVm } from '@/components/doctor/prescription/previ
 import { doctorApi, doctorPatientsQueryKeys } from '@/lib/doctor/client';
 import { loadEncounterPrescriptionForPreview } from '@/lib/doctor/encounters/encounterPrescriptionLoad';
 import { useDoctorProfile } from '@/hooks/doctor/profile/useDoctorProfile';
+import { useI18n } from '@/i18n/provider';
 
 export function usePrescriptionPreviewPage(
   doctorId: string,
@@ -14,6 +15,7 @@ export function usePrescriptionPreviewPage(
   encounterId: string,
   enabled = true,
 ) {
+  const { t } = useI18n();
   const isEnabled =
     enabled && Boolean(doctorId) && Boolean(patientId) && Boolean(encounterId);
 
@@ -55,9 +57,9 @@ export function usePrescriptionPreviewPage(
 
   const doctorName = useMemo(() => {
     const fullName = profileQuery.data?.doctor?.user?.fullName?.trim();
-    if (!fullName) return 'الطبيب';
+    if (!fullName) return t('doctor.prescriptionPreview.defaultDoctorName');
     return /^د\.?\s/u.test(fullName) ? fullName.replace(/^د\.?\s*/u, '') : fullName;
-  }, [profileQuery.data?.doctor?.user?.fullName]);
+  }, [profileQuery.data?.doctor?.user?.fullName, t]);
 
   const previewVm = useMemo(() => {
     if (!prescriptionQuery.data) return null;
@@ -66,12 +68,14 @@ export function usePrescriptionPreviewPage(
       encounter: encounterQuery.data?.encounter,
       publicProfile: publicProfileQuery.data?.patient,
       doctorName,
+      t,
     });
   }, [
     prescriptionQuery.data,
     encounterQuery.data?.encounter,
     publicProfileQuery.data?.patient,
     doctorName,
+    t,
   ]);
 
   const isAwaitingData = isAwaitingAnyInitialQueryData([

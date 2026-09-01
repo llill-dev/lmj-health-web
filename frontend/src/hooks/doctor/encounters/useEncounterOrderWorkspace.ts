@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isAwaitingAnyInitialQueryData, isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 import { useToggleOrderCatalogFavorite } from '@/hooks/doctor/orders/useOrderFavorites';
 import {
-  ENCOUNTER_ORDER_CONFIG,
+  getEncounterOrderConfig,
   type CatalogOrderCategory,
 } from '@/components/doctor/encounters/orders/encounter-order-config';
 import {
@@ -134,8 +134,8 @@ export function useEncounterOrderWorkspace(
   encounterId: string,
   enabled = true,
 ) {
-  const { locale } = useI18n();
-  const config = ENCOUNTER_ORDER_CONFIG[category];
+  const { locale, t } = useI18n();
+  const config = getEncounterOrderConfig(t)[category];
   const queryClient = useQueryClient();
   const toggleFavoriteMutation = useToggleOrderCatalogFavorite(category);
   const isEnabled =
@@ -197,8 +197,8 @@ export function useEncounterOrderWorkspace(
   );
 
   const items = useMemo(
-    () => mapRadiologyItemsToUi(orderQuery.data),
-    [orderQuery.data],
+    () => mapRadiologyItemsToUi(orderQuery.data, t),
+    [orderQuery.data, t],
   );
 
   const invalidate = useCallback(() => {

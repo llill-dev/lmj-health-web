@@ -17,6 +17,7 @@ import {
 import type { MedicalVisitCardData } from '@/components/doctor/encounters/types';
 import { RadiologySelectedItemCard } from './radiology-selected-item-card';
 import type { RadiologyOrderItemUi } from './radiology-types';
+import { useI18n } from '@/i18n/provider';
 
 type Props = {
   visit: MedicalVisitCardData;
@@ -54,6 +55,7 @@ export function RadiologyVisitExpandableCard({
   onViewDetails,
   onOpenPreview,
 }: Props) {
+  const { t } = useI18n();
   const count = items.length;
 
   return (
@@ -100,7 +102,12 @@ export function RadiologyVisitExpandableCard({
               <div className="mt-2 flex flex-wrap gap-2">
                 <span className="inline-flex items-center gap-1 rounded-full bg-[#E6F4F3] px-2.5 py-1 font-cairo text-[11px] font-extrabold text-primary">
                   <ScanLine className="h-3.5 w-3.5" aria-hidden />
-                  {count > 0 ? `${count} فحص` : 'لا فحوصات بعد'}
+                  {count > 0
+                    ? t('doctor.radiologyVisitCard.examCount').replace(
+                        '{count}',
+                        String(count),
+                      )
+                    : t('doctor.radiologyVisitCard.noExamsYet')}
                 </span>
                 <span className="rounded-full bg-[#FEF3C7] px-2.5 py-1 font-cairo text-[11px] font-extrabold text-[#B45309]">
                   {statusLabel}
@@ -132,7 +139,7 @@ export function RadiologyVisitExpandableCard({
           onClick={onViewDetails}
           className="flex h-11 w-full items-center justify-center gap-2 rounded-[10px] bg-primary font-cairo text-[13px] font-extrabold text-white shadow-[0_8px_20px_rgba(15,143,139,0.22)]"
         >
-          عرض التفاصيل
+          {t('doctor.radiologyVisitCard.viewDetails')}
           <ChevronLeft className="h-4 w-4" aria-hidden />
         </button>
       </div>
@@ -171,18 +178,27 @@ export function RadiologyVisitExpandableCard({
                 <>
                   {orderCode ? (
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                      <InfoCell label="رقم الطلب" value={orderCode} />
-                      <InfoCell label="الحالة" value={statusLabel} />
+                      <InfoCell
+                        label={t('doctor.radiologyVisitCard.orderNumber')}
+                        value={orderCode}
+                      />
+                      <InfoCell
+                        label={t('doctor.radiologyVisitCard.status')}
+                        value={statusLabel}
+                      />
                     </div>
                   ) : null}
 
                   <motion.section variants={ENCOUNTERS_EXPAND_CONTENT_ITEM}>
                     <h4 className="mb-3 font-cairo text-[14px] font-extrabold text-[#667085]">
-                      الأشعة المختارة ({count})
+                      {t('doctor.radiologyVisitCard.selectedExams').replace(
+                        '{count}',
+                        String(count),
+                      )}
                     </h4>
                     {count === 0 ? (
                       <div className="rounded-[12px] border border-dashed border-[#BFEDEC] bg-[#F8FFFE] py-8 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-                        لا توجد فحوصات في هذا الطلب بعد.
+                        {t('doctor.radiologyVisitCard.noExamsInOrder')}
                       </div>
                     ) : (
                       <div className="space-y-3">
@@ -208,14 +224,14 @@ export function RadiologyVisitExpandableCard({
                   onClick={onOpenPreview}
                   className="inline-flex h-11 items-center justify-center gap-2 rounded-[10px] border-2 border-primary bg-[#E6F4F3] font-cairo text-[13px] font-extrabold text-primary"
                 >
-                  معاينة الطلب
+                  {t('doctor.radiologyVisitCard.previewOrder')}
                 </button>
                 <button
                   type="button"
                   onClick={onViewDetails}
                   className="inline-flex h-11 items-center justify-center gap-2 rounded-[10px] bg-primary font-cairo text-[13px] font-extrabold text-white"
                 >
-                  تعديل الطلب
+                  {t('doctor.radiologyVisitCard.editOrder')}
                 </button>
               </motion.div>
             </motion.div>

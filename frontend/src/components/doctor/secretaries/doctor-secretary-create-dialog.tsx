@@ -16,6 +16,7 @@ import {
   MAX_DOCTOR_SECRETARIES,
   type DoctorSecretaryCreateFormValues,
 } from '@/lib/doctor/secretaries/schema';
+import { useI18n } from '@/i18n/provider';
 
 export function DoctorSecretaryCreateDialog({
   open,
@@ -31,6 +32,7 @@ export function DoctorSecretaryCreateDialog({
   onSave: (input: DoctorSecretaryCreateFormValues) => Promise<void> | void;
 }) {
   const { toast } = useToast();
+  const { t } = useI18n();
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -86,7 +88,7 @@ export function DoctorSecretaryCreateDialog({
     <ClinicAccountsModalShell
       open={open}
       onClose={closeDialog}
-      title="إضافة سكرتير"
+      title={t('doctor.secretaryDialog.createTitle')}
       maxWidthClass="max-w-[640px]"
     >
       {atSecretaryLimit ? (
@@ -94,8 +96,10 @@ export function DoctorSecretaryCreateDialog({
           className="mb-4 rounded-[8px] border border-[#FECDCA] bg-[#FEF3F2] px-4 py-3 text-start font-cairo text-[12px] font-semibold text-[#B42318]"
           role="alert"
         >
-          لقد وصلت للحد الأقصى ({MAX_DOCTOR_SECRETARIES} سكرتيرين). ألغِ ربط
-          سكرتير حالي لإضافة حساب جديد.
+          {t('doctor.secretaryDialog.limitReached').replace(
+            '{max}',
+            String(MAX_DOCTOR_SECRETARIES),
+          )}
         </div>
       ) : null}
 
@@ -123,13 +127,18 @@ export function DoctorSecretaryCreateDialog({
         disabled={saving || atSecretaryLimit}
         title={
           atSecretaryLimit
-            ? `الحد الأقصى ${MAX_DOCTOR_SECRETARIES} سكرتيرين`
+            ? t('doctor.secretaryDialog.limitTitle').replace(
+                '{max}',
+                String(MAX_DOCTOR_SECRETARIES),
+              )
             : undefined
         }
         onClick={() => void submit()}
         className="mt-4 flex h-[48px] w-full items-center justify-center rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {saving ? 'جاري الإنشاء...' : 'إنشاء السكرتير'}
+        {saving
+          ? t('doctor.secretaryDialog.creating')
+          : t('doctor.secretaryDialog.create')}
       </button>
     </ClinicAccountsModalShell>
   );

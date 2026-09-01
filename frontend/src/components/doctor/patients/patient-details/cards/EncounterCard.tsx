@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils/utils";
 import type { DoctorEncounterSummary } from "@/lib/doctor/types";
 
 import { TAB_STAGGER_ITEM } from "../constants";
+import { useI18n } from "@/i18n/provider";
 
 interface EncounterCardProps {
   encounter: DoctorEncounterSummary;
@@ -22,31 +23,32 @@ interface EncounterCardProps {
   formatIsoDate: (value?: string | null) => string;
 }
 
-const ORIGIN_META: Record<
-  string,
-  { label: string; icon: LucideIcon; tone: string }
-> = {
-  appointment: {
-    label: "من موعد",
-    icon: Calendar,
-    tone: "bg-[#EFF8FF] text-[#175CD3] ring-[#B2DDFF]",
-  },
-  walk_in: {
-    label: "زيارة مباشرة",
-    icon: UserCheck,
-    tone: "bg-[#ECFDF3] text-[#027A48] ring-[#ABEFC6]",
-  },
-  follow_up: {
-    label: "متابعة",
-    icon: ClipboardList,
-    tone: "bg-[#FAF5FF] text-[#7C3AED] ring-[#DDD6FE]",
-  },
-  manual: {
-    label: "إدخال يدوي",
-    icon: FileText,
-    tone: "bg-[#F8FAFC] text-[#475467] ring-[#E2E8F0]",
-  },
-};
+function buildOriginMeta(
+  t: (key: string, fallback?: string) => string,
+): Record<string, { label: string; icon: LucideIcon; tone: string }> {
+  return {
+    appointment: {
+      label: t("doctor.encounterCard.origin.appointment"),
+      icon: Calendar,
+      tone: "bg-[#EFF8FF] text-[#175CD3] ring-[#B2DDFF]",
+    },
+    walk_in: {
+      label: t("doctor.encounterCard.origin.walkIn"),
+      icon: UserCheck,
+      tone: "bg-[#ECFDF3] text-[#027A48] ring-[#ABEFC6]",
+    },
+    follow_up: {
+      label: t("doctor.encounterCard.origin.followUp"),
+      icon: ClipboardList,
+      tone: "bg-[#FAF5FF] text-[#7C3AED] ring-[#DDD6FE]",
+    },
+    manual: {
+      label: t("doctor.encounterCard.origin.manual"),
+      icon: FileText,
+      tone: "bg-[#F8FAFC] text-[#475467] ring-[#E2E8F0]",
+    },
+  };
+}
 
 function MetaChip({
   icon: Icon,
@@ -75,13 +77,17 @@ export function EncounterCard({
   index,
   formatIsoDate,
 }: EncounterCardProps) {
+  const { t } = useI18n();
   const isOpen = encounter.status === "open";
-  const statusLabel = isOpen ? "مفتوحة" : "مغلقة";
+  const statusLabel = isOpen
+    ? t("doctor.encounterCard.statusOpen")
+    : t("doctor.encounterCard.statusClosed");
   const originKey = encounter.origin ?? "manual";
+  const originMeta = buildOriginMeta(t);
   const origin =
-    ORIGIN_META[originKey] ??
+    originMeta[originKey] ??
     ({
-      label: "غير محدد",
+      label: t("doctor.encounterCard.origin.unknown"),
       icon: FileText,
       tone: "bg-[#F8FAFC] text-[#475467] ring-[#E2E8F0]",
     } as const);
@@ -92,10 +98,10 @@ export function EncounterCard({
     ? formatIsoDate(encounter.closedAt)
     : isOpen
       ? "—"
-      : "غير مسجّل";
+      : t("doctor.encounterCard.notRecorded");
   const appointmentDate = encounter.appointment?.date
     ? `${formatIsoDate(encounter.appointment.date)}${encounter.appointment.startTime ? ` • ${encounter.appointment.startTime}` : ""}`.trim()
-    : "لا يوجد موعد مرتبط";
+    : t("doctor.encounterCard.noLinkedAppointment");
   const appointmentType =
     encounter.appointment?.appointmentTypeNameSnapshot ??
     encounter.appointment?.appointmentType ??
@@ -150,7 +156,7 @@ export function EncounterCard({
               <div className="min-w-0 flex-1 space-y-2">
                 <h3 className="font-cairo text-[16px] font-black leading-snug text-[#0f172a] sm:text-[17px]">
                   <span className="tabular-nums text-[#94a3b8]">#{index}</span>{" "}
-                  زيارة طبية
+                  {t("doctor.encounterCard.title")}
                 </h3>
                 <div className="flex flex-wrap items-center justify-start gap-2">
                   <span
@@ -178,7 +184,7 @@ export function EncounterCard({
               <div className="shrink-0 rounded-xl border border-[#E2E8F0] bg-white/85 px-3 py-2 text-start shadow-sm backdrop-blur-sm">
                 <div className="flex items-center justify-start gap-1.5 font-cairo text-[10px] font-bold text-[#667085]">
                   <CalendarDays className="h-3 w-3" aria-hidden />
-                  تاريخ البدء
+                  {t("doctor.encounterCard.startDate")}
                 </div>
                 <div className="mt-1 font-cairo text-[12px] font-extrabold tabular-nums text-[#101828]">
                   {startedAt}
@@ -188,20 +194,28 @@ export function EncounterCard({
 
             <div className="rounded-[14px] border border-[#E8EDF3]/95 bg-[linear-gradient(145deg,#fafefd_0%,#ffffff_55%,#f8fafc_100%)] px-4 py-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
               <div className="mb-1.5 font-cairo text-[11px] font-extrabold uppercase tracking-wide text-[#64748b]">
-                ملاحظات الزيارة
+                {t("doctor.encounterCard.visitNotes")}
               </div>
               <p className="font-cairo text-[13px] font-semibold leading-[1.65] text-[#334155]">
                 {formatEncounterNotesForDisplay(encounter.notes) ||
-                  "لا توجد ملاحظات مسجّلة لهذه الزيارة."}
+                  t("doctor.encounterCard.noNotes")}
               </p>
             </div>
 
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-              <MetaChip icon={Clock} label="تاريخ الإغلاق" value={closedAt} />
-              <MetaChip icon={Calendar} label="الموعد المرتبط" value={appointmentDate} />
+              <MetaChip
+                icon={Clock}
+                label={t("doctor.encounterCard.closeDate")}
+                value={closedAt}
+              />
+              <MetaChip
+                icon={Calendar}
+                label={t("doctor.encounterCard.linkedAppointment")}
+                value={appointmentDate}
+              />
               <MetaChip
                 icon={ClipboardList}
-                label="نوع الموعد"
+                label={t("doctor.encounterCard.appointmentType")}
                 value={appointmentType ?? "—"}
               />
             </div>

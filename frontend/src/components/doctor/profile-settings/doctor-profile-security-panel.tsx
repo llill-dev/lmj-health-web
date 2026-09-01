@@ -9,9 +9,9 @@ import VerifyAccount from "@/components/auth/verify/verify-account";
 import ConfirmActionDialog from "@/components/doctor/confirm-action-dialog";
 import DoctorSecurityFormDialog from "@/components/doctor/profile-settings/doctor-security-form-dialog";
 import {
-  doctorEmailChangeRequestSchema,
-  doctorPasswordChangeSchema,
-  doctorPhoneChangeRequestSchema,
+  buildDoctorEmailChangeRequestSchema,
+  buildDoctorPasswordChangeSchema,
+  buildDoctorPhoneChangeRequestSchema,
   type DoctorEmailChangeRequestForm,
   type DoctorPasswordChangeForm,
   type DoctorPhoneChangeRequestForm,
@@ -54,7 +54,7 @@ export default function DoctorProfileSecurityPanel() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   const passwordForm = useForm<DoctorPasswordChangeForm>({
-    resolver: zodResolver(doctorPasswordChangeSchema),
+    resolver: zodResolver(buildDoctorPasswordChangeSchema(t)),
     mode: "onTouched",
     defaultValues: {
       currentPassword: "",
@@ -64,13 +64,13 @@ export default function DoctorProfileSecurityPanel() {
   });
 
   const emailForm = useForm<DoctorEmailChangeRequestForm>({
-    resolver: zodResolver(doctorEmailChangeRequestSchema),
+    resolver: zodResolver(buildDoctorEmailChangeRequestSchema(t)),
     mode: "onTouched",
     defaultValues: { currentPassword: "", newEmail: "" },
   });
 
   const phoneForm = useForm<DoctorPhoneChangeRequestForm>({
-    resolver: zodResolver(doctorPhoneChangeRequestSchema),
+    resolver: zodResolver(buildDoctorPhoneChangeRequestSchema(t)),
     mode: "onTouched",
     defaultValues: { currentPassword: "", newPhone: "" },
   });

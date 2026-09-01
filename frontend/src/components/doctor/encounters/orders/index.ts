@@ -1,6 +1,6 @@
 export {
-  ENCOUNTER_ORDER_CONFIG,
-  REFERRAL_WORKSPACE_CONFIG,
+  getEncounterOrderConfig,
+  getReferralWorkspaceConfig,
   type CatalogOrderCategory,
   type EncounterOrderCategoryConfig,
 } from './encounter-order-config';

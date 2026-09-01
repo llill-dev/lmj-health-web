@@ -1,10 +1,12 @@
 'use client';
 
 import { DoctorLoadingShell, SkeletonBlock } from './doctor-skeleton-primitives';
+import { useI18n } from '@/i18n/provider';
 
 export function DoctorProfileFormSkeleton({ fields = 6 }: { fields?: number }) {
+  const { t } = useI18n();
   return (
-    <DoctorLoadingShell label="جارٍ تحميل الملف الشخصي…">
+    <DoctorLoadingShell label={t('doctor.skeleton.profileForm')}>
       <div className="space-y-6 rounded-[16px] border border-[#EEF2F6] bg-white p-6">
         <div className="flex items-center gap-4">
           <SkeletonBlock className="h-20 w-20 rounded-full" />

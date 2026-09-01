@@ -23,6 +23,7 @@ import type {
   DoctorActivityLogItem,
 } from '@/lib/doctor/activityLog/types';
 import { cn } from '@/lib/utils/utils';
+import { useI18n } from '@/i18n/provider';
 
 const ACTION_ICONS: Record<ActivityLogActionType, typeof Eye> = {
   view_record: Eye,
@@ -98,6 +99,7 @@ export function ActivityLogCard({
   index: number;
   defaultExpanded?: boolean;
 }) {
+  const { t } = useI18n();
   const [expanded, setExpanded] = useState(defaultExpanded);
   const Icon = ACTION_ICONS[item.actionType] ?? Eye;
 
@@ -166,31 +168,51 @@ export function ActivityLogCard({
               exit="collapsed"
               className="px-4 py-4 space-y-2 sm:px-5"
             >
-              <DetailRow icon={Calendar} label="التاريخ" value={item.dateLabel} />
-              <DetailRow icon={Clock3} label="الوقت" value={item.timeLabel} />
+              <DetailRow
+                icon={Calendar}
+                label={t('doctor.activityLog.detail.date')}
+                value={item.dateLabel}
+              />
+              <DetailRow
+                icon={Clock3}
+                label={t('doctor.activityLog.detail.time')}
+                value={item.timeLabel}
+              />
               {item.patientName ? (
-                <DetailRow icon={UserRound} label="المريض" value={item.patientName} />
+                <DetailRow
+                  icon={UserRound}
+                  label={t('doctor.activityLog.detail.patient')}
+                  value={item.patientName}
+                />
               ) : null}
               {item.actorDisplayName ? (
                 <DetailRow
                   icon={UserRound}
-                  label="المنفّذ"
+                  label={t('doctor.activityLog.detail.actor')}
                   value={item.actorDisplayName}
                 />
               ) : null}
               {item.actorRoleLabel ? (
-                <DetailRow icon={ShieldCheck} label="الدور" value={item.actorRoleLabel} />
+                <DetailRow
+                  icon={ShieldCheck}
+                  label={t('doctor.activityLog.detail.role')}
+                  value={item.actorRoleLabel}
+                />
               ) : null}
               <DetailRow
                 icon={ShieldCheck}
-                label="نوع العملية"
+                label={t('doctor.activityLog.detail.operationType')}
                 value={item.operationTypeLabel}
               />
               {item.ip ? (
                 <DetailRow icon={Globe} label="IP" value={item.ip} />
               ) : null}
               {item.device ? (
-                <DetailRow icon={Monitor} label="الجهاز" value={item.device} />
+                <DetailRow
+                  icon={Monitor}
+                  label={t('doctor.activityLog.detail.device')}
+                  value={item.device}
+                />
               ) : null}
             </motion.div>
           </motion.div>
@@ -205,10 +227,11 @@ export function ActivityLogList({
 }: {
   items: DoctorActivityLogItem[];
 }) {
+  const { t } = useI18n();
   if (!items.length) {
     return (
       <div className="rounded-[14px] border border-dashed border-[#D1FAE5] bg-white px-6 py-14 text-center font-cairo text-[14px] font-semibold text-[#667085]">
-        لا توجد نشاطات تطابق البحث أو الفترة المحددة
+        {t('doctor.activityLog.emptyResults')}
       </div>
     );
   }

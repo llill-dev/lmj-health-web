@@ -2,7 +2,7 @@ import { useEffect, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  ENCOUNTER_ORDER_CONFIG,
+  getEncounterOrderConfig,
   EncounterOrderWorkspaceShell,
   type CatalogOrderCategory,
 } from "@/components/doctor/encounters/orders";
@@ -21,7 +21,7 @@ export default function DoctorEncounterOrderWorkspacePage({
   const { toast } = useToast();
   const { patientId = "", encounterId = "" } = useParams();
   const doctorId = readAuthUser()?.actorIds?.doctorId ?? "";
-  const config = ENCOUNTER_ORDER_CONFIG[category];
+  const config = getEncounterOrderConfig(t)[category];
 
   const workspace = useEncounterOrderWorkspace(
     category,

@@ -6,6 +6,7 @@ import { DoctorTableSkeleton } from './doctor-table-skeleton';
 import { DoctorToolbarSkeleton } from './doctor-toolbar-skeleton';
 import { DoctorStatCardsSkeleton } from './doctor-stat-cards-skeleton';
 import { DoctorLoadingShell } from './doctor-skeleton-primitives';
+import { useI18n } from '@/i18n/provider';
 
 export function DoctorListPageSkeleton({
   withStats = false,
@@ -18,8 +19,9 @@ export function DoctorListPageSkeleton({
   tableRows?: number;
   tableColumns?: number;
 }) {
+  const { t } = useI18n();
   return (
-    <DoctorLoadingShell label="جارٍ تحميل الصفحة…">
+    <DoctorLoadingShell label={t('doctor.skeleton.listPage')}>
       <div className="w-full space-y-6 pb-10">
         <DoctorPageHeaderSkeleton />
         {withStats ? <DoctorStatCardsSkeleton /> : null}

@@ -1,7 +1,8 @@
 import type { DoctorEncounterSummary } from '@/lib/doctor/types';
 import type { EncounterPrescriptionRecord } from '@/lib/doctor/prescriptions/prescriptionTypes';
 import type { PrescriptionPreviewVm } from './prescription-preview-types';
-import { resolvePrescriptionStatusLabel } from '../map-prescription-ui';
+
+type TFn = (key: string, fallback?: string) => string;
 
 function formatPrescriptionCode(prescriptionId: string) {
   const year = new Date().getFullYear();
@@ -10,11 +11,15 @@ function formatPrescriptionCode(prescriptionId: string) {
 }
 
 function formatPatientMeta(
-  encounter?: DoctorEncounterSummary | null,
-  publicProfile?: {
-    user?: { dateOfBirth?: string; phone?: string; fullName?: string };
-    dateOfBirth?: string;
-  } | null,
+  encounter: DoctorEncounterSummary | null | undefined,
+  publicProfile:
+    | {
+        user?: { dateOfBirth?: string; phone?: string; fullName?: string };
+        dateOfBirth?: string;
+      }
+    | null
+    | undefined,
+  t: TFn,
 ) {
   const dob =
     encounter?.patient?.dateOfBirth ??
@@ -27,10 +32,14 @@ function formatPatientMeta(
       const years = Math.floor(
         (Date.now() - birth.getTime()) / (365.25 * 24 * 60 * 60 * 1000),
       );
-      if (years > 0) ageLabel = `${years} سنة`;
+      if (years > 0)
+        ageLabel = t('doctor.prescriptionPreview.ageYears').replace(
+          '{years}',
+          String(years),
+        );
     }
   }
-  return `${ageLabel} • ذكر`;
+  return `${ageLabel} • ${t('doctor.prescriptionPreview.genderMale')}`;
 }
 
 export function mapPrescriptionPreviewVm({
@@ -38,6 +47,7 @@ export function mapPrescriptionPreviewVm({
   encounter,
   publicProfile,
   doctorName,
+  t,
 }: {
   prescription: EncounterPrescriptionRecord;
   encounter?: DoctorEncounterSummary | null;
@@ -46,6 +56,7 @@ export function mapPrescriptionPreviewVm({
     dateOfBirth?: string;
   } | null;
   doctorName: string;
+  t: TFn;
 }): PrescriptionPreviewVm {
   const patientName =
     prescription.patient?.user?.fullName?.trim() ??
@@ -63,7 +74,7 @@ export function mapPrescriptionPreviewVm({
       index: index + 1,
       name: item.name?.trim() || '—',
       concentration: item.dosage?.trim() || '—',
-      usage: item.route?.trim() || 'فموي',
+      usage: item.route?.trim() || t('doctor.prescriptionPreview.usageOral'),
       instructions,
       frequency: item.frequency?.trim() || '—',
       duration: item.duration?.trim() || '—',
@@ -78,12 +89,16 @@ export function mapPrescriptionPreviewVm({
     prescriptionId: prescription._id,
     prescriptionCode: formatPrescriptionCode(prescription._id),
     patientName,
-    patientMeta: formatPatientMeta(encounter, publicProfile),
+    patientMeta: formatPatientMeta(encounter, publicProfile, t),
     patientPhone,
-    doctorName: doctorName.trim() ? `د.${doctorName.trim()}` : 'الطبيب',
+    doctorName: doctorName.trim()
+      ? `${t('doctor.prescriptionPreview.doctorTitlePrefix')}${doctorName.trim()}`
+      : t('doctor.prescriptionPreview.defaultDoctorName'),
     generalInstructions: prescription.generalInstructions?.trim(),
     medications,
-    statusLabel: resolvePrescriptionStatusLabel(prescription.status),
+    statusLabel: status.includes('final')
+      ? t('doctor.prescriptionStatus.finalized')
+      : t('doctor.prescriptionStatus.draft'),
     canFinalize,
     raw: prescription,
   };

@@ -1,4 +1,5 @@
 import type { PrescriptionPreviewMedicationVm } from "./prescription-preview-types";
+import { useI18n } from "@/i18n/provider";
 
 function MetaCell({ label, value }: { label: string; value: string }) {
   return (
@@ -18,6 +19,7 @@ export function PrescriptionPreviewMedicationCard({
 }: {
   item: PrescriptionPreviewMedicationVm;
 }) {
+  const { t } = useI18n();
   return (
     <article className="relative rounded-[12px] border-[0.5px] border-[#0F8F8B] bg-[#E6F4F3] px-4 py-4">
       <span className="absolute top-3 start-3 flex h-7 w-7 items-center justify-center rounded-full bg-primary font-cairo text-[12px] font-extrabold text-white">
@@ -30,15 +32,24 @@ export function PrescriptionPreviewMedicationCard({
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-3">
-          <MetaCell label="التركيز" value={item.concentration} />
-          <MetaCell label="طريقة الاستخدام" value={item.usage} />
+          <MetaCell
+            label={t('doctor.prescriptionPreviewMedication.concentration')}
+            value={item.concentration}
+          />
+          <MetaCell
+            label={t('doctor.prescriptionPreviewMedication.usage')}
+            value={item.usage}
+          />
           {item.instructions ? (
-            <MetaCell label="التعليمات" value={item.instructions} />
+            <MetaCell
+              label={t('doctor.prescriptionPreviewMedication.instructions')}
+              value={item.instructions}
+            />
           ) : null}
         </div>
         <div className="space-y-3">
-          <MetaCell label="التكرار" value={item.frequency} />
-          <MetaCell label="المدة" value={item.duration} />
+          <MetaCell label={t('doctor.medicationCard.frequencyLabel')} value={item.frequency} />
+          <MetaCell label={t('doctor.medicationCard.durationLabel')} value={item.duration} />
         </div>
       </div>
     </article>

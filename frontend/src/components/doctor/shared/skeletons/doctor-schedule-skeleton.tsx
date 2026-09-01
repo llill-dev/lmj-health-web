@@ -1,10 +1,12 @@
 'use client';
 
 import { DoctorLoadingShell, SkeletonBlock } from './doctor-skeleton-primitives';
+import { useI18n } from '@/i18n/provider';
 
 export function DoctorScheduleSkeleton({ days = 4 }: { days?: number }) {
+  const { t } = useI18n();
   return (
-    <DoctorLoadingShell label="جارٍ تحميل جدول العمل…">
+    <DoctorLoadingShell label={t('doctor.skeleton.schedule')}>
       <div className="space-y-3 p-6">
         {Array.from({ length: days }).map((_, index) => (
           <div

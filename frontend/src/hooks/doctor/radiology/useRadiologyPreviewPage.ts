@@ -14,7 +14,7 @@ export function useRadiologyPreviewPage(
   encounterId: string,
   enabled = true,
 ) {
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
   const isEnabled =
     enabled && Boolean(doctorId) && Boolean(patientId) && Boolean(encounterId);
 
@@ -56,12 +56,14 @@ export function useRadiologyPreviewPage(
       encounter: encounterQuery.data?.encounter,
       publicProfile: publicProfileQuery.data?.patient,
       locale,
+      t,
     });
   }, [
     orderQuery.data,
     encounterQuery.data?.encounter,
     publicProfileQuery.data?.patient,
     locale,
+    t,
   ]);
 
   const isAwaitingData = isAwaitingAnyInitialQueryData([

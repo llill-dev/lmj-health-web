@@ -6,13 +6,15 @@ import type { DoctorTemplateType } from '@/lib/doctor/templates/templateTypes';
 import { summarizeTemplateApplication } from '@/lib/doctor/templates/templateDraftStorage';
 import { useI18n } from '@/i18n/provider';
 
-const TYPE_LABELS: Record<DoctorTemplateType, string> = {
-  PRESCRIPTION: 'وصفة',
-  LAB_ORDER: 'طلب مخبري',
-  IMAGING_ORDER: 'طلب أشعة',
-  PROCEDURE_ORDER: 'طلب إجراء',
-  REFERRAL_ORDER: 'إحالة',
-};
+function getTypeLabels(t: (key: string) => string): Record<DoctorTemplateType, string> {
+  return {
+    PRESCRIPTION: t('doctor.templateApplyDialog.type.prescription'),
+    LAB_ORDER: t('doctor.templateApplyDialog.type.labOrder'),
+    IMAGING_ORDER: t('doctor.templateApplyDialog.type.imagingOrder'),
+    PROCEDURE_ORDER: t('doctor.templateApplyDialog.type.procedureOrder'),
+    REFERRAL_ORDER: t('doctor.templateApplyDialog.type.referralOrder'),
+  };
+}
 
 export function ClinicalLibraryTemplateApplyDialog({
   open,
@@ -27,8 +29,9 @@ export function ClinicalLibraryTemplateApplyDialog({
   application?: Record<string, unknown>;
   onClose: () => void;
 }) {
-  const { locale, dir } = useI18n();
-  const summaryLines = summarizeTemplateApplication(application);
+  const { locale, dir, t } = useI18n();
+  const typeLabels = getTypeLabels(t);
+  const summaryLines = summarizeTemplateApplication(application, t);
   const jsonPreview = application
     ? JSON.stringify(application, null, 2)
     : '{}';
@@ -45,14 +48,13 @@ export function ClinicalLibraryTemplateApplyDialog({
     <ClinicAccountsModalShell
       open={open}
       onClose={onClose}
-      title="مسودة القالب"
+      title={t('doctor.templateApplyDialog.title')}
       maxWidthClass="max-w-[560px]"
       headerPattern
     >
       <div dir={dir} lang={locale} className="space-y-5 text-start">
         <p className="rounded-[12px] border border-[#E6F4F3] bg-[#F0FDFA] px-4 py-3 font-cairo text-[13px] font-semibold leading-relaxed text-[#667085]">
-          تم تحميل مسودة جاهزة من القالب. يمكنك نسخها أو استخدامها عند إنشاء
-          وصفة أو طلب في الزيارة الطبية.
+          {t('doctor.templateApplyDialog.hint')}
         </p>
 
         <div className="flex items-start gap-3 rounded-[12px] border border-[#EEF2F6] bg-[#FAFAFA] px-4 py-3">
@@ -65,7 +67,7 @@ export function ClinicalLibraryTemplateApplyDialog({
             </p>
             {templateType ? (
               <p className="mt-0.5 font-cairo text-[12px] font-semibold text-[#667085]">
-                {TYPE_LABELS[templateType] ?? templateType}
+                {typeLabels[templateType] ?? templateType}
               </p>
             ) : null}
           </div>
@@ -74,7 +76,7 @@ export function ClinicalLibraryTemplateApplyDialog({
         {summaryLines.length > 0 ? (
           <div>
             <h3 className="mb-2 font-cairo text-[13px] font-extrabold text-[#111827]">
-              ملخص المسودة
+              {t('doctor.templateApplyDialog.summaryTitle')}
             </h3>
             <ul className="space-y-1 rounded-[12px] border border-[#EEF2F6] bg-white px-4 py-3">
               {summaryLines.map((line) => (
@@ -92,7 +94,7 @@ export function ClinicalLibraryTemplateApplyDialog({
         <div>
           <div className="mb-2 flex items-center justify-between gap-3">
             <h3 className="font-cairo text-[13px] font-extrabold text-[#111827]">
-              بيانات JSON
+              {t('doctor.templateApplyDialog.jsonTitle')}
             </h3>
             <button
               type="button"
@@ -100,7 +102,7 @@ export function ClinicalLibraryTemplateApplyDialog({
               className="inline-flex items-center gap-1 font-cairo text-[12px] font-extrabold text-primary transition hover:text-[#14B3AE]"
             >
               <Copy className="h-3.5 w-3.5" aria-hidden />
-              نسخ
+              {t('doctor.templateApplyDialog.copy')}
             </button>
           </div>
           <pre className="max-h-[220px] overflow-auto rounded-[12px] border border-[#EEF2F6] bg-[#F9FAFB] p-4 text-end font-mono text-[11px] leading-relaxed text-[#344054]">
@@ -113,7 +115,7 @@ export function ClinicalLibraryTemplateApplyDialog({
           onClick={onClose}
           className="inline-flex h-[48px] w-full items-center justify-center rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white"
         >
-          تم
+          {t('doctor.templateApplyDialog.done')}
         </button>
       </div>
     </ClinicAccountsModalShell>

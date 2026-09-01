@@ -10,22 +10,25 @@ import {
 
 import { PatientTabEmptyIllustration } from "@/components/doctor/patients/patient-tab-empty-illustration";
 import { cn } from "@/lib/utils/utils";
+import { useI18n } from "@/i18n/provider";
 
 import { MedicalOrderCard } from "../cards";
 import { TAB_STAGGER_CONTAINER, TAB_STAGGER_ITEM } from "../constants";
 import type { FullProfileData } from "../types";
 
-const FILTER_OPTIONS: Array<{
+function getFilterOptions(t: (key: string) => string): Array<{
   id: "all" | "lab" | "radiology" | "procedure" | "referral";
   label: string;
   icon: LucideIcon;
-}> = [
-  { id: "all", label: "الكل", icon: Activity },
-  { id: "lab", label: "تحاليل", icon: FlaskConical },
-  { id: "radiology", label: "أشعة", icon: ScanLine },
-  { id: "procedure", label: "إجراءات", icon: Syringe },
-  { id: "referral", label: "تحويلات", icon: ArrowRightLeft },
-];
+}> {
+  return [
+    { id: "all", label: t("doctor.ordersTab.filter.all"), icon: Activity },
+    { id: "lab", label: t("doctor.ordersTab.filter.lab"), icon: FlaskConical },
+    { id: "radiology", label: t("doctor.ordersTab.filter.radiology"), icon: ScanLine },
+    { id: "procedure", label: t("doctor.ordersTab.filter.procedure"), icon: Syringe },
+    { id: "referral", label: t("doctor.ordersTab.filter.referral"), icon: ArrowRightLeft },
+  ];
+}
 
 export function OrdersTab({
   fullProfileData,
@@ -36,6 +39,8 @@ export function OrdersTab({
   orderTypeFilter: "all" | "lab" | "radiology" | "procedure" | "referral";
   onOrderTypeFilterChange: (filter: "all" | "lab" | "radiology" | "procedure" | "referral") => void;
 }) {
+  const { t } = useI18n();
+
   if (!fullProfileData.orders.length) {
     return (
       <motion.div variants={TAB_STAGGER_CONTAINER} initial="hidden" animate="show" className="w-full">
@@ -44,9 +49,9 @@ export function OrdersTab({
             variant="teal"
             imageSrc="/images/photo-not-meduical-file.png"
             imageClassName="drop-shadow-[0_12px_32px_rgba(202,138,4,0.1)]"
-            title="لا توجد طلبات طبية مسجّلة"
-            subtitle="ستظهر هنا طلبات التحاليل والأشعة والإجراءات عند إضافتها"
-            actionLabel="الانتقال إلى السجل الطبي"
+            title={t("doctor.ordersTab.emptyTitle")}
+            subtitle={t("doctor.ordersTab.emptySubtitle")}
+            actionLabel={t("doctor.ordersTab.goToMedicalRecord")}
             onAction={() => onOrderTypeFilterChange("all")}
             actionIcon={<Activity className="h-4 w-4" />}
           />
@@ -62,7 +67,7 @@ export function OrdersTab({
           (order) => order.category === orderTypeFilter,
         );
 
-  const filters = FILTER_OPTIONS;
+  const filters = getFilterOptions(t);
 
   return (
     <motion.div variants={TAB_STAGGER_CONTAINER} initial="hidden" animate="show" className="space-y-4">
@@ -72,12 +77,18 @@ export function OrdersTab({
       >
         <div className="text-start">
           <p className="font-cairo text-[13px] font-extrabold text-[#0F172A]">
-            {fullProfileData.orders.length} طلب طبي
+            {t("doctor.ordersTab.orderCount").replace(
+              "{count}",
+              String(fullProfileData.orders.length),
+            )}
           </p>
           <p className="mt-0.5 font-cairo text-[12px] font-semibold text-[#64748B]">
             {filteredOrders.length === fullProfileData.orders.length
-              ? "عرض جميع الطلبات"
-              : `${filteredOrders.length} طلب يطابق الفلتر الحالي`}
+              ? t("doctor.ordersTab.showingAll")
+              : t("doctor.ordersTab.filterMatchCount").replace(
+                  "{count}",
+                  String(filteredOrders.length),
+                )}
           </p>
         </div>
       </motion.div>
@@ -112,7 +123,7 @@ export function OrdersTab({
           <div className="rounded-2xl border-2 border-dashed border-[#E2E8F0] bg-[#F8FAFC] px-6 py-8 text-center">
             <Activity className="mx-auto h-10 w-10 text-[#CBD5E1]" />
             <p className="mt-3 font-cairo text-[14px] font-bold text-[#64748B]">
-              لا توجد طلبات تطابق هذا الفلتر
+              {t("doctor.ordersTab.noMatchFilter")}
             </p>
           </div>
         </motion.div>

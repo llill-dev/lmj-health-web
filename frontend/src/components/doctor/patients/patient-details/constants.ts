@@ -4,18 +4,28 @@
 
 import type { TabConfig } from "./types";
 
-export const TABS: TabConfig[] = [
-  { id: "basic", label: "نظرة عامة" },
-  { id: "timeline", label: "الخط الزمني" },
-  { id: "history", label: "السجل الطبي" },
-  { id: "encounters", label: "الزيارات الطبية" },
-  { id: "medications", label: "الأدوية" },
-  { id: "prescriptions", label: "الوصفات الطبية" },
-  { id: "tests", label: "الطلبات الطبية" },
-  { id: "files", label: "الملفات" },
-  { id: "documents", label: "الوثائق السريرية" },
-  { id: "appointments", label: "المواعيد" },
-];
+export function getPatientDetailsTabs(
+  t: (key: string, fallback?: string) => string,
+): TabConfig[] {
+  return [
+    { id: "basic", label: t("doctor.patientDetailsTabs.basic") },
+    { id: "timeline", label: t("doctor.patientDetailsTabs.timeline") },
+    { id: "history", label: t("doctor.patientDetailsTabs.history") },
+    { id: "encounters", label: t("doctor.patientDetailsTabs.encounters") },
+    { id: "medications", label: t("doctor.patientDetailsTabs.medications") },
+    {
+      id: "prescriptions",
+      label: t("doctor.patientDetailsTabs.prescriptions"),
+    },
+    { id: "tests", label: t("doctor.patientDetailsTabs.tests") },
+    { id: "files", label: t("doctor.patientDetailsTabs.files") },
+    { id: "documents", label: t("doctor.patientDetailsTabs.documents") },
+    {
+      id: "appointments",
+      label: t("doctor.patientDetailsTabs.appointments"),
+    },
+  ];
+}
 
 export const TAB_PANEL_TRANSITION = {
   duration: 0.34,

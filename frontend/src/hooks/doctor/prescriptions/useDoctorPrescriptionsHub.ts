@@ -17,6 +17,7 @@ import {
 import { doctorApi, doctorPatientsQueryKeys } from '@/lib/doctor/client';
 import { useDoctorPatients } from '@/hooks/doctor/patients/useDoctorPatients';
 import { useDoctorProfile } from '@/hooks/doctor/profile/useDoctorProfile';
+import { useI18n } from '@/i18n/provider';
 
 const MAX_PATIENTS = 100;
 const MAX_ENCOUNTERS_PER_PATIENT = 20;
@@ -48,6 +49,7 @@ export function useDoctorPrescriptionsHub(
   doctorId: string,
   filters: PrescriptionsHubFilters,
 ) {
+  const { t } = useI18n();
   const patientsQuery = useDoctorPatients({
     page: 1,
     limit: MAX_PATIENTS,
@@ -82,11 +84,11 @@ export function useDoctorPrescriptionsHub(
       const patient = patients[index];
       if (!patient || !query.data?.encounters?.length) return;
       for (const encounter of query.data.encounters) {
-        refs.push(buildEncounterRef(encounter, patient));
+        refs.push(buildEncounterRef(encounter, patient, t));
       }
     });
     return sortEncounterRefs(refs).slice(0, MAX_ENCOUNTERS_FOR_PRESCRIPTIONS);
-  }, [encounterQueries, patients]);
+  }, [encounterQueries, patients, t]);
 
   const prescriptionQueries = useQueries({
     queries: encounterRefs.map((ref) => ({
@@ -107,8 +109,8 @@ export function useDoctorPrescriptionsHub(
   });
 
   const facilityLabel = useMemo(
-    () => resolvePrescriptionHubFacilityLabel(profileQuery.data?.doctor),
-    [profileQuery.data?.doctor],
+    () => resolvePrescriptionHubFacilityLabel(profileQuery.data?.doctor, t),
+    [profileQuery.data?.doctor, t],
   );
 
   const allRows = useMemo(() => {
@@ -120,18 +122,18 @@ export function useDoctorPrescriptionsHub(
 
       if (prescriptions.length > 0) {
         for (const prescription of prescriptions) {
-          rows.push(mapPrescriptionToHubRow(ref, prescription, facilityLabel));
+          rows.push(mapPrescriptionToHubRow(ref, prescription, facilityLabel, t));
         }
         return;
       }
 
       if (ref.encounterStatus !== 'closed') {
-        rows.push(mapEncounterDraftToHubRow(ref, facilityLabel));
+        rows.push(mapEncounterDraftToHubRow(ref, facilityLabel, t));
       }
     });
 
     return sortRows(rows);
-  }, [encounterRefs, prescriptionQueries, facilityLabel]);
+  }, [encounterRefs, prescriptionQueries, facilityLabel, t]);
 
   const filteredRows = useMemo(
     () =>

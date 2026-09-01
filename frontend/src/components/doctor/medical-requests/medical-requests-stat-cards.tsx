@@ -1,49 +1,50 @@
 import { FlaskConical, ScanLine, Stethoscope, LayoutGrid, Share2 } from 'lucide-react';
 import { cn } from '@/lib/utils/utils';
-
-const CARDS = [
-  {
-    key: 'all' as const,
-    label: 'الكل',
-    icon: LayoutGrid,
-    activeClass: 'border-primary bg-primary text-white shadow-[0_10px_24px_rgba(15,143,139,0.28)]',
-    idleClass: 'border-[#C7F3F1] bg-primary text-white',
-  },
-  {
-    key: 'lab' as const,
-    label: 'تحاليل',
-    icon: FlaskConical,
-    activeClass: 'border-[#99F6E4] bg-[#CCFBF1] text-primary',
-    idleClass: 'border-[#E2E8F0] bg-[#F0FDFA] text-primary',
-  },
-  {
-    key: 'radiology' as const,
-    label: 'أشعة',
-    icon: ScanLine,
-    activeClass: 'border-[#E2E8F0] bg-[#F8FAFC] text-[#475467]',
-    idleClass: 'border-[#E2E8F0] bg-[#F8FAFC] text-[#475467]',
-  },
-  {
-    key: 'procedure' as const,
-    label: 'إجراءات',
-    icon: Stethoscope,
-    activeClass: 'border-[#E2E8F0] bg-[#F8FAFC] text-[#475467]',
-    idleClass: 'border-[#E2E8F0] bg-[#F8FAFC] text-[#475467]',
-  },
-  {
-    key: 'referral' as const,
-    label: 'إحالات',
-    icon: Share2,
-    activeClass: 'border-[#E2E8F0] bg-[#F8FAFC] text-[#475467]',
-    idleClass: 'border-[#E2E8F0] bg-[#F8FAFC] text-[#475467]',
-  },
-];
+import { useI18n } from '@/i18n/provider';
 
 export function MedicalRequestsStatCards({
   stats,
 }: {
   stats: { all: number; lab: number; radiology: number; procedure: number; referral: number };
 }) {
+  const { t } = useI18n();
+  const CARDS = [
+    {
+      key: 'all' as const,
+      label: t('doctor.medicalRequests.statCards.all'),
+      icon: LayoutGrid,
+      activeClass: 'border-primary bg-primary text-white shadow-[0_10px_24px_rgba(15,143,139,0.28)]',
+      idleClass: 'border-[#C7F3F1] bg-primary text-white',
+    },
+    {
+      key: 'lab' as const,
+      label: t('doctor.medicalRequests.statCards.lab'),
+      icon: FlaskConical,
+      activeClass: 'border-[#99F6E4] bg-[#CCFBF1] text-primary',
+      idleClass: 'border-[#E2E8F0] bg-[#F0FDFA] text-primary',
+    },
+    {
+      key: 'radiology' as const,
+      label: t('doctor.medicalRequests.statCards.radiology'),
+      icon: ScanLine,
+      activeClass: 'border-[#E2E8F0] bg-[#F8FAFC] text-[#475467]',
+      idleClass: 'border-[#E2E8F0] bg-[#F8FAFC] text-[#475467]',
+    },
+    {
+      key: 'procedure' as const,
+      label: t('doctor.medicalRequests.statCards.procedure'),
+      icon: Stethoscope,
+      activeClass: 'border-[#E2E8F0] bg-[#F8FAFC] text-[#475467]',
+      idleClass: 'border-[#E2E8F0] bg-[#F8FAFC] text-[#475467]',
+    },
+    {
+      key: 'referral' as const,
+      label: t('doctor.medicalRequests.statCards.referral'),
+      icon: Share2,
+      activeClass: 'border-[#E2E8F0] bg-[#F8FAFC] text-[#475467]',
+      idleClass: 'border-[#E2E8F0] bg-[#F8FAFC] text-[#475467]',
+    },
+  ];
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 sm:gap-4">
       {CARDS.map((card) => {

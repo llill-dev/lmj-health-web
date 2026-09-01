@@ -20,6 +20,7 @@ import { Link } from 'react-router-dom';
 import { fetchMedicalServiceDetails } from '@/lib/doctor/medical-services-directory/fetch';
 import type { MedicalServiceFacility } from '@/lib/doctor/medical-services-directory/types';
 import { cn } from '@/lib/utils/utils';
+import { useI18n } from '@/i18n/provider';
 
 function ContactButton({
   href,
@@ -97,6 +98,7 @@ export function FacilityDirectoryCard({
   expanded: boolean;
   onToggle: () => void;
 }) {
+  const { t } = useI18n();
   const detailsQuery = useQuery({
     queryKey: ['medical-services-directory', 'details', facility.id] as const,
     queryFn: () => fetchMedicalServiceDetails(facility.id),
@@ -194,7 +196,7 @@ export function FacilityDirectoryCard({
           type="button"
           onClick={handleShare}
           className="absolute end-4 top-4 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-primary shadow-sm transition hover:bg-white"
-          aria-label="مشاركة"
+          aria-label={t('doctor.facilityCard.share')}
         >
           <Share2 className="h-4 w-4" />
         </button>
@@ -203,7 +205,7 @@ export function FacilityDirectoryCard({
           type="button"
           onClick={onToggle}
           className="absolute start-4 top-4 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-primary shadow-sm transition hover:bg-white"
-          aria-label="طي التفاصيل"
+          aria-label={t('doctor.facilityCard.collapseDetails')}
         >
           <ChevronUp className="h-5 w-5" />
         </button>
@@ -213,14 +215,14 @@ export function FacilityDirectoryCard({
         {detailsQuery.isFetching ? (
           <div className="flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]">
             <Loader2 className="h-4 w-4 animate-spin text-primary" />
-            جارٍ تحديث التفاصيل...
+            {t('doctor.facilityCard.refreshingDetails')}
           </div>
         ) : null}
 
         {detailsQuery.isError ? (
           <div className="flex items-center gap-2 rounded-[10px] border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2 font-cairo text-[12px] font-bold text-[#92400E]">
             <TriangleAlert className="h-4 w-4 shrink-0" />
-            تعذّر تحميل التفاصيل الإضافية، ويتم عرض البيانات المتاحة حالياً.
+            {t('doctor.facilityCard.partialLoadError')}
           </div>
         ) : null}
 
@@ -233,7 +235,7 @@ export function FacilityDirectoryCard({
             <div className="mb-3 flex items-center gap-2">
               <Clock3 className="h-4 w-4 text-primary" aria-hidden />
               <h4 className="font-cairo text-[14px] font-extrabold text-[#111827]">
-                ساعات العمل
+                {t('doctor.medicalServiceDetails.workingHours')}
               </h4>
             </div>
             <div className="space-y-2 rounded-[10px] border border-[#EEF2F6] bg-[#F9FAFB] px-4 py-3">
@@ -257,7 +259,7 @@ export function FacilityDirectoryCard({
         {displayFacility.services.length > 0 ? (
           <section>
             <h4 className="mb-3 font-cairo text-[14px] font-extrabold text-[#111827]">
-              الخدمات
+              {t('doctor.medicalServiceDetails.availableServices')}
             </h4>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {displayFacility.services.map((service) => (
@@ -282,13 +284,13 @@ export function FacilityDirectoryCard({
         displayFacility.contact.website ? (
           <section>
             <h4 className="mb-3 font-cairo text-[14px] font-extrabold text-[#111827]">
-              التواصل
+              {t('doctor.medicalServiceDetails.contactMethods')}
             </h4>
             <div className="flex flex-wrap items-center gap-3">
             {displayFacility.contact.whatsapp ? (
               <ContactButton
                 href={displayFacility.contact.whatsapp}
-                label="واتساب"
+                label={t('doctor.medicalServiceDetails.whatsapp')}
                 className="bg-[#25D366]"
               >
                 <WhatsAppIcon />
@@ -297,7 +299,7 @@ export function FacilityDirectoryCard({
             {displayFacility.contact.phone ? (
               <ContactButton
                 href={displayFacility.contact.phone}
-                label="اتصال"
+                label={t('doctor.medicalServiceDetails.directCall')}
                 className="bg-primary"
               >
                 <Phone className="h-4 w-4" />
@@ -306,7 +308,7 @@ export function FacilityDirectoryCard({
             {displayFacility.contact.facebook ? (
               <ContactButton
                 href={displayFacility.contact.facebook}
-                label="فيسبوك"
+                label={t('doctor.medicalServiceDetails.facebook')}
                 className="bg-[#1877F2]"
               >
                 <Facebook className="h-4 w-4" />
@@ -315,7 +317,7 @@ export function FacilityDirectoryCard({
             {displayFacility.contact.website ? (
               <ContactButton
                 href={displayFacility.contact.website}
-                label="الموقع"
+                label={t('doctor.medicalServiceDetails.website')}
                 className="bg-[#4B5563]"
               >
                 <Globe className="h-4 w-4" />
@@ -329,8 +331,8 @@ export function FacilityDirectoryCard({
           <div className="flex items-start gap-2 font-cairo text-[12px] font-bold text-[#475467]">
             <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
             <div className="space-y-1">
-              <p>المتاح حالياً هو استعراض البيانات والتواصل المباشر مع الجهة.</p>
-              <p>الحجز أو طلب الخدمة من داخل المنصة غير متاح حالياً لهذا الدليل.</p>
+              <p>{t('doctor.facilityCard.noteLine1')}</p>
+              <p>{t('doctor.facilityCard.noteLine2')}</p>
             </div>
           </div>
         </section>
@@ -340,7 +342,7 @@ export function FacilityDirectoryCard({
             to={`/doctor/medical-services-directory/${encodeURIComponent(displayFacility.id)}`}
             className="inline-flex items-center justify-center rounded-[12px] border border-[#B8E6E0] bg-[#F0FDFA] px-4 py-2 font-cairo text-[12px] font-extrabold text-primary transition hover:bg-[#E6F7F5]"
           >
-            عرض الملف الكامل
+            {t('doctor.facilityCard.viewFullProfile')}
           </Link>
         </div>
       </div>

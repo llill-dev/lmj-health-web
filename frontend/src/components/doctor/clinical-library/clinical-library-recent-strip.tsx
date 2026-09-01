@@ -1,5 +1,6 @@
 import { Clock } from 'lucide-react';
 import type { DoctorLibraryItem } from '@/lib/doctor/library/libraryTypes';
+import { useI18n } from '@/i18n/provider';
 
 export function ClinicalLibraryRecentStrip({
   items,
@@ -10,10 +11,11 @@ export function ClinicalLibraryRecentStrip({
   typeLabels: Record<string, string>;
   isAwaitingData: boolean;
 }) {
+  const { t } = useI18n();
   if (isAwaitingData) {
     return (
       <div className='mb-5 rounded-[12px] border border-[#EEF2F6] bg-white px-4 py-3 font-cairo text-[12px] font-semibold text-[#667085]'>
-        جارٍ تحميل الاستخدام الأخير…
+        {t('doctor.clinicalLibrary.recent.loading')}
       </div>
     );
   }
@@ -25,7 +27,7 @@ export function ClinicalLibraryRecentStrip({
       <div className='mb-3 flex items-center justify-between gap-2'>
         <h2 className='inline-flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#111827]'>
           <Clock className='h-4 w-4 text-primary' aria-hidden />
-          استخدمت مؤخراً
+          {t('doctor.clinicalLibrary.recent.title')}
         </h2>
       </div>
       <div className='flex gap-2 overflow-x-auto pb-1'>

@@ -19,6 +19,7 @@ import {
   getStateMessage,
   type PatientRelationshipState,
 } from "@/lib/doctor/patients/patient-states";
+import { useI18n } from "@/i18n/provider";
 
 export type PatientCardTab =
   | "basic"
@@ -123,6 +124,7 @@ const DoctorPatientExpandableCard = memo(function DoctorPatientExpandableCard({
   pendingRequestId,
   hasActiveEncounter,
 }: DoctorPatientExpandableCardProps) {
+  const { t } = useI18n();
   const digits = patient.phone.replace(/\D/g, "");
   const phoneDisplay =
     digits.startsWith("966") && digits.length >= 12
@@ -209,7 +211,10 @@ const DoctorPatientExpandableCard = memo(function DoctorPatientExpandableCard({
               </div>
 
               <p className="font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                ملف #{patient.fileNo}
+                {t('doctor.patientCard.fileNumber').replace(
+                  '{fileNo}',
+                  patient.fileNo,
+                )}
               </p>
 
               <div className="mt-4 flex flex-wrap items-center justify-start gap-x-4 gap-y-2 font-cairo text-[13px] font-semibold text-[#667085]">
@@ -225,7 +230,7 @@ const DoctorPatientExpandableCard = memo(function DoctorPatientExpandableCard({
                 <span className="inline-flex items-center gap-1.5">
                   <Calendar className="w-4 h-4 text-primary" />
                   <span>
-                    آخر زيارة:{" "}
+                    {t('doctor.patientCard.lastVisit')}{" "}
                     <span className="text-[#1F2937]">{patient.lastVisit}</span>
                   </span>
                 </span>
@@ -237,7 +242,9 @@ const DoctorPatientExpandableCard = memo(function DoctorPatientExpandableCard({
             type="button"
             aria-expanded={expanded}
             aria-label={
-              expanded ? "طي المعاينة السريعة" : "عرض المعاينة السريعة"
+              expanded
+                ? t('doctor.patientCard.collapseQuickView')
+                : t('doctor.patientCard.expandQuickView')
             }
             onClick={onToggle}
             className="flex h-9 w-9 shrink-0 self-end items-center justify-center rounded-lg border border-[#E5E7EB] bg-white text-[#344054] transition-colors hover:border-primary hover:text-primary sm:self-auto"
@@ -260,24 +267,36 @@ const DoctorPatientExpandableCard = memo(function DoctorPatientExpandableCard({
           <div className="overflow-hidden min-h-0">
             <div className="mt-4 border-t border-[#EEF2F6] pt-4">
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
-                <QuickInfo label="فصيلة الدم" value={patient.bloodType} />
                 <QuickInfo
-                  label="الحساسية"
+                  label={t('doctor.patientCard.bloodType')}
+                  value={patient.bloodType}
+                />
+                <QuickInfo
+                  label={t('doctor.patientCard.allergies')}
                   value={
                     patient.allergies.length
-                      ? `${patient.allergies.length} عنصر`
-                      : "لا توجد"
+                      ? t('doctor.patientCard.itemsCount').replace(
+                          '{count}',
+                          String(patient.allergies.length),
+                        )
+                      : t('doctor.patientCard.none')
                   }
                 />
                 <QuickInfo
-                  label="الأمراض المزمنة"
+                  label={t('doctor.patientCard.chronicConditions')}
                   value={
                     patient.medicalConditions.length
-                      ? `${patient.medicalConditions.length} عنصر`
-                      : "لا توجد"
+                      ? t('doctor.patientCard.itemsCount').replace(
+                          '{count}',
+                          String(patient.medicalConditions.length),
+                        )
+                      : t('doctor.patientCard.none')
                   }
                 />
-                <QuickInfo label="حالة الوصول" value={stateInfo.label} />
+                <QuickInfo
+                  label={t('doctor.patientCard.accessStatus')}
+                  value={stateInfo.label}
+                />
               </div>
 
               <div
@@ -303,7 +322,7 @@ const DoctorPatientExpandableCard = memo(function DoctorPatientExpandableCard({
                     </p>
                     {pendingRequestId ? (
                       <div className="mt-2 font-cairo text-[12px] font-bold opacity-80">
-                        رقم الطلب: {pendingRequestId}
+                        {t('doctor.patientCard.requestNumber')} {pendingRequestId}
                       </div>
                     ) : null}
                   </div>
@@ -318,7 +337,9 @@ const DoctorPatientExpandableCard = memo(function DoctorPatientExpandableCard({
                     className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-[8px] border-2 border-primary/20 bg-[#F8FFFE] px-2 font-cairo text-[13px] font-extrabold text-primary transition-colors hover:bg-[#F0F9F9]"
                   >
                     <FileText className="w-4 h-4 shrink-0" aria-hidden />
-                    <span className="truncate">فتح ملف المريض</span>
+                    <span className="truncate">
+                      {t('doctor.patientCard.openPatientFile')}
+                    </span>
                   </button>
                 ) : null}
 
@@ -361,7 +382,9 @@ const DoctorPatientExpandableCard = memo(function DoctorPatientExpandableCard({
                 >
                   <ChevronDown className="w-4 h-4 shrink-0" aria-hidden />
                   <span className="truncate">
-                    {expanded ? "إخفاء المعاينة" : "إظهار المعاينة"}
+                    {expanded
+                      ? t('doctor.patientCard.hidePreview')
+                      : t('doctor.patientCard.showPreview')}
                   </span>
                 </button>
               </div>

@@ -2,7 +2,10 @@
  * Skeleton لرأس صفحة المريض أثناء التحميل
  */
 
+import { useI18n } from "@/i18n/provider";
+
 export function PatientHeaderSkeleton() {
+  const { t } = useI18n();
   return (
     <section className="relative overflow-hidden rounded-[28px] border border-[#E2E8F0]/95 bg-white shadow-[0_28px_64px_-18px_rgba(15,143,139,0.14),0_8px_24px_rgba(15,23,42,0.06)]">
       <div
@@ -23,7 +26,9 @@ export function PatientHeaderSkeleton() {
         aria-busy="true"
         aria-live="polite"
       >
-        <span className="sr-only">جارٍ تحميل تفاصيل المريض…</span>
+        <span className="sr-only">
+          {t("doctor.patientDetailsSkeleton.loadingHeader")}
+        </span>
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex min-w-0 flex-1 items-start gap-5">
             <div className="h-[76px] w-[76px] animate-pulse rounded-[22px] bg-gradient-to-br from-[#E5E7EB] to-[#F3F4F6]" />

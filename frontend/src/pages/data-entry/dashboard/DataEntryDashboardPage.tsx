@@ -141,21 +141,17 @@ export default function DataEntryDashboardPage() {
         {isRefetchingKpis ? (
           <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-[#BFE3E1] bg-[#F7FFFE] px-4 py-2 font-cairo text-[12px] font-bold text-primary">
             <Loader2 className="h-4 w-4 animate-spin" />
-            {locale === "ar" ? "جاري تحديث بيانات اللوحة..." : "Refreshing dashboard data..."}
+            {t("dataEntry.dashboard.refreshing")}
           </div>
         ) : null}
 
         {hasBlockingError ? (
           <section className="mt-5 rounded-[18px] border border-[#FECACA] bg-[#FFF7F7] px-5 py-5 text-start">
             <h2 className="font-cairo text-[15px] font-extrabold text-[#B42318]">
-              {locale === "ar"
-                ? "تعذّر تحميل بعض بيانات لوحة الإدخال"
-                : "Some data-entry dashboard data could not be loaded"}
+              {t("dataEntry.dashboard.error.title")}
             </h2>
             <p className="mt-2 font-cairo text-[13px] font-semibold leading-7 text-[#7A271A]">
-              {locale === "ar"
-                ? "أعد المحاولة لتحميل المحتوى والقوالب وكتالوج الأوامر الطبية بشكل صحيح."
-                : "Retry to reload content, templates, and medical-order catalog data."}
+              {t("dataEntry.dashboard.error.body")}
             </p>
             <button
               type="button"
@@ -164,7 +160,7 @@ export default function DataEntryDashboardPage() {
               className="mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#FCA5A5] bg-white px-4 py-2 font-cairo text-[13px] font-extrabold text-[#B42318] disabled:cursor-not-allowed disabled:opacity-60"
             >
               <RefreshCw className={`h-4 w-4 ${isRefetchingKpis ? "animate-spin" : ""}`} />
-              {locale === "ar" ? "إعادة المحاولة" : "Retry"}
+              {t("dataEntry.dashboard.error.retry")}
             </button>
           </section>
         ) : null}

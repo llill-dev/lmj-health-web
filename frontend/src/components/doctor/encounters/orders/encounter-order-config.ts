@@ -7,6 +7,8 @@ export type CatalogOrderCategory = Exclude<EncounterOrderCategoryKey, 'referral'
 
 export type EncounterOrderClinicalVariant = 'full' | 'compact';
 
+type TFn = (key: string, fallback?: string) => string;
+
 export type EncounterOrderCategoryConfig = {
   key: CatalogOrderCategory;
   /** عنوان الصفحة في الهيدر (مثال: الطلبات المخبرية) */
@@ -40,138 +42,177 @@ export type EncounterOrderCategoryConfig = {
   hubPath: (patientId: string, encounterId: string) => string;
 };
 
-export const ENCOUNTER_ORDER_CONFIG: Record<
-  CatalogOrderCategory,
-  EncounterOrderCategoryConfig
-> = {
-  radiology: {
-    key: 'radiology',
-    pageTitle: 'طلبات الأشعة',
-    title: 'طلبات الأشعة',
-    headerIcon: ScanLine,
-    catalogTabs: [
-      { id: 'favorites', label: 'المفضلة' },
-      { id: 'devices', label: 'الأجهزة' },
-      { id: 'lab', label: 'مختبري' },
-      { id: 'manual', label: 'يدوي' },
-    ],
-    addButtonLabel: 'إضافة أشعة',
-    catalogSectionLabel: 'إضافة أشعة',
-    searchPlaceholder: 'بحث عن فحص أو أشعة...',
-    patientSubtitle: (name) =>
-      name?.trim()
-        ? `طلب الأشعة الخاص بالمريض ${name.trim()}`
-        : 'طلبات الأشعة',
-    manualFormTitle: 'إدخال أشعة يدوياً',
-    selectedSectionTitle: (n) => `الأشعة المختارة (${n})`,
-    emptySelectedHint: 'لم تُضف فحوصات بعد. استخدم «إضافة أشعة» أو الإدخال اليدوي.',
-    catalogAddToast: 'تمت إضافة الفحص.',
-    deleteItemTitle: 'حذف الفحص',
-    finalizeTitle: 'اعتماد نهائي',
-    finalizeDescription: (n) => `اعتماد طلب الأشعة (${n} فحص)`,
-    loadingLabel: 'جارٍ تحميل طلب الأشعة...',
-    errorTitle: 'تعذّر تحميل طلب الأشعة',
-    clinicalVariant: 'full',
-    centerInstructionsLabel: 'تعليمات للمختبر / مركز الأشعة',
-    manualPathSuffix: 'radiology/manual',
-    supportsManual: true,
-    pdfSourceType: 'imaging_order',
-    previewPath: (patientId, encounterId) =>
-      `/doctor/encounters/${patientId}/${encounterId}/radiology/preview`,
-    workspacePath: (patientId, encounterId) =>
-      `/doctor/encounters/${patientId}/${encounterId}/radiology`,
-    hubPath: (patientId, encounterId) =>
-      `/doctor/encounters/${patientId}/${encounterId}`,
-  },
-  lab: {
-    key: 'lab',
-    pageTitle: 'الطلبات المخبرية',
-    title: 'الطلبات المخبرية',
-    headerIcon: FlaskConical,
-    catalogTabs: [
-      { id: 'favorites', label: 'المفضلة' },
-      { id: 'recent', label: 'الأخيرة' },
-      { id: 'lab', label: 'مختبري' },
-      { id: 'manual', label: 'يدوي' },
-    ],
-    addButtonLabel: 'إضافة تحليل',
-    catalogSectionLabel: 'إضافة تحليل',
-    searchPlaceholder: 'بحث عن دواء...',
-    patientSubtitle: (name) => {
-      const trimmed = name?.trim();
-      if (!trimmed) return 'الطلبات المخبرية';
-      const file = trimmed.startsWith('P-') ? trimmed : `P-${trimmed}`;
-      return `${trimmed} — ${file}`;
+export function getEncounterOrderConfig(
+  t: TFn,
+): Record<CatalogOrderCategory, EncounterOrderCategoryConfig> {
+  return {
+    radiology: {
+      key: 'radiology',
+      pageTitle: t('doctor.encounterOrder.radiology.title'),
+      title: t('doctor.encounterOrder.radiology.title'),
+      headerIcon: ScanLine,
+      catalogTabs: [
+        { id: 'favorites', label: t('doctor.encounterOrder.tabs.favorites') },
+        { id: 'devices', label: t('doctor.encounterOrder.tabs.devices') },
+        { id: 'lab', label: t('doctor.encounterOrder.tabs.lab') },
+        { id: 'manual', label: t('doctor.encounterOrder.tabs.manual') },
+      ],
+      addButtonLabel: t('doctor.encounterOrder.radiology.addButtonLabel'),
+      catalogSectionLabel: t('doctor.encounterOrder.radiology.addButtonLabel'),
+      searchPlaceholder: t('doctor.encounterOrder.radiology.searchPlaceholder'),
+      patientSubtitle: (name) =>
+        name?.trim()
+          ? t('doctor.encounterOrder.radiology.patientSubtitle').replace(
+              '{name}',
+              name.trim(),
+            )
+          : t('doctor.encounterOrder.radiology.title'),
+      manualFormTitle: t('doctor.encounterOrder.radiology.manualFormTitle'),
+      selectedSectionTitle: (n) =>
+        t('doctor.encounterOrder.radiology.selectedSectionTitle').replace(
+          '{count}',
+          String(n),
+        ),
+      emptySelectedHint: t('doctor.encounterOrder.radiology.emptySelectedHint'),
+      catalogAddToast: t('doctor.encounterOrder.radiology.catalogAddToast'),
+      deleteItemTitle: t('doctor.encounterOrder.radiology.deleteItemTitle'),
+      finalizeTitle: t('doctor.encounterOrder.finalizeTitle'),
+      finalizeDescription: (n) =>
+        t('doctor.encounterOrder.radiology.finalizeDescription').replace(
+          '{count}',
+          String(n),
+        ),
+      loadingLabel: t('doctor.encounterOrder.radiology.loadingLabel'),
+      errorTitle: t('doctor.encounterOrder.radiology.errorTitle'),
+      clinicalVariant: 'full',
+      centerInstructionsLabel: t(
+        'doctor.encounterOrder.radiology.centerInstructionsLabel',
+      ),
+      manualPathSuffix: 'radiology/manual',
+      supportsManual: true,
+      pdfSourceType: 'imaging_order',
+      previewPath: (patientId, encounterId) =>
+        `/doctor/encounters/${patientId}/${encounterId}/radiology/preview`,
+      workspacePath: (patientId, encounterId) =>
+        `/doctor/encounters/${patientId}/${encounterId}/radiology`,
+      hubPath: (patientId, encounterId) =>
+        `/doctor/encounters/${patientId}/${encounterId}`,
     },
-    manualFormTitle: 'إدخال تحليل يدوياً',
-    selectedSectionTitle: (n) => `التحاليل المختارة (${n})`,
-    emptySelectedHint: 'لم تُضف تحاليل بعد. اختر من الكتالوج أو الإدخال اليدوي.',
-    catalogAddToast: 'تمت إضافة التحليل.',
-    deleteItemTitle: 'حذف التحليل',
-    finalizeTitle: 'اعتماد نهائي',
-    finalizeDescription: (n) => `اعتماد طلب التحاليل (${n} بند)`,
-    loadingLabel: 'جارٍ تحميل طلب التحاليل...',
-    errorTitle: 'تعذّر تحميل طلب التحاليل',
-    clinicalVariant: 'full',
-    centerInstructionsLabel: 'تعليمات للمختبر',
-    urgencyAsSelect: true,
-    manualPathSuffix: 'lab/manual',
-    supportsManual: true,
-    pdfSourceType: 'order',
-    previewPath: (patientId, encounterId) =>
-      `/doctor/encounters/${patientId}/${encounterId}/lab/preview`,
-    workspacePath: (patientId, encounterId) =>
-      `/doctor/encounters/${patientId}/${encounterId}/lab`,
-    hubPath: (patientId, encounterId) =>
-      `/doctor/encounters/${patientId}/${encounterId}`,
-  },
-  procedure: {
-    key: 'procedure',
-    pageTitle: 'طلبات الإجراءات',
-    title: 'طلبات الإجراءات',
-    headerIcon: ScanLine,
-    catalogTabs: [
-      { id: 'favorites', label: 'المفضلة' },
-      { id: 'recent', label: 'الأخيرة' },
-      { id: 'lab', label: 'الكتالوج' },
-      { id: 'manual', label: 'يدوي' },
-    ],
-    addButtonLabel: 'إضافة إجراء',
-    catalogSectionLabel: 'إضافة إجراء',
-    searchPlaceholder: 'بحث عن إجراء...',
-    patientSubtitle: (name) =>
-      name?.trim()
-        ? `طلب الإجراءات الخاص بالمريض ${name.trim()}`
-        : 'طلبات الإجراءات',
-    manualFormTitle: 'إدخال إجراء يدوياً',
-    selectedSectionTitle: (n) => `الإجراءات المختارة (${n})`,
-    emptySelectedHint: 'لم تُضف إجراءات بعد. اختر من الكتالوج.',
-    catalogAddToast: 'تمت إضافة الإجراء.',
-    deleteItemTitle: 'حذف الإجراء',
-    finalizeTitle: 'اعتماد نهائي',
-    finalizeDescription: (n) => `اعتماد طلب الإجراءات (${n} بند)`,
-    loadingLabel: 'جارٍ تحميل طلب الإجراءات...',
-    errorTitle: 'تعذّر تحميل طلب الإجراءات',
-    clinicalVariant: 'compact',
-    centerInstructionsLabel: 'تعليمات',
-    manualPathSuffix: 'procedure/manual',
-    supportsManual: false,
-    pdfSourceType: 'order',
-    previewPath: (patientId, encounterId) =>
-      `/doctor/encounters/${patientId}/${encounterId}/procedure/preview`,
-    workspacePath: (patientId, encounterId) =>
-      `/doctor/encounters/${patientId}/${encounterId}/procedure`,
-    hubPath: (patientId, encounterId) =>
-      `/doctor/encounters/${patientId}/${encounterId}`,
-  },
-};
+    lab: {
+      key: 'lab',
+      pageTitle: t('doctor.encounterOrder.lab.title'),
+      title: t('doctor.encounterOrder.lab.title'),
+      headerIcon: FlaskConical,
+      catalogTabs: [
+        { id: 'favorites', label: t('doctor.encounterOrder.tabs.favorites') },
+        { id: 'recent', label: t('doctor.encounterOrder.tabs.recent') },
+        { id: 'lab', label: t('doctor.encounterOrder.tabs.lab') },
+        { id: 'manual', label: t('doctor.encounterOrder.tabs.manual') },
+      ],
+      addButtonLabel: t('doctor.encounterOrder.lab.addButtonLabel'),
+      catalogSectionLabel: t('doctor.encounterOrder.lab.addButtonLabel'),
+      searchPlaceholder: t('doctor.encounterOrder.lab.searchPlaceholder'),
+      patientSubtitle: (name) => {
+        const trimmed = name?.trim();
+        if (!trimmed) return t('doctor.encounterOrder.lab.title');
+        const file = trimmed.startsWith('P-') ? trimmed : `P-${trimmed}`;
+        return `${trimmed} — ${file}`;
+      },
+      manualFormTitle: t('doctor.encounterOrder.lab.manualFormTitle'),
+      selectedSectionTitle: (n) =>
+        t('doctor.encounterOrder.lab.selectedSectionTitle').replace(
+          '{count}',
+          String(n),
+        ),
+      emptySelectedHint: t('doctor.encounterOrder.lab.emptySelectedHint'),
+      catalogAddToast: t('doctor.encounterOrder.lab.catalogAddToast'),
+      deleteItemTitle: t('doctor.encounterOrder.lab.deleteItemTitle'),
+      finalizeTitle: t('doctor.encounterOrder.finalizeTitle'),
+      finalizeDescription: (n) =>
+        t('doctor.encounterOrder.lab.finalizeDescription').replace(
+          '{count}',
+          String(n),
+        ),
+      loadingLabel: t('doctor.encounterOrder.lab.loadingLabel'),
+      errorTitle: t('doctor.encounterOrder.lab.errorTitle'),
+      clinicalVariant: 'full',
+      centerInstructionsLabel: t(
+        'doctor.encounterOrder.lab.centerInstructionsLabel',
+      ),
+      urgencyAsSelect: true,
+      manualPathSuffix: 'lab/manual',
+      supportsManual: true,
+      pdfSourceType: 'order',
+      previewPath: (patientId, encounterId) =>
+        `/doctor/encounters/${patientId}/${encounterId}/lab/preview`,
+      workspacePath: (patientId, encounterId) =>
+        `/doctor/encounters/${patientId}/${encounterId}/lab`,
+      hubPath: (patientId, encounterId) =>
+        `/doctor/encounters/${patientId}/${encounterId}`,
+    },
+    procedure: {
+      key: 'procedure',
+      pageTitle: t('doctor.encounterOrder.procedure.title'),
+      title: t('doctor.encounterOrder.procedure.title'),
+      headerIcon: ScanLine,
+      catalogTabs: [
+        { id: 'favorites', label: t('doctor.encounterOrder.tabs.favorites') },
+        { id: 'recent', label: t('doctor.encounterOrder.tabs.recent') },
+        { id: 'lab', label: t('doctor.encounterOrder.tabs.catalog') },
+        { id: 'manual', label: t('doctor.encounterOrder.tabs.manual') },
+      ],
+      addButtonLabel: t('doctor.encounterOrder.procedure.addButtonLabel'),
+      catalogSectionLabel: t('doctor.encounterOrder.procedure.addButtonLabel'),
+      searchPlaceholder: t('doctor.encounterOrder.procedure.searchPlaceholder'),
+      patientSubtitle: (name) =>
+        name?.trim()
+          ? t('doctor.encounterOrder.procedure.patientSubtitle').replace(
+              '{name}',
+              name.trim(),
+            )
+          : t('doctor.encounterOrder.procedure.title'),
+      manualFormTitle: t('doctor.encounterOrder.procedure.manualFormTitle'),
+      selectedSectionTitle: (n) =>
+        t('doctor.encounterOrder.procedure.selectedSectionTitle').replace(
+          '{count}',
+          String(n),
+        ),
+      emptySelectedHint: t('doctor.encounterOrder.procedure.emptySelectedHint'),
+      catalogAddToast: t('doctor.encounterOrder.procedure.catalogAddToast'),
+      deleteItemTitle: t('doctor.encounterOrder.procedure.deleteItemTitle'),
+      finalizeTitle: t('doctor.encounterOrder.finalizeTitle'),
+      finalizeDescription: (n) =>
+        t('doctor.encounterOrder.procedure.finalizeDescription').replace(
+          '{count}',
+          String(n),
+        ),
+      loadingLabel: t('doctor.encounterOrder.procedure.loadingLabel'),
+      errorTitle: t('doctor.encounterOrder.procedure.errorTitle'),
+      clinicalVariant: 'compact',
+      centerInstructionsLabel: t(
+        'doctor.encounterOrder.procedure.centerInstructionsLabel',
+      ),
+      manualPathSuffix: 'procedure/manual',
+      supportsManual: false,
+      pdfSourceType: 'order',
+      previewPath: (patientId, encounterId) =>
+        `/doctor/encounters/${patientId}/${encounterId}/procedure/preview`,
+      workspacePath: (patientId, encounterId) =>
+        `/doctor/encounters/${patientId}/${encounterId}/procedure`,
+      hubPath: (patientId, encounterId) =>
+        `/doctor/encounters/${patientId}/${encounterId}`,
+    },
+  };
+}
 
-export const REFERRAL_WORKSPACE_CONFIG = {
-  title: 'إنشاء تحويل طبي',
-  loadingLabel: 'جارٍ تحميل التحويل...',
-  errorTitle: 'تعذّر تحميل التحويل',
-  hubPath: (patientId: string, encounterId: string) =>
-    `/doctor/encounters/${patientId}/${encounterId}`,
-  workspacePath: (patientId: string, encounterId: string) =>
-    `/doctor/encounters/${patientId}/${encounterId}/referral`,
-};
+export function getReferralWorkspaceConfig(t: TFn) {
+  return {
+    title: t('doctor.encounterOrder.referral.title'),
+    loadingLabel: t('doctor.encounterOrder.referral.loadingLabel'),
+    errorTitle: t('doctor.encounterOrder.referral.errorTitle'),
+    hubPath: (patientId: string, encounterId: string) =>
+      `/doctor/encounters/${patientId}/${encounterId}`,
+    workspacePath: (patientId: string, encounterId: string) =>
+      `/doctor/encounters/${patientId}/${encounterId}/referral`,
+  };
+}

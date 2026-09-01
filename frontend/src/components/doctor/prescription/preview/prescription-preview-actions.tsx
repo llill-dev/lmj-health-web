@@ -1,4 +1,5 @@
 import { ArrowLeft, Check, FileDown } from 'lucide-react';
+import { useI18n } from '@/i18n/provider';
 
 export function PrescriptionPreviewActions({
   onFinalize,
@@ -13,6 +14,7 @@ export function PrescriptionPreviewActions({
   busy?: boolean;
   finalizeDisabled?: boolean;
 }) {
+  const { t } = useI18n();
   return (
     <div className="mt-6 grid grid-cols-1 gap-3 lg:grid-cols-3">
       <button
@@ -22,7 +24,7 @@ export function PrescriptionPreviewActions({
         className="inline-flex h-12 items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_12px_28px_rgba(15,143,139,0.28)] transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
       >
         <Check className="h-5 w-5" aria-hidden />
-        اعتماد نهائي
+        {t('doctor.prescriptionPreviewActions.finalize')}
       </button>
       <button
         type="button"
@@ -31,7 +33,7 @@ export function PrescriptionPreviewActions({
         className="inline-flex h-12 items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_12px_28px_rgba(15,143,139,0.28)] transition hover:opacity-95 disabled:opacity-60"
       >
         <ArrowLeft className="h-5 w-5" aria-hidden />
-        تعديل الوصفة
+        {t('doctor.prescriptionPreviewActions.editPrescription')}
       </button>
       <button
         type="button"
@@ -40,7 +42,7 @@ export function PrescriptionPreviewActions({
         className="inline-flex h-12 items-center justify-center gap-2 rounded-[12px] border-2 border-primary bg-[#E6F4F3] font-cairo text-[14px] font-extrabold text-primary transition hover:bg-[#D8F0EE] disabled:opacity-60"
       >
         <FileDown className="h-5 w-5" aria-hidden />
-        إنشاء PDF
+        {t('doctor.prescriptionPreviewActions.createPdf')}
       </button>
     </div>
   );
