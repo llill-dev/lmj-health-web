@@ -18,16 +18,19 @@ const greetingWord = (
   return t("doctor.greeting.default");
 };
 
-const initialsFromName = (name: string): string => {
-  const t = name.trim();
-  if (!t) return "د";
-  const parts = t.split(/\s+/).filter(Boolean);
+const initialsFromName = (
+  name: string,
+  t: (key: string, fallback?: string) => string,
+): string => {
+  const trimmed = name.trim();
+  if (!trimmed) return t("doctor.dashboard.initialsFallback");
+  const parts = trimmed.split(/\s+/).filter(Boolean);
   if (parts.length >= 2) {
     const a = parts[0]?.[0] ?? "";
     const b = parts[1]?.[0] ?? "";
     return `${a}${b}`.toUpperCase();
   }
-  return t.slice(0, 2).toUpperCase();
+  return trimmed.slice(0, 2).toUpperCase();
 };
 
 export default function DashboardHeader({
@@ -69,8 +72,9 @@ export default function DashboardHeader({
     () =>
       initialsFromName(
         subtitleProp?.trim() ? subtitleProp.trim() : (user?.name?.trim() ?? ""),
+        t,
       ),
-    [subtitleProp, user?.name],
+    [subtitleProp, user?.name, t],
   );
 
   const greeting = greetingWord(t);

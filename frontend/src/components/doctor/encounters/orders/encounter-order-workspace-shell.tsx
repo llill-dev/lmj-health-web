@@ -66,8 +66,8 @@ export function EncounterOrderWorkspaceShell({
   if (!patientId || !encounterId) {
     return (
       <DoctorListErrorState
-        title="رابط غير صالح"
-        brief="معرّف المريض أو الزيارة مفقود."
+        title={t('doctor.encounterOrderShell.invalidLinkTitle')}
+        brief={t('doctor.encounterOrderShell.invalidLinkBrief')}
         onRetry={() => onNavigate(backTo)}
       />
     );
@@ -119,7 +119,7 @@ export function EncounterOrderWorkspaceShell({
             onNavigate(manualPath);
             return;
           }
-          toast('الإدخال اليدوي غير متاح لهذا القسم.', { variant: 'info' });
+          toast(t('doctor.encounterOrderShell.manualNotAvailable'), { variant: 'info' });
         }}
         onAddCatalogItem={async (item) => {
           try {
@@ -207,12 +207,12 @@ export function EncounterOrderWorkspaceShell({
             workspace.setClinicalFieldErrors({});
             workspace.setItemsSectionError(undefined);
             const res = await workspace.saveDraft();
-            toast(res.message ?? 'تم حفظ المسودة.', {
-              title: 'تم الحفظ',
+            toast(res.message ?? t('doctor.encounterOrderShell.draftSaved'), {
+              title: t('doctor.encounterOrderShell.saved'),
               variant: 'success',
             });
           } catch (error) {
-            handleSubmitError(error, 'تعذّر حفظ المسودة');
+            handleSubmitError(error, t('doctor.encounterOrderShell.saveDraftFailed'));
           }
         }}
         onPreview={async () => {
@@ -222,7 +222,7 @@ export function EncounterOrderWorkspaceShell({
             await workspace.preview();
             onNavigate(config.previewPath(patientId, encounterId));
           } catch (error) {
-            handleSubmitError(error, 'تعذّر المعاينة');
+            handleSubmitError(error, t('doctor.encounterOrderShell.previewFailed'));
           }
         }}
         onFinalize={() => {
@@ -233,7 +233,7 @@ export function EncounterOrderWorkspaceShell({
             workspace.assertHasOrderItems();
             setFinalizeOpen(true);
           } catch (error) {
-            handleSubmitError(error, 'بيانات الطلب غير مكتملة');
+            handleSubmitError(error, t('doctor.encounterOrderShell.incompleteOrderData'));
           }
         }}
       />
@@ -242,13 +242,13 @@ export function EncounterOrderWorkspaceShell({
         open={Boolean(deleteTargetId)}
         onOpenChange={(open) => !open && setDeleteTargetId(null)}
         title={config.deleteItemTitle}
-        description="هل تريد حذف هذا البند من الطلب؟"
-        confirmLabel="حذف"
+        description={t('doctor.encounterOrderShell.deleteItemConfirmDescription')}
+        confirmLabel={t('doctor.encounterOrderShell.delete')}
         onConfirm={async () => {
           if (!deleteTargetId) return;
           try {
             await workspace.deleteItem(deleteTargetId);
-            toast('تم الحذف.', { variant: 'success' });
+            toast(t('doctor.encounterOrderShell.deleted'), { variant: 'success' });
             setDeleteTargetId(null);
           } catch (error) {
             toast(workspace.getErrorMessage(error), { variant: 'error' });
@@ -261,15 +261,15 @@ export function EncounterOrderWorkspaceShell({
         onOpenChange={setFinalizeOpen}
         title={config.finalizeTitle}
         description={config.finalizeDescription(workspace.items.length)}
-        confirmLabel="تأكيد"
+        confirmLabel={t('doctor.encounterOrderShell.confirm')}
         confirmDisabled={workspace.items.length === 0 || workspace.isBusy}
         onConfirm={async () => {
           try {
             workspace.setClinicalFieldErrors({});
             workspace.setItemsSectionError(undefined);
             await workspace.finalize();
-            toast('تم اعتماد الطلب.', {
-              title: 'تم الاعتماد',
+            toast(t('doctor.encounterOrderShell.orderFinalized'), {
+              title: t('doctor.encounterOrderShell.finalized'),
               variant: 'success',
             });
             setFinalizeOpen(false);
@@ -281,7 +281,7 @@ export function EncounterOrderWorkspaceShell({
             ) {
               setFinalizeOpen(false);
             }
-            handleSubmitError(error, 'تعذّر الاعتماد النهائي');
+            handleSubmitError(error, t('doctor.encounterOrderShell.finalizeFailed'));
           }
         }}
       />

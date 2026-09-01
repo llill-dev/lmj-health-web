@@ -8,6 +8,7 @@ import type {
   DoctorTemplateApplication,
   DoctorTemplateType,
 } from '@/lib/doctor/templates/templateTypes';
+import { getCurrentLocale } from '@/i18n/runtime';
 
 type TemplateDraftRecord = {
   [key: string]: unknown;
@@ -164,7 +165,9 @@ export function parseOrderItemTemplateDrafts(
 
     items.push({
       name,
-      category: asString(record.category, record.section) ?? 'قالب',
+      category:
+        asString(record.category, record.section) ??
+        (getCurrentLocale() === 'en' ? 'Template' : 'قالب'),
       type: asString(record.type, record.modality) ?? '—',
       bodyArea: asString(record.bodyArea, record.bodyPart) ?? '—',
       side: asString(record.side) ?? '—',

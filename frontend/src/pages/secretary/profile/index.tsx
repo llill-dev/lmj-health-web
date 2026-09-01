@@ -109,6 +109,7 @@ function PermissionBadge({ permission }: { permission: string }) {
 
 export default function SecretaryProfilePage() {
   const { locale, dir, t } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const authUser = readAuthUser();
   const assignedDoctorQuery = useSecretaryAssignedDoctor();
   const secretaryPermissions = useSecretaryPermissions();
@@ -174,7 +175,7 @@ export default function SecretaryProfilePage() {
   ];
 
   const permissions = secretaryPermissions.permissions.map((permission) =>
-    secretaryPermissionLabel(permission, t),
+    secretaryPermissionLabel(permission, tr),
   );
   const unsupportedPermissions = secretaryPermissions.unsupportedPermissions;
 

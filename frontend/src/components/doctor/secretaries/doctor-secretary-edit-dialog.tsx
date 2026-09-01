@@ -20,7 +20,7 @@ import {
   resolveSecretaryFormValues,
 } from '@/lib/doctor/secretaries/formUtils';
 import {
-  doctorSecretaryEditFormSchema,
+  buildDoctorSecretaryEditFormSchema,
   type DoctorSecretaryEditFormValues,
 } from '@/lib/doctor/secretaries/schema';
 import type { DoctorSecretary } from '@/lib/doctor/secretaries/types';
@@ -73,7 +73,7 @@ function DoctorSecretaryEditForm({
     clearErrors,
     formState: { errors },
   } = useForm<DoctorSecretaryEditFormValues>({
-    resolver: zodResolver(doctorSecretaryEditFormSchema),
+    resolver: zodResolver(buildDoctorSecretaryEditFormSchema(t)),
     defaultValues: initialValues,
     mode: 'onSubmit',
   });

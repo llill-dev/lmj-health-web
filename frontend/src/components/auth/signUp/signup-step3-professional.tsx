@@ -47,7 +47,7 @@ export default function SignUpStep3Professional({
     refetch: refetchSpecialties,
   } = useDoctorSignupSpecialties();
 
-  const { locale } = useI18n();
+  const { t, locale } = useI18n();
   const hasSpecialtyCatalog =
     !specialtiesError && !specialtiesLoading && specialties.length > 0;
 
@@ -99,11 +99,11 @@ export default function SignUpStep3Professional({
         </div>
         <div className='mt-4 flex items-center justify-center gap-3'>
           <h2 className='font-cairo text-[26px] font-extrabold text-[#101828]'>
-            المعلومات المهنية
+            {t('signup.step3.title')}
           </h2>
         </div>
         <p className='mt-1 font-cairo text-[14px] font-semibold text-[#98A2B3]'>
-          بياناتك الطبية والمهنية
+          {t('signup.step3.subtitle')}
         </p>
       </div>
 
@@ -120,7 +120,7 @@ export default function SignUpStep3Professional({
             <div className='flex items-center justify-start gap-2 text-start'>
               <Stethoscope className='h-4 w-4 text-primary' />
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
-                التخصص
+                {t('signup.step3.specialty.label')}
               </span>
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                 *
@@ -129,14 +129,14 @@ export default function SignUpStep3Professional({
             {specialtiesError && (
               <div className='mt-2 flex flex-col gap-2 rounded-[6px] border border-amber-200 bg-amber-50 px-3 py-2 text-start'>
                 <p className='font-cairo text-[12px] font-semibold text-amber-900'>
-                  تعذر تحميل قائمة التخصصات. يمكنك إدخال التخصص يدوياً أو إعادة المحاولة.
+                  {t('signup.step3.specialty.loadError')}
                 </p>
                 <button
                   type='button'
                   onClick={() => void refetchSpecialties()}
                   className='self-end rounded-[6px] border border-amber-300 bg-white px-3 py-1 font-cairo text-[12px] font-bold text-amber-900 hover:bg-amber-100'
                 >
-                  إعادة المحاولة
+                  {t('signup.step3.specialty.retry')}
                 </button>
               </div>
             )}
@@ -147,9 +147,9 @@ export default function SignUpStep3Professional({
                   value=''
                   onChange={() => {}}
                   options={[]}
-                  placeholder='جاري تحميل التخصصات…'
-                  emptyTriggerLabel='جاري تحميل التخصصات…'
-                  listboxAriaLabel='التخصص'
+                  placeholder={t('signup.step3.specialty.loading')}
+                  emptyTriggerLabel={t('signup.step3.specialty.loading')}
+                  listboxAriaLabel={t('signup.step3.specialty.label')}
                 />
                 <Loader2 className='pointer-events-none absolute start-3 top-1/2 z-10 h-5 w-5 -translate-y-1/2 animate-spin text-primary' />
               </div>
@@ -163,7 +163,10 @@ export default function SignUpStep3Professional({
                       className='mt-2'
                       options={specialties.map((opt) => ({
                         value: opt.value,
-                        label: opt.labelAr,
+                        label:
+                          locale === 'en'
+                            ? (opt.labelEn ?? opt.labelAr)
+                            : opt.labelAr,
                       }))}
                       value={field.value}
                       onChange={(value) => {
@@ -174,8 +177,8 @@ export default function SignUpStep3Professional({
                         });
                       }}
                       onBlur={field.onBlur}
-                      placeholder='اختر التخصص'
-                      listboxAriaLabel='اختيار التخصص'
+                      placeholder={t('signup.step3.specialty.choose')}
+                      listboxAriaLabel={t('signup.step3.specialty.chooseAria')}
                     />
                   )}
                 />
@@ -191,27 +194,22 @@ export default function SignUpStep3Professional({
                   }}
                   className='mt-2 font-cairo text-[12px] font-bold text-primary underline-offset-2 hover:underline'
                 >
-                  تخصصي غير موجود؟ أدخله يدوياً
+                  {t('signup.step3.specialty.notFound')}
                 </button>
                 <p className='mt-1 font-cairo text-[11px] font-semibold text-[#98A2B3]'>
-                  وفق API: الاختيار من القائمة يُرسل{' '}
-                  <span className='font-bold'>specializationKey</span> ويُقبل
-                  مباشرة بعد موافقة الإدارة.
+                  {t('signup.step3.specialty.catalogNote')}
                 </p>
               </>
             ) : (
               <>
                 {!specialtiesError && !hasSpecialtyCatalog && (
                   <p className='mt-2 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
-                    الخادم أعاد قائمة فارغة (لا توجد تخصصات نشطة ضمن تصنيف
-                    DOCTOR_SPECIALIZATION)، فزِر الإدارة → إعدادات lookups
-                    لإضافتها. يمكنك المتابعة بإدخال يدوي؛ يُرسَل كنصّ مخصَّص
-                    وفق وثيقة الـ API.
+                    {t('signup.step3.specialty.emptyCatalog')}
                   </p>
                 )}
                 <input
                   type='text'
-                  placeholder='مثال: طب الأسنان، تقويم الأسنان، جراحة الفم'
+                  placeholder={t('signup.step3.specialty.manualPlaceholder')}
                   {...register('specialty', {
                     onChange: (event) => {
                       void register('specialty').onChange(event);
@@ -236,13 +234,11 @@ export default function SignUpStep3Professional({
                     }}
                     className='mt-2 font-cairo text-[12px] font-bold text-primary underline-offset-2 hover:underline'
                   >
-                    العودة لاختيار التخصص من القائمة
+                    {t('signup.step3.specialty.backToList')}
                   </button>
                 ) : null}
                 <p className='mt-1 font-cairo text-[11px] font-semibold text-[#98A2B3]'>
-                  الإدخال اليدوي يُرسل{' '}
-                  <span className='font-bold'>customSpecializationText</span>
-                  ويبقى معلّقاً حتى يربطه الأدمين بتخصص مُدار عند الموافقة.
+                  {t('signup.step3.specialty.manualNote')}
                 </p>
               </>
             )}
@@ -257,7 +253,7 @@ export default function SignUpStep3Professional({
             <div className='flex items-center justify-start gap-2 text-start'>
               <IdCard className='h-4 w-4 text-primary' />
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
-                رقم مزاولة المهنة
+                {t('signup.step3.license.label')}
               </span>
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                 *
@@ -265,7 +261,7 @@ export default function SignUpStep3Professional({
             </div>
             <input
               type='text'
-              placeholder='رقم الترخيص الطبي'
+              placeholder={t('signup.step3.license.placeholder')}
               {...register('licenseNumber', {
                 onChange: () => onDismissServerLicenseMessage?.(),
               })}
@@ -278,7 +274,7 @@ export default function SignUpStep3Professional({
               </div>
             )}
             <p className='mt-2 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
-              سيتم مراجعة هذا الرقم من قبل الإدارة
+              {t('signup.step3.license.hint')}
             </p>
           </div>
 
@@ -286,7 +282,7 @@ export default function SignUpStep3Professional({
             <div className='flex items-center justify-start gap-2 text-start'>
               <GraduationCap className='h-4 w-4 text-primary' />
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
-                المؤهل العلمي
+                {t('signup.step3.qualification.label')}
               </span>
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                 *
@@ -294,7 +290,7 @@ export default function SignUpStep3Professional({
             </div>
             <input
               type='text'
-              placeholder='مثال: جامعة دمشق - كلية الطب'
+              placeholder={t('signup.step3.qualification.placeholder')}
               {...register('qualification')}
               className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-start font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
             />
@@ -309,7 +305,7 @@ export default function SignUpStep3Professional({
             <div className='flex items-center justify-start gap-2 text-start'>
               <MapPin className='h-4 w-4 text-primary' />
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
-                عنوان العيادة
+                {t('signup.step3.clinicAddress.label')}
               </span>
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                 *
@@ -317,7 +313,7 @@ export default function SignUpStep3Professional({
             </div>
             <input
               type='text'
-              placeholder='موقع عيادتك'
+              placeholder={t('signup.step3.clinicAddress.placeholder')}
               {...register('clinicAddress')}
               className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-start font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
             />
@@ -332,7 +328,7 @@ export default function SignUpStep3Professional({
             <div className='flex items-center justify-start gap-2 text-start'>
               <Text className='h-4 w-4 text-primary' />
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
-                النبذة التعريفية
+                {t('signup.step3.bio.label')}
               </span>
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                 *
@@ -340,7 +336,7 @@ export default function SignUpStep3Professional({
             </div>
             <textarea
               rows={4}
-              placeholder='اكتب نبذة عنك وعن خبراتك...'
+              placeholder={t('signup.step3.bio.placeholder')}
               {...register('bio')}
               className='mt-2 h-[120px] w-full resize-none rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-3 text-start font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
             />
@@ -358,14 +354,14 @@ export default function SignUpStep3Professional({
               className='flex h-[54px] items-center justify-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white font-cairo text-[14px] font-bold text-[#374151] shadow-[0_12px_24px_rgba(0,0,0,0.06)]'
             >
               <ArrowRight className='h-4 w-4' />
-              السابق
+              {t('signup.step3.previous')}
             </button>
             <button
               type='submit'
               disabled={specialtiesLoading}
               className='flex h-[54px] items-center justify-center gap-2 rounded-[6px] bg-primary font-cairo text-[14px] font-bold text-white shadow-[0_18px_40px_rgba(15, 143, 139,0.35)] transition-colors hover:bg-[#14B3AE] disabled:cursor-not-allowed disabled:opacity-60'
             >
-              التالي
+              {t('signup.step3.next')}
               <ArrowLeft className='h-4 w-4' />
             </button>
           </div>

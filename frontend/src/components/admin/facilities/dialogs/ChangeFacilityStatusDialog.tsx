@@ -24,7 +24,7 @@ export default function ChangeFacilityStatusDialog({
   facilityName,
   currentStatus,
 }: ChangeFacilityStatusDialogProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const STATUS_OPTIONS = [
     { value: "ACTIVE", label: t("common.active") },
     { value: "PENDING", label: t("adminFacility.status.pending") },
@@ -51,7 +51,7 @@ export default function ChangeFacilityStatusDialog({
       onOpenChange(false);
     },
     onError: (error) => {
-      const feedback = resolveAdminFacilityFormFeedback(error, "edit");
+      const feedback = resolveAdminFacilityFormFeedback(error, "edit", locale);
       setRootError(feedback.rootBanner ?? "");
       toast(feedback.toastMessage, {
         title: feedback.toastTitle,

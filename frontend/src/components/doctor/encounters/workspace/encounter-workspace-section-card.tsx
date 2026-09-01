@@ -113,7 +113,7 @@ export function EncounterWorkspaceSectionCard({
               type="button"
               onClick={onAddReferral ?? onOpenSection}
               className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] bg-primary text-white shadow-[0_6px_16px_rgba(15,143,139,0.25)] transition hover:opacity-95"
-              aria-label="إضافة تحويل"
+              aria-label={t('doctor.encounterWorkspaceSection.addReferral')}
             >
               <AddIcon className="w-4 h-4" />
             </button>
@@ -141,7 +141,7 @@ export function EncounterWorkspaceSectionCard({
                       <div className="flex flex-wrap gap-2 items-center">
                         {referral.urgency === 'urgent' ? (
                           <span className="inline-flex rounded-full bg-[#FEF3C7] px-2.5 py-1 font-cairo text-[10px] font-extrabold text-[#B45309]">
-                            عاجل
+                            {t('doctor.encounterWorkspaceSection.urgent')}
                           </span>
                         ) : null}
                         <span className="font-cairo text-[12px] font-extrabold text-[#101828]">
@@ -153,7 +153,7 @@ export function EncounterWorkspaceSectionCard({
                       </span>
                     </div>
                     <div className="mt-2 font-cairo text-[13px] font-bold text-primary">
-                      إلى: {referral.doctorName}
+                      {t('doctor.encounterWorkspaceSection.to').replace('{name}', referral.doctorName)}
                     </div>
                     <div className="mt-1 font-cairo text-[12px] font-semibold text-[#667085]">
                       {referral.specialty}
@@ -162,7 +162,7 @@ export function EncounterWorkspaceSectionCard({
                 ))
               ) : section.count === 0 ? (
                 <div className="rounded-[10px] border border-dashed border-[#D0D5DD] bg-white/80 px-4 py-8 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-                  لا توجد عناصر في هذا القسم بعد
+                  {t('doctor.encounterWorkspaceSection.empty')}
                 </div>
               ) : hasItems ? (
                 section.items.map((item) => (
@@ -184,7 +184,7 @@ export function EncounterWorkspaceSectionCard({
                       <div className="flex flex-wrap gap-2 items-center shrink-0">
                         {item.urgency === 'urgent' ? (
                           <span className="inline-flex rounded-full bg-[#FEF3C7] px-2.5 py-1 font-cairo text-[10px] font-extrabold text-[#B45309]">
-                            عاجل
+                            {t('doctor.encounterWorkspaceSection.urgent')}
                           </span>
                         ) : null}
                         <span className="font-cairo text-[11px] font-semibold text-[#667085]">
@@ -197,7 +197,7 @@ export function EncounterWorkspaceSectionCard({
               ) : (
                 <div className="rounded-[10px] border border-[#E2E8F0] bg-white px-4 py-4 text-start">
                   <div className="font-cairo text-[13px] font-extrabold text-[#101828]">
-                    {section.count} طلب/طلبات مسجّلة
+                  {t('doctor.encounterWorkspaceSection.registeredCount').replace('{count}', String(section.count))}
                   </div>
                 </div>
               )}
@@ -208,7 +208,7 @@ export function EncounterWorkspaceSectionCard({
                   onClick={onOpenSection}
                   className="flex h-10 w-full items-center justify-center rounded-[10px] border-2 border-primary bg-white font-cairo text-[13px] font-extrabold text-primary transition hover:bg-[#F0FAF9]"
                 >
-                  فتح {theme.title}
+                  {t('doctor.encounterWorkspaceSection.open').replace('{title}', theme.title)}
                 </button>
               ) : null}
             </div>

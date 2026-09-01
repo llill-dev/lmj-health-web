@@ -44,6 +44,7 @@ export function useDoctorActivityLog(params: {
   page: number;
   period: ActivityLogPeriod;
   search: string;
+  locale?: 'ar' | 'en';
 }) {
   const range = useMemo(
     () => activityLogPeriodRange(params.period),
@@ -66,8 +67,8 @@ export function useDoctorActivityLog(params: {
   });
 
   const mappedItems = useMemo(
-    () => mapDoctorActivityLogItems(query.data?.activityLogs),
-    [query.data?.activityLogs],
+    () => mapDoctorActivityLogItems(query.data?.activityLogs, params.locale),
+    [query.data?.activityLogs, params.locale],
   );
 
   const items = useMemo(

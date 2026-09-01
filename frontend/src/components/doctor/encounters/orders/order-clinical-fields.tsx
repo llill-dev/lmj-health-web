@@ -7,7 +7,7 @@ import {
 import StyledSelect from '@/components/ui/styled-select';
 import type { RadiologyClinicalForm } from '@/components/doctor/radiology/radiology-types';
 import type { OrderClinicalFieldMessages } from '@/lib/doctor/orders/orderClinicalFormSchema';
-import { CLINICAL_URGENCY_SELECT_OPTIONS } from '@/lib/doctor/referrals/referralPriority';
+import { getClinicalUrgencySelectOptions } from '@/lib/doctor/referrals/referralPriority';
 import type { EncounterOrderClinicalVariant } from './encounter-order-config';
 import { useI18n } from '@/i18n/provider';
 
@@ -16,7 +16,7 @@ export function OrderClinicalFields({
   onChange,
   disabled,
   variant = 'full',
-  centerInstructionsLabel = 'تعليمات للمختبر / مركز الأشعة',
+  centerInstructionsLabel,
   fieldErrors = {},
   showFastingCheckbox = false,
   urgencyAsSelect = false,
@@ -30,7 +30,9 @@ export function OrderClinicalFields({
   showFastingCheckbox?: boolean;
   urgencyAsSelect?: boolean;
 }) {
-  const { locale, dir } = useI18n();
+  const { locale, dir, t } = useI18n();
+  const resolvedCenterInstructionsLabel =
+    centerInstructionsLabel ?? t('doctor.orderClinicalFields.centerInstructionsDefault');
   const set = (patch: Partial<RadiologyClinicalForm>) =>
     onChange({ ...value, ...patch });
 
@@ -42,12 +44,9 @@ export function OrderClinicalFields({
       value={value.urgency}
       onChange={(next) => set({ urgency: next })}
       error={Boolean(fieldErrors.urgency)}
-      placeholder="— بدون —"
-      options={CLINICAL_URGENCY_SELECT_OPTIONS.map((option) => ({
-        value: option.value,
-        label: option.label,
-      }))}
-      listboxAriaLabel="درجة الاستعجال"
+      placeholder={t('doctor.clinicalUrgency.none')}
+      options={getClinicalUrgencySelectOptions(t)}
+      listboxAriaLabel={t('doctor.orderClinicalFields.urgencyLabel')}
       triggerClassName={profileFieldClass(
         'w-full',
         Boolean(fieldErrors.urgency),
@@ -60,7 +59,7 @@ export function OrderClinicalFields({
       value={value.urgency}
       onChange={(e) => set({ urgency: e.target.value })}
       disabled={disabled}
-      placeholder="مثال: عادي / عاجل / طارئ"
+      placeholder={t('doctor.orderClinicalFields.urgencyPlaceholder')}
       className={profileFieldClass(
         profileInputClass,
         Boolean(fieldErrors.urgency),
@@ -70,7 +69,7 @@ export function OrderClinicalFields({
 
   return (
     <section className="mb-6 space-y-4 rounded-[12px] border border-[#E4E7EC] bg-white px-4 py-5 sm:px-5">
-      <DoctorProfileFormField label="درجة الاستعجال" error={fieldErrors.urgency}>
+      <DoctorProfileFormField label={t('doctor.orderClinicalFields.urgencyLabel')} error={fieldErrors.urgency}>
         {urgencyField}
       </DoctorProfileFormField>
 
@@ -83,14 +82,14 @@ export function OrderClinicalFields({
             disabled={disabled}
             className="h-4 w-4 rounded border-[#D0D5DD] text-primary focus:ring-primary/30"
           />
-          <span>يتطلب صيام</span>
+          <span>{t('doctor.orderClinicalFields.requiresFasting')}</span>
         </label>
       ) : null}
 
       {variant === 'full' ? (
         <>
           <DoctorProfileFormField
-            label="السبب الطبي"
+            label={t('doctor.orderClinicalFields.clinicalReasonLabel')}
             required
             error={fieldErrors.clinicalReason}
           >
@@ -100,7 +99,7 @@ export function OrderClinicalFields({
               value={value.clinicalReason}
               onChange={(e) => set({ clinicalReason: e.target.value })}
               disabled={disabled}
-              placeholder="مثال: متابعة حالة مرضية، اشتباه في عدوى..."
+              placeholder={t('doctor.orderClinicalFields.clinicalReasonPlaceholder')}
               className={profileFieldClass(
                 profileTextareaClass,
                 Boolean(fieldErrors.clinicalReason),
@@ -109,7 +108,7 @@ export function OrderClinicalFields({
           </DoctorProfileFormField>
 
           <DoctorProfileFormField
-            label="ملاحظات وتعليمات للمريض"
+            label={t('doctor.orderClinicalFields.patientNotesLabel')}
             error={fieldErrors.instructionsToPatient}
           >
             <textarea
@@ -118,7 +117,7 @@ export function OrderClinicalFields({
               value={value.instructionsToPatient}
               onChange={(e) => set({ instructionsToPatient: e.target.value })}
               disabled={disabled}
-              placeholder="أضف تعليمات للمريض..."
+              placeholder={t('doctor.orderClinicalFields.patientNotesPlaceholder')}
               className={profileFieldClass(
                 profileTextareaClass,
                 Boolean(fieldErrors.instructionsToPatient),
@@ -127,7 +126,7 @@ export function OrderClinicalFields({
           </DoctorProfileFormField>
 
           <DoctorProfileFormField
-            label={centerInstructionsLabel}
+            label={resolvedCenterInstructionsLabel}
             error={fieldErrors.imagingCenterInstructions}
           >
             <textarea
@@ -138,7 +137,7 @@ export function OrderClinicalFields({
                 set({ imagingCenterInstructions: e.target.value })
               }
               disabled={disabled}
-              placeholder="تعليمات فنية للمختبر..."
+              placeholder={t('doctor.orderClinicalFields.centerInstructionsPlaceholder')}
               className={profileFieldClass(
                 profileTextareaClass,
                 Boolean(fieldErrors.imagingCenterInstructions),
@@ -148,7 +147,7 @@ export function OrderClinicalFields({
         </>
       ) : (
         <DoctorProfileFormField
-          label="ملاحظات وتعليمات"
+          label={t('doctor.orderClinicalFields.compactNotesLabel')}
           required
           error={fieldErrors.instructionsToPatient}
         >
@@ -158,7 +157,7 @@ export function OrderClinicalFields({
             value={value.instructionsToPatient}
             onChange={(e) => set({ instructionsToPatient: e.target.value })}
             disabled={disabled}
-            placeholder="أضف ملاحظات للمريض..."
+            placeholder={t('doctor.orderClinicalFields.compactNotesPlaceholder')}
             className={profileFieldClass(
               profileTextareaClass,
               Boolean(fieldErrors.instructionsToPatient),

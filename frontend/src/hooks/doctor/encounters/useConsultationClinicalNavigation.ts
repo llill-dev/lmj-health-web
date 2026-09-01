@@ -8,6 +8,7 @@ import {
   type ConsultationClinicalAction,
 } from '@/lib/consultations/consultationEncounter';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
+import { useI18n } from '@/i18n/provider';
 
 export function useConsultationClinicalNavigation(input: {
   doctorId: string;
@@ -18,6 +19,7 @@ export function useConsultationClinicalNavigation(input: {
   onError?: (message: string) => void;
 }) {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [busyAction, setBusyAction] = useState<ConsultationClinicalAction | null>(
     null,
   );
@@ -28,7 +30,7 @@ export function useConsultationClinicalNavigation(input: {
         input;
 
       if (!doctorId || !patientId || !consultationId) {
-        input.onError?.('تعذّر فتح الأداة السريرية. تأكد من تحميل بيانات الاستشارة.');
+        input.onError?.(t('doctor.consultations.clinicalNav.missingContext'));
         return;
       }
 
@@ -52,7 +54,7 @@ export function useConsultationClinicalNavigation(input: {
       } catch (error) {
         input.onError?.(
           getUserFacingRequestErrorMessage(error) ||
-            'تعذّر تجهيز الزيارة السريرية لهذه الاستشارة.',
+            t('doctor.consultations.clinicalNav.prepareFailed'),
         );
       } finally {
         setBusyAction(null);

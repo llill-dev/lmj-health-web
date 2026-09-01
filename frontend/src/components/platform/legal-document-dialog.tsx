@@ -3,6 +3,7 @@
 import { FileText, Loader2 } from 'lucide-react';
 import { PlatformModalShell } from '@/components/platform/platform-modal-shell';
 import type { PlatformLegalDocument } from '@/lib/platform/types';
+import { useI18n } from '@/i18n/provider';
 
 export function LegalDocumentDialog({
   open,
@@ -15,6 +16,7 @@ export function LegalDocumentDialog({
   document: PlatformLegalDocument;
   loading?: boolean;
 }) {
+  const { t } = useI18n();
   return (
     <PlatformModalShell open={open} onClose={onClose} title={document.title}>
       <div className="rounded-[14px] border border-[#99F6E4] bg-white p-5 sm:p-6">
@@ -39,10 +41,10 @@ export function LegalDocumentDialog({
 
             <div className="mt-6 rounded-[10px] bg-[#F0FDFA] px-4 py-3 text-center font-cairo text-[12px] font-extrabold text-primary">
               {document.pageVersion
-                ? `الإصدار ${document.pageVersion}`
+                ? t('platform.legalDocument.version', { version: document.pageVersion })
                 : null}
               {document.pageVersion ? ' • ' : null}
-              آخر تحديث: {document.lastUpdated}
+              {t('platform.legalDocument.lastUpdated', { date: document.lastUpdated })}
             </div>
           </>
         )}

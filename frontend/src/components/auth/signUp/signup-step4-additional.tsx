@@ -11,6 +11,7 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { AppCheckbox } from '@/components/ui';
+import { useI18n } from '@/i18n/provider';
 
 import {
   step4AdditionalSchema,
@@ -26,6 +27,7 @@ export default function SignUpStep4Additional({
   onNext: (values: Step4AdditionalValues) => void;
   defaultValues?: Partial<Step4AdditionalValues>;
 }) {
+  const { t } = useI18n();
   const { register, handleSubmit } = useForm<Step4AdditionalValues>({
     resolver: zodResolver(step4AdditionalSchema),
     defaultValues: {
@@ -45,12 +47,11 @@ export default function SignUpStep4Additional({
         </div>
         <div className='flex gap-3 justify-center items-center mt-4'>
           <h2 className='font-cairo text-[26px] font-extrabold text-[#101828]'>
-            الإعدادات الإضافية
+            {t('signup.step4.title')}
           </h2>
         </div>
         <p className='mt-1 font-cairo text-[14px] font-semibold text-[#98A2B3]'>
-          حقول المدينة والدولة اختيارية؛ إذا تُركت الحقول فارغة فلن يُرسَل ذلك
-          إلى الخادم مع طلب التسجيل.
+          {t('signup.step4.subtitle')}
         </p>
       </div>
 
@@ -63,12 +64,12 @@ export default function SignUpStep4Additional({
             <div className='flex gap-2 justify-start items-center text-start'>
               <MapPin className='w-4 h-4 text-primary' />
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
-                المدينة
+                {t('signup.step4.city.label')}
               </span>
             </div>
             <input
               type='text'
-              placeholder='مزة، دمشق ...'
+              placeholder={t('signup.step4.city.placeholder')}
               {...register('city')}
               className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-start font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
             />
@@ -78,12 +79,12 @@ export default function SignUpStep4Additional({
             <div className='flex gap-2 justify-start items-center text-start'>
               <Globe className='w-4 h-4 text-primary' />
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
-                الدولة
+                {t('signup.step4.country.label')}
               </span>
             </div>
             <input
               type='text'
-              placeholder='سوريا'
+              placeholder={t('signup.step4.country.placeholder')}
               {...register('country')}
               className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-start font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
             />
@@ -91,24 +92,24 @@ export default function SignUpStep4Additional({
 
           <div className='rounded-[6px] border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-4 text-start'>
             <div className='font-cairo text-[14px] font-bold text-[#374151]'>
-              أنماط الاستشارة{' '}
+              {t('signup.step4.consultationModes.title')}{' '}
               <span className='text-[12px] font-semibold text-[#98A2B3]'>
-                (اختياري)
+                ({t('signup.step4.consultationModes.optional')})
               </span>
             </div>
             <p className='mt-1 font-cairo text-[12px] font-semibold text-[#667085]'>
-              حدّد إن كنت تقدّم استشارات عن بُعد أو في العيادة أو كليهما
+              {t('signup.step4.consultationModes.hint')}
             </p>
             <div className='flex flex-col gap-3 mt-3 sm:flex-row sm:flex-wrap sm:justify-end'>
               <label className='flex cursor-pointer items-center justify-end gap-2 font-cairo text-[13px] font-semibold text-[#374151]'>
-                <span>استشارة عبر الإنترنت (online)</span>
+                <span>{t('signup.step4.consultationModes.online')}</span>
                 <AppCheckbox
                   size='sm'
                   {...register('consultationOnline')}
                 />
               </label>
               <label className='flex cursor-pointer items-center justify-end gap-2 font-cairo text-[13px] font-semibold text-[#374151]'>
-                <span>في العيادة (offline)</span>
+                <span>{t('signup.step4.consultationModes.offline')}</span>
                 <AppCheckbox
                   size='sm'
                   {...register('consultationOffline')}
@@ -123,13 +124,10 @@ export default function SignUpStep4Additional({
             </div>
             <div className='flex-1 text-start'>
               <div className='font-cairo text-[14px] font-extrabold text-[#101828]'>
-                ملاحظة هامة
+                {t('signup.step4.notice.title')}
               </div>
               <div className='mt-1 font-cairo text-[13px] font-semibold leading-[22px] text-[#4A5565]'>
-                في الخطوة التالية تُعرَض المستندات القانونية؛ لا يُرسَل طلب التسجيل
-                ولا يبدأ التحقق (OTP) إلا بعد الموافقة عليها. بعد الإرسال، تُراجع
-                بياناتك من قبل الإدارة وفق سياسات المنصة قبل اكتمال ظهورك في
-                البحث.
+                {t('signup.step4.notice.body')}
               </div>
             </div>
           </div>
@@ -141,13 +139,13 @@ export default function SignUpStep4Additional({
               className='flex h-[54px] items-center justify-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white font-cairo text-[14px] font-bold text-[#374151] shadow-[0_12px_24px_rgba(0,0,0,0.06)]'
             >
               <ArrowRight className='w-4 h-4' />
-              السابق
+              {t('signup.step4.previous')}
             </button>
             <button
               type='submit'
               className='flex h-[54px] items-center justify-center gap-2 rounded-[6px] bg-primary font-cairo text-[14px] font-bold text-white shadow-[0_18px_40px_rgba(15, 143, 139,0.35)] transition-colors hover:bg-[#14B3AE]'
             >
-              التالي
+              {t('signup.step4.next')}
             </button>
           </div>
         </div>

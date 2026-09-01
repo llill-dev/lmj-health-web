@@ -22,6 +22,7 @@ import {
   clearDoctorTemplateDraft,
   readDoctorTemplateDraft,
 } from '@/lib/doctor/templates/templateDraftStorage';
+import { useI18n } from '@/i18n/provider';
 
 export type {
   ReferralFormState,
@@ -90,6 +91,7 @@ export function useEncounterReferralWorkspace(
   enabled = true,
 ) {
   const queryClient = useQueryClient();
+  const { t } = useI18n();
   const isEnabled =
     enabled && Boolean(doctorId) && Boolean(patientId) && Boolean(encounterId);
 
@@ -156,7 +158,9 @@ export function useEncounterReferralWorkspace(
 
     if (result.skipReason === 'existing_items') {
       setTemplateDraftNotice(
-        `لم يُطبَّق قالب «${draft.name}» لأن التحويل يحتوي بيانات مسبقاً. المسودة ما زالت محفوظة.`,
+        t(
+          'doctor.encounterWorkspace.referral.templateSkippedExistingItems',
+        ).replace('{name}', draft.name),
       );
     }
   }, [isEnabled, orderQuery.data, orderQuery.isLoading]);

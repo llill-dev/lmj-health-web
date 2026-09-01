@@ -39,7 +39,7 @@ export default function LinkFacilityDialog({
   }) => void;
   onSuggestFacility?: () => void;
 }) {
-  const { locale, dir } = useI18n();
+  const { locale, dir, t } = useI18n();
   const [search, setSearch] = useState('');
   const [city, setCity] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -84,14 +84,13 @@ export default function LinkFacilityDialog({
     <ClinicAccountsModalShell
       open={open}
       onClose={handleClose}
-      title="ربط منشأة موجودة"
+      title={t('doctor.linkFacility.title')}
       maxWidthClass="max-w-[640px]"
       headerPattern
     >
       <div dir={dir} lang={locale} className="space-y-5 text-start">
         <p className="rounded-[12px] border border-[#EEF2F6] bg-[#FAFAFA] px-4 py-4 font-cairo text-[12px] font-semibold leading-relaxed text-[#667085]">
-          ابحث عن منشأة مسجّلة في النظام واربط حسابك بها. إذا لم تجدها، استخدم
-          «اقتراح منشأة» لإرسال طلب إضافتها.
+          {t('doctor.linkFacility.intro')}
         </p>
 
         {onSuggestFacility ? (
@@ -102,32 +101,32 @@ export default function LinkFacilityDialog({
               disabled={submitting}
               className="inline-flex h-[40px] items-center justify-center rounded-[10px] border border-primary/20 bg-[#E6F4F3] px-4 font-cairo text-[12px] font-extrabold text-primary disabled:opacity-50"
             >
-              اقتراح منشأة جديدة
+              {t('doctor.linkFacility.suggestNew')}
             </button>
           </div>
         ) : null}
 
-        <DoctorProfileFormField label="بحث بالاسم" required hint="حرفان على الأقل">
+        <DoctorProfileFormField label={t('doctor.linkFacility.searchLabel')} required hint={t('doctor.linkFacility.searchHint')}>
           <input
             value={search}
             onChange={(event) => {
               setSearch(event.target.value);
               setSelectedId(null);
             }}
-            placeholder="مثال: مستشفى الشام"
+            placeholder={t('doctor.linkFacility.searchPlaceholder')}
             disabled={submitting}
             className={profileFieldClass(profileInputClass, false)}
           />
         </DoctorProfileFormField>
 
-        <DoctorProfileFormField label="المدينة" hint="اختياري — لتضييق النتائج">
+        <DoctorProfileFormField label={t('doctor.linkFacility.cityLabel')} hint={t('doctor.linkFacility.cityHint')}>
           <input
             value={city}
             onChange={(event) => {
               setCity(event.target.value);
               setSelectedId(null);
             }}
-            placeholder="مثال: دمشق"
+            placeholder={t('doctor.linkFacility.cityPlaceholder')}
             disabled={submitting}
             className={profileFieldClass(profileInputClass, false)}
           />
@@ -135,30 +134,30 @@ export default function LinkFacilityDialog({
 
         <div>
           <h3 className="mb-3 font-cairo text-[14px] font-extrabold text-[#111827]">
-            النتائج
+            {t('doctor.linkFacility.results')}
           </h3>
 
           {showMinCharsHint ? (
             <p className="rounded-[12px] border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-4 py-6 text-center font-cairo text-[12px] font-semibold text-[#98A2B3]">
-              اكتب حرفين على الأقل لبدء البحث
+              {t('doctor.linkFacility.minCharsHint')}
             </p>
           ) : suggestQuery.isLoading ? (
             <div className="flex items-center justify-center gap-3 rounded-[12px] border border-[#EEF2F6] bg-[#FAFAFA] py-10">
               <Loader2 className="h-5 w-5 animate-spin text-primary" aria-hidden />
               <span className="font-cairo text-[13px] font-semibold text-[#667085]">
-                جارٍ البحث...
+                {t('doctor.linkFacility.searching')}
               </span>
             </div>
           ) : suggestQuery.isError ? (
             <div className="flex items-start gap-2 rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-[#B42318]">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
               <p className="font-cairo text-[13px] font-semibold leading-relaxed">
-                تعذّر تحميل النتائج. حاول مرة أخرى.
+                {t('doctor.linkFacility.loadError')}
               </p>
             </div>
           ) : debouncedSearch.trim().length < 2 ? (
             <p className="rounded-[12px] border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-4 py-6 text-center font-cairo text-[12px] font-semibold text-[#98A2B3]">
-              ابدأ بالبحث عن اسم المنشأة
+              {t('doctor.linkFacility.startSearching')}
             </p>
           ) : facilities.length === 0 ? (
             <div className="rounded-[12px] border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-5 py-8 text-center">
@@ -166,10 +165,10 @@ export default function LinkFacilityDialog({
                 <Building2 className="h-5 w-5 text-primary" aria-hidden />
               </div>
               <p className="font-cairo text-[13px] font-extrabold text-[#667085]">
-                لا توجد نتائج مطابقة
+                {t('doctor.linkFacility.noResults')}
               </p>
               <p className="mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                جرّب اسمًا أو مدينة مختلفة، أو اقترح منشأة جديدة
+                {t('doctor.linkFacility.noResultsHint')}
               </p>
             </div>
           ) : (
@@ -233,7 +232,7 @@ export default function LinkFacilityDialog({
             disabled={submitting}
             className="inline-flex h-[48px] items-center justify-center rounded-[12px] border border-primary bg-white font-cairo text-[14px] font-extrabold text-primary disabled:opacity-50"
           >
-            إلغاء
+            {t('doctor.linkFacility.cancel')}
           </button>
           <button
             type="button"
@@ -242,7 +241,7 @@ export default function LinkFacilityDialog({
             className="inline-flex h-[48px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
           >
             <Link2 className="h-4 w-4" aria-hidden />
-            {submitting ? 'جارٍ الربط…' : 'ربط المنشأة'}
+            {submitting ? t('doctor.linkFacility.linking') : t('doctor.linkFacility.link')}
           </button>
         </div>
       </div>

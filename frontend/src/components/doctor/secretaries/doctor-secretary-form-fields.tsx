@@ -8,9 +8,9 @@ import {
 } from "@/lib/doctor/secretaries/permissionsUi";
 import type { SecretaryGender } from "@/lib/doctor/secretaries/formUtils";
 import type { SecretaryFormFieldErrors } from "@/lib/doctor/secretaries/schema";
-import { PHONE_DIAL_CODE_OPTIONS } from "@/lib/phone/dialCodes";
-import { cn } from "@/lib/utils/utils";
+import { getPhoneDialCodeOptions } from "@/lib/phone/dialCodes";
 import { useI18n } from "@/i18n/provider";
+import { cn } from "@/lib/utils/utils";
 
 const inputClass =
   "h-[44px] w-full rounded-[10px] border px-4 font-cairo text-[13px] font-semibold outline-none transition focus:border-primary";
@@ -179,7 +179,7 @@ export function DoctorSecretaryFormFields({
                   localNumber: phone?.localNumber ?? "",
                 })
               }
-              options={[...PHONE_DIAL_CODE_OPTIONS]}
+              options={getPhoneDialCodeOptions(locale)}
               size="sm"
               tone="muted"
               className="w-[140px]"

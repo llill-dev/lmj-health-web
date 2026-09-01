@@ -1,4 +1,12 @@
 import { ApiError, getUserFacingRequestErrorMessage } from '@/lib/api';
+import { getTranslationValue } from '@/i18n/translations';
+import { getCurrentLocale } from '@/i18n/runtime';
+
+type TFn = (key: string) => string;
+
+function defaultT(key: string): string {
+  return getTranslationValue(getCurrentLocale(), key) ?? key;
+}
 import type { DoctorPersonalEditForm } from '@/components/doctor/profile-settings/doctor-profile-schemas';
 
 export type DoctorProfilePatchField = keyof DoctorPersonalEditForm;
@@ -104,34 +112,38 @@ function mapLeafToField(leaf: string): DoctorProfilePatchField | null {
   return FIELD_ALIASES[normalized] ?? null;
 }
 
-function humanizeValidationKey(msg: string): string | null {
+function humanizeValidationKey(msg: string, t: TFn): string | null {
   const key = msg.toLowerCase();
   if (key.includes('dateofbirth') || key.includes('invaliddate')) {
-    return 'تاريخ الميلاد غير صالح.';
+    return t('doctor.profilePatchErrors.invalidDateOfBirth');
   }
   if (key.includes('consultationtypes') || key.includes('invalidenum')) {
-    return 'نوع الاستشارة غير صالح.';
+    return t('doctor.profilePatchErrors.invalidConsultationMode');
   }
   if (key.includes('consultationfee') || key.includes('invalidnumber')) {
-    return 'تكلفة الاستشارة غير صالحة.';
+    return t('doctor.profilePatchErrors.invalidConsultationFee');
   }
   if (key.includes('bio')) {
-    return 'النبذة التعريفية غير صالحة.';
+    return t('doctor.profilePatchErrors.invalidBio');
   }
   if (key.includes('fullname')) {
-    return 'الاسم الكامل غير صالح.';
+    return t('doctor.profilePatchErrors.invalidFullName');
   }
   if (key.includes('address')) {
-    return 'العنوان غير صالح.';
+    return t('doctor.profilePatchErrors.invalidAddress');
   }
   return null;
 }
 
-export function resolveDoctorProfilePatchFeedback(error: unknown): {
+export function resolveDoctorProfilePatchFeedback(
+  error: unknown,
+  t: TFn = defaultT,
+): {
   toastMessage: string;
   fields: DoctorProfilePatchFieldMessages;
 } {
-  const toastMessage = getUserFacingRequestErrorMessage(error);
+  const locale = getCurrentLocale();
+  const toastMessage = getUserFacingRequestErrorMessage(error, locale);
   const fields: DoctorProfilePatchFieldMessages = {};
 
   if (!(error instanceof ApiError)) {
@@ -140,12 +152,12 @@ export function resolveDoctorProfilePatchFeedback(error: unknown): {
 
   for (const [leaf, msg] of collectStructuredFieldTexts(error.body)) {
     if (leaf === '_root') {
-      const hint = humanizeValidationKey(msg);
+      const hint = humanizeValidationKey(msg, t);
       if (hint && !fields.consultationMode) fields.consultationMode = hint;
       continue;
     }
     const target = mapLeafToField(leaf);
-    const readable = humanizeValidationKey(msg) ?? msg;
+    const readable = humanizeValidationKey(msg, t) ?? msg;
     if (target && !fields[target]) fields[target] = readable;
   }
 
@@ -154,13 +166,13 @@ export function resolveDoctorProfilePatchFeedback(error: unknown): {
 
   if (combined.includes('consultationtypes') && !fields.consultationMode) {
     fields.consultationMode =
-      toastMessage || 'نوع الاستشارة غير صالح. اختر خياراً واحداً.';
+      toastMessage || t('doctor.profilePatchErrors.consultationModeRequired');
   }
   if (combined.includes('dateofbirth') && !fields.dateOfBirth) {
-    fields.dateOfBirth = toastMessage || 'تاريخ الميلاد غير صالح.';
+    fields.dateOfBirth = toastMessage || t('doctor.profilePatchErrors.invalidDateOfBirth');
   }
   if (combined.includes('consultationfee') && !fields.consultationFee) {
-    fields.consultationFee = toastMessage || 'تكلفة الاستشارة غير صالحة.';
+    fields.consultationFee = toastMessage || t('doctor.profilePatchErrors.invalidConsultationFee');
   }
 
   return { toastMessage, fields };

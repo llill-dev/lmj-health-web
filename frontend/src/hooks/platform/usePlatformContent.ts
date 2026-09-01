@@ -192,10 +192,12 @@ export function usePlatformAboutContent(language: PlatformContentLanguage = 'ar'
 
   const summary = useMemo(() => {
     if (!data) {
-      return 'منصتنا تهدف إلى تقديم أفضل الخدمات الصحية الرقمية بأعلى معايير الجودة والخصوصية لراحتك.';
+      return language === 'en'
+        ? 'Our platform aims to provide the best digital healthcare services with the highest standards of quality and privacy for your comfort.'
+        : 'منصتنا تهدف إلى تقديم أفضل الخدمات الصحية الرقمية بأعلى معايير الجودة والخصوصية لراحتك.';
     }
-    return extractAboutSummary(data);
-  }, [data]);
+    return extractAboutSummary(data, language);
+  }, [data, language]);
 
   return { data, isAwaitingData, summary };
 }

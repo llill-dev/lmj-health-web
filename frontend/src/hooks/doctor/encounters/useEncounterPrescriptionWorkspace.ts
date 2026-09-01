@@ -16,6 +16,7 @@ import {
   clearDoctorTemplateDraft,
   readDoctorTemplateDraft,
 } from '@/lib/doctor/templates/templateDraftStorage';
+import { useI18n } from '@/i18n/provider';
 
 export function useEncounterPrescriptionWorkspace(
   doctorId: string,
@@ -23,6 +24,7 @@ export function useEncounterPrescriptionWorkspace(
   encounterId: string,
   enabled = true,
 ) {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const isEnabled =
     enabled && Boolean(doctorId) && Boolean(patientId) && Boolean(encounterId);
@@ -103,8 +105,7 @@ export function useEncounterPrescriptionWorkspace(
 
       if (trimmed === serverValue) {
         return {
-          message:
-            'لا تغييرات على التعليمات العامة. إن أضفت أدويةً فهي محفوظة في المسودة.',
+          message: t('doctor.encounterWorkspace.prescription.noInstructionsChange'),
           prescription: prescriptionQuery.data,
         };
       }
@@ -187,7 +188,9 @@ export function useEncounterPrescriptionWorkspace(
 
       if (result.skipReason === 'existing_items') {
         setTemplateDraftNotice(
-          `لم يُطبَّق قالب «${draft.name}» لأن الوصفة تحتوي عناصر مسبقاً. المسودة ما زالت محفوظة.`,
+          t(
+            'doctor.encounterWorkspace.prescription.templateSkippedExistingItems',
+          ).replace('{name}', draft.name),
         );
         return;
       }
@@ -195,7 +198,9 @@ export function useEncounterPrescriptionWorkspace(
       if (result.skipReason === 'partial_failure') {
         clearDoctorTemplateDraft();
         setTemplateDraftNotice(
-          `تم تطبيق قالب «${draft.name}» جزئياً فقط. راجع الأدوية المتبقية يدوياً.`,
+          t(
+            'doctor.encounterWorkspace.prescription.templatePartiallyApplied',
+          ).replace('{name}', draft.name),
         );
       }
     })();
@@ -385,7 +390,7 @@ export function useEncounterPrescriptionWorkspace(
         error instanceof Error &&
         error.message === 'errors.prescription.finalizeRequiresItems'
       ) {
-        return 'يجب إضافة دواء واحد على الأقل قبل الاعتماد النهائي.';
+        return t('doctor.encounterWorkspace.prescription.finalizeRequiresItems');
       }
       return getUserFacingRequestErrorMessage(error);
     },

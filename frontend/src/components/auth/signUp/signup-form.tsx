@@ -102,7 +102,7 @@ export default function SignUpForm({
       setDraft((prev) => ({ ...prev, ...values }));
       setStep(2);
     } catch (e: unknown) {
-      const msg = formatSignupApiError(e);
+      const msg = formatSignupApiError(e, locale);
       setSubmitError(msg);
       toast(msg.replace(/\s+/g, " ").trim().slice(0, 280), {
         title: t("auth.signup.error.continueTitle"),
@@ -223,17 +223,17 @@ export default function SignUpForm({
           }
         }
         const conflicts = extractSignupConflictFields(e);
-        const licenseConflict = extractSignupMedicalLicenseConflictMessage(e);
+        const licenseConflict = extractSignupMedicalLicenseConflictMessage(e, locale);
         const contactOnly =
           Boolean(conflicts.email || conflicts.phone) &&
           signupErrorHasOnlyContactFieldIssues(e) &&
           !licenseConflict;
         setStep1ContactErrors(contactOnly ? conflicts : {});
         const general = contactOnly
-          ? formatSignupGeneralBannerError(e, conflicts)
-          : formatSignupApiError(e);
+          ? formatSignupGeneralBannerError(e, conflicts, locale)
+          : formatSignupApiError(e, locale);
         setSubmitError(
-          general ?? (contactOnly ? null : formatSignupApiError(e)),
+          general ?? (contactOnly ? null : formatSignupApiError(e, locale)),
         );
         setProfessionalLicenseConflict(licenseConflict ?? null);
 
@@ -242,7 +242,7 @@ export default function SignUpForm({
         }
 
         const toastBody =
-          (general ?? formatSignupApiError(e))
+          (general ?? formatSignupApiError(e, locale))
             ?.replace(/\s+/g, " ")
             .trim()
             .slice(0, 280) ?? t("auth.signup.error.submitFallback");

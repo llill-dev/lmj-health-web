@@ -20,13 +20,14 @@ import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import type { AdminContentBlock } from "@/lib/admin/types";
 import { useI18n } from "@/i18n/provider";
 
-const TYPE_LABELS: Record<string, string> = {
-  NEWS: "أخبار طبية",
-  GENERAL_ADVICE: "نصائح عامة",
-  CONDITION: "حالات مرضية",
-  SYMPTOM: "أعراض",
-  MEDICATION: "أدوية",
-};
+type Translate = (
+  key: string,
+  paramsOrFallback?: Record<string, unknown> | string,
+) => string;
+
+function typeLabel(t: Translate, type: string) {
+  return t(`publicLibrary.type.${type}`, type);
+}
 
 function readText(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
@@ -56,11 +57,11 @@ function readFaqItems(
     });
 }
 
-function formatPublishedAt(value?: string) {
+function formatPublishedAt(value: string | undefined, locale: string) {
   if (!value) return "—";
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return value;
-  return parsed.toLocaleDateString("ar-SY", {
+  return parsed.toLocaleDateString(locale === "ar" ? "ar-SY" : "en-US", {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -68,7 +69,7 @@ function formatPublishedAt(value?: string) {
 }
 
 export default function PublicMedicalLibraryDetailsPage() {
-  const { locale, dir } = useI18n();
+  const { locale, dir, t } = useI18n();
   const params = useParams<{ slug: string }>();
   const location = useLocation();
   const slug = params.slug ? decodeURIComponent(params.slug) : "";
@@ -135,7 +136,7 @@ export default function PublicMedicalLibraryDetailsPage() {
       >
         <div className="flex items-center gap-3 font-cairo text-[14px] font-bold text-[#667085]">
           <Loader2 className="h-5 w-5 animate-spin text-primary" />
-          جارٍ تحميل المحتوى...
+          {t("publicLibraryDetails.loading")}
         </div>
       </div>
     );
@@ -149,11 +150,11 @@ export default function PublicMedicalLibraryDetailsPage() {
         className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6"
       >
         <DoctorListErrorState
-          title="تعذّر تحميل المحتوى الطبي"
+          title={t("publicLibraryDetails.error.title")}
           brief={
             contentQuery.error
               ? getUserFacingRequestErrorMessage(contentQuery.error)
-              : "المحتوى المطلوب غير متوفر حالياً."
+              : t("publicLibraryDetails.error.brief")
           }
           onRetry={() => void contentQuery.refetch()}
         />
@@ -177,7 +178,7 @@ export default function PublicMedicalLibraryDetailsPage() {
           className="mb-5 inline-flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#667085] transition hover:text-primary"
         >
           <ArrowLeft className="h-4 w-4" />
-          العودة إلى المكتبة الطبية
+          {t("publicLibraryDetails.backToLibrary")}
         </Link>
 
         <article className="overflow-hidden rounded-[28px] border border-[#E4E7EC] bg-white shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
@@ -199,15 +200,17 @@ export default function PublicMedicalLibraryDetailsPage() {
             </h1>
             <div className="mt-4 flex flex-wrap items-center gap-4 font-cairo text-[12px] font-bold text-[#667085]">
               <span className="rounded-full bg-white px-3 py-1 text-primary shadow-sm">
-                {TYPE_LABELS[contentQuery.data.type] ?? contentQuery.data.type}
+                {typeLabel(t, contentQuery.data.type)}
               </span>
               <span className="inline-flex items-center gap-2">
                 <CalendarDays className="h-4 w-4 text-primary" />
-                {formatPublishedAt(contentQuery.data.publishedAt)}
+                {formatPublishedAt(contentQuery.data.publishedAt, locale)}
               </span>
               {contentQuery.data.sourceName?.trim() ? (
                 <span className="rounded-full bg-white px-3 py-1 text-[#475467] shadow-sm">
-                  المصدر: {contentQuery.data.sourceName.trim()}
+                  {t("publicLibrary.card.source", {
+                    name: contentQuery.data.sourceName.trim(),
+                  })}
                 </span>
               ) : null}
             </div>
@@ -223,13 +226,13 @@ export default function PublicMedicalLibraryDetailsPage() {
                 className="inline-flex items-center gap-2 rounded-[12px] border border-[#B8E6E0] bg-white px-4 py-2 font-cairo text-[13px] font-extrabold text-primary transition hover:bg-[#F0FDFA]"
               >
                 <Share2 className="h-4 w-4" />
-                مشاركة المقال
+                {t("publicLibraryDetails.share")}
               </button>
               {shareState !== "idle" ? (
                 <p className="mt-3 font-cairo text-[12px] font-bold text-[#0F766E]">
                   {shareState === "shared"
-                    ? "تم فتح نافذة المشاركة."
-                    : "تم نسخ الرابط إلى الحافظة."}
+                    ? t("publicLibraryDetails.shared")
+                    : t("publicLibraryDetails.copied")}
                 </p>
               ) : null}
             </div>
@@ -248,24 +251,18 @@ export default function PublicMedicalLibraryDetailsPage() {
             ) : (
               <div className="whitespace-pre-line font-cairo text-[15px] font-semibold leading-9 text-[#344054]">
                 {contentQuery.data.summary ||
-                  "لا يوجد نص تفصيلي متاح لهذا المحتوى حالياً."}
+                  t("publicLibraryDetails.noBody")}
               </div>
             )}
 
             <div className="mt-8 flex flex-wrap gap-3 border-t border-[#EAECF0] pt-6">
               <div className="w-full rounded-[18px] border border-[#FDE68A] bg-[#FFFBEB] px-5 py-4">
                 <h3 className="font-cairo text-[16px] font-black text-[#92400E]">
-                  ملاحظة حول الميزة الحالية
+                  {t("publicLibraryDetails.notes.title")}
                 </h3>
                 <div className="mt-2 space-y-1 font-cairo text-[12px] font-bold leading-7 text-[#92400E]">
-                  <p>
-                    هذه الصفحة مخصّصة لقراءة المحتوى الطبي المنشور ومراجعة
-                    مصادره فقط.
-                  </p>
-                  <p>
-                    تنزيل مكتبة PDF مشتركة أو طلب خدمة طبية من داخل هذا المحتوى
-                    غير متاح حالياً.
-                  </p>
+                  <p>{t("publicLibraryDetails.notes.one")}</p>
+                  <p>{t("publicLibraryDetails.notes.two")}</p>
                 </div>
               </div>
               {contentQuery.data.sources?.filter((source) => source.url?.trim())
@@ -273,15 +270,14 @@ export default function PublicMedicalLibraryDetailsPage() {
                 <div className="w-full space-y-3 rounded-[18px] border border-[#EAECF0] bg-[#FCFCFD] px-5 py-4">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <h3 className="font-cairo text-[16px] font-black text-[#101828]">
-                      المراجع والمصادر
+                      {t("publicLibraryDetails.sources.title")}
                     </h3>
                     <span className="rounded-full bg-white px-3 py-1 font-cairo text-[11px] font-extrabold text-primary shadow-sm">
-                      {
-                        contentQuery.data.sources.filter((source) =>
+                      {t("publicLibraryDetails.sources.count", {
+                        count: contentQuery.data.sources.filter((source) =>
                           source.url?.trim(),
-                        ).length
-                      }{" "}
-                      مرجع
+                        ).length,
+                      })}
                     </span>
                   </div>
                   <div className="space-y-2">
@@ -308,13 +304,13 @@ export default function PublicMedicalLibraryDetailsPage() {
                 to={backToList}
                 className="inline-flex items-center justify-center rounded-[12px] border border-[#B8E6E0] bg-[#F0FDFA] px-4 py-2 font-cairo text-[13px] font-extrabold text-primary transition hover:bg-[#E6F7F5]"
               >
-                المزيد من المحتوى الطبي
+                {t("publicLibraryDetails.moreContent")}
               </Link>
               <Link
                 to="/welcome"
                 className="inline-flex items-center justify-center rounded-[12px] border border-[#E4E7EC] bg-white px-4 py-2 font-cairo text-[13px] font-extrabold text-[#475467] transition hover:border-[#B8E6E0] hover:text-primary"
               >
-                الصفحة الرئيسية
+                {t("publicLibraryDetails.home")}
               </Link>
             </div>
 
@@ -322,13 +318,13 @@ export default function PublicMedicalLibraryDetailsPage() {
               <section className="mt-8 border-t border-[#EAECF0] pt-6">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <h3 className="font-cairo text-[18px] font-black text-[#101828]">
-                    محتوى مشابه
+                    {t("publicLibraryDetails.related.title")}
                   </h3>
                   <Link
                     to={backToList}
                     className="font-cairo text-[12px] font-extrabold text-primary transition hover:opacity-80"
                   >
-                    عرض المزيد
+                    {t("publicLibraryDetails.related.showMore")}
                   </Link>
                 </div>
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
@@ -339,13 +335,14 @@ export default function PublicMedicalLibraryDetailsPage() {
                       className="rounded-[18px] border border-[#E4E7EC] bg-[#FCFCFD] p-4 transition hover:border-[#B8E6E0] hover:bg-white"
                     >
                       <div className="rounded-full bg-[#E6F7F5] px-3 py-1 font-cairo text-[11px] font-extrabold text-primary w-fit">
-                        {TYPE_LABELS[item.type] ?? item.type}
+                        {typeLabel(t, item.type)}
                       </div>
                       <h4 className="mt-3 line-clamp-2 font-cairo text-[15px] font-black leading-7 text-[#101828]">
                         {item.title}
                       </h4>
                       <p className="mt-2 line-clamp-3 font-cairo text-[12px] font-semibold leading-6 text-[#667085]">
-                        {item.summary?.trim() || "افتح المقال لقراءة التفاصيل."}
+                        {item.summary?.trim() ||
+                          t("publicLibraryDetails.related.summaryFallback")}
                       </p>
                     </Link>
                   ))}
@@ -360,6 +357,7 @@ export default function PublicMedicalLibraryDetailsPage() {
 }
 
 function ContentBlockRenderer({ block }: { block: AdminContentBlock }) {
+  const { t } = useI18n();
   const flexibleBlock = block as AdminContentBlock & {
     imageUrl?: string;
     image?: string;
@@ -378,7 +376,7 @@ function ContentBlockRenderer({ block }: { block: AdminContentBlock }) {
     const Tag = level && level <= 2 ? "h2" : "h3";
     return (
       <Tag className="font-cairo text-[22px] font-black leading-10 text-[#101828]">
-        {readText((block as { text?: unknown }).text) || "عنوان"}
+        {readText((block as { text?: unknown }).text) || t("publicLibraryDetails.block.heading")}
       </Tag>
     );
   }
@@ -437,7 +435,7 @@ function ContentBlockRenderer({ block }: { block: AdminContentBlock }) {
       >
         <div>
           <h3 className="font-cairo text-[16px] font-black text-[#101828]">
-            {title || "رابط خارجي"}
+            {title || t("publicLibraryDetails.block.externalLink")}
           </h3>
           {description ? (
             <p className="mt-2 font-cairo text-[13px] font-semibold leading-7 text-[#667085]">
@@ -460,7 +458,7 @@ function ContentBlockRenderer({ block }: { block: AdminContentBlock }) {
             className="rounded-[18px] border border-[#EAECF0] bg-[#FCFCFD] px-5 py-4"
           >
             <h3 className="font-cairo text-[15px] font-black text-[#101828]">
-              {item.question || "سؤال"}
+              {item.question || t("publicLibraryDetails.block.question")}
             </h3>
             <p className="mt-2 whitespace-pre-line font-cairo text-[14px] font-semibold leading-8 text-[#475467]">
               {item.answer || "—"}
@@ -480,7 +478,7 @@ function ContentBlockRenderer({ block }: { block: AdminContentBlock }) {
       readText(flexibleBlock.imageUrl) || readText(flexibleBlock.image);
     if (!imageUrl) return null;
     const caption = readText(flexibleBlock.caption);
-    const alt = readText(flexibleBlock.alt) || caption || "صورة توضيحية";
+    const alt = readText(flexibleBlock.alt) || caption || t("publicLibraryDetails.block.imageAlt");
 
     return (
       <figure className="overflow-hidden rounded-[22px] border border-[#E4E7EC] bg-[#FCFCFD]">
@@ -513,7 +511,13 @@ function ContentBlockRenderer({ block }: { block: AdminContentBlock }) {
             >
               <img
                 src={image.url}
-                alt={image.alt || image.caption || `صورة ${index + 1}`}
+                alt={
+                  image.alt ||
+                  image.caption ||
+                  t("publicLibraryDetails.block.galleryImageAlt", {
+                    index: index + 1,
+                  })
+                }
                 className="h-[220px] w-full object-cover"
               />
               {image.caption ? (
@@ -533,7 +537,7 @@ function ContentBlockRenderer({ block }: { block: AdminContentBlock }) {
     const title =
       readText(flexibleBlock.title) ||
       readText(flexibleBlock.provider) ||
-      "محتوى مضمّن";
+      t("publicLibraryDetails.block.embed");
     const caption = readText(flexibleBlock.caption);
     if (!embedUrl) return null;
     return (

@@ -20,7 +20,7 @@ export function MedicalRequestModalShell({
   children: ReactNode;
   maxWidthClass?: string;
 }) {
-  const { dir } = useI18n();
+  const { dir, t } = useI18n();
   useEffect(() => {
     if (!open) return;
 
@@ -65,7 +65,7 @@ export function MedicalRequestModalShell({
               type="button"
               onClick={onClose}
               className="absolute start-6 top-6 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827]"
-              aria-label="إغلاق"
+              aria-label={t("common.close")}
             >
               <X className="h-5 w-5" aria-hidden />
             </button>

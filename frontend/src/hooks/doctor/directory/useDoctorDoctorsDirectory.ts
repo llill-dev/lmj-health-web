@@ -53,7 +53,7 @@ function mapInternalDoctorToCard(
 ): DoctorDirectoryListItem {
   const city = [doctor.locationCity, doctor.locationCountry]
     .filter(Boolean)
-    .join('، ');
+    .join(tr('، ', ', '));
 
   return {
     id: doctor._id,

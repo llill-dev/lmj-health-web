@@ -28,12 +28,42 @@ export type DoctorFacilityFormValues = {
   attributes?: string[];
 };
 
+export function getFacilityStatusLabels(
+  t: (key: string) => string,
+): Record<DoctorFacilityStatus, string> {
+  return {
+    active: t("doctor.facilities.status.active"),
+    pending: t("doctor.facilities.status.pending"),
+    closed: t("doctor.facilities.status.closed"),
+  };
+}
+
+/** @deprecated Arabic-only — use getFacilityStatusLabels(t) for locale-aware labels. */
 export const FACILITY_STATUS_LABELS: Record<DoctorFacilityStatus, string> = {
   active: "نشط",
   pending: "قيد المراجعة",
   closed: "غير نشط",
 };
 
+export function getFacilityTypeOptions(
+  t: (key: string) => string,
+): Array<{ value: FacilityType; label: string }> {
+  return [
+    { value: "clinic", label: t("doctor.facilities.type.clinic") },
+    { value: "hospital", label: t("doctor.facilities.type.hospital") },
+    { value: "polyclinic", label: t("doctor.facilities.type.polyclinic") },
+    { value: "medical_center", label: t("doctor.facilities.type.medical_center") },
+    { value: "laboratory", label: t("doctor.facilities.type.laboratory") },
+    { value: "imaging_center", label: t("doctor.facilities.type.imaging_center") },
+    { value: "pharmacy", label: t("doctor.facilities.type.pharmacy") },
+    { value: "rehabilitation_center", label: t("doctor.facilities.type.rehabilitation_center") },
+    { value: "dialysis_center", label: t("doctor.facilities.type.dialysis_center") },
+    { value: "emergency_center", label: t("doctor.facilities.type.emergency_center") },
+    { value: "other", label: t("doctor.facilities.type.other") },
+  ];
+}
+
+/** @deprecated Arabic-only — use getFacilityTypeOptions(t) for locale-aware labels. */
 export const DEFAULT_FACILITY_TYPE_OPTIONS: Array<{
   value: FacilityType;
   label: string;

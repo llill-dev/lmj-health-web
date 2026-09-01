@@ -3,28 +3,32 @@
 import { CircleCheck, Eye, EyeOff } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { ClipboardEvent, KeyboardEvent } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import {
-  VERIFY_CODE_SCHEMA_HINT_AR,
   formatVerifyFlowError,
+  getVerifyCodeSchemaHint,
 } from "@/lib/auth/signupMessaging";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useI18n } from "@/i18n/provider";
 
-const claimVerifySchema = z
-  .object({
-    code: z.string().regex(new RegExp("^\\d{6}$"), VERIFY_CODE_SCHEMA_HINT_AR),
-    password: z.string().min(6, "auth.resetPassword.passwordMinLength"),
-    confirmPassword: z.string().min(1, "auth.resetPassword.confirmRequired"),
-  })
-  .refine((values) => values.password === values.confirmPassword, {
-    message: "auth.resetPassword.passwordMismatch",
-    path: ["confirmPassword"],
-  });
+function buildClaimVerifySchema(locale: "ar" | "en") {
+  return z
+    .object({
+      code: z
+        .string()
+        .regex(new RegExp("^\\d{6}$"), getVerifyCodeSchemaHint(locale)),
+      password: z.string().min(6, "auth.resetPassword.passwordMinLength"),
+      confirmPassword: z.string().min(1, "auth.resetPassword.confirmRequired"),
+    })
+    .refine((values) => values.password === values.confirmPassword, {
+      message: "auth.resetPassword.passwordMismatch",
+      path: ["confirmPassword"],
+    });
+}
 
-type ClaimVerifyValues = z.infer<typeof claimVerifySchema>;
+type ClaimVerifyValues = z.infer<ReturnType<typeof buildClaimVerifySchema>>;
 
 export default function ClaimAccountVerifyForm({
   destination,
@@ -39,6 +43,10 @@ export default function ClaimAccountVerifyForm({
 }) {
   const { locale, dir, t } = useI18n();
 
+  const claimVerifySchema = useMemo(
+    () => buildClaimVerifySchema(locale),
+    [locale],
+  );
   const {
     register,
     handleSubmit,
@@ -116,7 +124,7 @@ export default function ClaimAccountVerifyForm({
     try {
       await onSubmit(values);
     } catch (error) {
-      const formatted = formatVerifyFlowError(error);
+      const formatted = formatVerifyFlowError(error, locale);
       setFlowError(formatted);
       toast(formatted.replace(/\s+/g, " ").trim().slice(0, 220), {
         title: t("auth.claim.activationFailed"),
@@ -319,7 +327,7 @@ export default function ClaimAccountVerifyForm({
                             durationMs: 3200,
                           });
                         } catch (error) {
-                          const formatted = formatVerifyFlowError(error);
+                          const formatted = formatVerifyFlowError(error, locale);
                           setFlowError(formatted);
                           toast(
                             formatted.replace(/\s+/g, " ").trim().slice(0, 220),

@@ -20,7 +20,7 @@ import {
   mapUiItemToOrderItemBody,
 } from '@/lib/doctor/encounters/encounterOrderBodies';
 import {
-  ORDER_CLINICAL_MESSAGES,
+  getOrderClinicalMessages,
   OrderClinicalFormSubmitError,
   OrderItemsRequiredError,
   assertOrderClinicalFormValid,
@@ -271,11 +271,11 @@ export function useEncounterOrderWorkspace(
         catalog.title?.trim() ??
         catalog.name?.trim() ??
         catalog.label?.trim() ??
-        'بند';
+        t('doctor.encounterOrderWorkspace.catalogItemFallbackName');
       const section = catalog.section?.trim() || catalog.category?.trim();
       return addItemMutation.mutateAsync({
         name: title,
-        category: section || 'كتالوج',
+        category: section || t('doctor.encounterOrderWorkspace.catalogFallbackCategory'),
         type: section || '—',
         bodyArea: section || '—',
         side: '—',
@@ -325,7 +325,7 @@ export function useEncounterOrderWorkspace(
 
       if (result.skipReason === 'existing_items') {
         setTemplateDraftNotice(
-          `لم يُطبَّق قالب «${draft.name}» لأن الطلب يحتوي بنوداً مسبقاً. المسودة ما زالت محفوظة.`,
+          t('doctor.encounterOrderWorkspace.templateSkippedExistingItems').replace('{name}', draft.name),
         );
         return;
       }
@@ -333,7 +333,7 @@ export function useEncounterOrderWorkspace(
       if (result.skipReason === 'partial_failure') {
         clearDoctorTemplateDraft();
         setTemplateDraftNotice(
-          `تم تطبيق قالب «${draft.name}» جزئياً فقط. راجع البنود المتبقية يدوياً.`,
+          t('doctor.encounterOrderWorkspace.templateSkippedExistingItems').replace('{name}', draft.name),
         );
       }
     })();
@@ -392,6 +392,7 @@ export function useEncounterOrderWorkspace(
           clinical,
           mode,
           config.clinicalVariant,
+          t,
         );
         setClinicalFieldErrors({});
         return result;
@@ -410,7 +411,7 @@ export function useEncounterOrderWorkspace(
       setItemsSectionError(undefined);
       return;
     }
-    const msg = ORDER_CLINICAL_MESSAGES.itemsRequired;
+    const msg = getOrderClinicalMessages(t).itemsRequired;
     setItemsSectionError(msg);
     throw new OrderItemsRequiredError();
   }, [items.length]);
@@ -502,7 +503,7 @@ export function useEncounterOrderWorkspace(
       getEncounterOrderRequestErrorMessage(error, locale),
     getFieldErrors: (error: unknown) => {
       if (error instanceof OrderClinicalFormSubmitError) return error.fields;
-      return resolveOrderClinicalServerFeedback(error).fields;
+      return resolveOrderClinicalServerFeedback(error, t).fields;
     },
     handleSubmitError: (error: unknown) => {
       if (error instanceof OrderClinicalFormSubmitError) {
@@ -510,11 +511,11 @@ export function useEncounterOrderWorkspace(
         return { toastMessage: error.message, fields: error.fields };
       }
       if (error instanceof OrderItemsRequiredError) {
-        const msg = ORDER_CLINICAL_MESSAGES.itemsRequired;
+        const msg = getOrderClinicalMessages(t).itemsRequired;
         setItemsSectionError(msg);
         return { toastMessage: msg, fields: {} };
       }
-      const { toastMessage, fields } = resolveOrderClinicalServerFeedback(error);
+      const { toastMessage, fields } = resolveOrderClinicalServerFeedback(error, t);
       if (Object.keys(fields).length) setClinicalFieldErrors(fields);
       return { toastMessage, fields };
     },

@@ -121,9 +121,9 @@ export default function DoctorOnlineConsultationsPage() {
 
   const consultations = useMemo(() => {
     return (listQuery.data?.tickets ?? [])
-      .map(mapConsultationTicketToUi)
+      .map((ticket) => mapConsultationTicketToUi(ticket, locale))
       .filter((c) => c.id);
-  }, [listQuery.data?.tickets]);
+  }, [listQuery.data?.tickets, locale]);
 
   const listAwaitingData = isAwaitingInitialQueryData(
     listQuery.data,
@@ -360,7 +360,7 @@ export default function DoctorOnlineConsultationsPage() {
       });
       setCloseOpen(false);
     } catch (error) {
-      toast(getConsultationMutationErrorMessage(error, "close"), {
+      toast(getConsultationMutationErrorMessage(error, "close", locale), {
         title: t("doctor.onlineConsultations.closeError"),
         variant: "error",
       });
@@ -381,7 +381,7 @@ export default function DoctorOnlineConsultationsPage() {
       });
       setDismissOpen(false);
     } catch (error) {
-      toast(getConsultationMutationErrorMessage(error, "dismiss"), {
+      toast(getConsultationMutationErrorMessage(error, "dismiss", locale), {
         title: t("doctor.onlineConsultations.dismissError"),
         variant: "error",
       });
@@ -404,7 +404,7 @@ export default function DoctorOnlineConsultationsPage() {
           setPendingAttachments([]);
         },
         onError: (error) => {
-          toast(getConsultationMutationErrorMessage(error, "send-message"), {
+          toast(getConsultationMutationErrorMessage(error, "send-message", locale), {
             title: t("doctor.onlineConsultations.sendReplyError"),
             variant: "error",
           });

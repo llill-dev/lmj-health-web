@@ -17,6 +17,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { useI18n } from "@/i18n/provider";
 
 export type StyledSelectOption<T extends string = string> = {
   value: T;
@@ -117,14 +118,17 @@ function StyledSelectInner(
     emptyTriggerLabel,
     renderOptionTrailing,
     listboxAriaLabel,
-    chevronAriaLabelOpen = "إغلاق القائمة",
-    chevronAriaLabelClose = "فتح القائمة",
+    chevronAriaLabelOpen,
+    chevronAriaLabelClose,
     dropdownResetKey,
     listboxZIndex = 11050,
     listboxPortalRef,
   }: StyledSelectProps,
   forwardedRef: ForwardedRef<HTMLDivElement>,
 ) {
+  const { t } = useI18n();
+  const resolvedChevronAriaLabelOpen = chevronAriaLabelOpen ?? t("common.closeMenu");
+  const resolvedChevronAriaLabelClose = chevronAriaLabelClose ?? t("common.openMenu");
   const autoId = useId();
   const listboxId = listboxIdProp ?? `${autoId}-listbox`;
   const [open, setOpen] = useState(false);
@@ -399,7 +403,7 @@ function StyledSelectInner(
             >
               {clickable.length === 0 ? (
                 <div className="px-4 py-4 text-start text-[12px] font-semibold leading-6 text-[#667085]">
-                  {emptyState ?? emptyTriggerLabel ?? "لا توجد خيارات متاحة."}
+                  {emptyState ?? emptyTriggerLabel ?? t("common.noOptionsAvailable")}
                 </div>
               ) : (
                 <div
@@ -526,7 +530,7 @@ function StyledSelectInner(
             type="button"
             aria-expanded={open}
             aria-controls={listboxId}
-            aria-label={open ? chevronAriaLabelOpen : chevronAriaLabelClose}
+            aria-label={open ? resolvedChevronAriaLabelOpen : resolvedChevronAriaLabelClose}
             disabled={mergedDisabled}
             className={[
               "flex shrink-0 items-center justify-center text-[#667085] transition-colors hover:bg-[#F2FFFE] focus-visible:bg-[#F2FFFE] disabled:pointer-events-none",

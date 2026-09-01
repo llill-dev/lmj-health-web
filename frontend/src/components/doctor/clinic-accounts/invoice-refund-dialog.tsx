@@ -41,6 +41,7 @@ export function InvoiceRefundDialog({
   onSuccess?: () => void;
 }) {
   const { t, locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const { toast } = useToast();
   const createRefund = useCreateBillingRefund();
 
@@ -119,8 +120,8 @@ export function InvoiceRefundDialog({
     }
 
     if (isBillingDateInputAfterToday(date)) {
-      toast(getBillingFutureDateMessage(t).message, {
-        title: getBillingFutureDateMessage(t).title,
+      toast(getBillingFutureDateMessage(tr).message, {
+        title: getBillingFutureDateMessage(tr).title,
         variant: "error",
       });
       return;
@@ -141,7 +142,7 @@ export function InvoiceRefundDialog({
       onSuccess?.();
       onClose();
     } catch (error) {
-      const { title, message } = getBillingRefundErrorToast(error);
+      const { title, message } = getBillingRefundErrorToast(error, t);
       toast(message, { title, variant: "error" });
     }
   };

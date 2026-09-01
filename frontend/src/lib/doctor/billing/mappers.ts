@@ -22,15 +22,28 @@ import type {
   RecentActivity,
   WeeklyOverviewPoint,
 } from '@/lib/doctor/clinicAccounts/types';
+import { getCurrentLocale } from '@/i18n/runtime';
+import { getTranslationValue } from '@/i18n/translations';
+
+function tr(key: string, params?: Record<string, unknown>): string {
+  const locale = getCurrentLocale();
+  const raw = getTranslationValue(locale, key) ?? key;
+  if (!params) return raw;
+  return raw.replace(/\{(\w+)\}/g, (m, name) =>
+    params[name] != null ? String(params[name]) : m,
+  );
+}
 
 const EXPENSE_COLORS = ['#0F8F8B', '#22C55E', '#F97316', '#EF4444', '#8B5CF6', '#0EA5E9'];
 
-const PAYMENT_METHOD_LABELS: Record<string, string> = {
-  cash: 'نقدي',
-  card: 'بطاقة',
-  bank_transfer: 'تحويل بنكي',
-  insurance: 'تأمين',
-};
+function paymentMethodLabels(): Record<string, string> {
+  return {
+    cash: tr('doctor.billingMappers.paymentMethod.cash'),
+    card: tr('doctor.billingMappers.paymentMethod.card'),
+    bank_transfer: tr('doctor.billingMappers.paymentMethod.bank_transfer'),
+    insurance: tr('doctor.billingMappers.paymentMethod.insurance'),
+  };
+}
 
 function readArrayOrEmpty<T>(value: T[] | null | undefined): T[] {
   return Array.isArray(value) ? value : [];
@@ -50,11 +63,11 @@ function formatRelativeTime(value?: string): string {
   if (Number.isNaN(date.getTime())) return '—';
   const diffMs = Date.now() - date.getTime();
   const hours = Math.floor(diffMs / (1000 * 60 * 60));
-  if (hours < 1) return 'الآن';
-  if (hours < 24) return `منذ ${hours} ساعة`;
+  if (hours < 1) return tr('doctor.billingMappers.relativeTime.now');
+  if (hours < 24) return tr('doctor.billingMappers.relativeTime.hoursAgo', { hours });
   const days = Math.floor(hours / 24);
-  if (days === 1) return 'أمس';
-  return `منذ ${days} يوم`;
+  if (days === 1) return tr('doctor.billingMappers.relativeTime.yesterday');
+  return tr('doctor.billingMappers.relativeTime.daysAgo', { days });
 }
 
 export function mapApiInvoiceStatus(
@@ -125,7 +138,7 @@ export function mapApiInvoiceToClinicInvoice(
     taxPercent,
     items: readInvoiceItems(invoice.items).map((item, index) => ({
       id: item.id ?? `item-${index}`,
-      name: item.serviceNameSnapshot ?? item.description ?? 'خدمة',
+      name: item.serviceNameSnapshot ?? item.description ?? tr('doctor.billingMappers.defaultServiceName'),
       quantity: item.quantity ?? 1,
       unitPrice: item.unitPrice ?? 0,
     })),
@@ -155,7 +168,7 @@ export function mapApiPaymentToClinicPayment(
     amount,
     refundedAmount,
     refundableAmount,
-    method: PAYMENT_METHOD_LABELS[payment.method ?? ''] ?? payment.method ?? '—',
+    method: paymentMethodLabels()[payment.method ?? ''] ?? payment.method ?? '—',
     date: formatIsoDate(payment.paidAt),
   };
 }
@@ -166,7 +179,7 @@ export function mapApiExpenseToClinicExpense(
   const mapped: ClinicExpense = {
     id: expense.number ?? expense.id,
     category: guessExpenseCategory(expense.category),
-    title: expense.description ?? expense.category ?? 'مصروف',
+    title: expense.description ?? expense.category ?? tr('doctor.billingMappers.defaultExpenseName'),
     date: formatIsoDate(expense.expenseDate),
     amount: expense.amount ?? 0,
     currency: expense.currency,
@@ -242,7 +255,7 @@ export function mapExpensesByCategory(
 
   return readArrayOrEmpty(rows).map((row, index) => ({
     category: guessExpenseCategory(row.label),
-    label: row.label ?? 'أخرى',
+    label: row.label ?? tr('doctor.billingMappers.other'),
     value: row.amount ?? 0,
     color: EXPENSE_COLORS[index % EXPENSE_COLORS.length],
   }));
@@ -254,7 +267,7 @@ export function mapRecentActivitiesFromReport(
 ): RecentActivity[] {
   const payments = readArrayOrEmpty(report.tables?.payments).slice(0, 5).map((payment) => ({
     id: `pay-${payment.id}`,
-    title: `دفعة - ${payment.invoiceNumber ?? payment.invoiceId ?? ''}`,
+    title: tr('doctor.billingMappers.paymentTitle', { ref: payment.invoiceNumber ?? payment.invoiceId ?? '' }),
     timeLabel: formatRelativeTime(payment.paidAt),
     amount: payment.amount ?? 0,
     type: 'income' as const,
@@ -263,7 +276,7 @@ export function mapRecentActivitiesFromReport(
 
   const expenses = readArrayOrEmpty(report.tables?.expenses).slice(0, 3).map((expense) => ({
     id: `exp-${expense.id}`,
-    title: expense.description ?? expense.category ?? 'مصروف',
+    title: expense.description ?? expense.category ?? tr('doctor.billingMappers.defaultExpenseName'),
     timeLabel: formatRelativeTime(expense.expenseDate),
     amount: expense.amount ?? 0,
     type: 'expense' as const,

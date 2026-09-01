@@ -45,6 +45,7 @@ import { useI18n } from "@/i18n/provider";
 
 export default function DoctorClinicAddPaymentPage() {
   const { t, locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const methodLabels = buildMethodLabels(t);
   const navigate = useNavigate();
   const { basePath, canViewSettings, isSecretary } = useBillingAccess();
@@ -131,7 +132,7 @@ export default function DoctorClinicAddPaymentPage() {
     }
 
     if (isBillingDateInputAfterToday(date)) {
-      const futureDateMessage = getBillingFutureDateMessage(t);
+      const futureDateMessage = getBillingFutureDateMessage(tr);
       toast(futureDateMessage.message, {
         title: futureDateMessage.title,
         variant: "error",
@@ -155,7 +156,7 @@ export default function DoctorClinicAddPaymentPage() {
       });
       navigate(`${basePath}/invoices`);
     } catch (error) {
-      const { title, message } = getBillingPaymentErrorToast(error);
+      const { title, message } = getBillingPaymentErrorToast(error, t);
       toast(message, {
         title,
         variant: "error",
@@ -164,7 +165,7 @@ export default function DoctorClinicAddPaymentPage() {
   };
 
   const loadErrorToast = invoiceQuery.error
-    ? getBillingInvoiceLoadErrorToast(invoiceQuery.error)
+    ? getBillingInvoiceLoadErrorToast(invoiceQuery.error, t)
     : null;
 
   return (

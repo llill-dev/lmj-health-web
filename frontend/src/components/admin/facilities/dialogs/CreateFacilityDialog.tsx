@@ -53,7 +53,7 @@ export default function CreateFacilityDialog({
   doctors,
   onSuccess,
 }: CreateFacilityDialogProps) {
-  const { dir, t } = useI18n();
+  const { dir, t, locale } = useI18n();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -217,7 +217,7 @@ export default function CreateFacilityDialog({
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
-      const feedback = resolveAdminFacilityFormFeedback(error, "create");
+      const feedback = resolveAdminFacilityFormFeedback(error, "create", locale);
       setErrors(feedback.fields);
       setRootError(feedback.rootBanner ?? "");
       toast(feedback.toastMessage, {

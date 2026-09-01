@@ -23,7 +23,7 @@ export function MedicalRequestUpdateStatusDialog({
   busy?: boolean;
   onConfirm: (statusCode: string) => Promise<void>;
 }) {
-  const { dir, locale } = useI18n();
+  const { dir, locale, t } = useI18n();
   const options = useMemo(
     () => buildDoctorOrderStatusUpdateOptions(currentStatusCode, locale),
     [currentStatusCode, locale],
@@ -40,18 +40,18 @@ export function MedicalRequestUpdateStatusDialog({
     <MedicalRequestModalShell
       open={open}
       onClose={onClose}
-      title="تحديث الحالة"
+      title={t('doctor.medicalRequestUpdateStatus.title')}
       maxWidthClass="max-w-[480px]"
     >
       <div className="space-y-5 text-start" dir={dir}>
         <p className="font-cairo text-[13px] font-semibold leading-6 text-[#667085]">
-          تحديث حالة طلب المريض{' '}
+          {t('doctor.medicalRequestUpdateStatus.subtitle')}{' '}
           <span className="font-extrabold text-[#111827]">{patientName}</span>
         </p>
 
         <div className="rounded-[8px] border border-[#EEF2F6] bg-[#F8FAFC] px-4 py-3">
           <span className="block font-cairo text-[11px] font-bold text-[#667085]">
-            الحالة الحالية
+            {t('doctor.medicalRequestUpdateStatus.currentStatus')}
           </span>
           <span className="mt-1 block font-cairo text-[14px] font-extrabold text-[#111827]">
             {currentStatusLabel}
@@ -60,7 +60,7 @@ export function MedicalRequestUpdateStatusDialog({
 
         <div>
           <span className="mb-2 block font-cairo text-[12px] font-extrabold text-[#344054]">
-            الحالة الجديدة
+            {t('doctor.medicalRequestUpdateStatus.newStatus')}
           </span>
           {options.length ? (
             <StyledSelect
@@ -70,15 +70,14 @@ export function MedicalRequestUpdateStatusDialog({
               onChange={setNextStatus}
               disabled={busy}
               options={options}
-              placeholder="اختر الحالة الجديدة"
-              listboxAriaLabel="الحالة الجديدة"
+              placeholder={t('doctor.medicalRequestUpdateStatus.selectNewStatus')}
+              listboxAriaLabel={t('doctor.medicalRequestUpdateStatus.newStatus')}
               listboxZIndex={200}
-              emptyState="لا توجد حالات متاحة"
+              emptyState={t('doctor.medicalRequestUpdateStatus.noStatusesAvailable')}
             />
           ) : (
             <p className="rounded-[8px] border border-[#FEF3C7] bg-[#FFFBEB] px-4 py-3 font-cairo text-[12px] font-semibold leading-6 text-[#92400E]">
-              لا يمكن تغيير حالة هذا الطلب لأنه في حالة نهائية (مكتمل، معتمد، ملغى، أو
-              مرفوض).
+              {t('doctor.medicalRequestUpdateStatus.terminalStateHint')}
             </p>
           )}
         </div>
@@ -90,7 +89,7 @@ export function MedicalRequestUpdateStatusDialog({
             disabled={busy}
             className="inline-flex h-11 items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white font-cairo text-[13px] font-extrabold text-[#475467]"
           >
-            إلغاء
+            {t('doctor.medicalRequestUpdateStatus.cancel')}
           </button>
           <button
             type="button"
@@ -98,7 +97,7 @@ export function MedicalRequestUpdateStatusDialog({
             onClick={() => void onConfirm(nextStatus)}
             className="inline-flex h-11 items-center justify-center rounded-[8px] bg-primary font-cairo text-[13px] font-extrabold text-white shadow-[0_10px_22px_rgba(15,143,139,0.28)] disabled:opacity-60"
           >
-            {busy ? 'جارٍ الحفظ...' : 'تأكيد'}
+            {busy ? t('doctor.medicalRequestUpdateStatus.saving') : t('doctor.medicalRequestUpdateStatus.confirm')}
           </button>
         </div>
       </div>

@@ -57,7 +57,7 @@ export default function EditFacilityDialog({
   doctors,
   onSuccess,
 }: EditFacilityDialogProps) {
-  const { dir, t } = useI18n();
+  const { dir, t, locale } = useI18n();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -212,7 +212,7 @@ export default function EditFacilityDialog({
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
-      const feedback = resolveAdminFacilityFormFeedback(error, "edit");
+      const feedback = resolveAdminFacilityFormFeedback(error, "edit", locale);
       setErrors(feedback.fields);
       setRootError(feedback.rootBanner ?? "");
       toast(feedback.toastMessage, {

@@ -364,7 +364,7 @@ export default function DoctorAppointmentsPage() {
         if (!fileUrl) throw new Error("missing download url");
         window.open(fileUrl, "_blank", "noopener,noreferrer");
       } catch (error) {
-        toast(getAppointmentFileAccessErrorMessage(error, "open"), {
+        toast(getAppointmentFileAccessErrorMessage(error, "open", locale), {
           title: t("doctor.appointments.file.openFailed"),
           variant: "error",
         });
@@ -390,7 +390,7 @@ export default function DoctorAppointmentsPage() {
           fileResponse.file?.originalName ?? "appointment-file",
         );
       } catch (error) {
-        toast(getAppointmentFileAccessErrorMessage(error, "download"), {
+        toast(getAppointmentFileAccessErrorMessage(error, "download", locale), {
           title: t("doctor.appointments.file.downloadFailed"),
           variant: "error",
         });
@@ -425,7 +425,7 @@ export default function DoctorAppointmentsPage() {
           durationMs: 4200,
         });
       } catch (error) {
-        toast(getAppointmentFileMutationErrorMessage(error, "unlink"), {
+        toast(getAppointmentFileMutationErrorMessage(error, "unlink", locale), {
           title: t("doctor.appointments.file.unlinkFailed"),
           variant: "error",
           durationMs: 4800,
@@ -467,7 +467,7 @@ export default function DoctorAppointmentsPage() {
           durationMs: 4200,
         });
       } catch (error) {
-        toast(getAppointmentFileMutationErrorMessage(error, "upload"), {
+        toast(getAppointmentFileMutationErrorMessage(error, "upload", locale), {
           title: t("doctor.appointments.file.uploadFailed"),
           variant: "error",
         });
@@ -602,7 +602,7 @@ export default function DoctorAppointmentsPage() {
                 durationMs: 4200,
               });
             } catch (error) {
-              toast(getAppointmentBookingErrorMessage(error), {
+              toast(getAppointmentBookingErrorMessage(error, locale), {
                 title: t("doctor.appointments.bookFailed"),
                 variant: "error",
                 durationMs: 5200,
@@ -666,7 +666,7 @@ export default function DoctorAppointmentsPage() {
                 body: { reason: reason || undefined },
               });
             } catch (error) {
-              toast(getAppointmentWriteErrorMessage(error, "cancel"), {
+              toast(getAppointmentWriteErrorMessage(error, "cancel", locale), {
                 title: t("doctor.appointments.identityErrorTitle"),
                 variant: "error",
                 durationMs: 4800,
@@ -703,7 +703,7 @@ export default function DoctorAppointmentsPage() {
               });
             } catch (error) {
               toast(
-                getAppointmentStatusMutationErrorMessage(error, "complete"),
+                getAppointmentStatusMutationErrorMessage(error, "complete", locale),
                 {
                   title: t("doctor.appointments.identityErrorTitle"),
                   variant: "error",
@@ -742,7 +742,7 @@ export default function DoctorAppointmentsPage() {
               });
             } catch (error) {
               toast(
-                getAppointmentStatusMutationErrorMessage(error, "no-show"),
+                getAppointmentStatusMutationErrorMessage(error, "no-show", locale),
                 {
                   title: t("doctor.appointments.identityErrorTitle"),
                   variant: "error",
@@ -784,7 +784,7 @@ export default function DoctorAppointmentsPage() {
                 durationMs: 4200,
               });
             } catch (error) {
-              toast(getAppointmentWriteErrorMessage(error, "reschedule"), {
+              toast(getAppointmentWriteErrorMessage(error, "reschedule", locale), {
                 title: t("doctor.appointments.identityErrorTitle"),
                 variant: "error",
                 durationMs: 4800,

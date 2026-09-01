@@ -52,30 +52,26 @@ function catalogItemsBody(
 
 function draftPlaceholderItem(
   category: EncounterOrderCategoryKey,
+  locale: 'ar' | 'en' = 'ar',
 ): ImagingOrderItemBody {
+  const isEn = locale === 'en';
   switch (category) {
-    case 'lab':
-      return {
-        title: 'مسودة تحليل',
-        name: 'مسودة تحليل',
-        displayName: 'مسودة تحليل',
-        testName: 'مسودة تحليل',
-      };
-    case 'radiology':
-      return {
-        title: 'مسودة أشعة',
-        name: 'مسودة أشعة',
-        displayName: 'مسودة أشعة',
-      };
-    case 'procedure':
-      return {
-        title: 'مسودة إجراء',
-        name: 'مسودة إجراء',
-        displayName: 'مسودة إجراء',
-        procedureName: 'مسودة إجراء',
-      };
-    default:
-      return { title: 'مسودة', name: 'مسودة' };
+    case 'lab': {
+      const label = isEn ? 'Lab draft' : 'مسودة تحليل';
+      return { title: label, name: label, displayName: label, testName: label };
+    }
+    case 'radiology': {
+      const label = isEn ? 'Imaging draft' : 'مسودة أشعة';
+      return { title: label, name: label, displayName: label };
+    }
+    case 'procedure': {
+      const label = isEn ? 'Procedure draft' : 'مسودة إجراء';
+      return { title: label, name: label, displayName: label, procedureName: label };
+    }
+    default: {
+      const label = isEn ? 'Draft' : 'مسودة';
+      return { title: label, name: label };
+    }
   }
 }
 
@@ -83,9 +79,10 @@ function draftPlaceholderItem(
 export function draftManualPlaceholderBody(
   category: EncounterOrderCategoryKey,
   patientId: string,
+  locale: 'ar' | 'en' = 'ar',
 ): CreateEncounterOrderBody {
   const pid = patientId.trim();
-  const item = draftPlaceholderItem(category);
+  const item = draftPlaceholderItem(category, locale);
   return {
     patientId: pid,
     manualItems: [item],
@@ -101,6 +98,7 @@ export function buildStandaloneOrderCreateCandidates(
   category: EncounterOrderCategoryKey,
   patientId: string,
   catalogItemId?: string,
+  locale: 'ar' | 'en' = 'ar',
 ): CreateEncounterOrderBody[] {
   const pid = patientId.trim();
   if (!pid || category === 'referral') return [];
@@ -118,9 +116,9 @@ export function buildStandaloneOrderCreateCandidates(
     push(catalogItemsBody(pid, catalogItemId.trim()));
   }
 
-  push(draftManualPlaceholderBody(category, pid));
+  push(draftManualPlaceholderBody(category, pid, locale));
 
-  const item = draftPlaceholderItem(category);
+  const item = draftPlaceholderItem(category, locale);
   push({ patientId: pid, items: [item] });
   push({ patientId: pid, manualItems: [item] });
 
@@ -138,6 +136,7 @@ export function buildEncounterOrderCreateCandidates(
   patientId: string,
   encounterId?: string,
   catalogItemId?: string,
+  locale: 'ar' | 'en' = 'ar',
 ): CreateEncounterOrderBody[] {
   const pid = patientId.trim();
   if (!pid) return [{}];
@@ -156,23 +155,26 @@ export function buildEncounterOrderCreateCandidates(
     push(catalogItemsBody(pid, catalogItemId.trim()));
   }
 
-  push(draftManualPlaceholderBody(category, pid));
+  push(draftManualPlaceholderBody(category, pid, locale));
 
-  const item = draftPlaceholderItem(category);
+  const item = draftPlaceholderItem(category, locale);
   push({ patientId: pid, items: [item] });
   push({ patientId: pid, manualItems: [item] });
 
   if (category === 'referral') {
+    const specialty = locale === 'en' ? 'General specialty' : 'اختصاص عام';
+    const reason =
+      locale === 'en' ? 'Referral from the encounter' : 'تحويل من الزيارة الطبية';
     return [
       {
         patientId: pid,
-        specialty: 'اختصاص عام',
-        reason: 'تحويل من الزيارة الطبية',
+        specialty,
+        reason,
         ...(eid ? { encounterId: eid } : {}),
       },
       {
-        specialty: 'اختصاص عام',
-        reason: 'تحويل من الزيارة الطبية',
+        specialty,
+        reason,
       },
     ];
   }
@@ -186,6 +188,7 @@ export function buildEncounterOrderCreateBody(
   patientId: string,
   encounterId?: string,
   catalogItemId?: string,
+  locale: 'ar' | 'en' = 'ar',
 ): CreateEncounterOrderBody {
   return (
     buildEncounterOrderCreateCandidates(
@@ -193,7 +196,8 @@ export function buildEncounterOrderCreateBody(
       patientId,
       encounterId,
       catalogItemId,
-    )[0] ?? draftManualPlaceholderBody(category, patientId)
+      locale,
+    )[0] ?? draftManualPlaceholderBody(category, patientId, locale)
   );
 }
 

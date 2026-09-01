@@ -66,8 +66,8 @@ export default function DoctorLayout() {
     )?.path ?? "dashboard";
 
   const backLink = useMemo(
-    () => getSectionBackNavigation(pathname, "/doctor", sidebarItems),
-    [pathname],
+    () => getSectionBackNavigation(pathname, "/doctor", sidebarItems, t),
+    [pathname, t],
   );
 
   return (

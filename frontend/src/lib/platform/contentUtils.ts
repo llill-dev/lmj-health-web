@@ -3,6 +3,7 @@ import type {
   PlatformContactChannel,
   PlatformContentApiRecord,
   PlatformContentDetails,
+  PlatformContentLanguage,
   PlatformContentListItem,
   PlatformFaqItem,
   PlatformLegalDocument,
@@ -486,11 +487,16 @@ function formatContentDate(value?: string | null): string {
   });
 }
 
-export function extractAboutSummary(content: PlatformContentDetails): string {
+export function extractAboutSummary(
+  content: PlatformContentDetails,
+  language: PlatformContentLanguage = 'ar',
+): string {
   if (content.summary?.trim()) return content.summary.trim();
   const text = contentBlocksToPlainText(content.contentBlocks);
   if (!text) {
-    return 'منصتنا تهدف إلى تقديم أفضل الخدمات الصحية الرقمية بأعلى معايير الجودة والخصوصية.';
+    return language === 'en'
+      ? 'Our platform aims to provide the best digital healthcare services with the highest standards of quality and privacy.'
+      : 'منصتنا تهدف إلى تقديم أفضل الخدمات الصحية الرقمية بأعلى معايير الجودة والخصوصية.';
   }
   return text.length > 220 ? `${text.slice(0, 217)}…` : text;
 }

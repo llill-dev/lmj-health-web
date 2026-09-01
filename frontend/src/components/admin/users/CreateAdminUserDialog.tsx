@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils/utils";
 import { useI18n } from "@/i18n/provider";
 import {
   PHONE_DIAL_CODE_OPTIONS,
+  getPhoneDialCodeOptions,
   type PhoneDialCode,
 } from "@/lib/phone/dialCodes";
 import {
@@ -62,7 +63,7 @@ export default function CreateAdminUserDialog({
   open,
   onOpenChange,
 }: CreateAdminUserDialogProps) {
-  const { dir, t } = useI18n();
+  const { dir, t, locale } = useI18n();
   const { toast } = useToast();
   const createMutation = useCreateAdminUser();
   const [showPassword, setShowPassword] = useState(false);
@@ -291,7 +292,7 @@ export default function CreateAdminUserDialog({
                         render={({ field }) => (
                           <StyledSelect
                             {...field}
-                            options={PHONE_DIAL_CODE_OPTIONS as any}
+                            options={getPhoneDialCodeOptions(locale) as any}
                             size="sm"
                             tone="muted"
                             disabled={createMutation.isPending}

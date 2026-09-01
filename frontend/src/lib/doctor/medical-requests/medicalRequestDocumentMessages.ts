@@ -1,18 +1,45 @@
 import { ApiError, getUserFacingRequestErrorMessage } from '@/lib/api';
+import { getTranslationValue } from '@/i18n/translations';
+import { getCurrentLocale, type AppLocale } from '@/i18n/runtime';
 
-export const MEDICAL_REQUEST_NO_RESULT_FILES_AR =
-  'لا توجد ملفات نتيجة متاحة للتحميل حالياً.';
+function tr(locale: AppLocale, key: string): string {
+  return getTranslationValue(locale, key) ?? key;
+}
 
-export const MEDICAL_REQUEST_NO_RESULT_VIEW_AR =
-  'لا توجد نتيجة أو ملفات متاحة للعرض حالياً.';
+export const MEDICAL_REQUEST_NO_RESULT_FILES_AR = tr(
+  'ar',
+  'doctor.medicalRequests.errors.noResultFiles',
+);
 
-export const MEDICAL_REQUEST_NO_RESULT_DATA_AR =
-  'لا توجد بيانات نتيجة أو ملفات لهذا الطلب.';
+export const MEDICAL_REQUEST_NO_RESULT_VIEW_AR = tr(
+  'ar',
+  'doctor.medicalRequests.errors.noResultView',
+);
+
+export const MEDICAL_REQUEST_NO_RESULT_DATA_AR = tr(
+  'ar',
+  'doctor.medicalRequests.errors.noResultData',
+);
+
+export function medicalRequestNoResultFilesMessage(
+  locale: AppLocale = getCurrentLocale(),
+): string {
+  return tr(locale, 'doctor.medicalRequests.errors.noResultFiles');
+}
+
+export function medicalRequestNoResultViewMessage(
+  locale: AppLocale = getCurrentLocale(),
+): string {
+  return tr(locale, 'doctor.medicalRequests.errors.noResultView');
+}
 
 /** رسائل واضحة عند فشل POST /api/documents/generate أو غياب المرفقات. */
 export function resolveMedicalRequestDocumentErrorMessage(
   error: unknown,
+  locale: AppLocale = getCurrentLocale(),
 ): string {
+  const noResultData = tr(locale, 'doctor.medicalRequests.errors.noResultData');
+
   if (error instanceof ApiError) {
     const key = (error.messageKey ?? '').toLowerCase();
     const status = error.status;
@@ -24,7 +51,7 @@ export function resolveMedicalRequestDocumentErrorMessage(
       key.includes('medicationnotfound') ||
       key.includes('orders.notfound')
     ) {
-      return MEDICAL_REQUEST_NO_RESULT_DATA_AR;
+      return noResultData;
     }
 
     if (
@@ -32,7 +59,7 @@ export function resolveMedicalRequestDocumentErrorMessage(
       key.includes('validation') ||
       key.includes('invalidenum')
     ) {
-      return 'لا يمكن إنشاء مستند نتيجة لهذا الطلب. تحقّق من اكتمال بيانات الطلب.';
+      return tr(locale, 'doctor.medicalRequests.errors.cannotGenerate');
     }
 
     if (
@@ -40,11 +67,11 @@ export function resolveMedicalRequestDocumentErrorMessage(
       key.includes('forbidden') ||
       key.includes('access')
     ) {
-      return 'لا تملك صلاحية تحميل نتيجة هذا الطلب.';
+      return tr(locale, 'doctor.medicalRequests.errors.noDownloadAccess');
     }
 
     if (status >= 500 || key.includes('render') || key.includes('generat')) {
-      return 'تعذّر إنشاء ملف النتيجة. لا توجد بيانات كافية أو الخدمة غير متاحة مؤقتاً.';
+      return tr(locale, 'doctor.medicalRequests.errors.generationFailed');
     }
 
     const msg = error.message?.trim();
@@ -53,13 +80,15 @@ export function resolveMedicalRequestDocumentErrorMessage(
     }
   }
 
-  const generic = getUserFacingRequestErrorMessage(error);
+  const generic = getUserFacingRequestErrorMessage(error, locale);
   if (
     generic.includes('لم يُعثَر') ||
     generic.includes('غير مقبولة') ||
-    generic.includes('تعذّر إنشاء')
+    generic.includes('تعذّر إنشاء') ||
+    generic.includes('not found') ||
+    generic.includes('could not')
   ) {
-    return MEDICAL_REQUEST_NO_RESULT_DATA_AR;
+    return noResultData;
   }
 
   return generic;

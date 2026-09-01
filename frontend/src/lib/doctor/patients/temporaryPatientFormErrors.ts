@@ -158,13 +158,14 @@ export function isEmailPhoneDifferentUsersMessage(text: string): boolean {
  */
 export function resolveCreateTemporaryPatientServerFeedback(
   error: unknown,
+  locale: "ar" | "en" = "ar",
 ): {
   toastMessage: string;
   fields: TemporaryPatientServerFieldMessages;
   /** رسالة عامة تحت عنوان النموذج إذا لم يُوزَّع أي خطأ على حقل */
   rootBanner: string | null;
 } {
-  const toastMessage = getCreateTemporaryPatientErrorMessage(error);
+  const toastMessage = getCreateTemporaryPatientErrorMessage(error, locale);
   const fields: TemporaryPatientServerFieldMessages = {};
 
   const mk =

@@ -20,7 +20,7 @@ export function MedicalRequestUploadResultDialog({
     isFinal: boolean;
   }) => Promise<void>;
 }) {
-  const { dir } = useI18n();
+  const { dir, t } = useI18n();
   const [reportText, setReportText] = useState('');
   const [isFinal, setIsFinal] = useState(false);
 
@@ -35,24 +35,24 @@ export function MedicalRequestUploadResultDialog({
     <MedicalRequestModalShell
       open={open}
       onClose={onClose}
-      title="إضافة نتيجة"
+      title={t('doctor.medicalRequestUploadResult.title')}
       maxWidthClass="max-w-[520px]"
     >
       <div className="space-y-5 text-start" dir={dir}>
         <p className="font-cairo text-[13px] font-semibold text-[#667085]">
-          إضافة نتيجة لطلب المريض{' '}
+          {t('doctor.medicalRequestUploadResult.subtitle')}{' '}
           <span className="font-extrabold text-[#111827]">{patientName}</span>
         </p>
 
         <label className="block">
           <span className="mb-2 block font-cairo text-[12px] font-extrabold text-[#344054]">
-            نص النتيجة
+            {t('doctor.medicalRequestUploadResult.resultTextLabel')}
           </span>
           <textarea
             value={reportText}
             onChange={(event) => setReportText(event.target.value)}
             rows={6}
-            placeholder="اكتب ملخص النتيجة أو الملاحظات السريرية..."
+            placeholder={t('doctor.medicalRequestUploadResult.resultPlaceholder')}
             className="w-full rounded-[8px] border border-[#E5E7EB] px-3 py-2 font-cairo text-[13px]"
           />
         </label>
@@ -63,7 +63,7 @@ export function MedicalRequestUploadResultDialog({
             checked={isFinal}
             onChange={(event) => setIsFinal(event.target.checked)}
           />
-          اعتبار النتيجة نهائية وإكمال الطلب
+          {t('doctor.medicalRequestUploadResult.markFinal')}
         </label>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -73,7 +73,7 @@ export function MedicalRequestUploadResultDialog({
             disabled={busy}
             className="inline-flex h-11 items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white font-cairo text-[13px] font-extrabold text-[#475467]"
           >
-            إلغاء
+            {t('doctor.medicalRequestUploadResult.cancel')}
           </button>
           <button
             type="button"
@@ -86,7 +86,7 @@ export function MedicalRequestUploadResultDialog({
             }
             className="inline-flex h-11 items-center justify-center rounded-[8px] bg-primary font-cairo text-[13px] font-extrabold text-white disabled:opacity-60"
           >
-            {busy ? 'جارٍ الحفظ...' : 'حفظ النتيجة'}
+            {busy ? t('doctor.medicalRequestUploadResult.saving') : t('doctor.medicalRequestUploadResult.save')}
           </button>
         </div>
       </div>

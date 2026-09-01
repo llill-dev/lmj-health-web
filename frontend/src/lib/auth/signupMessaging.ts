@@ -1,4 +1,10 @@
 import { ApiError } from "@/lib/api";
+import { getTranslationValue } from "@/i18n/translations";
+import type { AppLocale } from "@/i18n/runtime";
+
+function tr(locale: AppLocale, key: string): string {
+  return getTranslationValue(locale, key) ?? key;
+}
 
 /** تعارض بريد/هاتف مُعرَّف بوضوح من الاستجابة (يُعرَض تحت الحقلة لا في الشريط العام إن أمكن). */
 export type SignupFieldConflictMessages = {
@@ -12,14 +18,16 @@ export type SignupFieldConflictMessages = {
  * للأخطاء: يُفضَّل عرض رسالة الخادم (وبعدها `Accept-Language` / `x-lang: ar`) قبل أي نص عربي ثابت.
  */
 
-export const SIGNUP_SUBMIT_FALLBACK_AR =
-  "تعذّر إكمال طلب إنشاء الحساب. تحقّق من الإنترنت والبيانات؛ إن ظهرت رسالة من الخادم فاتّبعها ثم أعد المحاولة.";
+export const SIGNUP_SUBMIT_FALLBACK_AR = tr("ar", "signup.submitFallback");
 
 /** عند تعذّر التحقق من OTP دون رسالة خادم */
-export const VERIFY_OTP_FALLBACK_AR =
-  "الرمز غير صحيح أو منتهٍ. أعد المحاولة أو طلب إرسال رمز جديد.";
+export const VERIFY_OTP_FALLBACK_AR = tr("ar", "signup.verifyOtpFallback");
 
-export const VERIFY_CODE_SCHEMA_HINT_AR = "يجب إدخال ٦ أرقام.";
+export const VERIFY_CODE_SCHEMA_HINT_AR = tr("ar", "signup.verifyCodeSchemaHint");
+
+export function getVerifyCodeSchemaHint(locale: AppLocale): string {
+  return tr(locale, "signup.verifyCodeSchemaHint");
+}
 
 type SignupValidationIssue = {
   key: string | null;
@@ -51,35 +59,12 @@ function normalizeIssueKey(key: string | null | undefined): string | null {
     .replace(/^"+|"+$/g, "");
 }
 
-function validationFieldLabel(key: string): string {
+function validationFieldLabel(key: string, locale: AppLocale): string {
   const normalized = normalizeIssueKey(key) ?? key;
   const leaf = normalized.split(".").filter(Boolean).at(-1) ?? normalized;
-  const labels: Record<string, string> = {
-    fullName: "الاسم الكامل",
-    email: "البريد الإلكتروني",
-    phone: "رقم الهاتف",
-    channel: "قناة التحقق",
-    password: "كلمة المرور",
-    role: "نوع الحساب",
-    gender: "الجنس",
-    dateOfBirth: "تاريخ الميلاد",
-    address: "العنوان",
-    specializationKey: "التخصص",
-    customSpecializationText: "التخصص المخصص",
-    specialization: "التخصص",
-    medicalLicenseNumber: "رقم مزاولة المهنة",
-    bio: "النبذة التعريفية",
-    education: "المؤهل العلمي",
-    clinicAddress: "عنوان العيادة",
-    locationCity: "المدينة",
-    locationCountry: "الدولة",
-    consultationTypes: "أنماط الاستشارة",
-    clinicLat: "خط العرض",
-    clinicLng: "خط الطول",
-    otp: "رمز التحقق",
-    clientType: "نوع العميل",
-  };
-  return labels[leaf] ?? normalized;
+  const translationKey = `signup.field.${leaf}`;
+  const translated = getTranslationValue(locale, translationKey);
+  return translated ?? normalized;
 }
 
 function dedupeMessages(messages: string[]): string[] {
@@ -112,7 +97,10 @@ function serverDetailAlreadyContainedIn(
   return false;
 }
 
-function formatValidationDetails(body: SignupErrorBodyRecord): string | null {
+function formatValidationDetails(
+  body: SignupErrorBodyRecord,
+  locale: AppLocale,
+): string | null {
   const issues = collectValidationIssues(body);
   if (!issues.length) return null;
 
@@ -121,7 +109,7 @@ function formatValidationDetails(body: SignupErrorBodyRecord): string | null {
       const messages = dedupeMessages(issue.messages);
       if (!messages.length) return null;
       if (!issue.key) return `• ${messages.join("، ")}`;
-      return `• ${validationFieldLabel(issue.key)}: ${messages.join("، ")}`;
+      return `• ${validationFieldLabel(issue.key, locale)}: ${messages.join("، ")}`;
     })
     .filter((s): s is string => Boolean(s))
     .join("\n");
@@ -342,6 +330,7 @@ export function issueKeyIndicatesMedicalLicense(
  */
 export function extractSignupMedicalLicenseConflictMessage(
   error: unknown,
+  locale: AppLocale = "ar",
 ): string | undefined {
   if (!(error instanceof ApiError)) return undefined;
 
@@ -349,8 +338,7 @@ export function extractSignupMedicalLicenseConflictMessage(
   const msgs: string[] = [];
 
   /** توحيد أسلوب رسالة واحدة مهنية عند يُعاد تصنيفها من حقول الهاتف/البريد */
-  const LICENSE_FALLBACK_ALREADY_AR =
-    "رقم مزاولة المهنة مسجل مسبقاً أو مستخدم؛ جرّب رقم الترخيص الصادر عن الجهة المختصة.";
+  const LICENSE_FALLBACK_ALREADY_AR = tr(locale, "signup.licenseAlreadyFallback");
   const bodyLicenseContext = responseBodyLooksLikeMedicalLicenseViolation(
     error.body,
   );
@@ -603,8 +591,9 @@ export function signupErrorHasOnlyContactFieldIssues(error: unknown): boolean {
 export function formatSignupGeneralBannerError(
   error: unknown,
   fieldConflicts: SignupFieldConflictMessages,
+  locale: AppLocale = "ar",
 ): string | null {
-  const full = formatSignupApiError(error).trim();
+  const full = formatSignupApiError(error, locale).trim();
   if (!full) return null;
 
   let rest = full;
@@ -638,10 +627,13 @@ export function formatSignupGeneralBannerError(
  * رسالة خطأ موحَّدة لتسجيل الطبيب: تفضّل `ApiError.message` (محلية من الخادم عادةً)
  * وتُكمّل بتفاصيل `errors` عند 422 وما شابه.
  */
-export function formatSignupApiError(error: unknown): string {
+export function formatSignupApiError(
+  error: unknown,
+  locale: AppLocale = "ar",
+): string {
   if (error instanceof ApiError) {
     const primary = error.message.trim();
-    const details = formatValidationDetails(error.body);
+    const details = formatValidationDetails(error.body, locale);
     if (details) {
       if (!primary) return details;
       if (primary.includes(details)) return primary;
@@ -652,10 +644,13 @@ export function formatSignupApiError(error: unknown): string {
   if (error instanceof Error && error.message.trim()) {
     return error.message.trim();
   }
-  return SIGNUP_SUBMIT_FALLBACK_AR;
+  return tr(locale, "signup.submitFallback");
 }
 
-export function formatVerifyFlowError(error: unknown): string {
+export function formatVerifyFlowError(
+  error: unknown,
+  locale: AppLocale = "ar",
+): string {
   const truncate = (s: string, max = 160): string => {
     const t = s.trim();
     if (!t) return t;
@@ -684,5 +679,5 @@ export function formatVerifyFlowError(error: unknown): string {
     return truncate(firstSnippet(error.message));
   }
 
-  return VERIFY_OTP_FALLBACK_AR;
+  return tr(locale, "signup.verifyOtpFallback");
 }

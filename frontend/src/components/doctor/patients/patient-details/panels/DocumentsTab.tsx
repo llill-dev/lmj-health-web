@@ -64,7 +64,7 @@ export function DocumentsTab({
   onOpenFiles,
   onOpenEncountersPage,
 }: DocumentsTabProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [filter, setFilter] = useState<"all" | ClinicalDoc["kind"]>("all");
   const kindLabels = buildKindLabels(t);
   const kindFilterOptions = buildKindFilterOptions(t);
@@ -104,7 +104,8 @@ export function DocumentsTab({
         presc.items
           .slice(0, 2)
           .map((i) => i.medicationName)
-          .join("، ") + (presc.items.length > 2 ? "..." : ""),
+          .join(locale === "en" ? ", " : "، ") +
+        (presc.items.length > 2 ? "..." : ""),
       date: presc.createdAt,
       icon: FileText,
       iconColor: "text-[#8B5CF6]",

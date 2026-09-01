@@ -21,17 +21,28 @@ export function formatAppointmentDate(value?: string | null): string {
 }
 
 /**
- * Formats a 24h `HH:MM` time string as a 12h value with مساء/صباحاً, e.g. `14:05` -> `02:05 مساء`.
+ * Formats a 24h `HH:MM` time string as a 12h value with an AM/PM marker localized to
+ * `locale`, e.g. `14:05` -> `02:05 مساءً` (ar) or `02:05 PM` (en).
  * Falls back to the raw input for anything that doesn't parse as `HH:MM`.
  */
-export function formatAppointmentTime(value?: string | null): string {
+export function formatAppointmentTime(
+  value?: string | null,
+  locale: 'ar' | 'en' = 'ar',
+): string {
   if (!value) return '—';
   const match = /^(\d{1,2}):(\d{2})/.exec(value);
   if (!match) return value;
   const hours24 = Number(match[1]);
   const minutes = match[2];
   if (Number.isNaN(hours24) || hours24 > 23) return value;
-  const period = hours24 >= 12 ? 'مساءً' : 'صباحًا';
+  const period =
+    locale === 'en'
+      ? hours24 >= 12
+        ? 'PM'
+        : 'AM'
+      : hours24 >= 12
+        ? 'مساءً'
+        : 'صباحًا';
   const hours12 = hours24 % 12 === 0 ? 12 : hours24 % 12;
   return `${String(hours12).padStart(2, '0')}:${minutes} ${period}`;
 }

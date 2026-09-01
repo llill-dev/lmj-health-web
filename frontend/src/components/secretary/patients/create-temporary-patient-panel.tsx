@@ -8,74 +8,73 @@ import { z } from "zod";
 import StyledSelect from "@/components/ui/styled-select";
 import { useToast } from "@/components/ui/ToastProvider";
 import {
-  SIGNUP_PHONE_DIAL_OPTIONS,
   normalizePhoneLocalDigits,
   validatePhoneByDialCode,
 } from "@/components/auth/signUp/signup-schemas";
+import { PHONE_DIAL_CODES, getPhoneDialCodeOptions } from "@/lib/phone/dialCodes";
 import { cn } from "@/lib/utils/utils";
 import { resolveCreateTemporaryPatientServerFeedback } from "@/lib/doctor/patients/temporaryPatientFormErrors";
 import { useI18n } from "@/i18n/provider";
 
-const TEMP_PATIENT_PHONE_DIAL_CODES = SIGNUP_PHONE_DIAL_OPTIONS.map(
-  (option) => option.value,
-) as [string, ...string[]];
+function buildTempPatientSchema(t: (key: string) => string, locale: "ar" | "en" = "ar") {
+  return z
+    .object({
+      fullName: z
+        .string()
+        .trim()
+        .min(1, t("doctor.tempPatientSchema.nameRequired"))
+        .max(200, t("doctor.tempPatientSchema.nameMax")),
+      email: z
+        .string()
+        .trim()
+        .min(1, t("doctor.tempPatientSchema.emailRequired"))
+        .email(t("doctor.tempPatientSchema.emailInvalid")),
+      phoneDialCode: z.enum(PHONE_DIAL_CODES, {
+        message: t("doctor.tempPatientSchema.dialCodeRequired"),
+      }),
+      phoneLocal: z
+        .string()
+        .trim()
+        .min(1, t("doctor.tempPatientSchema.phoneRequired"))
+        .regex(/^\d+$/, t("doctor.tempPatientSchema.phoneDigitsOnly")),
+    })
+    .superRefine((data, ctx) => {
+      const local = normalizePhoneLocalDigits(data.phoneLocal);
 
-const tempPatientSchema = z
-  .object({
-    fullName: z
-      .string()
-      .trim()
-      .min(1, "الاسم مطلوب")
-      .max(200, "الاسم طويل جداً"),
-    email: z
-      .string()
-      .trim()
-      .min(1, "البريد الإلكتروني مطلوب")
-      .email("البريد الإلكتروني غير صالح"),
-    phoneDialCode: z.enum(TEMP_PATIENT_PHONE_DIAL_CODES, {
-      message: "اختر رمز دولة صحيحاً",
-    }),
-    phoneLocal: z
-      .string()
-      .trim()
-      .min(1, "رقم الهاتف مطلوب")
-      .regex(/^\d+$/, "أدخل أرقاماً فقط بدون مسافات أو رمز الدولة"),
-  })
-  .superRefine((data, ctx) => {
-    const local = normalizePhoneLocalDigits(data.phoneLocal);
+      if (!local.length) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("doctor.tempPatientSchema.phoneNoLeadingZero"),
+          path: ["phoneLocal"],
+        });
+        return;
+      }
 
-    if (!local.length) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "أدخل الرقم المحلي بدون الصفر الأول",
-        path: ["phoneLocal"],
-      });
-      return;
-    }
+      const phoneError = validatePhoneByDialCode(
+        data.phoneDialCode as Parameters<typeof validatePhoneByDialCode>[0],
+        data.phoneLocal,
+        locale,
+      );
+      if (phoneError && phoneError !== "أدخل رقم الهاتف بدون رمز الدولة" && phoneError !== "Enter phone number without country code") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: phoneError,
+          path: ["phoneLocal"],
+        });
+      }
+    })
+    .transform((data) => {
+      const local = normalizePhoneLocalDigits(data.phoneLocal);
+      return {
+        fullName: data.fullName.trim(),
+        email: data.email.trim().toLowerCase(),
+        phone: `${data.phoneDialCode}${local}`,
+      };
+    });
+}
 
-    const phoneError = validatePhoneByDialCode(
-      data.phoneDialCode as Parameters<typeof validatePhoneByDialCode>[0],
-      data.phoneLocal,
-    );
-    if (phoneError && phoneError !== "أدخل رقم الهاتف بدون رمز الدولة") {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: phoneError,
-        path: ["phoneLocal"],
-      });
-    }
-  })
-  .transform((data) => {
-    const local = normalizePhoneLocalDigits(data.phoneLocal);
-    return {
-      fullName: data.fullName.trim(),
-      email: data.email.trim().toLowerCase(),
-      phone: `${data.phoneDialCode}${local}`,
-    };
-  });
-
-type FormValues = z.input<typeof tempPatientSchema>;
-type Values = z.output<typeof tempPatientSchema>;
+type FormValues = z.input<ReturnType<typeof buildTempPatientSchema>>;
+type Values = z.output<ReturnType<typeof buildTempPatientSchema>>;
 
 const inputBaseClass =
   "h-[50px] w-full rounded-[14px] border bg-white px-4 ps-8 font-cairo text-[13px] font-bold text-[#101828] shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] outline-none transition-[border-color,box-shadow,background] placeholder:text-[#98A2B3]";
@@ -114,7 +113,7 @@ export default function CreateTemporaryPatientPanel({
     clearErrors,
     formState: { errors, isSubmitting },
   } = useForm<FormValues, undefined, Values>({
-    resolver: zodResolver(tempPatientSchema),
+    resolver: zodResolver(buildTempPatientSchema(t, locale)),
     defaultValues: {
       fullName: "",
       email: "",
@@ -178,7 +177,7 @@ export default function CreateTemporaryPatientPanel({
               await onSubmit(values);
               reset();
             } catch (err: unknown) {
-              const fb = resolveCreateTemporaryPatientServerFeedback(err);
+              const fb = resolveCreateTemporaryPatientServerFeedback(err, locale);
               toast(fb.toastMessage, {
                 title: t("secretary.temporaryPatient.createError"),
                 variant: "error",
@@ -290,10 +289,7 @@ export default function CreateTemporaryPatientPanel({
                       <StyledSelect
                         className="w-full min-w-0"
                         triggerClassName="rounded-[11px] !text-[15px] !font-extrabold text-[#101828]"
-                        options={SIGNUP_PHONE_DIAL_OPTIONS.map((option) => ({
-                          value: option.value,
-                          label: option.label,
-                        }))}
+                        options={getPhoneDialCodeOptions(locale)}
                         value={field.value}
                         onChange={field.onChange}
                         onBlur={field.onBlur}

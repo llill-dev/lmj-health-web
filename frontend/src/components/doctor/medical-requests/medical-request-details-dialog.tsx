@@ -26,7 +26,7 @@ export function MedicalRequestDetailsDialog({
   onUpdateStatus: () => void;
   onUploadResult: () => void;
 }) {
-  const { dir } = useI18n();
+  const { dir, t } = useI18n();
   const { openResultUrl, documentBusy } = useMedicalRequestDocument();
 
   if (!vm) return null;
@@ -40,7 +40,7 @@ export function MedicalRequestDetailsDialog({
     <MedicalRequestModalShell
       open={open}
       onClose={onClose}
-      title="تفاصيل الطلب"
+      title={t('doctor.medicalRequestDetails.title')}
       titleIcon={<FileText className="h-5 w-5 shrink-0 text-primary" aria-hidden />}
     >
       <div className="space-y-5">
@@ -49,7 +49,7 @@ export function MedicalRequestDetailsDialog({
         <section dir={dir} className="text-start">
           <div className="mb-2 flex items-center justify-start gap-2 font-cairo text-[13px] font-extrabold text-[#111827]">
             <ClipboardList className="h-4 w-4 shrink-0 text-primary" aria-hidden />
-            <span>ملاحظات إضافية</span>
+            <span>{t('doctor.medicalRequestDetails.additionalNotes')}</span>
           </div>
           <div className="rounded-[8px] border border-[#EEF2F6] bg-[#F8FAFC] px-4 py-3 text-start font-cairo text-[13px] font-semibold leading-6 text-[#344054]">
             {vm.additionalNotes}
@@ -60,7 +60,7 @@ export function MedicalRequestDetailsDialog({
           <section dir={dir} className="text-start">
             <div className="mb-3 flex items-center justify-start gap-2 font-cairo text-[13px] font-extrabold text-[#111827]">
               <ClipboardList className="h-4 w-4 shrink-0 text-primary" aria-hidden />
-              <span>النتيجة</span>
+              <span>{t('doctor.medicalRequestDetails.result')}</span>
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <button
@@ -80,7 +80,7 @@ export function MedicalRequestDetailsDialog({
                 className="inline-flex h-11 items-center justify-center gap-2 rounded-[8px] border-2 border-primary bg-white font-cairo text-[13px] font-extrabold text-primary transition hover:bg-[#F0FDFA] disabled:opacity-60"
               >
                 <Eye className="h-4 w-4" aria-hidden />
-                عرض
+                {t('doctor.medicalRequestDetails.view')}
               </button>
               <button
                 type="button"
@@ -89,7 +89,7 @@ export function MedicalRequestDetailsDialog({
                 className="inline-flex h-11 items-center justify-center gap-2 rounded-[8px] border-2 border-primary bg-white font-cairo text-[13px] font-extrabold text-primary transition hover:bg-[#F0FDFA] disabled:opacity-60"
               >
                 <Download className="h-4 w-4" aria-hidden />
-                تحميل
+                {t('doctor.medicalRequestDetails.download')}
               </button>
             </div>
           </section>
@@ -102,7 +102,7 @@ export function MedicalRequestDetailsDialog({
             disabled={!vm.canUploadResults}
             className="inline-flex h-11 items-center justify-center rounded-[8px] border-2 border-primary bg-white font-cairo text-[13px] font-extrabold text-primary transition hover:bg-[#F0FDFA] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            إضافة نتيجة
+            {t('doctor.medicalRequestDetails.addResult')}
           </button>
           <button
             type="button"
@@ -110,14 +110,14 @@ export function MedicalRequestDetailsDialog({
             disabled={!vm.canUpdateStatus}
             className="inline-flex h-11 items-center justify-center rounded-[8px] bg-primary font-cairo text-[13px] font-extrabold text-white shadow-[0_10px_22px_rgba(15,143,139,0.28)] transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            تحديث الحالة
+            {t('doctor.medicalRequestDetails.updateStatus')}
           </button>
           <button
             type="button"
             onClick={onReorder}
             className="inline-flex h-11 items-center justify-center rounded-[8px] bg-primary font-cairo text-[13px] font-extrabold text-white shadow-[0_10px_22px_rgba(15,143,139,0.28)] transition hover:opacity-95 sm:col-span-2"
           >
-            إعادة الطلب
+            {t('doctor.medicalRequestDetails.reorder')}
           </button>
         </div>
       </div>

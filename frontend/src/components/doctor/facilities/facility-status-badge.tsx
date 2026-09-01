@@ -1,8 +1,9 @@
 import {
-  FACILITY_STATUS_LABELS,
+  getFacilityStatusLabels,
   type DoctorFacilityStatus,
 } from '@/lib/doctor/facilities/types';
 import { cn } from '@/lib/utils/utils';
+import { useI18n } from '@/i18n/provider';
 
 const STYLES: Record<DoctorFacilityStatus, string> = {
   active: 'bg-[#DCFCE7] text-[#16A34A]',
@@ -11,6 +12,7 @@ const STYLES: Record<DoctorFacilityStatus, string> = {
 };
 
 export function FacilityStatusBadge({ status }: { status: DoctorFacilityStatus }) {
+  const { t } = useI18n();
   return (
     <span
       className={cn(
@@ -18,7 +20,7 @@ export function FacilityStatusBadge({ status }: { status: DoctorFacilityStatus }
         STYLES[status],
       )}
     >
-      {FACILITY_STATUS_LABELS[status]}
+      {getFacilityStatusLabels(t)[status]}
     </span>
   );
 }

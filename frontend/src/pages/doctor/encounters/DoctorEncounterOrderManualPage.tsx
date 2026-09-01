@@ -101,7 +101,7 @@ export default function DoctorEncounterOrderManualPage({
           saving={workspace.isBusy}
           onSave={async () => {
             try {
-              const valid = assertOrderManualFormValid(form);
+              const valid = assertOrderManualFormValid(form, t);
               await workspace.addManualItem(valid);
               toast(config.catalogAddToast, { variant: "success" });
               setForm(EMPTY);

@@ -3,22 +3,24 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { ClipboardEvent, KeyboardEvent } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import PasswordResetShell from "@/components/auth/password/PasswordResetShell";
 import {
-  VERIFY_CODE_SCHEMA_HINT_AR,
   formatVerifyFlowError,
+  getVerifyCodeSchemaHint,
 } from "@/lib/auth/signupMessaging";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useI18n } from "@/i18n/provider";
 
-const verifySchema = z.object({
-  code: z.string().regex(/^\d{6}$/, VERIFY_CODE_SCHEMA_HINT_AR),
-});
+function buildVerifySchema(locale: "ar" | "en") {
+  return z.object({
+    code: z.string().regex(/^\d{6}$/, getVerifyCodeSchemaHint(locale)),
+  });
+}
 
-type VerifyValues = z.infer<typeof verifySchema>;
+type VerifyValues = z.infer<ReturnType<typeof buildVerifySchema>>;
 
 export default function ResetPasswordVerifyForm({
   destination,
@@ -31,8 +33,9 @@ export default function ResetPasswordVerifyForm({
   onVerify?: (code: string) => void | Promise<void>;
   onResend?: () => void | Promise<void>;
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { toast } = useToast();
+  const verifySchema = useMemo(() => buildVerifySchema(locale), [locale]);
   const {
     handleSubmit,
     setValue,
@@ -103,7 +106,7 @@ export default function ResetPasswordVerifyForm({
     try {
       await onVerify(values.code);
     } catch (error) {
-      const formatted = formatVerifyFlowError(error);
+      const formatted = formatVerifyFlowError(error, locale);
       setFlowError(formatted);
       toast(formatted.replace(/\s+/g, " ").trim().slice(0, 220), {
         title: t("auth.resetPassword.verificationFailed"),
@@ -198,7 +201,7 @@ export default function ResetPasswordVerifyForm({
                       durationMs: 3200,
                     });
                   } catch (error) {
-                    const formatted = formatVerifyFlowError(error);
+                    const formatted = formatVerifyFlowError(error, locale);
                     setFlowError(formatted);
                     toast(formatted.replace(/\s+/g, " ").trim().slice(0, 220), {
                       title: t("auth.claim.resendFailed"),

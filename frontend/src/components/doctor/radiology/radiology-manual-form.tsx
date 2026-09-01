@@ -14,8 +14,8 @@ export function RadiologyManualForm({
   onSave,
   onCancel,
   saving,
-  title = 'إدخال يدوياً',
-  nameLabel = 'الاسم',
+  title,
+  nameLabel,
   fieldErrors = {},
 }: {
   value: RadiologyManualForm;
@@ -27,19 +27,21 @@ export function RadiologyManualForm({
   nameLabel?: string;
   fieldErrors?: OrderManualFieldMessages;
 }) {
-  const { locale, dir } = useI18n();
+  const { locale, dir, t } = useI18n();
+  const resolvedTitle = title ?? t('doctor.radiologyManualForm.title');
+  const resolvedNameLabel = nameLabel ?? t('doctor.radiologyManualForm.nameLabel');
   const set = (patch: Partial<RadiologyManualForm>) =>
     onChange({ ...value, ...patch });
 
   return (
     <section className="mb-6 space-y-4 rounded-[12px] border border-[#E4E7EC] bg-white px-4 py-5 sm:px-5">
       <h2 className="text-start font-cairo text-[16px] font-extrabold text-[#101828]">
-        {title}
+        {resolvedTitle}
       </h2>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <DoctorProfileFormField
-          label={nameLabel}
+          label={resolvedNameLabel}
           required
           error={fieldErrors.name}
         >
@@ -54,33 +56,33 @@ export function RadiologyManualForm({
             )}
           />
         </DoctorProfileFormField>
-        <DoctorProfileFormField label="النوع" error={fieldErrors.type}>
+        <DoctorProfileFormField label={t('doctor.radiologyManualForm.typeLabel')} error={fieldErrors.type}>
           <input
             dir={dir}
             lang={locale}
             value={value.type}
             onChange={(e) => set({ type: e.target.value })}
-            placeholder="مثال: عينة دم، بول"
+            placeholder={t('doctor.radiologyManualForm.typePlaceholder')}
             className={profileFieldClass(
               profileInputClass,
               Boolean(fieldErrors.type),
             )}
           />
         </DoctorProfileFormField>
-        <DoctorProfileFormField label="منطقة الجسم" error={fieldErrors.bodyArea}>
+        <DoctorProfileFormField label={t('doctor.radiologyManualForm.bodyAreaLabel')} error={fieldErrors.bodyArea}>
           <input
             dir={dir}
             lang={locale}
             value={value.bodyArea}
             onChange={(e) => set({ bodyArea: e.target.value })}
-            placeholder="اختياري"
+            placeholder={t('doctor.radiologyManualForm.optional')}
             className={profileFieldClass(
               profileInputClass,
               Boolean(fieldErrors.bodyArea),
             )}
           />
         </DoctorProfileFormField>
-        <DoctorProfileFormField label="الجهة" error={fieldErrors.side}>
+        <DoctorProfileFormField label={t('doctor.radiologyManualForm.sideLabel')} error={fieldErrors.side}>
           <input
             dir={dir}
             lang={locale}
@@ -92,7 +94,7 @@ export function RadiologyManualForm({
             )}
           />
         </DoctorProfileFormField>
-        <DoctorProfileFormField label="الوضعية" error={fieldErrors.position}>
+        <DoctorProfileFormField label={t('doctor.radiologyManualForm.positionLabel')} error={fieldErrors.position}>
           <input
             dir={dir}
             lang={locale}
@@ -106,7 +108,7 @@ export function RadiologyManualForm({
         </DoctorProfileFormField>
       </div>
 
-      <DoctorProfileFormField label="ملاحظات" error={fieldErrors.notes}>
+      <DoctorProfileFormField label={t('doctor.radiologyManualForm.notesLabel')} error={fieldErrors.notes}>
         <textarea
           dir={dir}
           lang={locale}
@@ -125,7 +127,7 @@ export function RadiologyManualForm({
           disabled={saving}
           className="flex h-12 items-center justify-center rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
         >
-          حفظ
+          {t('doctor.radiologyManualForm.save')}
         </button>
         <button
           type="button"
@@ -133,7 +135,7 @@ export function RadiologyManualForm({
           disabled={saving}
           className="flex h-12 items-center justify-center rounded-[12px] border-2 border-primary bg-[#E6F4F3] font-cairo text-[14px] font-extrabold text-primary"
         >
-          إلغاء
+          {t('doctor.radiologyManualForm.cancel')}
         </button>
       </div>
     </section>

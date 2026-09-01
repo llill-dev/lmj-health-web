@@ -1,17 +1,32 @@
 import { z } from 'zod';
 import type { RadiologyManualForm } from '@/components/doctor/radiology/radiology-types';
+import { getTranslationValue } from '@/i18n/translations';
+import { getCurrentLocale } from '@/i18n/runtime';
 
-export const ORDER_MANUAL_MESSAGES = {
-  nameRequired: 'اسم التحليل أو الفحص مطلوب.',
-  nameMin: 'الاسم قصير جداً (حرفان على الأقل).',
-  nameMax: 'الاسم طويل جداً (200 حرفاً كحد أقصى).',
-  typeMax: 'النوع طويل جداً (80 حرفاً كحد أقصى).',
-  bodyAreaMax: 'منطقة الجسم طويلة جداً (120 حرفاً كحد أقصى).',
-  sideMax: 'الجهة طويلة جداً (40 حرفاً كحد أقصى).',
-  positionMax: 'الوضعية طويلة جداً (80 حرفاً كحد أقصى).',
-  notesMax: 'الملاحظات طويلة جداً (1000 حرفاً كحد أقصى).',
-  formSummary: 'يرجى تصحيح الحقول المميزة قبل الحفظ.',
-} as const;
+type TFn = (key: string) => string;
+
+function defaultT(key: string): string {
+  return getTranslationValue(getCurrentLocale(), key) ?? key;
+}
+
+export function getOrderManualMessages(t: TFn = defaultT) {
+  return {
+    nameRequired: t('doctor.orderManualSchema.nameRequired'),
+    nameMin: t('doctor.orderManualSchema.nameMin'),
+    nameMax: t('doctor.orderManualSchema.nameMax'),
+    typeMax: t('doctor.orderManualSchema.typeMax'),
+    bodyAreaMax: t('doctor.orderManualSchema.bodyAreaMax'),
+    sideMax: t('doctor.orderManualSchema.sideMax'),
+    positionMax: t('doctor.orderManualSchema.positionMax'),
+    notesMax: t('doctor.orderManualSchema.notesMax'),
+    formSummary: t('doctor.orderManualSchema.formSummary'),
+  } as const;
+}
+
+/** @deprecated Arabic-only — use getOrderManualMessages(t) for locale-aware messages. */
+export const ORDER_MANUAL_MESSAGES = getOrderManualMessages((key) =>
+  getTranslationValue('ar', key) ?? key,
+);
 
 export type OrderManualField = keyof RadiologyManualForm;
 
@@ -19,19 +34,27 @@ export type OrderManualFieldMessages = Partial<
   Record<OrderManualField, string>
 >;
 
-export const orderManualItemSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(1, ORDER_MANUAL_MESSAGES.nameRequired)
-    .min(2, ORDER_MANUAL_MESSAGES.nameMin)
-    .max(200, ORDER_MANUAL_MESSAGES.nameMax),
-  type: z.string().trim().max(80, ORDER_MANUAL_MESSAGES.typeMax),
-  bodyArea: z.string().trim().max(120, ORDER_MANUAL_MESSAGES.bodyAreaMax),
-  side: z.string().trim().max(40, ORDER_MANUAL_MESSAGES.sideMax),
-  position: z.string().trim().max(80, ORDER_MANUAL_MESSAGES.positionMax),
-  notes: z.string().trim().max(1000, ORDER_MANUAL_MESSAGES.notesMax),
-});
+export function buildOrderManualItemSchema(t: TFn = defaultT) {
+  const messages = getOrderManualMessages(t);
+  return z.object({
+    name: z
+      .string()
+      .trim()
+      .min(1, messages.nameRequired)
+      .min(2, messages.nameMin)
+      .max(200, messages.nameMax),
+    type: z.string().trim().max(80, messages.typeMax),
+    bodyArea: z.string().trim().max(120, messages.bodyAreaMax),
+    side: z.string().trim().max(40, messages.sideMax),
+    position: z.string().trim().max(80, messages.positionMax),
+    notes: z.string().trim().max(1000, messages.notesMax),
+  });
+}
+
+/** @deprecated Arabic-only — use buildOrderManualItemSchema(t) for locale-aware messages. */
+export const orderManualItemSchema = buildOrderManualItemSchema((key) =>
+  getTranslationValue('ar', key) ?? key,
+);
 
 export class OrderManualFormSubmitError extends Error {
   readonly fields: OrderManualFieldMessages;
@@ -68,12 +91,15 @@ export function zodIssuesToOrderManualFieldMessages(
 
 export function assertOrderManualFormValid(
   form: RadiologyManualForm,
+  t: TFn = defaultT,
 ): RadiologyManualForm {
-  const result = orderManualItemSchema.safeParse(form);
+  const schema = buildOrderManualItemSchema(t);
+  const result = schema.safeParse(form);
   if (result.success) return result.data;
 
   const fields = zodIssuesToOrderManualFieldMessages(result.error);
+  const messages = getOrderManualMessages(t);
   const message =
-    result.error.issues[0]?.message ?? ORDER_MANUAL_MESSAGES.formSummary;
+    result.error.issues[0]?.message ?? messages.formSummary;
   throw new OrderManualFormSubmitError(fields, message);
 }

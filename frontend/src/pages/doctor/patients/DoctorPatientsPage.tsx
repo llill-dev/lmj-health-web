@@ -564,7 +564,7 @@ export default function DoctorPatientsPage() {
       if (!fileUrl) throw new Error("missing download url");
       window.open(fileUrl, "_blank", "noopener,noreferrer");
     } catch (error) {
-      toast(getPatientFileAccessErrorMessage(error, "open"), {
+      toast(getPatientFileAccessErrorMessage(error, "open", locale), {
         title: t("doctor.patients.file.openFailed"),
         variant: "error",
       });
@@ -591,7 +591,7 @@ export default function DoctorPatientsPage() {
         fileResponse.file?.originalName ?? "patient-file",
       );
     } catch (error) {
-      toast(getPatientFileAccessErrorMessage(error, "download"), {
+      toast(getPatientFileAccessErrorMessage(error, "download", locale), {
         title: t("doctor.patients.file.downloadFailed"),
         variant: "error",
       });
@@ -610,7 +610,7 @@ export default function DoctorPatientsPage() {
         variant: "success",
       });
     } catch (error) {
-      toast(getPatientFileMutationErrorMessage(error, "delete"), {
+      toast(getPatientFileMutationErrorMessage(error, "delete", locale), {
         title: t("doctor.patients.file.deleteFailed"),
         variant: "error",
       });
@@ -632,7 +632,7 @@ export default function DoctorPatientsPage() {
         variant: "success",
       });
     } catch (error) {
-      toast(getPatientFileMutationErrorMessage(error, "upload"), {
+      toast(getPatientFileMutationErrorMessage(error, "upload", locale), {
         title: t("doctor.patients.file.uploadFailed"),
         variant: "error",
       });
@@ -711,7 +711,7 @@ export default function DoctorPatientsPage() {
                   },
                 );
               } catch (error) {
-                toast(getCreateTemporaryPatientErrorMessage(error), {
+                toast(getCreateTemporaryPatientErrorMessage(error, locale), {
                   title: t("doctor.patients.tempPatientCreateFailed"),
                   variant: "error",
                 });
@@ -1192,7 +1192,7 @@ export default function DoctorPatientsPage() {
                       },
                     );
                   } catch (error) {
-                    toast(getDoctorAccessRequestErrorMessage(error), {
+                    toast(getDoctorAccessRequestErrorMessage(error, locale), {
                       title: t("doctor.patients.accessRequestFailed"),
                       variant: "error",
                     });

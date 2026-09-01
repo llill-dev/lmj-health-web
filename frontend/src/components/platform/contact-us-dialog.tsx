@@ -115,8 +115,7 @@ export function ContactUsDialog({
   onClose: () => void;
   initialValues?: Partial<ContactUsFormState>;
 }) {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const { locale, dir, t } = useI18n();
   const { toast } = useToast();
   const user = useAuthStore((state) => state.user);
   const doctorProfileQuery = useDoctorProfile();
@@ -187,10 +186,16 @@ export function ContactUsDialog({
   const buildSupportMessage = () =>
     [
       form.message.trim(),
-      form.fullName.trim() ? `\n\nالاسم: ${form.fullName.trim()}` : '',
-      form.email.trim() ? `\nالبريد: ${form.email.trim()}` : '',
-      form.phone.trim() ? `\nالهاتف: ${form.phone.trim()}` : '',
-      user?.role ? `\nالدور: ${user.role}` : '',
+      form.fullName.trim()
+        ? `\n\n${t('contactUs.meta.name', { value: form.fullName.trim() })}`
+        : '',
+      form.email.trim()
+        ? `\n${t('contactUs.meta.email', { value: form.email.trim() })}`
+        : '',
+      form.phone.trim()
+        ? `\n${t('contactUs.meta.phone', { value: form.phone.trim() })}`
+        : '',
+      user?.role ? `\n${t('contactUs.meta.role', { value: user.role })}` : '',
     ]
       .join('')
       .trim();
@@ -198,11 +203,11 @@ export function ContactUsDialog({
   const submitViaSupportEmail = () => {
     openSupportMailto({
       email: resolveSupportEmail(contactQuery.channels),
-      subject: form.subject.trim() || 'طلب دعم فني',
+      subject: form.subject.trim() || t('contactUs.defaultSubject'),
       body: buildSupportMessage(),
     });
-    toast('تم تجهيز رسالتك في تطبيق البريد. أرسلها لإكمال التواصل مع الدعم.', {
-      title: 'فتح البريد',
+    toast(t('contactUs.toast.mailOpened.body'), {
+      title: t('contactUs.toast.mailOpened.title'),
       variant: 'success',
     });
     setForm(EMPTY_CONTACT_FORM);
@@ -213,8 +218,8 @@ export function ContactUsDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.subject.trim() || !form.message.trim()) {
-      toast('يرجى تعبئة موضوع الرسالة والنص.', {
-        title: 'حقول ناقصة',
+      toast(t('contactUs.toast.missingFields.body'), {
+        title: t('contactUs.toast.missingFields.title'),
         variant: 'error',
       });
       return;
@@ -243,8 +248,8 @@ export function ContactUsDialog({
           },
           supportEmail: resolveSupportEmail(contactQuery.channels),
         });
-        toast('تم تجهيز رسالتك في تطبيق البريد. أرسلها لإكمال التواصل مع فريق الدعم.', {
-          title: 'فتح البريد',
+        toast(t('contactUs.toast.mailOpenedSupportTeam.body'), {
+          title: t('contactUs.toast.mailOpened.title'),
           variant: 'success',
         });
         setForm(EMPTY_CONTACT_FORM);
@@ -274,8 +279,8 @@ export function ContactUsDialog({
         message: buildSupportMessage(),
       });
 
-      toast('سيتواصل معك فريق الدعم في أقرب وقت.', {
-        title: 'تم إرسال رسالتك',
+      toast(t('contactUs.toast.sent.body'), {
+        title: t('contactUs.toast.sent.title'),
         variant: 'success',
       });
       setForm(EMPTY_CONTACT_FORM);
@@ -290,8 +295,8 @@ export function ContactUsDialog({
       toast(
         error instanceof ApiError
           ? error.message
-          : 'تعذّر إرسال الرسالة. حاول مجدداً أو استخدم قنوات التواصل المباشرة.',
-        { title: 'خطأ', variant: 'error' },
+          : t('contactUs.toast.error.body'),
+        { title: t('contactUs.toast.error.title'), variant: 'error' },
       );
     } finally {
       setSubmitting(false);
@@ -302,7 +307,7 @@ export function ContactUsDialog({
     <PlatformModalShell
       open={open}
       onClose={onClose}
-      title={tr('تواصل معنا', 'Contact us')}
+      title={t('contactUs.title')}
       maxWidthClass="max-w-[620px]"
     >
       <form
@@ -316,22 +321,22 @@ export function ContactUsDialog({
             <Send className="w-4 h-4" aria-hidden />
           </div>
           <h3 className="font-cairo text-[16px] font-extrabold text-[#111827]">
-            أرسل رسالة
+            {t('contactUs.sendMessage')}
           </h3>
         </div>
 
-        <Field label="الاسم الكامل">
+        <Field label={t('contactUs.fullName')}>
           <input
             value={form.fullName}
             onChange={(e) =>
               setForm((prev) => ({ ...prev, fullName: e.target.value }))
             }
-            placeholder="أدخل اسمك الكامل"
+            placeholder={t('contactUs.fullNamePlaceholder')}
             className={inputClass}
           />
         </Field>
 
-        <Field label="البريد الإلكتروني">
+        <Field label={t('contactUs.email')}>
           <input
             type="email"
             value={form.email}
@@ -343,7 +348,7 @@ export function ContactUsDialog({
           />
         </Field>
 
-        <Field label="رقم الهاتف">
+        <Field label={t('contactUs.phone')}>
           <input
             type="tel"
             value={form.phone}
@@ -355,25 +360,25 @@ export function ContactUsDialog({
           />
         </Field>
 
-        <Field label="العنوان" required>
+        <Field label={t('contactUs.subject')} required>
           <input
             value={form.subject}
             onChange={(e) =>
               setForm((prev) => ({ ...prev, subject: e.target.value }))
             }
-            placeholder="موضوع الرسالة"
+            placeholder={t('contactUs.subjectPlaceholder')}
             className={inputClass}
           />
         </Field>
 
-        <Field label="الرسالة" required>
+        <Field label={t('contactUs.message')} required>
           <textarea
             value={form.message}
             onChange={(e) =>
               setForm((prev) => ({ ...prev, message: e.target.value }))
             }
             rows={4}
-            placeholder="اكتب رسالتك هنا..."
+            placeholder={t('contactUs.messagePlaceholder')}
             className={textareaClass}
           />
         </Field>
@@ -396,10 +401,10 @@ export function ContactUsDialog({
           >
             <UploadCloud className="w-8 h-8 text-primary" aria-hidden />
             <span className="font-cairo text-[14px] font-extrabold text-[#111827]">
-              {selectedFileName ?? "اضغط لاختيار ملف"}
+              {selectedFileName ?? t('contactUs.pickFile')}
             </span>
             <span className="font-cairo text-[12px] font-semibold text-[#98A2B3]">
-              إرفاق الملفات متاح للمرضى المسجلين فقط
+              {t('contactUs.attachmentsHint')}
             </span>
           </button>
         </div>
@@ -409,13 +414,13 @@ export function ContactUsDialog({
           disabled={submitting}
           className="flex h-[52px] w-full items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[15px] font-extrabold text-white shadow-[0_8px_20px_rgba(15,143,139,0.28)] transition hover:bg-primary/90 disabled:opacity-60"
         >
-          {submitting ? "جاري الإرسال..." : "إرسال الرسالة"}
+          {submitting ? t('contactUs.submitting') : t('contactUs.submit')}
           <Send className="w-4 h-4" aria-hidden />
         </button>
 
         <div className="rounded-[14px] bg-[#ECFEFF] px-5 py-5">
           <p className="mb-4 text-center font-cairo text-[14px] font-extrabold text-[#111827]">
-            تابعنا على
+            {t('contactUs.followUs')}
           </p>
           <div className="flex gap-3 justify-center items-center">
             {socialLinks.map(({ id, label, href, className, Icon }) => (
@@ -434,17 +439,17 @@ export function ContactUsDialog({
           <div className="mt-5 rounded-[12px] border border-[#D9F2EF] bg-white px-4 py-4 text-start">
             <div className="flex items-center gap-2 font-cairo text-[14px] font-extrabold text-[#111827]">
               <BookOpen className="h-4 w-4 text-primary" />
-              قبل إرسال الطلب
+              {t('contactUs.beforeSending')}
             </div>
             <p className="mt-2 font-cairo text-[13px] font-semibold leading-7 text-[#667085]">
-              قد تجد إجابة سريعة ضمن المقالات والنصائح الطبية المنشورة في المكتبة الطبية.
+              {t('contactUs.beforeSendingHint')}
             </p>
             <Link
               to="/medical-library"
               onClick={onClose}
               className="mt-3 inline-flex items-center justify-center rounded-[10px] border border-[#B8E6E0] bg-[#F0FDFA] px-4 py-2 font-cairo text-[13px] font-extrabold text-primary transition hover:bg-[#E6F7F5]"
             >
-              تصفح المكتبة الطبية
+              {t('contactUs.browseLibrary')}
             </Link>
           </div>
         </div>

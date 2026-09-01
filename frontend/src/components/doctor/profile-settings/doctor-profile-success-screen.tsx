@@ -25,8 +25,8 @@ function FloatingIcon({
 }
 
 export default function DoctorProfileSuccessScreen({
-  title = "تم تعديل بياناتك الشخصية بنجاح",
-  subtitle = "شكراً لك ♡",
+  title,
+  subtitle,
   redirectTo = "/doctor/dashboard",
   redirectSeconds = REDIRECT_SECONDS,
 }: {
@@ -35,8 +35,10 @@ export default function DoctorProfileSuccessScreen({
   redirectTo?: string;
   redirectSeconds?: number;
 }) {
-  const { locale, dir } = useI18n();
+  const { locale, dir, t } = useI18n();
   const navigate = useNavigate();
+  const effectiveTitle = title ?? t("doctor.profileSuccess.title");
+  const effectiveSubtitle = subtitle ?? t("doctor.profileSuccess.subtitle");
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -80,13 +82,16 @@ export default function DoctorProfileSuccessScreen({
         </div>
 
         <h1 className="mt-8 font-cairo text-[22px] font-extrabold text-white sm:text-[24px]">
-          {title}
+          {effectiveTitle}
         </h1>
         <p className="mt-2 font-cairo text-[15px] font-semibold text-white/90">
-          {subtitle}
+          {effectiveSubtitle}
         </p>
         <p className="mt-6 font-cairo text-[13px] font-medium text-white/75">
-          سيتم تحويلك إلى لوحة التحكم خلال {redirectSeconds} ثوانٍ…
+          {t("doctor.profileSuccess.redirecting").replace(
+            "{seconds}",
+            String(redirectSeconds),
+          )}
         </p>
       </div>
     </section>

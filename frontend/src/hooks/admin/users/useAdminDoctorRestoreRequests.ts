@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { adminApi } from "@/lib/admin/client";
+import { getCurrentLocale } from "@/i18n/runtime";
+import { getTranslationValue } from "@/i18n/translations";
 
 export interface RestoreRequest {
   _id: string;
@@ -92,6 +94,7 @@ function normalizeRestoreRequest(raw: unknown): RestoreRequest | null {
       doctor.name ??
       user.fullName ??
       user.name ??
+      getTranslationValue(getCurrentLocale(), "admin.doctorRestoreRequests.unknownDoctor") ??
       "طبيب غير معروف",
   );
   const status = String(

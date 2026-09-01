@@ -11,14 +11,15 @@ import type { ReferralFormState } from '@/lib/doctor/referrals/referralFormSchem
 import type { ReferralFormFieldMessages } from '@/lib/doctor/referrals/referralFormSchema';
 import { useI18n } from '@/i18n/provider';
 
-const PRIORITY_OPTIONS: Array<{
-  value: ReferralFormState['priority'];
-  label: string;
-}> = [
-  { value: 'normal', label: 'عادي (منخفض)' },
-  { value: 'urgent', label: 'عاجل (متوسط)' },
-  { value: 'emergency', label: 'طارئ (عالي)' },
-];
+function getPriorityOptions(
+  t: (key: string) => string,
+): Array<{ value: ReferralFormState['priority']; label: string }> {
+  return [
+    { value: 'normal', label: t('doctor.referralCreateForm.priorityNormal') },
+    { value: 'urgent', label: t('doctor.referralCreateForm.priorityUrgent') },
+    { value: 'emergency', label: t('doctor.referralCreateForm.priorityEmergency') },
+  ];
+}
 
 export function ReferralCreateForm({
   value,
@@ -31,7 +32,8 @@ export function ReferralCreateForm({
   disabled?: boolean;
   fieldErrors?: ReferralFormFieldMessages;
 }) {
-  const { dir } = useI18n();
+  const { dir, t } = useI18n();
+  const priorityOptions = getPriorityOptions(t);
   const set = (patch: Partial<ReferralFormState>) =>
     onChange({ ...value, ...patch });
 
@@ -39,7 +41,7 @@ export function ReferralCreateForm({
     <div className="space-y-4">
       <section className="space-y-4 rounded-[12px] border border-[#E4E7EC] bg-white px-4 py-5 sm:px-5">
         <DoctorProfileFormField
-          label="نوع التحويل"
+          label={t('doctor.referralCreateForm.typeLabel')}
           error={fieldErrors.referralType}
         >
           <input
@@ -50,13 +52,13 @@ export function ReferralCreateForm({
             value={value.referralType}
             disabled={disabled}
             onChange={(e) => set({ referralType: e.target.value })}
-            placeholder="مثال: استشارة / إحالة داخلية"
+            placeholder={t('doctor.referralCreateForm.typePlaceholder')}
             maxLength={80}
           />
         </DoctorProfileFormField>
 
         <DoctorProfileFormField
-          label="التخصص"
+          label={t('doctor.referralCreateForm.specialtyLabel')}
           required
           error={fieldErrors.specialty}
         >
@@ -68,13 +70,13 @@ export function ReferralCreateForm({
             value={value.specialty}
             disabled={disabled}
             onChange={(e) => set({ specialty: e.target.value })}
-            placeholder="مثال: قلب — جراحة"
+            placeholder={t('doctor.referralCreateForm.specialtyPlaceholder')}
             maxLength={120}
           />
         </DoctorProfileFormField>
 
         <DoctorProfileFormField
-          label="سبب التحويل"
+          label={t('doctor.referralCreateForm.reasonLabel')}
           required
           error={fieldErrors.reason}
         >
@@ -86,13 +88,13 @@ export function ReferralCreateForm({
             value={value.reason}
             disabled={disabled}
             onChange={(e) => set({ reason: e.target.value })}
-            placeholder="سبب التحويل السريري"
+            placeholder={t('doctor.referralCreateForm.reasonPlaceholder')}
             maxLength={2000}
           />
         </DoctorProfileFormField>
 
         <DoctorProfileFormField
-          label="تفاصيل الحالة"
+          label={t('doctor.referralCreateForm.summaryLabel')}
           error={fieldErrors.clinicalSummary}
         >
           <textarea
@@ -104,14 +106,14 @@ export function ReferralCreateForm({
             value={value.clinicalSummary}
             disabled={disabled}
             onChange={(e) => set({ clinicalSummary: e.target.value })}
-            placeholder="ملخص الحالة والتاريخ المرضي ذي الصلة"
+            placeholder={t('doctor.referralCreateForm.summaryPlaceholder')}
             maxLength={5000}
           />
         </DoctorProfileFormField>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <DoctorProfileFormField
-            label="الطبيب المحوّل إليه"
+            label={t('doctor.referralCreateForm.referredDoctorLabel')}
             error={fieldErrors.referredDoctorName}
           >
             <input
@@ -126,7 +128,7 @@ export function ReferralCreateForm({
             />
           </DoctorProfileFormField>
           <DoctorProfileFormField
-            label="المؤسسة / المستشفى"
+            label={t('doctor.referralCreateForm.institutionLabel')}
             error={fieldErrors.institution}
           >
             <input
@@ -144,10 +146,10 @@ export function ReferralCreateForm({
 
         <div dir={dir} className="text-start">
           <p className="mb-2 font-cairo text-[12px] font-extrabold text-[#344054]">
-            درجة الأهمية
+            {t('doctor.referralCreateForm.priorityLabel')}
           </p>
           <div className="flex flex-wrap gap-4 justify-start">
-            {PRIORITY_OPTIONS.map((option) => (
+            {priorityOptions.map((option) => (
               <label
                 key={option.value}
                 className="inline-flex cursor-pointer items-center gap-2 font-cairo text-[13px] font-semibold text-[#344054]"
@@ -175,7 +177,7 @@ export function ReferralCreateForm({
         </div>
 
         <DoctorProfileFormField
-          label="أسئلة للطبيب المستقبل"
+          label={t('doctor.referralCreateForm.questionsLabel')}
           error={fieldErrors.questionsToColleague}
         >
           <textarea
@@ -192,7 +194,7 @@ export function ReferralCreateForm({
         </DoctorProfileFormField>
 
         <DoctorProfileFormField
-          label="ملاحظات للطبيب المستقبل"
+          label={t('doctor.referralCreateForm.notesLabel')}
           error={fieldErrors.notes}
         >
           <textarea
@@ -219,7 +221,7 @@ export function ReferralCreateForm({
             aria-hidden
           />
           <p className="font-cairo text-[12px] font-semibold leading-6 text-[#B45309]">
-            تأكد من صحة جميع المعلومات قبل الإرسال أو الاعتماد النهائي.
+            {t('doctor.referralCreateForm.verifyBeforeSubmit')}
           </p>
         </div>
       </div>

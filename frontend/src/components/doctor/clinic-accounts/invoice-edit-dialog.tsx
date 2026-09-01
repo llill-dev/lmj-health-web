@@ -159,7 +159,7 @@ export function InvoiceEditDialog({
       onSuccess?.();
       onClose();
     } catch (error) {
-      const { title, message } = getBillingInvoiceUpdateErrorToast(error);
+      const { title, message } = getBillingInvoiceUpdateErrorToast(error, t);
       toast(message, { title, variant: "error" });
     }
   };

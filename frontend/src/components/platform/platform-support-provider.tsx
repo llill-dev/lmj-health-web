@@ -16,6 +16,7 @@ import {
   usePlatformTermsContent,
   usePlatformUsageContent,
 } from '@/hooks/platform/usePlatformContent';
+import { useI18n } from '@/i18n/provider';
 
 export type PlatformSupportModal =
   | 'contact'
@@ -37,10 +38,11 @@ const PlatformSupportContext = createContext<PlatformSupportContextValue | null>
 
 export function PlatformSupportProvider({ children }: { children: ReactNode }) {
   const [activeModal, setActiveModal] = useState<PlatformSupportModal>(null);
+  const { locale } = useI18n();
 
-  const termsQuery = usePlatformTermsContent('ar');
-  const privacyQuery = usePlatformPrivacyContent('ar');
-  const usageQuery = usePlatformUsageContent('ar');
+  const termsQuery = usePlatformTermsContent(locale);
+  const privacyQuery = usePlatformPrivacyContent(locale);
+  const usageQuery = usePlatformUsageContent(locale);
 
   const openModal = useCallback(
     (modal: Exclude<PlatformSupportModal, null>) => {

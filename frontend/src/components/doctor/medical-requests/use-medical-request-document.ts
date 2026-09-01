@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useToast } from '@/components/ui/ToastProvider';
+import { useI18n } from '@/i18n/provider';
 import {
-  MEDICAL_REQUEST_NO_RESULT_FILES_AR,
-  MEDICAL_REQUEST_NO_RESULT_VIEW_AR,
+  medicalRequestNoResultFilesMessage,
+  medicalRequestNoResultViewMessage,
   resolveMedicalRequestDocumentErrorMessage,
 } from '@/lib/doctor/medical-requests/medicalRequestDocumentMessages';
 import { triggerBrowserFileDownload } from '@/lib/files/triggerBrowserFileDownload';
@@ -10,6 +11,7 @@ import type { MedicalRequestDetailVm } from './map-doctor-medical-requests';
 
 export function useMedicalRequestDocument() {
   const { toast } = useToast();
+  const { locale } = useI18n();
   const [busy, setBusy] = useState(false);
 
   const openResultUrl = async (
@@ -21,8 +23,8 @@ export function useMedicalRequestDocument() {
     if (!directUrl) {
       toast(
         mode === 'download'
-          ? MEDICAL_REQUEST_NO_RESULT_FILES_AR
-          : MEDICAL_REQUEST_NO_RESULT_VIEW_AR,
+          ? medicalRequestNoResultFilesMessage(locale)
+          : medicalRequestNoResultViewMessage(locale),
         { variant: 'error' },
       );
       return;
@@ -39,7 +41,7 @@ export function useMedicalRequestDocument() {
         window.open(directUrl, '_blank', 'noopener,noreferrer');
       }
     } catch (error) {
-      toast(resolveMedicalRequestDocumentErrorMessage(error), {
+      toast(resolveMedicalRequestDocumentErrorMessage(error, locale), {
         variant: 'error',
       });
     } finally {

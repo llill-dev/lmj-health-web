@@ -452,12 +452,13 @@ export default function DoctorPatientDetailsPage() {
   }, [fullProfileQuery.patient]);
 
   const stateInfo = patient
-    ? getPatientStateInfo(patient.relationshipState)
+    ? getPatientStateInfo(patient.relationshipState, locale)
     : null;
   const stateMessage = patient
     ? getStateMessage(
         patient.relationshipState,
         pendingRequestIdFromQuery ?? pendingAccess?.pendingRequestId ?? null,
+        locale,
       )
     : null;
 
@@ -491,7 +492,7 @@ export default function DoctorPatientDetailsPage() {
         variant: "success",
       });
     } catch (error) {
-      toast(getDoctorAccessRequestErrorMessage(error), {
+      toast(getDoctorAccessRequestErrorMessage(error, locale), {
         title: t("doctor.patientDetails.accessRequestFailed"),
         variant: "error",
       });
@@ -511,7 +512,7 @@ export default function DoctorPatientDetailsPage() {
       if (!fileUrl) throw new Error("missing download url");
       window.open(fileUrl, "_blank", "noopener,noreferrer");
     } catch (error) {
-      toast(getPatientFileAccessErrorMessage(error, "open"), {
+      toast(getPatientFileAccessErrorMessage(error, "open", locale), {
         title: t("doctor.patientDetails.file.openFailed"),
         variant: "error",
       });
@@ -535,7 +536,7 @@ export default function DoctorPatientDetailsPage() {
         fileResponse.file?.originalName ?? "patient-file",
       );
     } catch (error) {
-      toast(getPatientFileAccessErrorMessage(error, "download"), {
+      toast(getPatientFileAccessErrorMessage(error, "download", locale), {
         title: t("doctor.patientDetails.file.downloadFailed"),
         variant: "error",
       });
@@ -554,7 +555,7 @@ export default function DoctorPatientDetailsPage() {
         variant: "success",
       });
     } catch (error) {
-      toast(getPatientFileMutationErrorMessage(error, "delete"), {
+      toast(getPatientFileMutationErrorMessage(error, "delete", locale), {
         title: t("doctor.patientDetails.file.deleteFailed"),
         variant: "error",
       });
@@ -574,7 +575,7 @@ export default function DoctorPatientDetailsPage() {
         variant: "success",
       });
     } catch (error) {
-      toast(getPatientFileMutationErrorMessage(error, "upload"), {
+      toast(getPatientFileMutationErrorMessage(error, "upload", locale), {
         title: t("doctor.patientDetails.file.uploadFailed"),
         variant: "error",
       });

@@ -453,7 +453,7 @@ export function ClinicalLibraryTemplateFormDialog({
                           ),
                         )
                       }
-                      placeholder="المدة"
+                      placeholder={t('doctor.templateFormDialog.durationPlaceholder')}
                       className={rowInputClass}
                     />
                     <button
@@ -467,7 +467,7 @@ export function ClinicalLibraryTemplateFormDialog({
                       }
                       disabled={medications.length <= 1}
                       className="inline-flex h-[42px] w-[42px] items-center justify-center justify-self-end rounded-[10px] text-[#F04438] transition hover:bg-[#FEF3F2] disabled:opacity-40"
-                      aria-label="حذف الدواء"
+                      aria-label={t('doctor.templateFormDialog.deleteMedicationAria')}
                     >
                       <Trash2 className="h-4 w-4" aria-hidden />
                     </button>
@@ -477,46 +477,46 @@ export function ClinicalLibraryTemplateFormDialog({
             </>
           ) : templateType === 'REFERRAL_ORDER' ? (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <DoctorProfileFormField label="نوع التحويل">
+              <DoctorProfileFormField label={t('doctor.templateFormDialog.referralTypeLabel')}>
                 <input
                   value={referralType}
                   onChange={(event) => setReferralType(event.target.value)}
                   className={`${profileInputClass} bg-white px-4`}
                 />
               </DoctorProfileFormField>
-              <DoctorProfileFormField label="التخصص">
+              <DoctorProfileFormField label={t('doctor.templateFormDialog.specialtyLabel')}>
                 <input
                   value={specialty}
                   onChange={(event) => setSpecialty(event.target.value)}
                   className={`${profileInputClass} bg-white px-4`}
                 />
               </DoctorProfileFormField>
-              <DoctorProfileFormField label="اسم الطبيب المُحال إليه">
+              <DoctorProfileFormField label={t('doctor.templateFormDialog.referredDoctorNameLabel')}>
                 <input
                   value={referredDoctorName}
                   onChange={(event) => setReferredDoctorName(event.target.value)}
                   className={`${profileInputClass} bg-white px-4`}
                 />
               </DoctorProfileFormField>
-              <DoctorProfileFormField label="المنشأة">
+              <DoctorProfileFormField label={t('doctor.templateFormDialog.institutionLabel')}>
                 <input
                   value={institution}
                   onChange={(event) => setInstitution(event.target.value)}
                   className={`${profileInputClass} bg-white px-4`}
                 />
               </DoctorProfileFormField>
-              <DoctorProfileFormField label="الأولوية">
+              <DoctorProfileFormField label={t('doctor.templateFormDialog.priorityLabel')}>
                 <StyledSelect
                   size="sm"
                   tone="muted"
                   value={priority}
                   onChange={setPriority}
-                  options={PRIORITY_OPTIONS}
-                  listboxAriaLabel="الأولوية"
+                  options={priorityOptions}
+                  listboxAriaLabel={t('doctor.templateFormDialog.priorityAria')}
                   listboxZIndex={200}
                 />
               </DoctorProfileFormField>
-              <DoctorProfileFormField label="سبب التحويل" className="sm:col-span-2">
+              <DoctorProfileFormField label={t('doctor.templateFormDialog.referralReasonLabel')} className="sm:col-span-2">
                 <textarea
                   value={reason}
                   onChange={(event) => setReason(event.target.value)}
@@ -525,7 +525,7 @@ export function ClinicalLibraryTemplateFormDialog({
                 />
               </DoctorProfileFormField>
               <DoctorProfileFormField
-                label="ملخص الحالة السريرية"
+                label={t('doctor.templateFormDialog.clinicalSummaryLabel')}
                 className="sm:col-span-2"
               >
                 <textarea
@@ -536,7 +536,7 @@ export function ClinicalLibraryTemplateFormDialog({
                 />
               </DoctorProfileFormField>
               <DoctorProfileFormField
-                label="أسئلة للزميل"
+                label={t('doctor.templateFormDialog.questionsToColleagueLabel')}
                 className="sm:col-span-2"
               >
                 <textarea
@@ -546,7 +546,7 @@ export function ClinicalLibraryTemplateFormDialog({
                   className={`${profileTextareaClass} min-h-[64px] bg-white`}
                 />
               </DoctorProfileFormField>
-              <DoctorProfileFormField label="ملاحظات" className="sm:col-span-2">
+              <DoctorProfileFormField label={t('doctor.templateFormDialog.notesLabel')} className="sm:col-span-2">
                 <textarea
                   value={referralNotes}
                   onChange={(event) => setReferralNotes(event.target.value)}
@@ -558,29 +558,29 @@ export function ClinicalLibraryTemplateFormDialog({
           ) : (
             <>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <DoctorProfileFormField label="سبب الطلب">
+                <DoctorProfileFormField label={t('doctor.templateFormDialog.orderReasonLabel')}>
                   <input
                     value={clinicalReason}
                     onChange={(event) => setClinicalReason(event.target.value)}
                     className={`${profileInputClass} bg-white px-4`}
                   />
                 </DoctorProfileFormField>
-                <DoctorProfileFormField label="الأولوية / الاستعجال">
+                <DoctorProfileFormField label={t('doctor.templateFormDialog.urgencyLabel')}>
                   <input
                     value={urgency}
                     onChange={(event) => setUrgency(event.target.value)}
-                    placeholder="مثال: عاجل"
+                    placeholder={t('doctor.templateFormDialog.urgencyPlaceholder')}
                     className={`${profileInputClass} bg-white px-4`}
                   />
                 </DoctorProfileFormField>
-                <DoctorProfileFormField label="تعليمات للمريض">
+                <DoctorProfileFormField label={t('doctor.templateFormDialog.patientInstructionsLabel')}>
                   <input
                     value={instructionsToPatient}
                     onChange={(event) => setInstructionsToPatient(event.target.value)}
                     className={`${profileInputClass} bg-white px-4`}
                   />
                 </DoctorProfileFormField>
-                <DoctorProfileFormField label="تعليمات للمركز/المخبر">
+                <DoctorProfileFormField label={t('doctor.templateFormDialog.centerInstructionsLabel')}>
                   <input
                     value={imagingCenterInstructions}
                     onChange={(event) =>
@@ -599,14 +599,14 @@ export function ClinicalLibraryTemplateFormDialog({
                     onChange={(event) => setRequiresFasting(event.target.checked)}
                     className="h-4 w-4 rounded border-[#D0D5DD] text-primary focus:ring-primary"
                   />
-                  يتطلب صيامًا
+                  {t('doctor.templateFormDialog.requiresFasting')}
                 </label>
               ) : null}
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="font-cairo text-[12px] font-extrabold text-[#344054]">
-                    عناصر الطلب
+                    {t('doctor.templateFormDialog.orderItemsLabel')}
                   </span>
                   <button
                     type="button"
@@ -616,7 +616,7 @@ export function ClinicalLibraryTemplateFormDialog({
                     className="inline-flex items-center gap-1 font-cairo text-[12px] font-extrabold text-primary hover:text-[#14B3AE]"
                   >
                     <Plus className="h-3.5 w-3.5" aria-hidden />
-                    إضافة عنصر
+                    {t('doctor.templateFormDialog.addOrderItem')}
                   </button>
                 </div>
                 {orderItems.map((row, index) => (
@@ -634,7 +634,7 @@ export function ClinicalLibraryTemplateFormDialog({
                             ),
                           )
                         }
-                        placeholder="اسم العنصر (تحليل / فحص / إجراء)"
+                        placeholder={t('doctor.templateFormDialog.itemNamePlaceholder')}
                         className={`${rowInputClass} flex-1`}
                       />
                       <button
@@ -648,7 +648,7 @@ export function ClinicalLibraryTemplateFormDialog({
                         }
                         disabled={orderItems.length <= 1}
                         className="inline-flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-[10px] text-[#F04438] transition hover:bg-[#FEF3F2] disabled:opacity-40"
-                        aria-label="حذف العنصر"
+                        aria-label={t('doctor.templateFormDialog.deleteItemAria')}
                       >
                         <Trash2 className="h-4 w-4" aria-hidden />
                       </button>
@@ -664,7 +664,7 @@ export function ClinicalLibraryTemplateFormDialog({
                           ),
                         )
                       }
-                      placeholder="المنطقة/العضو"
+                      placeholder={t('doctor.templateFormDialog.bodyAreaPlaceholder')}
                       className={rowInputClass}
                     />
                     <input
@@ -676,7 +676,7 @@ export function ClinicalLibraryTemplateFormDialog({
                           ),
                         )
                       }
-                      placeholder="ملاحظات"
+                      placeholder={t('doctor.templateFormDialog.notesPlaceholder')}
                       className={rowInputClass}
                     />
                   </div>
@@ -688,8 +688,7 @@ export function ClinicalLibraryTemplateFormDialog({
 
         {payloadIsEmpty ? (
           <p className="rounded-[10px] border border-[#FEDF89] bg-[#FFFAEB] px-4 py-2.5 font-cairo text-[12px] font-bold text-[#B54708]">
-            أضف تفصيلاً واحداً على الأقل ليعمل تطبيق القالب لاحقاً — قالب بلا
-            تفاصيل لن يملأ أي حقول.
+            {t('doctor.templateFormDialog.emptyPayloadWarning')}
           </p>
         ) : null}
 
@@ -700,7 +699,7 @@ export function ClinicalLibraryTemplateFormDialog({
             disabled={busy}
             className="inline-flex h-[48px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white font-cairo text-[14px] font-extrabold text-[#667085] transition hover:bg-[#F9FAFB] disabled:opacity-60"
           >
-            إلغاء
+            {t('doctor.templateFormDialog.cancel')}
           </button>
           <button
             type="button"
@@ -715,7 +714,11 @@ export function ClinicalLibraryTemplateFormDialog({
             }
             className="inline-flex h-[48px] items-center justify-center rounded-[10px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_12px_24px_-4px_rgba(15,143,139,0.35)] transition hover:bg-[#14B3AE] disabled:opacity-60"
           >
-            {busy ? 'جارٍ الحفظ...' : mode === 'edit' ? 'حفظ التعديلات' : 'حفظ القالب'}
+            {busy
+              ? t('doctor.templateFormDialog.saving')
+              : mode === 'edit'
+                ? t('doctor.templateFormDialog.saveChanges')
+                : t('doctor.templateFormDialog.saveTemplate')}
           </button>
         </div>
       </div>

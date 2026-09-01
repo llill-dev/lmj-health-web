@@ -10,6 +10,7 @@ import type {
   DoctorFacilityFormValues,
   DoctorFacilityStatus,
 } from "@/lib/doctor/facilities/types";
+import { getCurrentLocale } from "@/i18n/runtime";
 
 /** Legacy pseudo-keys some older facilities stored before API-3; stripped on read. */
 const WORK_HOURS_FROM_PREFIX = "work_hours_from_";
@@ -185,7 +186,9 @@ export function formValuesToMutationBody(
     country: values.country.trim(),
     address: values.address.trim(),
     phone: normalizeFacilityPhone(values.phone),
-    description: optionalTrim(values.description) ?? "بلا وصف",
+    description:
+      optionalTrim(values.description) ??
+      (getCurrentLocale() === "en" ? "No description" : "بلا وصف"),
     attributes,
   };
 }
@@ -217,7 +220,8 @@ export function doctorFacilityToFormValues(
     facilityType: facility.facilityType,
     description: facility.description ?? "",
     city: facility.city,
-    country: facility.country ?? "سوريا",
+    country:
+      facility.country ?? (getCurrentLocale() === "en" ? "Syria" : "سوريا"),
     address: facility.address === "—" ? "" : facility.address,
     phone: facility.phone === "—" ? "" : facility.phone,
     attributes: readFacilityAttributes(facility.attributes),

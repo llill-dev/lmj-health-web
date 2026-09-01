@@ -246,18 +246,19 @@ export function mapEncounterSummaryFromApi(
     scopedRecords[0]?.title?.trim() ??
     encounter?.notes?.trim() ??
     '—';
+  const listSep = locale === 'en' ? ', ' : '، ';
   const pastIllnesses =
     profile?.medicalConditions?.length
-      ? profile.medicalConditions.join('، ')
+      ? profile.medicalConditions.join(listSep)
       : publicProfile?.medicalConditions?.length
-        ? publicProfile.medicalConditions.join('، ')
+        ? publicProfile.medicalConditions.join(listSep)
         : '—';
   const historyMeds =
     profile?.medications?.length
       ? profile.medications
           .map((med) => med.name?.trim())
           .filter(Boolean)
-          .join('، ') || '—'
+          .join(listSep) || '—'
       : '—';
 
   const rxMedications = mapMedicationsFromPrescriptions(prescriptions);

@@ -35,9 +35,9 @@ export function DoctorDirectoryCardsSkeleton({
 }: {
   cardCount?: number;
 }) {
-  const { locale, dir } = useI18n();
+  const { locale, dir, t } = useI18n();
   return (
-    <DoctorLoadingShell label="جارٍ تحميل دليل الأطباء…">
+    <DoctorLoadingShell label={t("doctor.directory.skeleton.loading")}>
       <div dir={dir} lang={locale} className="w-full">
         <section className="rounded-[6px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)]">
           <div className="flex items-start justify-between">

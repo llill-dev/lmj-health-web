@@ -57,7 +57,7 @@ export function AppointmentsTab({
   onOpenAppointments,
   formatIsoDate,
 }: AppointmentsTabProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
 
   if (isAwaitingData) return <PatientDetailsTabSkeleton rows={3} />;
 
@@ -223,7 +223,7 @@ export function AppointmentsTab({
                     <div className="flex min-w-0 flex-1 items-center gap-4 text-start">
                       <div className="font-cairo text-[16px] font-bold text-primary">{t("doctor.appointmentsTab.fields.time")}</div>
                       <div className="mt-0.5 font-cairo text-[16px] font-normal text-[#1F2937]">
-                        {formatAppointmentTime(appointment.startTime ?? appointment.time)}
+                        {formatAppointmentTime(appointment.startTime ?? appointment.time, locale)}
                       </div>
                     </div>
                   </div>

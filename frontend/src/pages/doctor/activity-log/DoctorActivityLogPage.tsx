@@ -36,6 +36,7 @@ export default function DoctorActivityLogPage() {
     page,
     period,
     search: debouncedSearch,
+    locale,
   });
   const { retry: retryActivity, retrying: retryingActivity } = useRetryAction(
     () => activityQuery.refetch(),

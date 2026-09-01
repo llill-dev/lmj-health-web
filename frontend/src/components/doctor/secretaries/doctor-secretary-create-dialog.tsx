@@ -12,7 +12,7 @@ import {
 import { useToast } from '@/components/ui/ToastProvider';
 import {
   DEFAULT_SECRETARY_CREATE_FORM,
-  doctorSecretaryCreateFormSchema,
+  buildDoctorSecretaryCreateFormSchema,
   MAX_DOCTOR_SECRETARIES,
   type DoctorSecretaryCreateFormValues,
 } from '@/lib/doctor/secretaries/schema';
@@ -43,7 +43,7 @@ export function DoctorSecretaryCreateDialog({
     clearErrors,
     formState: { errors },
   } = useForm<DoctorSecretaryCreateFormValues>({
-    resolver: zodResolver(doctorSecretaryCreateFormSchema),
+    resolver: zodResolver(buildDoctorSecretaryCreateFormSchema(t)),
     defaultValues: DEFAULT_SECRETARY_CREATE_FORM,
     mode: 'onSubmit',
   });

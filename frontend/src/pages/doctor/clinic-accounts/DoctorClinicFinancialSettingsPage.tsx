@@ -34,8 +34,9 @@ function sectionCardClassName() {
 
 export default function DoctorClinicFinancialSettingsPage() {
   const { t, locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const { toast } = useToast();
-  const paymentMethodOptions = buildBillingPaymentMethodOptions(t);
+  const paymentMethodOptions = buildBillingPaymentMethodOptions(tr);
   const { canManageSettings } = useBillingAccess();
   const settingsQuery = useBillingSettings();
   const updateSettings = useUpdateBillingSettings();
@@ -79,7 +80,7 @@ export default function DoctorClinicFinancialSettingsPage() {
       : [{ code: settingsQuery.currency ?? "USD" }];
     return list.map((item) => ({
       value: item.code,
-      label: formatBillingCurrencyOptionLabel(item.code, item.name, t),
+      label: formatBillingCurrencyOptionLabel(item.code, item.name, tr),
     }));
   }, [settingsQuery.currency, settingsQuery.supportedCurrencies, t]);
 

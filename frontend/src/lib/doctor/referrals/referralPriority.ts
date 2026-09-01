@@ -29,6 +29,18 @@ export function mapReferralPriorityToApiUrgency(
 export const CLINICAL_URGENCY_UI_VALUES = ['عادي', 'عاجل', 'طارئ'] as const;
 export type ClinicalUrgencyUiValue = (typeof CLINICAL_URGENCY_UI_VALUES)[number];
 
+export function getClinicalUrgencySelectOptions(
+  t: (key: string) => string,
+): Array<{ value: '' | ClinicalUrgencyUiValue; label: string }> {
+  return [
+    { value: '', label: t('doctor.clinicalUrgency.none') },
+    { value: 'عادي', label: t('doctor.clinicalUrgency.normal') },
+    { value: 'عاجل', label: t('doctor.clinicalUrgency.urgent') },
+    { value: 'طارئ', label: t('doctor.clinicalUrgency.emergency') },
+  ];
+}
+
+/** @deprecated Arabic-only — use getClinicalUrgencySelectOptions(t) for locale-aware labels. */
 export const CLINICAL_URGENCY_SELECT_OPTIONS: Array<{
   value: '' | ClinicalUrgencyUiValue;
   label: string;

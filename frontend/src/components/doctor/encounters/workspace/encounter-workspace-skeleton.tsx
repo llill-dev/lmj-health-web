@@ -1,5 +1,7 @@
 'use client';
 
+import { useI18n } from '@/i18n/provider';
+
 const PULSE =
   'animate-pulse rounded-md bg-gradient-to-r from-[#E5E7EB] to-[#F3F4F6]';
 
@@ -69,6 +71,7 @@ export function EncounterWorkspaceSectionSkeleton() {
 
 /** هيكل كامل للزيارة أثناء انتظار تفاصيل الزيارة من الخادم */
 export function EncounterWorkspacePageSkeleton() {
+  const { t } = useI18n();
   return (
     <div
       className="space-y-4"
@@ -76,7 +79,7 @@ export function EncounterWorkspacePageSkeleton() {
       aria-live="polite"
       role="status"
     >
-      <span className="sr-only">جارٍ تحيل مساحة الزيارة الطبية…</span>
+      <span className="sr-only">{t('doctor.encounterWorkspace.skeleton.loadingWorkspace')}</span>
       <PatientCardSkeleton />
       <QuickActionsSkeleton />
       <div className="space-y-4">
@@ -98,9 +101,10 @@ export function EncounterWorkspaceSectionsSkeleton({
 }: {
   count?: number;
 }) {
+  const { t } = useI18n();
   return (
     <div className="space-y-4" aria-busy="true" aria-live="polite">
-      <span className="sr-only">جارٍ تحميل أقسام الزيارة…</span>
+      <span className="sr-only">{t('doctor.encounterWorkspace.skeleton.loadingSections')}</span>
       {Array.from({ length: count }).map((_, index) => (
         <EncounterWorkspaceSectionSkeleton key={index} />
       ))}

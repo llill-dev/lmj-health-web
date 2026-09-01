@@ -1,5 +1,6 @@
 import { API_BASE_URL, ApiError } from '@/lib/api';
 import { getCurrentLocale } from '@/i18n/runtime';
+import { getTranslationValue } from '@/i18n/translations';
 import { useAuthStore } from '@/store/authStore';
 
 export type GenerateDoctorDocumentBody = {
@@ -55,7 +56,7 @@ export async function generateDoctorDocumentPdf(
   const contentType = (res.headers.get('content-type') ?? '').toLowerCase();
 
   if (!res.ok || contentType.includes('application/json')) {
-    let message = 'تعذّر إنشاء ملف PDF.';
+    let message = getTranslationValue(getCurrentLocale(), 'doctor.orderDocuments.pdfGenerationFailed') ?? 'تعذّر إنشاء ملف PDF.';
     let messageKey: string | null = null;
     let errorBody: DoctorDocumentErrorPayload = {};
 
@@ -82,7 +83,7 @@ export async function generateDoctorDocumentPdf(
       404,
       'errors.documents.empty',
       {},
-      'لا توجد بيانات كافية لإنشاء ملف النتيجة.',
+      getTranslationValue(getCurrentLocale(), 'doctor.orderDocuments.insufficientData') ?? 'لا توجد بيانات كافية لإنشاء ملف النتيجة.',
     );
   }
 

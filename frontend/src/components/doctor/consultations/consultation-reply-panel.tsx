@@ -78,7 +78,7 @@ export default function ConsultationReplyPanel({
   onDismiss: () => void;
   closing?: boolean;
 }) {
-  const { dir, t } = useI18n();
+  const { dir, t, locale } = useI18n();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -124,7 +124,7 @@ export default function ConsultationReplyPanel({
         variant: 'success',
       });
     } catch (error) {
-      toast(getPatientFileMutationErrorMessage(error, 'upload'), {
+      toast(getPatientFileMutationErrorMessage(error, 'upload', locale), {
         title: t('doctor.consultationReplyPanel.uploadFailedTitle'),
         variant: 'error',
       });

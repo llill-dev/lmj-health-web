@@ -2,6 +2,8 @@ import type { Query, Mutation } from "@tanstack/react-query";
 
 import type { ToastOptions } from "@/components/ui/ToastProvider";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
+import { getCurrentLocale } from "@/i18n/runtime";
+import { getTranslationValue } from "@/i18n/translations";
 
 type ToastSink = (message: string, options?: ToastOptions) => void;
 
@@ -31,7 +33,10 @@ export function notifyGlobalQueryError(
   queryErrorToastSink(
     opts?.message ?? getUserFacingRequestErrorMessage(error),
     {
-      title: opts?.title ?? "تعذّر التنفيذ",
+      title:
+        opts?.title ??
+        getTranslationValue(getCurrentLocale(), "queryError.actionFailed") ??
+        "تعذّر التنفيذ",
       variant: "error",
       durationMs: 4200,
     },

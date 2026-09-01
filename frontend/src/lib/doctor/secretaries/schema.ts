@@ -7,6 +7,14 @@ import {
 import { isValidAuthPhoneIdentifier } from "@/lib/phone/normalizeAuthPhone";
 import { ASSIGNABLE_SECRETARY_PERMISSIONS } from "@/lib/doctor/secretaries/permissionsUi";
 import { PHONE_DIAL_CODE_OPTIONS } from "@/lib/phone/dialCodes";
+import { getTranslationValue } from "@/i18n/translations";
+import { getCurrentLocale } from "@/i18n/runtime";
+
+type TFn = (key: string) => string;
+
+function defaultT(key: string): string {
+  return getTranslationValue(getCurrentLocale(), key) ?? key;
+}
 
 const assignablePermissionSet = new Set<string>(
   ASSIGNABLE_SECRETARY_PERMISSIONS,
@@ -14,80 +22,105 @@ const assignablePermissionSet = new Set<string>(
 
 export const MAX_DOCTOR_SECRETARIES = 3;
 
-export const secretaryGenderSchema = z.enum(["Male", "Female"], {
-  message: "يجب اختيار الجنس.",
-});
+export function buildSecretaryGenderSchema(t: TFn = defaultT) {
+  return z.enum(["Male", "Female"], {
+    message: t("doctor.secretarySchema.genderRequired"),
+  });
+}
 
-const fullNameSchema = z
-  .string()
-  .trim()
-  .min(2, "الاسم الكامل مطلوب (حرفان على الأقل).")
-  .max(120, "الاسم الكامل طويل جداً.");
+/** @deprecated Arabic-only — use buildSecretaryGenderSchema(t) for locale-aware messages. */
+export const secretaryGenderSchema = buildSecretaryGenderSchema();
 
-const phoneLocalSchema = z
-  .string()
-  .trim()
-  .refine(
-    (value) => !value || value.length <= 15,
-    "رقم الهاتف طويل جداً. الحد الأقصى 15 رقم.",
-  )
-  .refine(
-    (value) => !value || value.length >= 6,
-    "رقم الهاتف قصير جداً. الحد الأدنى 6 أرقام.",
-  )
-  .refine(
-    (value) => !value || /^\d+$/.test(value),
-    "رقم الهاتف يجب أن يحتوي على أرقام فقط.",
-  );
-
-const phoneCountryCodeSchema = z
-  .string()
-  .refine(
-    (value) => PHONE_DIAL_CODE_OPTIONS.some((opt) => opt.value === value),
-    "اختر رمز الدولة.",
-  );
-
-const phoneSchema = z
-  .object({
-    countryCode: phoneCountryCodeSchema,
-    localNumber: phoneLocalSchema,
-  })
-  .optional();
-
-const permissionsSchema = z
-  .array(z.string())
-  .min(1, "اختر صلاحية واحدة على الأقل.")
-  .refine(
-    (items) => items.every((item) => assignablePermissionSet.has(item)),
-    "توجد صلاحيات غير مدعومة.",
-  );
-
-export const doctorSecretaryCreateFormSchema = z.object({
-  fullName: fullNameSchema,
-  email: z
+function buildFullNameSchema(t: TFn) {
+  return z
     .string()
     .trim()
-    .min(1, SIGNUP_EMAIL_REQUIRED_MESSAGE_AR)
-    .email(SIGNUP_EMAIL_INVALID_MESSAGE_AR),
-  password: signupPasswordSchema,
-  phone: phoneSchema,
-  gender: secretaryGenderSchema,
-  permissions: permissionsSchema,
-});
+    .min(2, t("doctor.secretarySchema.fullNameMin"))
+    .max(120, t("doctor.secretarySchema.fullNameMax"));
+}
 
-export const doctorSecretaryEditFormSchema = z.object({
-  fullName: fullNameSchema,
-  phone: phoneSchema,
-  gender: secretaryGenderSchema,
-  permissions: permissionsSchema,
-});
+function buildPhoneLocalSchema(t: TFn) {
+  return z
+    .string()
+    .trim()
+    .refine(
+      (value) => !value || value.length <= 15,
+      t("doctor.secretarySchema.phoneTooLong"),
+    )
+    .refine(
+      (value) => !value || value.length >= 6,
+      t("doctor.secretarySchema.phoneTooShort"),
+    )
+    .refine(
+      (value) => !value || /^\d+$/.test(value),
+      t("doctor.secretarySchema.phoneDigitsOnly"),
+    );
+}
+
+function buildPhoneCountryCodeSchema(t: TFn) {
+  return z
+    .string()
+    .refine(
+      (value) => PHONE_DIAL_CODE_OPTIONS.some((opt) => opt.value === value),
+      t("doctor.secretarySchema.selectCountryCode"),
+    );
+}
+
+function buildPhoneSchema(t: TFn) {
+  return z
+    .object({
+      countryCode: buildPhoneCountryCodeSchema(t),
+      localNumber: buildPhoneLocalSchema(t),
+    })
+    .optional();
+}
+
+function buildPermissionsSchema(t: TFn) {
+  return z
+    .array(z.string())
+    .min(1, t("doctor.secretarySchema.selectAtLeastOnePermission"))
+    .refine(
+      (items) => items.every((item) => assignablePermissionSet.has(item)),
+      t("doctor.secretarySchema.unsupportedPermissions"),
+    );
+}
+
+export function buildDoctorSecretaryCreateFormSchema(t: TFn = defaultT) {
+  return z.object({
+    fullName: buildFullNameSchema(t),
+    email: z
+      .string()
+      .trim()
+      .min(1, SIGNUP_EMAIL_REQUIRED_MESSAGE_AR)
+      .email(SIGNUP_EMAIL_INVALID_MESSAGE_AR),
+    password: signupPasswordSchema,
+    phone: buildPhoneSchema(t),
+    gender: buildSecretaryGenderSchema(t),
+    permissions: buildPermissionsSchema(t),
+  });
+}
+
+/** @deprecated Arabic-only — use buildDoctorSecretaryCreateFormSchema(t) for locale-aware messages. */
+export const doctorSecretaryCreateFormSchema = buildDoctorSecretaryCreateFormSchema();
+
+export function buildDoctorSecretaryEditFormSchema(t: TFn = defaultT) {
+  return z.object({
+    fullName: buildFullNameSchema(t),
+    phone: buildPhoneSchema(t),
+    gender: buildSecretaryGenderSchema(t),
+    permissions: buildPermissionsSchema(t),
+  });
+}
+
+/** @deprecated Arabic-only — use buildDoctorSecretaryEditFormSchema(t) for locale-aware messages. */
+export const doctorSecretaryEditFormSchema = buildDoctorSecretaryEditFormSchema();
 
 export type DoctorSecretaryCreateFormValues = z.infer<
-  typeof doctorSecretaryCreateFormSchema
+  ReturnType<typeof buildDoctorSecretaryCreateFormSchema>
 >;
 
 export type DoctorSecretaryEditFormValues = z.infer<
-  typeof doctorSecretaryEditFormSchema
+  ReturnType<typeof buildDoctorSecretaryEditFormSchema>
 >;
 
 export type SecretaryFormFieldName =
@@ -112,6 +145,7 @@ export const DEFAULT_SECRETARY_CREATE_FORM: DoctorSecretaryCreateFormValues = {
 
 export function pickFirstSecretaryValidationMessage(
   errors: SecretaryFormFieldErrors,
+  t: TFn = defaultT,
 ): string {
   return (
     errors.fullName ??
@@ -120,7 +154,7 @@ export function pickFirstSecretaryValidationMessage(
     errors.phone ??
     errors.gender ??
     errors.permissions ??
-    "يرجى تصحيح الحقول المميزة."
+    t("doctor.secretarySchema.correctHighlightedFields")
   );
 }
 

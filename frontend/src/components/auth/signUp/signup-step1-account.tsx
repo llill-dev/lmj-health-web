@@ -23,7 +23,6 @@ import {
   type Step1AccountValues,
   type SignUpValues,
   splitSignupPhone,
-  SIGNUP_PHONE_DIAL_OPTIONS,
   SIGNUP_NAME_PREFIX_AR,
   SIGNUP_NAME_PREFIX_EN,
   buildSignupFullName,
@@ -34,6 +33,7 @@ import {
 import type { SignupFieldConflictMessages } from "@/lib/auth/signupMessaging";
 import StyledSelect from "@/components/ui/styled-select";
 import { useI18n } from "@/i18n/provider";
+import { getPhoneDialCodeOptions } from "@/lib/phone/dialCodes";
 
 export default function SignUpStep1Account({
   onBack,
@@ -125,11 +125,11 @@ export default function SignUpStep1Account({
         </div>
         <div className="flex gap-3 justify-center items-center mt-4">
           <h2 className="font-cairo text-[22px] font-extrabold text-[#101828]">
-            معلومات الحساب
+            {t('signup.step1.title')}
           </h2>
         </div>
         <p className="mt-1 font-cairo text-[13px] font-semibold text-[#667085]">
-          أدخل بياناتك الأساسية لإنشاء حساب
+          {t('signup.step1.subtitle')}
         </p>
       </div>
 
@@ -147,7 +147,7 @@ export default function SignUpStep1Account({
             <div className="flex gap-2 justify-start items-center text-start">
               <User className="w-4 h-4 text-primary" />
               <span className="font-cairo text-[14px] font-bold text-[#374151]">
-                الاسم الكامل
+                {t('signup.step1.fullName.label')}
               </span>
               <span className="font-cairo text-[14px] font-bold text-[#374151]">
                 *
@@ -165,7 +165,11 @@ export default function SignUpStep1Account({
               <input
                 type="text"
                 dir={nameScript === "ar" ? "rtl" : "ltr"}
-                placeholder={nameScript === "ar" ? "محمد أحمد" : "John Smith"}
+                placeholder={
+                  nameScript === "ar"
+                    ? t('signup.step1.fullName.placeholderAr')
+                    : t('signup.step1.fullName.placeholderEn')
+                }
                 value={nameRest}
                 onChange={(ev) => setNameRest(ev.target.value)}
                 onBlur={() => void trigger("fullName")}
@@ -185,7 +189,7 @@ export default function SignUpStep1Account({
             <div className="flex gap-2 justify-start items-center text-start">
               <Mail className="w-4 h-4 text-primary" />
               <span className="font-cairo text-[14px] font-bold text-[#374151]">
-                البريد الإلكتروني
+                {t('signup.step1.email.label')}
               </span>
               <span className="font-cairo text-[14px] font-bold text-[#374151]">
                 *
@@ -214,7 +218,7 @@ export default function SignUpStep1Account({
             <div className="flex gap-2 justify-start items-center text-start">
               <LockKeyhole className="w-4 h-4 text-primary" />
               <span className="font-cairo text-[14px] font-bold text-[#374151]">
-                كلمة المرور
+                {t('signup.step1.password.label')}
               </span>
               <span className="font-cairo text-[14px] font-bold text-[#374151]">
                 *
@@ -234,9 +238,15 @@ export default function SignUpStep1Account({
                 onClick={() => setShowPassword((v) => !v)}
                 className="justify-start shrink-0 items-center text-[#6B7280] transition-colors hover:text-primary focus:outline-none"
                 aria-label={
-                  showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"
+                  showPassword
+                    ? t('signup.step1.password.hide')
+                    : t('signup.step1.password.show')
                 }
-                title={showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
+                title={
+                  showPassword
+                    ? t('signup.step1.password.hide')
+                    : t('signup.step1.password.show')
+                }
               >
                 {showPassword ? (
                   <EyeOff className="w-5 h-5" />
@@ -282,13 +292,13 @@ export default function SignUpStep1Account({
                 className="justify-start shrink-0 items-center text-[#6B7280] transition-colors hover:text-primary focus:outline-none"
                 aria-label={
                   showConfirmPassword
-                    ? "إخفاء تأكيد كلمة المرور"
-                    : "إظهار تأكيد كلمة المرور"
+                    ? t('signup.step1.confirmPassword.hide')
+                    : t('signup.step1.confirmPassword.show')
                 }
                 title={
                   showConfirmPassword
-                    ? "إخفاء تأكيد كلمة المرور"
-                    : "إظهار تأكيد كلمة المرور"
+                    ? t('signup.step1.confirmPassword.hide')
+                    : t('signup.step1.confirmPassword.show')
                 }
               >
                 {showConfirmPassword ? (
@@ -313,7 +323,7 @@ export default function SignUpStep1Account({
             <div className="flex gap-2 justify-start items-center text-start">
               <Phone className="w-4 h-4 text-primary" />
               <span className="font-cairo text-[14px] font-bold text-[#374151]">
-                رقم الهاتف
+                {t('signup.step1.phone.label')}
               </span>
               <span className="font-cairo text-[14px] font-bold text-[#374151]">
                 *
@@ -343,10 +353,7 @@ export default function SignUpStep1Account({
                     triggerClassName="h-[48px] rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-2 font-cairo text-[12px] font-bold text-[#374151] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary"
                     size="md"
                     tone="brand"
-                    options={SIGNUP_PHONE_DIAL_OPTIONS.map((o) => ({
-                      value: o.value,
-                      label: o.label,
-                    }))}
+                    options={getPhoneDialCodeOptions(locale)}
                     value={field.value}
                     onChange={(v) => field.onChange(v)}
                     onBlur={() => {
@@ -355,13 +362,13 @@ export default function SignUpStep1Account({
                         onDismissContactConflict?.("phone");
                     }}
                     name={field.name}
-                    listboxAriaLabel="رمز الاتصال"
+                    listboxAriaLabel={t('signup.step1.phone.dialCodeAria')}
                   />
                 )}
               />
             </div>
             <p className="mt-2 text-start font-cairo text-[11px] font-semibold text-[#98A2B3]">
-              اختر مفتاح الدولة ثم أدخل الرقم المحلي فقط (بدون الصفر الأول)
+              {t('signup.step1.phone.hint')}
             </p>
             <div
               className={`mt-1 min-h-[18px] font-cairo text-[12px] font-semibold ${
@@ -375,7 +382,7 @@ export default function SignUpStep1Account({
           <div>
             <div className="flex gap-2 justify-start items-center text-start">
               <span className="font-cairo text-[14px] font-bold text-[#374151]">
-                قناة التحقق
+                {t('signup.step1.channel.label')}
               </span>
               <span className="font-cairo text-[14px] font-bold text-primary">
                 *
@@ -395,7 +402,7 @@ export default function SignUpStep1Account({
                     : "flex h-[70px] items-center justify-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white font-cairo text-[14px] font-bold text-[#6B7280]"
                 }
               >
-                واتساب
+                {t('signup.step1.channel.whatsapp')}
                 <Phone className="w-5 h-5" />
               </button>
 
@@ -409,7 +416,7 @@ export default function SignUpStep1Account({
                     : "flex h-[70px] items-center justify-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white font-cairo text-[14px] font-bold text-[#6B7280]"
                 }
               >
-                البريد
+                {t('signup.step1.channel.email')}
                 <Mail className="w-5 h-5" />
               </button>
             </div>
@@ -429,7 +436,7 @@ export default function SignUpStep1Account({
               className="flex h-[54px] items-center justify-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white font-cairo text-[14px] font-bold text-[#374151] shadow-[0_12px_24px_rgba(0,0,0,0.06)]"
             >
               <ArrowRight className="w-4 h-4" />
-              رجوع
+              {t('signup.step1.back')}
             </button>
 
             <button
@@ -443,7 +450,9 @@ export default function SignUpStep1Account({
                   aria-hidden
                 />
               ) : null}
-              {contactPrecheckBusy ? "جاري التحقق…" : "التالي"}
+              {contactPrecheckBusy
+                ? t('signup.step1.checking')
+                : t('signup.step1.next')}
               {!contactPrecheckBusy ? (
                 <ArrowLeft className="w-4 h-4 shrink-0" />
               ) : null}

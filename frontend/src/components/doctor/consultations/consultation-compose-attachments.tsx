@@ -40,7 +40,7 @@ export default function ConsultationComposeAttachments({
       const response = await doctorApi.patients.uploadFile(
         patientId,
         file,
-        'مرفق استشارة أونلاين',
+        t('doctor.consultations.compose.attachmentDescription'),
       );
       const uploaded = response.file;
       const ref = uploaded?._id ?? uploaded?.id;

@@ -146,6 +146,7 @@ export default function DoctorSecretariesPage() {
       const errorMessage = getDoctorSecretaryMutationErrorMessage(
         error,
         "create",
+        locale,
       );
       toast(errorMessage, {
         title: t("doctor.secretaries.createFailed"),
@@ -178,7 +179,7 @@ export default function DoctorSecretariesPage() {
       });
       setEditTarget(null);
     } catch (error) {
-      toast(getDoctorSecretaryMutationErrorMessage(error, "update"), {
+      toast(getDoctorSecretaryMutationErrorMessage(error, "update", locale), {
         title: t("doctor.secretaries.saveFailed"),
         variant: "error",
       });
@@ -196,7 +197,7 @@ export default function DoctorSecretariesPage() {
       });
       setUnassignTarget(null);
     } catch (error) {
-      toast(getDoctorSecretaryMutationErrorMessage(error, "unassign"), {
+      toast(getDoctorSecretaryMutationErrorMessage(error, "unassign", locale), {
         title: t("doctor.secretaries.unlinkFailed"),
         variant: "error",
       });

@@ -6,7 +6,10 @@ import { useAdminSecretariesList } from '@/hooks/admin/secretaries/useAdminSecre
 import type { AdminSecretarySummary } from '@/lib/admin/types';
 import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 
-export function useAdminSecretaryById(secretaryId: string | undefined) {
+export function useAdminSecretaryById(
+  secretaryId: string | undefined,
+  t?: (key: string, paramsOrFallback?: Record<string, unknown> | string) => string,
+) {
   const location = useLocation();
   const locationSecretary = (
     location.state as { secretary?: AdminSecretarySummary } | null
@@ -28,7 +31,11 @@ export function useAdminSecretaryById(secretaryId: string | undefined) {
 
   const doctorName =
     secretary?.doctor?.user?.fullName?.trim() ||
-    (assignedDoctorId ? `طبيب (${assignedDoctorId})` : '—');
+    (assignedDoctorId
+      ? t
+        ? t('admin.secretary.doctorFallbackWithId', { id: assignedDoctorId })
+        : `طبيب (${assignedDoctorId})`
+      : '—');
 
   return {
     secretary,

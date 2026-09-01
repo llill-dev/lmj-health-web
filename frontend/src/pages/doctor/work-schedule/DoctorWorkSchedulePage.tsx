@@ -120,7 +120,7 @@ export default function DoctorWorkSchedulePage() {
         },
       );
     } catch (err: any) {
-      const errorMessage = getWorkScheduleMutationErrorMessage(err, "add-day");
+      const errorMessage = getWorkScheduleMutationErrorMessage(err, "add-day", locale);
       toast(errorMessage, {
         variant: "error",
         title: t("doctor.workSchedule.operationFailed"),
@@ -172,6 +172,7 @@ export default function DoctorWorkSchedulePage() {
       const errorMessage = getWorkScheduleMutationErrorMessage(
         err,
         "update-day",
+        locale,
       );
       toast(errorMessage, {
         variant: "error",
@@ -227,6 +228,7 @@ export default function DoctorWorkSchedulePage() {
       const errorMessage = getWorkScheduleMutationErrorMessage(
         err,
         "delete-day",
+        locale,
       );
       toast(errorMessage, {
         variant: "error",
@@ -252,6 +254,7 @@ export default function DoctorWorkSchedulePage() {
       const errorMessage = getWorkScheduleMutationErrorMessage(
         err,
         "update-settings",
+        locale,
       );
       toast(errorMessage, {
         variant: "error",
@@ -279,6 +282,7 @@ export default function DoctorWorkSchedulePage() {
       const errorMessage = getWorkScheduleMutationErrorMessage(
         err,
         "add-exception",
+        locale,
       );
       toast(errorMessage, {
         variant: "error",
@@ -309,6 +313,7 @@ export default function DoctorWorkSchedulePage() {
       const errorMessage = getWorkScheduleMutationErrorMessage(
         err,
         "delete-exception",
+        locale,
       );
       toast(errorMessage, {
         variant: "error",

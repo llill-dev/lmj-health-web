@@ -164,7 +164,7 @@ export function useDoctorEncounterSummary(
     for (const prescription of prescriptionsQuery.data?.prescriptions ?? []) {
       if (!prescription._id) continue;
       candidates.push({
-        label: 'وصفة',
+        label: t('doctor.encounterWorkspace.summary.documentLabel.prescription'),
         body: { sourceType: 'prescription', sourceId: prescription._id },
       });
     }
@@ -174,12 +174,15 @@ export function useDoctorEncounterSummary(
       const category = normalizeEncounterOrderCategory(order);
       if (category === 'radiology') {
         candidates.push({
-          label: 'طلب أشعة',
+          label: t('doctor.encounterWorkspace.summary.documentLabel.radiologyOrder'),
           body: { sourceType: 'imaging_order', sourceId: order._id },
         });
       } else if (category === 'lab' || category === 'procedure') {
         candidates.push({
-          label: category === 'lab' ? 'طلب مختبر' : 'طلب إجراء',
+          label:
+            category === 'lab'
+              ? t('doctor.encounterWorkspace.summary.documentLabel.labOrder')
+              : t('doctor.encounterWorkspace.summary.documentLabel.procedureOrder'),
           body: { sourceType: 'order', sourceId: order._id },
         });
       }

@@ -52,6 +52,7 @@ function statusIcon(status: ClinicVerificationStatus) {
 
 export default function DoctorClinicLocationPage() {
   const { t, locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const { toast } = useToast();
   const {
     doctor,
@@ -81,7 +82,7 @@ export default function DoctorClinicLocationPage() {
     }
   }, [initialValues, dirty]);
 
-  const statusLabel = clinicVerificationLabel(verificationStatus, t);
+  const statusLabel = clinicVerificationLabel(verificationStatus, tr);
 
   const parsedCoords = useMemo(() => {
     const lat = Number(form.lat);
@@ -183,7 +184,7 @@ export default function DoctorClinicLocationPage() {
   const handleSubmitReview = async () => {
     if (!doctor) return;
 
-    const validationError = validateClinicLocationForm(form, t);
+    const validationError = validateClinicLocationForm(form, tr);
     if (validationError) {
       toast(validationError, {
         title: t("doctor.clinicLocation.error.checkData"),
@@ -284,7 +285,7 @@ export default function DoctorClinicLocationPage() {
                 statusBadgeClassName(verificationStatus),
               )}
             >
-              {clinicVerificationLabel(verificationStatus, t)}
+              {clinicVerificationLabel(verificationStatus, tr)}
               {statusIcon(verificationStatus)}
             </span>
           </div>
@@ -453,7 +454,7 @@ export default function DoctorClinicLocationPage() {
                 statusBadgeClassName(verificationStatus),
               )}
             >
-              {clinicVerificationLabel(verificationStatus, t)}
+              {clinicVerificationLabel(verificationStatus, tr)}
               {statusIcon(verificationStatus)}
             </span>
           </div>

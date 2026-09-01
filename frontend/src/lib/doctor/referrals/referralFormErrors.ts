@@ -3,8 +3,16 @@ import type {
   ReferralFormField,
   ReferralFormFieldMessages,
 } from '@/lib/doctor/referrals/referralFormSchema';
-import { REFERRAL_FORM_MESSAGES } from '@/lib/doctor/referrals/referralFormSchema';
+import { getReferralFormMessages } from '@/lib/doctor/referrals/referralFormSchema';
 import { REFERRAL_API_URGENCY_VALUES } from '@/lib/doctor/referrals/referralPriority';
+import { getTranslationValue } from '@/i18n/translations';
+import { getCurrentLocale } from '@/i18n/runtime';
+
+type TFn = (key: string) => string;
+
+function defaultT(key: string): string {
+  return getTranslationValue(getCurrentLocale(), key) ?? key;
+}
 
 type ReferralValidationErrorRecord = {
   errors?: unknown;
@@ -116,11 +124,20 @@ function messageTargetsReferralRequired(text: string): boolean {
   );
 }
 
-export function resolveReferralServerFeedback(error: unknown): {
+export function resolveReferralServerFeedback(
+  error: unknown,
+  t: TFn = defaultT,
+): {
   toastMessage: string;
   fields: ReferralFormFieldMessages;
 } {
-  const toastMessage = getUserFacingRequestErrorMessage(error);
+  const locale = getCurrentLocale();
+  const toastMessage = getUserFacingRequestErrorMessage(error, locale);
+  const messages = getReferralFormMessages(t);
+  const priorityNotAccepted = t('doctor.referralFormErrors.priorityNotAccepted').replace(
+    '{values}',
+    REFERRAL_API_URGENCY_VALUES.join(locale === 'en' ? ', ' : '، '),
+  );
   const fields: ReferralFormFieldMessages = {};
 
   if (!(error instanceof ApiError)) {
@@ -141,14 +158,14 @@ export function resolveReferralServerFeedback(error: unknown): {
     messageKey.includes('finalizerequiresreferral')
   ) {
     if (/specialty|اختصاص/i.test(combined) && !fields.specialty) {
-      fields.specialty = REFERRAL_FORM_MESSAGES.specialtyRequired;
+      fields.specialty = messages.specialtyRequired;
     }
     if (/reason|سبب/i.test(combined) && !fields.reason) {
-      fields.reason = REFERRAL_FORM_MESSAGES.reasonRequired;
+      fields.reason = messages.reasonRequired;
     }
     if (!fields.specialty && !fields.reason && messageTargetsReferralRequired(combined)) {
-      fields.specialty = REFERRAL_FORM_MESSAGES.specialtyRequired;
-      fields.reason = REFERRAL_FORM_MESSAGES.reasonRequired;
+      fields.specialty = messages.specialtyRequired;
+      fields.reason = messages.reasonRequired;
     }
   }
 
@@ -157,7 +174,7 @@ export function resolveReferralServerFeedback(error: unknown): {
       /urgency|priority|أهمية|استعجال/i.test(combined) ||
       Object.keys(fields).length === 0
     ) {
-      fields.priority = `درجة الأهمية غير مقبولة. القيم المسموحة: ${REFERRAL_API_URGENCY_VALUES.join('، ')}.`;
+      fields.priority = priorityNotAccepted;
     }
   }
 
@@ -167,7 +184,7 @@ export function resolveReferralServerFeedback(error: unknown): {
     /قيمة غير صالحة/i.test(toastMessage) &&
     /urgency|priority/i.test(combined)
   ) {
-    fields.priority = `درجة الأهمية غير مقبولة. القيم المسموحة: ${REFERRAL_API_URGENCY_VALUES.join('، ')}.`;
+    fields.priority = priorityNotAccepted;
   }
 
   return { toastMessage, fields };

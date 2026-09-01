@@ -183,7 +183,7 @@ export default function DoctorEncountersPage() {
       });
       void refetch();
     } catch (requestError) {
-      const feedback = resolveCreateEncounterServerFeedback(requestError);
+      const feedback = resolveCreateEncounterServerFeedback(requestError, t);
       throw new CreateEncounterSubmitError(
         feedback.fields,
         feedback.toastMessage,

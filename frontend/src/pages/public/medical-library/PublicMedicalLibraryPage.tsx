@@ -10,13 +10,6 @@ import { usePlatformMedicalLibrary } from "@/hooks/platform";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import { useI18n } from "@/i18n/provider";
 
-const TYPE_LABELS: Record<string, string> = {
-  NEWS: "أخبار طبية",
-  GENERAL_ADVICE: "نصائح عامة",
-  CONDITION: "حالات مرضية",
-  SYMPTOM: "أعراض",
-  MEDICATION: "أدوية",
-};
 const TYPE_OPTIONS = [
   "all",
   "NEWS",
@@ -38,31 +31,32 @@ type MedicalLibraryItem = typeof usePlatformMedicalLibrary extends (
     : never
   : never;
 
-const TYPE_DESCRIPTIONS: Record<
-  Exclude<MedicalLibraryFilter, "all">,
-  string
-> = {
-  NEWS: "آخر الأخبار والتحديثات الطبية المنشورة من المصادر المعتمدة.",
-  GENERAL_ADVICE:
-    "إرشادات يومية ونصائح وقائية لتحسين نمط الحياة والصحة العامة.",
-  CONDITION:
-    "شروحات مبسطة حول الحالات المرضية والأسباب والعلامات المرتبطة بها.",
-  SYMPTOM: "محتوى يساعد على فهم الأعراض الشائعة ومتى تستدعي المتابعة الطبية.",
-  MEDICATION: "مقالات ومواد توعوية مرتبطة بالأدوية والاستعمال الآمن.",
-};
+type Translate = (
+  key: string,
+  paramsOrFallback?: Record<string, unknown> | string,
+) => string;
 
-function formatPublishedAt(value?: string) {
+function typeLabel(t: Translate, type: string) {
+  return t(`publicLibrary.type.${type}`, type);
+}
+
+function formatPublishedAt(value: string | undefined, locale: string) {
   if (!value) return "—";
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return value;
-  return parsed.toLocaleDateString("ar-SY", {
+  return parsed.toLocaleDateString(locale === "ar" ? "ar-SY" : "en-US", {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
 }
 
-function renderLibraryCard(item: MedicalLibraryItem, listQueryString: string) {
+function renderLibraryCard(
+  item: MedicalLibraryItem,
+  listQueryString: string,
+  t: Translate,
+  locale: string,
+) {
   return (
     <Link
       key={item.id}
@@ -80,10 +74,10 @@ function renderLibraryCard(item: MedicalLibraryItem, listQueryString: string) {
       ) : null}
       <div className="flex items-start justify-between gap-3">
         <span className="rounded-full bg-[#E6F7F5] px-3 py-1 font-cairo text-[11px] font-extrabold text-primary">
-          {TYPE_LABELS[item.type] ?? item.type}
+          {typeLabel(t, item.type)}
         </span>
         <span className="font-cairo text-[11px] font-bold text-[#98A2B3]">
-          {formatPublishedAt(item.publishedAt)}
+          {formatPublishedAt(item.publishedAt, locale)}
         </span>
       </div>
 
@@ -92,22 +86,24 @@ function renderLibraryCard(item: MedicalLibraryItem, listQueryString: string) {
       </h2>
 
       <p className="mt-3 line-clamp-4 font-cairo text-[13px] font-semibold leading-7 text-[#667085]">
-        {item.summary?.trim() || "افتح التفاصيل لقراءة المحتوى الطبي الكامل."}
+        {item.summary?.trim() || t("publicLibrary.card.summaryFallback")}
       </p>
 
       {item.sourceName?.trim() ? (
         <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-[#F8FAFC] px-3 py-1 font-cairo text-[11px] font-extrabold text-[#475467]">
           <ExternalLink className="h-3.5 w-3.5 text-primary" />
-          المصدر: {item.sourceName.trim()}
+          {t("publicLibrary.card.source", { name: item.sourceName.trim() })}
         </div>
       ) : null}
 
       <div className="mt-5 flex items-center justify-between">
         <span className="font-cairo text-[12px] font-extrabold text-primary">
-          قراءة التفاصيل
+          {t("publicLibrary.card.readDetails")}
         </span>
         <span className="font-cairo text-[11px] font-bold text-[#98A2B3]">
-          {item.viewCount != null ? `${item.viewCount} مشاهدة` : ""}
+          {item.viewCount != null
+            ? t("publicLibrary.card.views", { count: item.viewCount })
+            : ""}
         </span>
       </div>
     </Link>
@@ -115,7 +111,7 @@ function renderLibraryCard(item: MedicalLibraryItem, listQueryString: string) {
 }
 
 export default function PublicMedicalLibraryPage() {
-  const { locale, dir } = useI18n();
+  const { locale, dir, t } = useI18n();
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("q") ?? "");
   const [debouncedSearch, setDebouncedSearch] = useState(
@@ -179,7 +175,9 @@ export default function PublicMedicalLibraryPage() {
     return value ? `?${value}` : "";
   }, [activeSort, activeType, debouncedSearch]);
   const activeTypeLabel =
-    activeType === "all" ? "كل الأنواع" : TYPE_LABELS[activeType];
+    activeType === "all"
+      ? t("publicLibrary.type.allTypes")
+      : typeLabel(t, activeType);
   const hasActiveFilters =
     Boolean(debouncedSearch.trim()) ||
     activeType !== "all" ||
@@ -207,11 +205,11 @@ export default function PublicMedicalLibraryPage() {
         (type): type is Exclude<MedicalLibraryFilter, "all"> => type !== "all",
       ).map((type) => ({
         type,
-        label: TYPE_LABELS[type],
-        description: TYPE_DESCRIPTIONS[type],
+        label: typeLabel(t, type),
+        description: t(`publicLibrary.typeDesc.${type}`),
         items: sortedItems.filter((item) => item.type === type),
       })),
-    [sortedItems],
+    [sortedItems, t],
   );
   const visibleSections = useMemo(
     () =>
@@ -232,7 +230,7 @@ export default function PublicMedicalLibraryPage() {
   return (
     <>
       <Helmet>
-        <title>المكتبة الطبية • LMJ Health</title>
+        <title>{t("publicLibrary.pageTitle")}</title>
       </Helmet>
 
       <div
@@ -249,12 +247,11 @@ export default function PublicMedicalLibraryPage() {
                   <BookOpen className="h-6 w-6" />
                 </div>
                 <h1 className="font-cairo text-[28px] font-black text-[#101828] sm:text-[34px]">
-                  المكتبة الطبية
+                  {t("publicLibrary.heading")}
                 </h1>
               </div>
               <p className="mt-3 font-cairo text-[14px] font-semibold leading-7 text-[#475467] sm:text-[15px]">
-                تصفح الأخبار الطبية والنصائح العامة والمحتوى الصحي المنشور ضمن
-                المنصة.
+                {t("publicLibrary.subheading")}
               </p>
             </div>
 
@@ -264,7 +261,7 @@ export default function PublicMedicalLibraryPage() {
                 type="search"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="ابحث في المحتوى الطبي..."
+                placeholder={t("publicLibrary.searchPlaceholder")}
                 className="h-12 w-full rounded-2xl border border-[#D0D5DD] bg-white pe-12 ps-12 text-start font-cairo text-[14px] font-semibold text-[#101828] outline-none transition focus:border-primary focus:ring-4 focus:ring-[#0F8F8B]/10"
               />
               {search.trim() ? (
@@ -272,7 +269,7 @@ export default function PublicMedicalLibraryPage() {
                   type="button"
                   onClick={() => setSearch("")}
                   className="absolute end-3 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F2F4F7] hover:text-[#344054]"
-                  aria-label="مسح البحث"
+                  aria-label={t("common.clearSearch")}
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -299,7 +296,7 @@ export default function PublicMedicalLibraryPage() {
                     : "border-[#D9F2EF] bg-white text-primary hover:bg-[#F0FDFA]"
                 }`}
               >
-                {type === "all" ? "الكل" : TYPE_LABELS[type]}{" "}
+                {type === "all" ? t("publicLibrary.type.all") : typeLabel(t, type)}{" "}
                 {count ? `(${count})` : ""}
               </button>
             );
@@ -317,7 +314,7 @@ export default function PublicMedicalLibraryPage() {
                   : "border-[#D9F2EF] bg-white text-[#0F766E] hover:bg-[#F0FDFA]"
               }`}
             >
-              {sort === "latest" ? "الأحدث" : "الأكثر قراءة"}
+              {t(`publicLibrary.sort.${sort}`)}
             </button>
           ))}
         </div>
@@ -326,15 +323,19 @@ export default function PublicMedicalLibraryPage() {
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-[18px] border border-[#E4E7EC] bg-white px-4 py-3 shadow-[0_8px_18px_rgba(15,23,42,0.04)]">
             <div className="flex flex-wrap items-center gap-3">
               <div className="font-cairo text-[13px] font-extrabold text-[#344054]">
-                {sortedItems.length} نتيجة ضمن{" "}
+                {t("publicLibrary.results.count", {
+                  count: sortedItems.length,
+                })}{" "}
                 <span className="text-primary">{activeTypeLabel}</span>
               </div>
               <div className="font-cairo text-[12px] font-bold text-[#667085]">
                 {debouncedSearch.trim()
-                  ? `البحث الحالي: ${debouncedSearch.trim()}`
+                  ? t("publicLibrary.results.currentSearch", {
+                      query: debouncedSearch.trim(),
+                    })
                   : activeSort === "popular"
-                    ? "يعرض المحتوى الأعلى قراءة"
-                    : "يعرض أحدث المحتوى المنشور"}
+                    ? t("publicLibrary.results.showingPopular")
+                    : t("publicLibrary.results.showingLatest")}
               </div>
             </div>
             {hasActiveFilters ? (
@@ -347,11 +348,11 @@ export default function PublicMedicalLibraryPage() {
                 }}
                 className="inline-flex items-center justify-center rounded-full border border-[#B8E6E0] bg-[#F0FDFA] px-4 py-2 font-cairo text-[12px] font-extrabold text-primary transition hover:bg-[#E6F7F5]"
               >
-                إعادة ضبط
+                {t("publicLibrary.results.reset")}
               </button>
             ) : (
               <div className="font-cairo text-[12px] font-bold text-[#98A2B3]">
-                عرض كامل
+                {t("publicLibrary.results.fullView")}
               </div>
             )}
           </div>
@@ -360,21 +361,12 @@ export default function PublicMedicalLibraryPage() {
         {!libraryQuery.isAwaitingData && !libraryQuery.isError ? (
           <section className="mt-4 rounded-[18px] border border-[#FDE68A] bg-[#FFFBEB] px-4 py-4 shadow-[0_8px_18px_rgba(15,23,42,0.04)]">
             <h2 className="font-cairo text-[14px] font-black text-[#92400E]">
-              ملاحظات حول الميزة الحالية
+              {t("publicLibrary.notes.title")}
             </h2>
             <div className="mt-2 space-y-1 font-cairo text-[12px] font-bold leading-7 text-[#92400E]">
-              <p>
-                المتاح حالياً هو قراءة المحتوى الطبي المنشور وتصفح تفاصيله
-                ومصادره.
-              </p>
-              <p>
-                مكتبة ملفات PDF المشتركة أو المستندات الطبية العامة غير متاحة
-                حالياً من خلال هذا القسم.
-              </p>
-              <p>
-                الحجز أو طلب الخدمات الطبية يتم عبر المسارات المخصصة الأخرى وليس
-                من داخل هذه المكتبة.
-              </p>
+              <p>{t("publicLibrary.notes.one")}</p>
+              <p>{t("publicLibrary.notes.two")}</p>
+              <p>{t("publicLibrary.notes.three")}</p>
             </div>
           </section>
         ) : null}
@@ -383,16 +375,15 @@ export default function PublicMedicalLibraryPage() {
           <div className="flex min-h-[260px] items-center justify-center">
             <div className="flex items-center gap-3 font-cairo text-[14px] font-bold text-[#667085]">
               <Loader2 className="h-5 w-5 animate-spin text-primary" />
-              جارٍ تحميل المكتبة الطبية...
+              {t("publicLibrary.loading")}
             </div>
           </div>
         ) : libraryQuery.isError ? (
           <div className="mt-6">
             <DoctorListErrorState
-              title="تعذّر تحميل المكتبة الطبية"
+              title={t("publicLibrary.error.title")}
               brief={
-                errorMessage ??
-                "حدث خطأ أثناء جلب المحتوى الطبي المنشور. حاول مرة أخرى."
+                errorMessage ?? t("publicLibrary.error.brief")
               }
               onRetry={() => void libraryQuery.refetch()}
             />
@@ -405,17 +396,19 @@ export default function PublicMedicalLibraryPage() {
               imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.1)]"
               title={
                 search.trim()
-                  ? "لا توجد نتائج مطابقة للبحث"
+                  ? t("publicLibrary.empty.search")
                   : activeType === "all"
-                    ? "لا يوجد محتوى طبي منشور حالياً"
-                    : `لا يوجد محتوى منشور ضمن ${TYPE_LABELS[activeType]} حالياً`
+                    ? t("publicLibrary.empty.all")
+                    : t("publicLibrary.empty.type", {
+                        type: typeLabel(t, activeType),
+                      })
               }
               subtitle={
                 search.trim()
-                  ? "جرّب تعديل كلمات البحث للعثور على مقالات أو أخبار أخرى."
-                  : "عند نشر مقالات ونصائح طبية جديدة ستظهر هنا تلقائياً."
+                  ? t("publicLibrary.empty.searchSubtitle")
+                  : t("publicLibrary.empty.subtitle")
               }
-              actionLabel="مسح البحث"
+              actionLabel={t("common.clearSearch")}
               onAction={() => {
                 setSearch("");
                 setActiveType("all");
@@ -431,20 +424,24 @@ export default function PublicMedicalLibraryPage() {
                 {[
                   {
                     key: "latest",
-                    title: "أحدث الأخبار",
-                    description: "آخر ما نُشر حديثاً في المكتبة الطبية.",
+                    title: t("publicLibrary.surfaced.latest.title"),
+                    description: t("publicLibrary.surfaced.latest.description"),
                     items: surfacedSections.latest,
                   },
                   {
                     key: "featured",
-                    title: "مقالات مميزة",
-                    description: "المحتوى الأعلى قراءة وتفاعلاً.",
+                    title: t("publicLibrary.surfaced.featured.title"),
+                    description: t(
+                      "publicLibrary.surfaced.featured.description",
+                    ),
                     items: surfacedSections.featured,
                   },
                   {
                     key: "quick-tips",
-                    title: "نصائح سريعة",
-                    description: "مختارات سريعة من النصائح العامة العملية.",
+                    title: t("publicLibrary.surfaced.quickTips.title"),
+                    description: t(
+                      "publicLibrary.surfaced.quickTips.description",
+                    ),
                     items: surfacedSections.quickTips,
                   },
                 ].map((section) => (
@@ -467,19 +464,19 @@ export default function PublicMedicalLibraryPage() {
                             className="block rounded-[16px] border border-[#EEF2F6] bg-[#FCFCFD] p-4 transition hover:border-[#B8E6E0] hover:bg-white"
                           >
                             <div className="font-cairo text-[11px] font-extrabold text-primary">
-                              {TYPE_LABELS[item.type] ?? item.type}
+                              {typeLabel(t, item.type)}
                             </div>
                             <div className="mt-2 line-clamp-2 font-cairo text-[14px] font-black leading-7 text-[#101828]">
                               {item.title}
                             </div>
                             <div className="mt-2 font-cairo text-[11px] font-bold text-[#98A2B3]">
-                              {formatPublishedAt(item.publishedAt)}
+                              {formatPublishedAt(item.publishedAt, locale)}
                             </div>
                           </Link>
                         ))
                       ) : (
                         <div className="rounded-[16px] border border-dashed border-[#D9F2EF] px-4 py-6 text-center font-cairo text-[12px] font-bold text-[#98A2B3]">
-                          لا يوجد محتوى متاح حالياً.
+                          {t("publicLibrary.surfaced.empty")}
                         </div>
                       )}
                     </div>
@@ -503,7 +500,9 @@ export default function PublicMedicalLibraryPage() {
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     <div className="rounded-full bg-[#E6F7F5] px-4 py-2 font-cairo text-[12px] font-extrabold text-primary">
-                      {section.items.length} عنصر
+                      {t("publicLibrary.section.itemsCount", {
+                        count: section.items.length,
+                      })}
                     </div>
                     {activeType === "all" ? (
                       <button
@@ -511,7 +510,7 @@ export default function PublicMedicalLibraryPage() {
                         onClick={() => setActiveType(section.type)}
                         className="inline-flex items-center justify-center rounded-full border border-[#B8E6E0] bg-white px-4 py-2 font-cairo text-[12px] font-extrabold text-primary transition hover:bg-[#F0FDFA]"
                       >
-                        عرض القسم
+                        {t("publicLibrary.section.showSection")}
                       </button>
                     ) : activeType === section.type ? (
                       <button
@@ -519,7 +518,7 @@ export default function PublicMedicalLibraryPage() {
                         onClick={() => setActiveType("all")}
                         className="inline-flex items-center justify-center rounded-full border border-[#E4E7EC] bg-white px-4 py-2 font-cairo text-[12px] font-extrabold text-[#475467] transition hover:border-[#B8E6E0] hover:text-primary"
                       >
-                        عرض كل الأقسام
+                        {t("publicLibrary.section.showAllSections")}
                       </button>
                     ) : null}
                   </div>
@@ -529,7 +528,9 @@ export default function PublicMedicalLibraryPage() {
                   {(activeType === "all"
                     ? section.items.slice(0, 3)
                     : section.items
-                  ).map((item) => renderLibraryCard(item, listQueryString))}
+                  ).map((item) =>
+                    renderLibraryCard(item, listQueryString, t, locale),
+                  )}
                 </div>
               </section>
             ))}

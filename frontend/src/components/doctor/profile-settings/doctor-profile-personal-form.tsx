@@ -128,7 +128,7 @@ export default function DoctorProfilePersonalForm({
       try {
         await onSubmit(values, photoFile);
       } catch (error) {
-        const { fields } = resolveDoctorProfilePatchFeedback(error);
+        const { fields } = resolveDoctorProfilePatchFeedback(error, t);
         for (const [key, message] of Object.entries(fields)) {
           if (!message) continue;
           form.setError(key as keyof DoctorPersonalEditForm, { message });

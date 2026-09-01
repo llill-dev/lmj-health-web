@@ -84,7 +84,7 @@ export default function MedicalRecordDetailsDialog({
   onOpenChange: (open: boolean) => void;
   record: MedicalRecordDetails | null;
 }) {
-  const { locale, dir } = useI18n();
+  const { locale, dir, t } = useI18n();
   useEffect(() => {
     if (!open) return;
 
@@ -187,17 +187,17 @@ export default function MedicalRecordDetailsDialog({
                   <button
                     type='button'
                     className='absolute start-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]'
-                    aria-label='إغلاق'
+                    aria-label={t('doctor.medicalRecordDetails.close')}
                   >
                     <X className='h-5 w-5' />
                   </button>
                 </Dialog.Close>
 
                 <Dialog.Title className='text-start font-cairo text-[20px] font-extrabold leading-[28px] text-[#101828]'>
-                  تفاصيل السجل الطبي
+                  {t('doctor.medicalRecordDetails.title')}
                 </Dialog.Title>
                 <Dialog.Description className='sr-only'>
-                  عرض تفاصيل السجل الطبي الكاملة للمريض.
+                  {t('doctor.medicalRecordDetails.description')}
                 </Dialog.Description>
               </div>
 
@@ -224,7 +224,7 @@ export default function MedicalRecordDetailsDialog({
                 <div className='mt-6'>
                   <div className='mb-2 flex items-center justify-start gap-2 text-start font-cairo text-[14px] font-extrabold text-[#111827]'>
                     <Stethoscope className='h-4 w-4 text-[#2563EB]' />
-                    التشخيص
+                    {t('doctor.medicalRecordDetails.diagnosis')}
                   </div>
                   <div className='rounded-[6px] bg-[#EEF6FF] px-5 py-4 text-start font-cairo text-[14px] font-extrabold text-[#111827]'>
                     {record.diagnosisSubtitle}
@@ -234,7 +234,7 @@ export default function MedicalRecordDetailsDialog({
                 <div className='mt-6'>
                   <div className='mb-2 flex items-center justify-start gap-2 text-start font-cairo text-[14px] font-extrabold text-[#111827]'>
                     <Activity className='h-4 w-4 text-[#F04438]' />
-                    الأعراض
+                    {t('doctor.medicalRecordDetails.symptoms')}
                   </div>
                   <div className='flex flex-wrap justify-start gap-2'>
                     {record.symptoms.map((s) => (
@@ -251,7 +251,7 @@ export default function MedicalRecordDetailsDialog({
                 <div className='mt-6'>
                   <div className='mb-2 flex items-center justify-start gap-2 text-start font-cairo text-[14px] font-extrabold text-[#111827]'>
                     <Heart className='h-4 w-4 text-[#7C3AED]' />
-                    العلامات الحيوية
+                    {t('doctor.medicalRecordDetails.vitals')}
                   </div>
 
                   <div className='grid grid-cols-4 gap-3'>
@@ -284,7 +284,7 @@ export default function MedicalRecordDetailsDialog({
                 <div className='mt-6'>
                   <div className='mb-2 flex items-center justify-start gap-2 text-start font-cairo text-[14px] font-extrabold text-[#111827]'>
                     <ClipboardList className='h-4 w-4 text-[#7C3AED]' />
-                    الوصفات الطبية ({record.medicinesCount})
+                    {t('doctor.medicalRecordDetails.prescriptionsCount').replace('{count}', String(record.medicinesCount))}
                   </div>
 
                   <div className='space-y-4'>
@@ -306,17 +306,17 @@ export default function MedicalRecordDetailsDialog({
                               <div className='mt-2 space-y-1 font-cairo text-[12px] font-semibold text-[#667085]'>
                                 <div>
                                   <span className='text-[#111827]'>
-                                    الجرعة:
+                                    {t('doctor.medicalRecordDetails.dosage')}
                                   </span>{' '}
                                   {p.dosage}
                                 </div>
                                 <div>
-                                  <span className='text-[#111827]'>المدة:</span>{' '}
+                                  <span className='text-[#111827]'>{t('doctor.medicalRecordDetails.duration')}</span>{' '}
                                   {p.duration}
                                 </div>
                                 <div>
                                   <span className='text-[#111827]'>
-                                    ملاحظات:
+                                    {t('doctor.medicalRecordDetails.notes')}
                                   </span>{' '}
                                   {p.notes}
                                 </div>
@@ -325,7 +325,7 @@ export default function MedicalRecordDetailsDialog({
                           </div>
 
                           <div className='font-cairo text-[14px] font-extrabold text-[#111827]'>
-                            التكرار :{' '}
+                            {t('doctor.medicalRecordDetails.frequency')}{' '}
                             <span className='text-[12px] font-normal'>
                               {p.frequency}
                             </span>
@@ -341,10 +341,10 @@ export default function MedicalRecordDetailsDialog({
                     <Activity className='h-5 w-5 text-[#F54900]' />
                     <div className='space-y-1'>
                       <div className='font-cairo text-[14px] font-extrabold text-[#B54708]'>
-                        يحتاج متابعة
+                        {t('doctor.medicalRecordDetails.needsFollowUp')}
                       </div>
                       <div className='flex gap-1 font-cairo text-[14px] leading-[20px] font-normal text-[#9F2D00]'>
-                        الموعد المقترح:
+                        {t('doctor.medicalRecordDetails.suggestedDate')}
                         <span>{record.followUpDate}</span>
                       </div>
                     </div>
@@ -354,7 +354,7 @@ export default function MedicalRecordDetailsDialog({
                 <div className='mt-6'>
                   <div className='mb-2 flex items-center justify-start gap-2 text-start font-cairo text-[14px] font-extrabold text-[#111827]'>
                     <ClipboardList className='h-4 w-4 text-[#667085]' />
-                    ملاحظات إضافية
+                    {t('doctor.medicalRecordDetails.additionalNotes')}
                   </div>
                   <div className='rounded-[6px] bg-[#F2F4F7] px-5 py-4 text-start font-cairo text-[13px] font-semibold leading-[22px] text-[#344054]'>
                     {record.additionalNotes}
@@ -367,7 +367,7 @@ export default function MedicalRecordDetailsDialog({
                       type='button'
                       className='h-[46px] w-full rounded-[6px] bg-[#EAECF0] font-cairo text-[14px] font-extrabold text-[#344054]'
                     >
-                      إغلاق
+                      {t('doctor.medicalRecordDetails.close')}
                     </button>
                   </Dialog.Close>
                 </div>

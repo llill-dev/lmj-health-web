@@ -16,12 +16,12 @@ import {
   doctorFacilityToFormValues,
 } from '@/lib/doctor/facilities/mappers';
 import {
-  doctorFacilityFormSchema,
-  EMPTY_DOCTOR_FACILITY_FORM,
+  buildDoctorFacilityFormSchema,
+  buildEmptyDoctorFacilityForm,
   type DoctorFacilityFormSchemaValues,
 } from '@/lib/doctor/facilities/schema';
 import type { DoctorFacility } from '@/lib/doctor/facilities/types';
-import { DEFAULT_FACILITY_TYPE_OPTIONS } from '@/lib/doctor/facilities/types';
+import { getFacilityTypeOptions } from '@/lib/doctor/facilities/types';
 import { FacilityStatusBadge } from '@/components/doctor/facilities/facility-status-badge';
 import { cn } from '@/lib/utils/utils';
 import { useI18n } from '@/i18n/provider';
@@ -34,7 +34,7 @@ export function FacilityFormDialog({
   open,
   mode,
   initialFacility,
-  typeOptions = DEFAULT_FACILITY_TYPE_OPTIONS,
+  typeOptions,
   submitting = false,
   onClose,
   onSubmit,
@@ -47,7 +47,8 @@ export function FacilityFormDialog({
   onClose: () => void;
   onSubmit: (values: DoctorFacilityFormSchemaValues) => void | Promise<void>;
 }) {
-  const { dir, t } = useI18n();
+  const { dir, t, locale } = useI18n();
+  const resolvedTypeOptions = typeOptions ?? getFacilityTypeOptions(t);
   const {
     control,
     register,
@@ -57,8 +58,8 @@ export function FacilityFormDialog({
     setValue,
     formState: { errors },
   } = useForm<DoctorFacilityFormSchemaValues>({
-    resolver: zodResolver(doctorFacilityFormSchema),
-    defaultValues: EMPTY_DOCTOR_FACILITY_FORM,
+    resolver: zodResolver(buildDoctorFacilityFormSchema(t)),
+    defaultValues: buildEmptyDoctorFacilityForm(locale),
     mode: 'onSubmit',
   });
 
@@ -67,9 +68,9 @@ export function FacilityFormDialog({
     reset(
       mode === 'edit' && initialFacility
         ? doctorFacilityToFormValues(initialFacility)
-        : EMPTY_DOCTOR_FACILITY_FORM,
+        : buildEmptyDoctorFacilityForm(locale),
     );
-  }, [open, mode, initialFacility, reset]);
+  }, [open, mode, initialFacility, reset, locale]);
 
   const [attrInput, setAttrInput] = useState('');
   const attributes = watch('attributes') ?? [];
@@ -194,7 +195,7 @@ export function FacilityFormDialog({
                       <StyledSelect
                         value={field.value}
                         onChange={field.onChange}
-                        options={typeOptions.map((option) => ({
+                        options={resolvedTypeOptions.map((option) => ({
                           value: option.value,
                           label: option.label,
                         }))}

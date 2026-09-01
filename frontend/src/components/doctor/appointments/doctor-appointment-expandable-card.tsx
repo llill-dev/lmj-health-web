@@ -124,7 +124,7 @@ export default function DoctorAppointmentExpandableCard({
   onUnlinkFile,
   fileActionKey,
 }: DoctorAppointmentExpandableCardProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const patientName = appointment.patient?.userId?.fullName ?? t("doctor.appointmentCard.patientFallback");
   const patientInitials = patientName.charAt(0);
   const phone = "—";
@@ -139,7 +139,7 @@ export default function DoctorAppointmentExpandableCard({
   const location = t("doctor.appointmentsTab.mode.clinic");
   const reason = appointment.notes?.trim() || t("doctor.appointmentCard.noReasonGiven");
   const kindLabel = t("doctor.appointmentsTab.kind.followUp");
-  const time = formatAppointmentTime(appointment.startTime);
+  const time = formatAppointmentTime(appointment.startTime, locale);
   const noShowBlockedForFuture = isFutureAppointmentSlot(
     appointment.date,
     appointment.startTime,

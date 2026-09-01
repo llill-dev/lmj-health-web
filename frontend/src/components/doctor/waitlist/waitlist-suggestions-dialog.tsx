@@ -24,7 +24,7 @@ export default function WaitlistSuggestionsDialog({
   open: boolean;
   onClose: () => void;
 }) {
-  const { locale, dir } = useI18n();
+  const { locale, dir, t } = useI18n();
   const today = formatLocalDate(new Date());
 
   const maxDate = (() => {
@@ -43,7 +43,7 @@ export default function WaitlistSuggestionsDialog({
   const formatDate = (dateStr: string) => {
     try {
       const date = new Date(`${dateStr}T12:00:00`);
-      return new Intl.DateTimeFormat('ar-SY', {
+      return new Intl.DateTimeFormat(locale === 'en' ? 'en-US' : 'ar-SY', {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
@@ -59,7 +59,7 @@ export default function WaitlistSuggestionsDialog({
     try {
       const [hours, minutes] = time.split(':');
       const hour = parseInt(hours, 10);
-      const period = hour >= 12 ? 'مساءً' : 'صباحاً';
+      const period = hour >= 12 ? t('doctor.waitlistSuggestions.pm') : t('doctor.waitlistSuggestions.am');
       const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
       return `${displayHour}:${minutes} ${period}`;
     } catch {
@@ -73,18 +73,17 @@ export default function WaitlistSuggestionsDialog({
     <ClinicAccountsModalShell
       open={open}
       onClose={onClose}
-      title="اقتراحات المواعيد"
+      title={t('doctor.waitlistSuggestions.title')}
       maxWidthClass="max-w-[560px]"
       headerPattern
     >
       <div dir={dir} lang={locale} className="space-y-5 text-start">
         <p className="rounded-[12px] border border-[#E6F4F3] bg-[#F0FDFA] px-4 py-3 font-cairo text-[13px] font-semibold leading-relaxed text-[#667085]">
-          اعرض الأوقات المتاحة في جدولك لمساعدتك على تنظيم المواعيد وخدمة
-          مرضى قائمة الانتظار بسرعة.
+          {t('doctor.waitlistSuggestions.intro')}
         </p>
 
         <DoctorProfileFormField
-          label="التاريخ"
+          label={t('doctor.waitlistSuggestions.dateLabel')}
           required
           hint={formatDate(selectedDate)}
         >
@@ -100,21 +99,21 @@ export default function WaitlistSuggestionsDialog({
 
         <div>
           <h3 className="mb-3 font-cairo text-[14px] font-extrabold text-[#111827]">
-            الأوقات المتاحة
+            {t('doctor.waitlistSuggestions.availableTimes')}
           </h3>
 
           {suggestions.isLoading ? (
             <div className="flex items-center justify-center gap-3 rounded-[12px] border border-[#EEF2F6] bg-[#FAFAFA] py-10">
               <Loader2 className="h-5 w-5 animate-spin text-primary" aria-hidden />
               <span className="font-cairo text-[13px] font-semibold text-[#667085]">
-                جارٍ تحميل الاقتراحات...
+                {t('doctor.waitlistSuggestions.loading')}
               </span>
             </div>
           ) : suggestions.isError ? (
             <div className="flex items-start gap-2 rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-[#B42318]">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
               <p className="font-cairo text-[13px] font-semibold leading-relaxed">
-                تعذّر تحميل الاقتراحات. حاول مرة أخرى.
+                {t('doctor.waitlistSuggestions.loadError')}
               </p>
             </div>
           ) : freeSlots.length === 0 ? (
@@ -123,10 +122,10 @@ export default function WaitlistSuggestionsDialog({
                 <Clock className="h-5 w-5 text-primary" aria-hidden />
               </div>
               <p className="font-cairo text-[13px] font-extrabold text-[#667085]">
-                لا توجد أوقات متاحة في هذا التاريخ
+                {t('doctor.waitlistSuggestions.noSlots')}
               </p>
               <p className="mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                جرّب تاريخاً آخر لعرض الاقتراحات
+                {t('doctor.waitlistSuggestions.tryAnotherDate')}
               </p>
             </div>
           ) : (
@@ -145,7 +144,7 @@ export default function WaitlistSuggestionsDialog({
                     </p>
                     {slot.endTime ? (
                       <p className="font-cairo text-[11px] font-semibold text-[#667085]">
-                        إلى {formatTime(slot.endTime)}
+                        {t('doctor.waitlistSuggestions.until')} {formatTime(slot.endTime)}
                       </p>
                     ) : null}
                   </div>
@@ -161,7 +160,7 @@ export default function WaitlistSuggestionsDialog({
             onClick={onClose}
             className="inline-flex h-[48px] w-full items-center justify-center rounded-[12px] border border-primary bg-white font-cairo text-[14px] font-extrabold text-primary transition hover:bg-[#F0FDFA]"
           >
-            إغلاق
+            {t('doctor.waitlistSuggestions.close')}
           </button>
         </div>
       </div>

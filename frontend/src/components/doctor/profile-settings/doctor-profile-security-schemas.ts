@@ -1,8 +1,4 @@
 import { z } from 'zod';
-import {
-  SIGNUP_EMAIL_INVALID_MESSAGE_AR,
-  SIGNUP_EMAIL_REQUIRED_MESSAGE_AR,
-} from '@/components/auth/signUp/signup-schemas';
 
 type TFn = (key: string, fallback?: string) => string;
 
@@ -70,13 +66,19 @@ export function buildDoctorEmailChangeRequestSchema(t?: TFn) {
   const currentPasswordRequired = t
     ? t('doctor.profileSettings.security.currentPasswordRequired')
     : 'كلمة المرور الحالية مطلوبة';
+  const newEmailRequired = t
+    ? t('doctor.profileSettings.security.newEmailRequired')
+    : 'البريد الإلكتروني مطلوب.';
+  const newEmailInvalid = t
+    ? t('doctor.profileSettings.security.newEmailInvalid')
+    : 'البريد غير صالح. يُرجى إدخال بريد إلكتروني صالح.';
   return z.object({
     currentPassword: z.string().trim().min(1, currentPasswordRequired),
     newEmail: z
       .string()
       .trim()
-      .min(1, SIGNUP_EMAIL_REQUIRED_MESSAGE_AR)
-      .email(SIGNUP_EMAIL_INVALID_MESSAGE_AR),
+      .min(1, newEmailRequired)
+      .email(newEmailInvalid),
   });
 }
 

@@ -3,6 +3,11 @@ import type {
   DoctorTemplateApplication,
   DoctorTemplateType,
 } from '@/lib/doctor/templates/templateTypes';
+import { getCurrentLocale } from '@/i18n/runtime';
+
+function defaultTemplateName(): string {
+  return getCurrentLocale() === 'en' ? 'Template' : 'قالب';
+}
 
 const STORAGE_KEY = 'doctor.templateDraft';
 /** Drafts older than this are discarded on read (tab session safety). */
@@ -104,7 +109,7 @@ export function storeDoctorTemplateDraft(
   const draft: StoredDoctorTemplateDraft = {
     templateId: response.templateId ?? templateId,
     type,
-    name: response.name?.trim() || response.template?.name?.trim() || 'قالب',
+    name: response.name?.trim() || response.template?.name?.trim() || defaultTemplateName(),
     application,
     storedAt: new Date().toISOString(),
   };
@@ -145,7 +150,7 @@ function parseStoredDraft(raw: string): StoredDoctorTemplateDraft | null {
   return {
     templateId,
     type: record.type,
-    name: readTemplateDraftString(record.name) ?? 'قالب',
+    name: readTemplateDraftString(record.name) ?? defaultTemplateName(),
     application,
     storedAt: storedAt ?? new Date().toISOString(),
   };

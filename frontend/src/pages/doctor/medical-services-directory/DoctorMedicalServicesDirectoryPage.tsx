@@ -40,6 +40,7 @@ const PAGE_SIZE = 8;
 
 export default function DoctorMedicalServicesDirectoryPage() {
   const { t, locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const [search, setSearch] = useState("");
 
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -178,7 +179,7 @@ export default function DoctorMedicalServicesDirectoryPage() {
         <ClinicAccountsFilterTabs
           value={activeCategory}
           onChange={handleCategoryChange}
-          options={buildMedicalServiceCategoryTabs(t)}
+          options={buildMedicalServiceCategoryTabs(tr)}
         />
 
         <section className="mt-4 rounded-[14px] border border-[#FDE68A] bg-[#FFFBEB] px-5 py-4 shadow-[0_8px_18px_rgba(15,23,42,0.04)]">

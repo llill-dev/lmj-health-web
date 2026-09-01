@@ -1,4 +1,5 @@
 import type { AppLocale } from '@/i18n/runtime';
+import { getTranslationValue } from '@/i18n/translations';
 import type { EncounterOrder, EncounterOrderItem } from '@/lib/doctor/encounters/encounterClinicalTypes';
 import {
   filterEncounterOrdersByCategory,
@@ -175,9 +176,12 @@ function resolveOrderItemLine(
   order: EncounterOrder,
   item: EncounterOrderItem,
   category: EncounterOrderCategoryKey,
+  locale: AppLocale = 'ar',
 ): { title: string; subtitle?: string } {
   if (category === 'radiology') {
-    const fields = resolveImagingOrderItemFields(item);
+    const t = (key: string, fallback?: string): string =>
+      getTranslationValue(locale, key) ?? fallback ?? key;
+    const fields = resolveImagingOrderItemFields(item, t);
     const brief = formatRadiologyItemBrief(fields);
     return {
       title: fields.name,
@@ -190,7 +194,7 @@ function resolveOrderItemLine(
     item.name?.trim() ??
     item.testName?.trim() ??
     item.procedureName?.trim() ??
-    resolveEncounterOrderTitle(order);
+    resolveEncounterOrderTitle(order, locale);
 
   const subtitle =
     category === 'lab'
@@ -213,8 +217,8 @@ function mapOrderLineItems(
     if (orderItems.length > 0) {
       return orderItems.map((item, itemIndex) => {
         const { title, subtitle } = category === 'other' 
-          ? { title: resolveEncounterOrderTitle(order), subtitle: undefined }
-          : resolveOrderItemLine(order, item, category);
+          ? { title: resolveEncounterOrderTitle(order, locale), subtitle: undefined }
+          : resolveOrderItemLine(order, item, category, locale);
         return {
           id: item._id ?? `${order._id}-item-${itemIndex}`,
           title,
@@ -231,7 +235,7 @@ function mapOrderLineItems(
     return [
       {
         id: order._id ?? `order-${orderIndex}`,
-        title: resolveEncounterOrderTitle(order),
+        title: resolveEncounterOrderTitle(order, locale),
         subtitle: order.clinicalReason?.trim() ?? order.reason?.trim(),
         statusLabel,
         urgency:

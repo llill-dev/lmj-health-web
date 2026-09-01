@@ -1,6 +1,14 @@
 import { ApiError, getUserFacingRequestErrorMessage } from '@/lib/api';
 import type { OrderClinicalFieldMessages } from '@/lib/doctor/orders/orderClinicalFormSchema';
-import { ORDER_CLINICAL_MESSAGES } from '@/lib/doctor/orders/orderClinicalFormSchema';
+import { getOrderClinicalMessages } from '@/lib/doctor/orders/orderClinicalFormSchema';
+import { getTranslationValue } from '@/i18n/translations';
+import { getCurrentLocale } from '@/i18n/runtime';
+
+type TFn = (key: string) => string;
+
+function defaultT(key: string): string {
+  return getTranslationValue(getCurrentLocale(), key) ?? key;
+}
 import type { OrderManualFieldMessages } from '@/lib/doctor/orders/orderManualFormSchema';
 import { REFERRAL_API_URGENCY_VALUES } from '@/lib/doctor/referrals/referralPriority';
 
@@ -83,11 +91,16 @@ function mapLeafToClinicalField(leaf: string): keyof OrderClinicalFieldMessages 
   return null;
 }
 
-export function resolveOrderClinicalServerFeedback(error: unknown): {
+export function resolveOrderClinicalServerFeedback(
+  error: unknown,
+  t: TFn = defaultT,
+): {
   toastMessage: string;
   fields: OrderClinicalFieldMessages;
 } {
-  const toastMessage = getUserFacingRequestErrorMessage(error);
+  const locale = getCurrentLocale();
+  const toastMessage = getUserFacingRequestErrorMessage(error, locale);
+  const messages = getOrderClinicalMessages(t);
   const fields: OrderClinicalFieldMessages = {};
 
   if (!(error instanceof ApiError)) {
@@ -104,14 +117,17 @@ export function resolveOrderClinicalServerFeedback(error: unknown): {
 
   if (messageKey.includes('finalizerequiresitems')) {
     return {
-      toastMessage: ORDER_CLINICAL_MESSAGES.itemsRequired,
+      toastMessage: messages.itemsRequired,
       fields,
     };
   }
 
   if (messageKey.includes('invalidenum') && !fields.urgency) {
     if (/urgency|priority|استعجال/i.test(combined)) {
-      fields.urgency = `درجة الاستعجال غير مقبولة. القيم المسموحة: ${REFERRAL_API_URGENCY_VALUES.join('، ')}.`;
+      fields.urgency = t('doctor.orderFormErrors.urgencyNotAccepted').replace(
+        '{values}',
+        REFERRAL_API_URGENCY_VALUES.join(locale === 'en' ? ', ' : '، '),
+      );
     }
   }
 

@@ -88,8 +88,9 @@ export default function DataEntryLayout() {
         pathname,
         "/data-entry",
         dataEntrySidebarItems,
+        t,
       ),
-    [pathname],
+    [pathname, t],
   );
 
   return (

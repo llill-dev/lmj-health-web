@@ -1,4 +1,10 @@
 import type { ConsultationTicketSummary } from '@/lib/consultations/client';
+import { getCurrentLocale, type AppLocale } from '@/i18n/runtime';
+import { getTranslationValue } from '@/i18n/translations';
+
+function tr(locale: AppLocale, key: string, fallback: string): string {
+  return getTranslationValue(locale, key) ?? fallback;
+}
 
 export type UiConsultationStatus = 'closed' | 'dismissed' | 'in_progress' | 'waiting';
 
@@ -37,38 +43,53 @@ function mapStatus(
   return 'closed';
 }
 
-function statusLabelAr(status: UiConsultationStatus) {
-  if (status === 'in_progress') return 'قيد المعالجة';
-  if (status === 'waiting') return 'بالانتظار';
-  if (status === 'dismissed') return 'مرفوضة';
-  return 'مغلقة';
+function statusLabel(status: UiConsultationStatus, locale: AppLocale) {
+  if (status === 'in_progress') {
+    return tr(locale, 'doctor.consultations.status.in_progress', 'قيد المعالجة');
+  }
+  if (status === 'waiting') {
+    return tr(locale, 'doctor.consultations.status.waiting', 'بالانتظار');
+  }
+  if (status === 'dismissed') {
+    return tr(locale, 'doctor.consultations.status.dismissed', 'مرفوضة');
+  }
+  return tr(locale, 'doctor.consultations.status.closed', 'مغلقة');
 }
 
-function formatDateLabel(iso?: string) {
+function formatDateLabel(iso?: string, locale: AppLocale = 'ar') {
   if (!iso) return '—';
   const t = Date.parse(iso);
   if (Number.isNaN(t)) return iso.slice(0, 10);
-  return new Date(t).toLocaleDateString('ar-SY');
+  return new Date(t).toLocaleDateString(locale === 'en' ? 'en-US' : 'ar-SY');
 }
 
 export function mapConsultationTicketToUi(
   ticket: ConsultationTicketSummary,
+  locale: AppLocale = getCurrentLocale(),
 ): UiConsultationListItem {
   const patientName =
-    ticket.patientSummary?.userId?.fullName?.trim() || 'مريض';
+    ticket.patientSummary?.userId?.fullName?.trim() ||
+    tr(locale, 'doctor.appointmentCard.patientFallback', 'مريض');
   const status = mapStatus(ticket.status);
 
   return {
     id: ticket._id ?? '',
     status,
-    statusLabel: statusLabelAr(status),
-    priorityLabel: (ticket.unreadForDoctor ?? 0) > 0 ? 'عالية' : 'عادية',
-    title: ticket.subject?.trim() || 'استشارة',
-    createdAtLabel: formatDateLabel(ticket.createdAt),
-    lastUpdateLabel: formatDateLabel(ticket.updatedAt ?? ticket.lastMessageAt),
+    statusLabel: statusLabel(status, locale),
+    priorityLabel:
+      (ticket.unreadForDoctor ?? 0) > 0
+        ? locale === 'en'
+          ? 'High'
+          : 'عالية'
+        : locale === 'en'
+          ? 'Normal'
+          : 'عادية',
+    title: ticket.subject?.trim() || (locale === 'en' ? 'Consultation' : 'استشارة'),
+    createdAtLabel: formatDateLabel(ticket.createdAt, locale),
+    lastUpdateLabel: formatDateLabel(ticket.updatedAt ?? ticket.lastMessageAt, locale),
     repliesCount: ticket.messageCount ?? 0,
     patientName,
-    patientInitial: patientName.charAt(0) || 'م',
+    patientInitial: patientName.charAt(0) || (locale === 'en' ? 'P' : 'م'),
     patientEmail: '',
     patientPhone: '',
     description: ticket.description?.trim() || ticket.subject?.trim() || '',

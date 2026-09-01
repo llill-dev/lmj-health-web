@@ -80,8 +80,8 @@ export function ReferralWorkspaceShell({
   if (!patientId || !encounterId) {
     return (
       <DoctorListErrorState
-        title="رابط غير صالح"
-        brief="معرّف المريض أو الزيارة مفقود."
+        title={t('doctor.encounterOrderShell.invalidLinkTitle')}
+        brief={t('doctor.encounterOrderShell.invalidLinkBrief')}
         onRetry={() => onNavigate(backTo)}
       />
     );
@@ -136,51 +136,51 @@ export function ReferralWorkspaceShell({
             try {
               setFieldErrors({});
               const res = await workspace.save();
-              toast(res.message ?? 'تم حفظ التحويل كمسودة.', {
-                title: 'تم الحفظ',
+              toast(res.message ?? t('doctor.referralShell.draftSaved'), {
+                title: t('doctor.encounterOrderShell.saved'),
                 variant: 'success',
               });
             } catch (error) {
-              handleSubmitError(error, 'تعذّر حفظ التحويل');
+              handleSubmitError(error, t('doctor.referralShell.saveDraftFailed'));
             }
           }}
           className="flex h-12 w-full items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_12px_28px_rgba(15,143,139,0.28)] disabled:opacity-60"
         >
           <Save className="h-5 w-5" aria-hidden />
-          حفظ كمسودة
+          {t('doctor.referralShell.saveDraftButton')}
         </button>
         <button
           type="button"
           disabled={workspace.isBusy || !workspace.isEditable}
           onClick={() => {
             try {
-              assertReferralFormValid(workspace.form, 'finalize');
+              assertReferralFormValid(workspace.form, 'finalize', t);
               setFieldErrors({});
               setFinalizeOpen(true);
             } catch (error) {
-              handleSubmitError(error, 'بيانات التحويل غير مكتملة');
+              handleSubmitError(error, t('doctor.referralShell.incompleteData'));
             }
           }}
           className="flex h-12 w-full items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_12px_28px_rgba(15,143,139,0.28)] disabled:opacity-60"
         >
           <Send className="h-5 w-5" aria-hidden />
-          إرسال التحويل
+          {t('doctor.referralShell.sendButton')}
         </button>
       </div>
 
       <ConfirmActionDialog
         open={finalizeOpen}
         onOpenChange={setFinalizeOpen}
-        title="اعتماد التحويل"
-        description="اعتماد التحويل الطبي وإرساله ضمن سجل الزيارة."
-        confirmLabel="تأكيد"
+        title={t('doctor.referralShell.finalizeTitle')}
+        description={t('doctor.referralShell.finalizeDescription')}
+        confirmLabel={t('doctor.encounterOrderShell.confirm')}
         confirmDisabled={workspace.isBusy}
         onConfirm={async () => {
           try {
             setFieldErrors({});
             await workspace.finalize();
-            toast('تم اعتماد التحويل.', {
-              title: 'تم الاعتماد',
+            toast(t('doctor.referralShell.finalized'), {
+              title: t('doctor.encounterOrderShell.finalized'),
               variant: 'success',
             });
             setFinalizeOpen(false);
@@ -189,7 +189,7 @@ export function ReferralWorkspaceShell({
             if (error instanceof ReferralFormSubmitError) {
               setFinalizeOpen(false);
             }
-            handleSubmitError(error, 'تعذّر اعتماد التحويل');
+            handleSubmitError(error, t('doctor.referralShell.finalizeFailed'));
           }
         }}
       />

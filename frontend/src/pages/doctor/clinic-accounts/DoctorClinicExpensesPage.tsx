@@ -82,6 +82,7 @@ function findCategoryCount(
 
 export default function DoctorClinicExpensesPage() {
   const { t, locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const filterOptions = buildFilterOptions(t);
   const { toast } = useToast();
   const { canManageExpenses, canViewDashboard, canViewSettings, isSecretary } =
@@ -148,8 +149,8 @@ export default function DoctorClinicExpensesPage() {
     }
 
     if (isBillingDateInputAfterToday(date)) {
-      toast(getBillingFutureDateMessage(t).message, {
-        title: getBillingFutureDateMessage(t).title,
+      toast(getBillingFutureDateMessage(tr).message, {
+        title: getBillingFutureDateMessage(tr).title,
         variant: "error",
       });
       return;

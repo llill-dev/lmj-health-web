@@ -258,7 +258,7 @@ export default function DoctorPrescriptionPage() {
                   );
                 } catch (error) {
                   const { toastMessage, fields } =
-                    resolvePrescriptionSaveFeedback(error);
+                    resolvePrescriptionSaveFeedback(error, t);
                   if (fields.generalInstructions) {
                     setGeneralInstructionsError(fields.generalInstructions);
                   }

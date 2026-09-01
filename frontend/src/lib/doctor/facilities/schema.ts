@@ -1,4 +1,12 @@
 import { z } from 'zod';
+import { getTranslationValue } from '@/i18n/translations';
+import { getCurrentLocale } from '@/i18n/runtime';
+
+type TFn = (key: string) => string;
+
+function defaultT(key: string): string {
+  return getTranslationValue(getCurrentLocale(), key) ?? key;
+}
 
 const facilityTypeValues = [
   'hospital',
@@ -14,47 +22,60 @@ const facilityTypeValues = [
   'other',
 ] as const;
 
-export const doctorFacilityFormSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(2, 'اسم المنشأة مطلوب (حرفان على الأقل)')
-    .max(120, 'اسم المنشأة طويل جداً'),
-  facilityType: z.enum(facilityTypeValues, {
-    message: 'نوع المنشأة مطلوب',
-  }),
-  description: z
-    .string()
-    .trim()
-    .max(500, 'الوصف طويل جداً (500 حرف كحد أقصى)')
-    .optional()
-    .or(z.literal('')),
-  city: z.string().trim().min(2, 'المدينة مطلوبة'),
-  country: z.string().trim().min(2, 'الدولة مطلوبة'),
-  address: z.string().trim().min(3, 'العنوان التفصيلي مطلوب'),
-  phone: z
-    .string()
-    .trim()
-    .min(8, 'رقم الهاتف قصير جداً')
-    .max(20, 'رقم الهاتف طويل جداً')
-    .regex(
-      /^[+]?[\d\s()-]+$/,
-      'صيغة الهاتف غير صحيحة. استخدم أرقاماً مع + اختيارياً',
-    ),
-  attributes: z.array(z.string()),
-});
+export function buildDoctorFacilityFormSchema(t: TFn = defaultT) {
+  return z.object({
+    name: z
+      .string()
+      .trim()
+      .min(2, t('doctor.facilitySchema.nameMin'))
+      .max(120, t('doctor.facilitySchema.nameMax')),
+    facilityType: z.enum(facilityTypeValues, {
+      message: t('doctor.facilitySchema.typeRequired'),
+    }),
+    description: z
+      .string()
+      .trim()
+      .max(500, t('doctor.facilitySchema.descriptionMax'))
+      .optional()
+      .or(z.literal('')),
+    city: z.string().trim().min(2, t('doctor.facilitySchema.cityRequired')),
+    country: z.string().trim().min(2, t('doctor.facilitySchema.countryRequired')),
+    address: z.string().trim().min(3, t('doctor.facilitySchema.addressRequired')),
+    phone: z
+      .string()
+      .trim()
+      .min(8, t('doctor.facilitySchema.phoneMin'))
+      .max(20, t('doctor.facilitySchema.phoneMax'))
+      .regex(
+        /^[+]?[\d\s()-]+$/,
+        t('doctor.facilitySchema.phoneFormat'),
+      ),
+    attributes: z.array(z.string()),
+  });
+}
+
+/** @deprecated Arabic-only — use buildDoctorFacilityFormSchema(t) for locale-aware messages. */
+export const doctorFacilityFormSchema = buildDoctorFacilityFormSchema();
 
 export type DoctorFacilityFormSchemaValues = z.infer<
-  typeof doctorFacilityFormSchema
+  ReturnType<typeof buildDoctorFacilityFormSchema>
 >;
 
-export const EMPTY_DOCTOR_FACILITY_FORM: DoctorFacilityFormSchemaValues = {
-  name: '',
-  facilityType: 'clinic',
-  description: '',
-  city: '',
-  country: 'سوريا',
-  address: '',
-  phone: '',
-  attributes: [],
-};
+export function buildEmptyDoctorFacilityForm(
+  locale: 'ar' | 'en' = getCurrentLocale(),
+): DoctorFacilityFormSchemaValues {
+  return {
+    name: '',
+    facilityType: 'clinic',
+    description: '',
+    city: '',
+    country: locale === 'en' ? 'Syria' : 'سوريا',
+    address: '',
+    phone: '',
+    attributes: [],
+  };
+}
+
+/** @deprecated Arabic-only — use buildEmptyDoctorFacilityForm(locale) for locale-aware defaults. */
+export const EMPTY_DOCTOR_FACILITY_FORM: DoctorFacilityFormSchemaValues =
+  buildEmptyDoctorFacilityForm('ar');

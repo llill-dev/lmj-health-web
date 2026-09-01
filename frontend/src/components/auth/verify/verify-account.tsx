@@ -3,21 +3,23 @@
 import { CircleCheck } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { ClipboardEvent, KeyboardEvent } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import {
-  VERIFY_CODE_SCHEMA_HINT_AR,
   formatVerifyFlowError,
+  getVerifyCodeSchemaHint,
 } from "@/lib/auth/signupMessaging";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useI18n } from "@/i18n/provider";
 
-const verifyAccountSchema = z.object({
-  code: z.string().regex(new RegExp("^\\d{6}$"), VERIFY_CODE_SCHEMA_HINT_AR),
-});
+function buildVerifyAccountSchema(locale: "ar" | "en") {
+  return z.object({
+    code: z.string().regex(new RegExp("^\\d{6}$"), getVerifyCodeSchemaHint(locale)),
+  });
+}
 
-type VerifyAccountValues = z.infer<typeof verifyAccountSchema>;
+type VerifyAccountValues = z.infer<ReturnType<typeof buildVerifyAccountSchema>>;
 
 export default function VerifyAccount({
   destination,
@@ -32,6 +34,10 @@ export default function VerifyAccount({
 }) {
   const { locale, dir, t } = useI18n();
 
+  const verifyAccountSchema = useMemo(
+    () => buildVerifyAccountSchema(locale),
+    [locale],
+  );
   const {
     handleSubmit,
     setValue,
@@ -104,7 +110,7 @@ export default function VerifyAccount({
     try {
       await onVerify(values.code);
     } catch (error) {
-      const formatted = formatVerifyFlowError(error);
+      const formatted = formatVerifyFlowError(error, locale);
       setFlowError(formatted);
       toast(formatted.replace(/\s+/g, " ").trim().slice(0, 220), {
         title: t("auth.resetPassword.verificationFailed"),
@@ -227,7 +233,7 @@ export default function VerifyAccount({
                             durationMs: 3200,
                           });
                         } catch (error) {
-                          const formatted = formatVerifyFlowError(error);
+                          const formatted = formatVerifyFlowError(error, locale);
                           setFlowError(formatted);
                           toast(
                             formatted.replace(/\s+/g, " ").trim().slice(0, 220),

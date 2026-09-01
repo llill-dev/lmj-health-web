@@ -531,6 +531,7 @@ export const dataEntrySidebarItems: Array<{
 ];
 
 type DashboardBackNavItem = {
+  id: string;
   path: string;
   label: string;
 };
@@ -539,6 +540,7 @@ export function getSectionBackNavigation(
   pathname: string,
   basePath: string,
   items: readonly DashboardBackNavItem[],
+  translateLabel?: (key: string, fallback?: string) => string,
 ): {
   href: string;
   label: string;
@@ -558,6 +560,8 @@ export function getSectionBackNavigation(
 
   return {
     href: `${basePath}/${item.path}`,
-    label: item.label,
+    label: translateLabel
+      ? translateLabel(`sidebar.item.${item.id}`, item.label)
+      : item.label,
   };
 }

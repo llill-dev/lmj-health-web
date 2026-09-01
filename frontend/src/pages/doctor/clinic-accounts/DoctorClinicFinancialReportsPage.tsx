@@ -94,6 +94,7 @@ function buildMonths(t: (key: string) => string) {
 
 export default function DoctorClinicFinancialReportsPage() {
   const { t, locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const months = buildMonths(t);
   const { toast } = useToast();
   const { canExportReports, canViewSettings, isSecretary } = useBillingAccess();
@@ -137,7 +138,7 @@ export default function DoctorClinicFinancialReportsPage() {
       },
       ...list.map((item) => ({
         value: item.code,
-        label: formatBillingCurrencyOptionLabel(item.code, item.name, t),
+        label: formatBillingCurrencyOptionLabel(item.code, item.name, tr),
       })),
     ];
   }, [settingsQuery.supportedCurrencies, t]);

@@ -29,7 +29,7 @@ export default function SignUpStep2Personal({
   onNext: (values: Step2PersonalValues) => void;
   defaultValues?: Partial<Step2PersonalValues>;
 }) {
-  const { locale } = useI18n();
+  const { t, locale } = useI18n();
   const maxBirthIso = useMemo(() => {
     const now = new Date();
     const y = now.getFullYear();
@@ -65,11 +65,11 @@ export default function SignUpStep2Personal({
         </div>
         <div className='flex gap-3 justify-center items-center mt-4'>
           <h2 className='font-cairo text-[26px] font-extrabold text-[#101828]'>
-            المعلومات الشخصية
+            {t('signup.step2.title')}
           </h2>
         </div>
         <p className='mt-1 font-cairo text-[14px] font-semibold text-[#98A2B3]'>
-          بياناتك الشخصية الأساسية
+          {t('signup.step2.subtitle')}
         </p>
       </div>
 
@@ -82,7 +82,7 @@ export default function SignUpStep2Personal({
             <div className='flex gap-2 justify-start items-center text-start'>
               <User className='w-4 h-4 text-primary' />
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
-                الجنس
+                {t('signup.step2.gender.label')}
               </span>
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                 *
@@ -99,7 +99,7 @@ export default function SignUpStep2Personal({
                     : 'flex h-[54px] items-center justify-center rounded-[6px] border border-primary bg-white font-cairo text-[16px] font-bold text-[#6B7280]'
                 }
               >
-                ذكر
+                {t('signup.step2.gender.male')}
               </button>
 
               <button
@@ -111,7 +111,7 @@ export default function SignUpStep2Personal({
                     : 'flex h-[54px] items-center justify-center rounded-[6px] border border-primary bg-white font-cairo text-[16px] font-bold text-[#6B7280]'
                 }
               >
-                أنثى
+                {t('signup.step2.gender.female')}
               </button>
             </div>
             {errors.gender?.message && (
@@ -125,7 +125,7 @@ export default function SignUpStep2Personal({
               <div className='flex gap-2 justify-start items-center text-start'>
                 <CalendarDays className='w-4 h-4 text-primary' />
                 <span className='font-cairo text-[14px] font-bold text-[#374151]'>
-                  تاريخ الميلاد
+                  {t('signup.step2.birthDate.label')}
                 </span>
                 <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                   *
@@ -152,7 +152,7 @@ export default function SignUpStep2Personal({
               <div className='flex gap-2 justify-start items-center text-start'>
                 <MapPin className='w-4 h-4 text-primary' />
                 <span className='font-cairo text-[14px] font-bold text-[#374151]'>
-                  العنوان
+                  {t('signup.step2.address.label')}
                 </span>
                 <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                   *
@@ -160,7 +160,7 @@ export default function SignUpStep2Personal({
               </div>
               <input
                 type='text'
-                placeholder='المدينة, الحي, الشارع'
+                placeholder={t('signup.step2.address.placeholder')}
                 {...register('address')}
                 className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-start font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
               />
@@ -179,13 +179,13 @@ export default function SignUpStep2Personal({
               className='flex h-[54px] items-center justify-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white font-cairo text-[14px] font-bold text-[#374151] shadow-[0_12px_24px_rgba(0,0,0,0.06)]'
             >
               <ArrowRight className='w-4 h-4' />
-              السابق
+              {t('signup.step2.previous')}
             </button>
             <button
               type='submit'
               className='flex h-[54px] items-center justify-center gap-2 rounded-[6px] bg-primary font-cairo text-[14px] font-bold text-white shadow-[0_18px_40px_rgba(15, 143, 139,0.35)] transition-colors hover:bg-[#14B3AE]'
             >
-              التالي
+              {t('signup.step2.next')}
               <ArrowLeft className='w-4 h-4' />
             </button>
           </div>

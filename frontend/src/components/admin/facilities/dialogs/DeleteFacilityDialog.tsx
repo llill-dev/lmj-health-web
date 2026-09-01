@@ -21,7 +21,7 @@ export default function DeleteFacilityDialog({
   facilityId,
   facilityName,
 }: DeleteFacilityDialogProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [confirmText, setConfirmText] = useState("");
   const [rootError, setRootError] = useState("");
   const queryClient = useQueryClient();
@@ -39,7 +39,7 @@ export default function DeleteFacilityDialog({
       onOpenChange(false);
     },
     onError: (error) => {
-      const feedback = resolveAdminFacilityFormFeedback(error, "edit");
+      const feedback = resolveAdminFacilityFormFeedback(error, "edit", locale);
       setRootError(feedback.rootBanner ?? "");
       toast(feedback.toastMessage, {
         title: t('adminFacilityDialog.delete.ariaLabel'),

@@ -403,7 +403,7 @@ export default function SecretaryAppointmentsPage() {
       if (!fileUrl) throw new Error("missing download url");
       window.open(fileUrl, "_blank", "noopener,noreferrer");
     } catch (error) {
-      toast(getAppointmentFileAccessErrorMessage(error, "open"), {
+      toast(getAppointmentFileAccessErrorMessage(error, "open", locale), {
         title: t("secretary.appointments.couldNotOpenFile"),
         variant: "error",
       });
@@ -427,7 +427,7 @@ export default function SecretaryAppointmentsPage() {
         fileResponse.file?.originalName ?? "appointment-file",
       );
     } catch (error) {
-      toast(getAppointmentFileAccessErrorMessage(error, "download"), {
+      toast(getAppointmentFileAccessErrorMessage(error, "download", locale), {
         title: t("secretary.appointments.couldNotDownloadFile"),
         variant: "error",
       });
@@ -736,7 +736,7 @@ export default function SecretaryAppointmentsPage() {
             });
             setCancelTarget(null);
           } catch (error) {
-            toast(getAppointmentWriteErrorMessage(error, "cancel"), {
+            toast(getAppointmentWriteErrorMessage(error, "cancel", locale), {
               title: t("secretary.appointments.error"),
               variant: "error",
               durationMs: 4800,
@@ -775,7 +775,7 @@ export default function SecretaryAppointmentsPage() {
             });
             setRescheduleTarget(null);
           } catch (error) {
-            toast(getAppointmentWriteErrorMessage(error, "reschedule"), {
+            toast(getAppointmentWriteErrorMessage(error, "reschedule", locale), {
               title: t("secretary.appointments.error"),
               variant: "error",
               durationMs: 4800,

@@ -175,7 +175,7 @@ export default function DoctorAppointmentTypesPage() {
 
       setCreateOpen(false);
     } catch (error) {
-      toast(getAppointmentTypeMutationErrorMessage(error, "create"), {
+      toast(getAppointmentTypeMutationErrorMessage(error, "create", locale), {
         variant: "error",
       });
     }
@@ -203,7 +203,7 @@ export default function DoctorAppointmentTypesPage() {
 
       setEditTarget(null);
     } catch (error) {
-      toast(getAppointmentTypeMutationErrorMessage(error, "update"), {
+      toast(getAppointmentTypeMutationErrorMessage(error, "update", locale), {
         variant: "error",
       });
     }
@@ -219,7 +219,7 @@ export default function DoctorAppointmentTypesPage() {
 
       setDeleteTarget(null);
     } catch (error) {
-      toast(getAppointmentTypeMutationErrorMessage(error, "delete"), {
+      toast(getAppointmentTypeMutationErrorMessage(error, "delete", locale), {
         variant: "error",
       });
     }

@@ -89,8 +89,8 @@ export default function SecretaryLayout() {
 
   const backLink = useMemo(
     () =>
-      getSectionBackNavigation(pathname, "/secretary", visibleSidebarItems),
-    [pathname, visibleSidebarItems],
+      getSectionBackNavigation(pathname, "/secretary", visibleSidebarItems, t),
+    [pathname, visibleSidebarItems, t],
   );
 
   useEffect(() => {

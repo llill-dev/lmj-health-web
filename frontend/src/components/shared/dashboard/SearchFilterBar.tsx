@@ -1,4 +1,5 @@
 import { LucideIcon } from "lucide-react";
+import { useI18n } from "@/i18n/provider";
 
 interface SearchFilterBarProps {
   searchPlaceholder: string;
@@ -11,6 +12,7 @@ export default function SearchFilterBar({
   onSearchChange,
   onFilterClick,
 }: SearchFilterBarProps) {
+  const { t } = useI18n();
   return (
     <div className="flex flex-wrap items-center gap-3">
       <div className="flex flex-1 min-w-[200px] items-center gap-2 rounded-xl border border-[#e2e8f0] bg-white px-4 py-2.5 shadow-sm">
@@ -25,7 +27,7 @@ export default function SearchFilterBar({
         onClick={onFilterClick}
         className="flex items-center gap-2 rounded-xl border border-[#e2e8f0] bg-white px-4 py-2.5 font-cairo text-sm font-bold text-[#0f172a] shadow-sm transition hover:bg-gray-50"
       >
-        تصفية
+        {t("common.filter")}
       </button>
     </div>
   );

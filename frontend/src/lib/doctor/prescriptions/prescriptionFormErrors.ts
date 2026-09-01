@@ -1,4 +1,12 @@
 import { ApiError, getUserFacingRequestErrorMessage } from '@/lib/api';
+import { getTranslationValue } from '@/i18n/translations';
+import { getCurrentLocale } from '@/i18n/runtime';
+
+type TFn = (key: string) => string;
+
+function defaultT(key: string): string {
+  return getTranslationValue(getCurrentLocale(), key) ?? key;
+}
 
 export type PrescriptionFormField = 'generalInstructions';
 
@@ -122,11 +130,15 @@ function messageTargetsGeneralInstructions(text: string): boolean {
   );
 }
 
-export function resolvePrescriptionSaveFeedback(error: unknown): {
+export function resolvePrescriptionSaveFeedback(
+  error: unknown,
+  t: TFn = defaultT,
+): {
   toastMessage: string;
   fields: PrescriptionServerFieldMessages;
 } {
-  const toastMessage = getUserFacingRequestErrorMessage(error);
+  const locale = getCurrentLocale();
+  const toastMessage = getUserFacingRequestErrorMessage(error, locale);
   const fields: PrescriptionServerFieldMessages = {};
 
   if (!(error instanceof ApiError)) {
@@ -148,7 +160,7 @@ export function resolvePrescriptionSaveFeedback(error: unknown): {
     if (/generalinstruction|تعليمات عامة/i.test(combined)) {
       fields.generalInstructions =
         fields.generalInstructions ??
-        'التعليمات العامة اختيارية. إن ظهر هذا الخطأ فغالباً لم يُحفظ شيء جديد — أضف دواءً أو عدّل التعليمات ثم أعد المحاولة.';
+        t('doctor.prescriptionFormErrors.generalInstructionsOptional');
     }
   }
 

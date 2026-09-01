@@ -10,7 +10,7 @@ export default function AdminSecretaryAppointmentsPage() {
   const { secretaryId = "" } = useParams();
   const { t, locale, dir } = useI18n();
   const { secretaryName, doctorName, assignedDoctorId, isAwaitingData } =
-    useAdminSecretaryById(secretaryId);
+    useAdminSecretaryById(secretaryId, t);
 
   return (
     <>

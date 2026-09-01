@@ -1,4 +1,12 @@
 import { ApiError, getUserFacingRequestErrorMessage } from '@/lib/api';
+import { getTranslationValue } from '@/i18n/translations';
+import { getCurrentLocale } from '@/i18n/runtime';
+
+type TFn = (key: string) => string;
+
+function defaultT(key: string): string {
+  return getTranslationValue(getCurrentLocale(), key) ?? key;
+}
 
 export type CreateEncounterFormField =
   | 'patientId'
@@ -131,11 +139,15 @@ function messageTargetsAppointmentId(text: string): boolean {
   );
 }
 
-export function resolveCreateEncounterServerFeedback(error: unknown): {
+export function resolveCreateEncounterServerFeedback(
+  error: unknown,
+  t: TFn = defaultT,
+): {
   toastMessage: string;
   fields: CreateEncounterServerFieldMessages;
 } {
-  const toastMessage = getUserFacingRequestErrorMessage(error);
+  const locale = getCurrentLocale();
+  const toastMessage = getUserFacingRequestErrorMessage(error, locale);
   const fields: CreateEncounterServerFieldMessages = {};
 
   if (!(error instanceof ApiError)) {
@@ -160,11 +172,11 @@ export function resolveCreateEncounterServerFeedback(error: unknown): {
     fields.appointmentId =
       fields.appointmentId ??
       toastMessage ??
-      'رقم الموعد غير صالح أو غير موجود لدى هذا المريض.';
+      t('doctor.createEncounterFormErrors.invalidAppointmentId');
   }
 
   if (messageKey.includes('invalidenum') && !fields.origin) {
-    fields.origin = toastMessage || 'نوع الزيارة غير مدعوم.';
+    fields.origin = toastMessage || t('doctor.createEncounterFormErrors.originNotSupported');
   }
 
   if (

@@ -34,7 +34,7 @@ import type { SuggestFacilityPayload } from "@/components/doctor/facilities/sugg
 import type { DoctorFacilityFormSchemaValues } from "@/lib/doctor/facilities/schema";
 import type { SuggestFacilityRecord } from "@/lib/doctor/medical-services-directory/api-types";
 import type { DoctorFacility } from "@/lib/doctor/facilities/types";
-import { DEFAULT_FACILITY_TYPE_OPTIONS } from "@/lib/doctor/facilities/types";
+import { getFacilityTypeOptions } from "@/lib/doctor/facilities/types";
 import { useRetryAction } from "@/lib/query/useRetryAction";
 import { useI18n } from "@/i18n/provider";
 
@@ -64,12 +64,12 @@ export default function DoctorFacilitiesPage() {
 
   const typeOptions = useMemo(() => {
     const apiTypes = typesQuery.data?.types ?? [];
-    if (!apiTypes.length) return DEFAULT_FACILITY_TYPE_OPTIONS;
+    if (!apiTypes.length) return getFacilityTypeOptions(t);
     return apiTypes.map((type) => ({
       value: type.key as DoctorFacility["facilityType"],
       label: type.label,
     }));
-  }, [typesQuery.data?.types]);
+  }, [typesQuery.data?.types, t]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -135,7 +135,7 @@ export default function DoctorFacilitiesPage() {
       await linkMutation.mutateAsync({ facilityId: null });
       toast(t("doctor.facilities.unlinked"), { variant: "success" });
     } catch (error) {
-      const { title, message } = getDoctorFacilityLinkErrorToast(error);
+      const { title, message } = getDoctorFacilityLinkErrorToast(error, locale);
       toast(message, { title, variant: "error" });
     }
   };
@@ -164,6 +164,7 @@ export default function DoctorFacilitiesPage() {
       const { title, message } = getDoctorFacilitySaveErrorToast(
         error,
         dialogMode,
+        locale,
       );
       toast(message, {
         title,
@@ -194,7 +195,7 @@ export default function DoctorFacilitiesPage() {
       });
       setLinkDialogOpen(false);
     } catch (error) {
-      const { title, message } = getDoctorFacilityLinkErrorToast(error);
+      const { title, message } = getDoctorFacilityLinkErrorToast(error, locale);
       toast(message, {
         title,
         variant: "error",
@@ -212,7 +213,7 @@ export default function DoctorFacilitiesPage() {
       setSuggestDialogOpen(false);
       setLinkDialogOpen(false);
     } catch (error) {
-      const { title, message } = getDoctorFacilitySuggestErrorToast(error);
+      const { title, message } = getDoctorFacilitySuggestErrorToast(error, locale);
       toast(message, {
         title,
         variant: "error",

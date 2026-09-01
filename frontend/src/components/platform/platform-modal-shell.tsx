@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useEffect, type ReactNode } from 'react';
+import { useI18n } from '@/i18n/provider';
 
 export function PlatformModalShell({
   open,
@@ -17,6 +18,7 @@ export function PlatformModalShell({
   children: ReactNode;
   maxWidthClass?: string;
 }) {
+  const { t } = useI18n();
   useEffect(() => {
     if (!open) return;
 
@@ -76,7 +78,7 @@ export function PlatformModalShell({
                 type="button"
                 onClick={onClose}
                 className="absolute start-5 top-5 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-white/70 hover:text-[#111827]"
-                aria-label="إغلاق"
+                aria-label={t('common.close')}
               >
                 <X className="h-5 w-5" aria-hidden />
               </button>

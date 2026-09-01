@@ -55,6 +55,7 @@ function mapRecordToDetails(
   record: NonNullable<ReturnType<typeof useDoctorMedicalRecord>["record"]>,
   patientName: string,
   t: (key: string, params?: Record<string, unknown>) => string,
+  locale: "ar" | "en" = "ar",
 ): MedicalRecordDetails {
   return {
     id: record._id,
@@ -82,7 +83,7 @@ function mapRecordToDetails(
     additionalNotes:
       record.attachments && record.attachments.length > 0
         ? t("doctor.medicalRecords.attachments", {
-            attachments: record.attachments.join("، "),
+            attachments: record.attachments.join(locale === "en" ? ", " : "، "),
           })
         : t("doctor.medicalRecords.noAdditionalNotes"),
   };
@@ -150,9 +151,10 @@ export default function DoctorMedicalRecordsPage() {
         recordDetailsQuery.record,
         selectedPatient.user.fullName,
         t,
+        locale,
       ),
     );
-  }, [recordDetailsQuery.record, selectedPatient, t]);
+  }, [recordDetailsQuery.record, selectedPatient, t, locale]);
 
   const openDetails = (row: MedicalRecordRowVm) => {
     setDetailsRecord(null);

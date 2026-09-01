@@ -41,12 +41,16 @@ import type {
 } from "@/lib/auth/accountDeletionTypes";
 import { readAuthUser } from "@/lib/cookies";
 import { useAuthStore } from "@/store/authStore";
+import { useI18n } from "@/i18n/provider";
 
-function formatRecoverUntil(value?: string | null): string | null {
+function formatRecoverUntil(
+  value?: string | null,
+  locale: "ar" | "en" = "ar",
+): string | null {
   if (!value) return null;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString("ar-SY", {
+  return date.toLocaleDateString(locale === "en" ? "en-US" : "ar-SY", {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -56,6 +60,7 @@ function formatRecoverUntil(value?: string | null): string | null {
 type RestoreView = "info" | "otp";
 
 export default function RestoreAccountPage() {
+  const { t, locale } = useI18n();
   const navigate = useNavigate();
   const { toast } = useToast();
   const authUser = readAuthUser();
@@ -126,7 +131,7 @@ export default function RestoreAccountPage() {
     if (guestRecoveryMode && pendingRecovery) {
       setStatus("requested");
       setRecoverUntilRaw(pendingRecovery.recoverUntil ?? null);
-      setRecoverUntil(formatRecoverUntil(pendingRecovery.recoverUntil));
+      setRecoverUntil(formatRecoverUntil(pendingRecovery.recoverUntil, locale));
       setLoading(false);
       return;
     }
@@ -145,26 +150,26 @@ export default function RestoreAccountPage() {
         if (cancelled) return;
         setStatus(normalizeAccountDeletionStatus(response.status));
         setRecoverUntilRaw(response.recoverUntil ?? null);
-        setRecoverUntil(formatRecoverUntil(response.recoverUntil));
+        setRecoverUntil(formatRecoverUntil(response.recoverUntil, locale));
       } catch {
         if (cancelled) return;
         const sessionMeta = readAccountDeletionSessionMeta();
         if (sessionMeta) {
           setStatus(sessionMeta.status);
           setRecoverUntilRaw(sessionMeta.recoverUntil ?? null);
-          setRecoverUntil(formatRecoverUntil(sessionMeta.recoverUntil));
+          setRecoverUntil(formatRecoverUntil(sessionMeta.recoverUntil, locale));
         } else if (authUser?.accountDeletionStatus) {
           setStatus(
             normalizeAccountDeletionStatus(authUser.accountDeletionStatus),
           );
           setRecoverUntilRaw(authUser.deletionRecoverUntil ?? null);
           setRecoverUntil(
-            formatRecoverUntil(authUser.deletionRecoverUntil ?? null),
+            formatRecoverUntil(authUser.deletionRecoverUntil ?? null, locale),
           );
         } else if (pendingRecovery) {
           setStatus("requested");
           setRecoverUntilRaw(pendingRecovery.recoverUntil ?? null);
-          setRecoverUntil(formatRecoverUntil(pendingRecovery.recoverUntil));
+          setRecoverUntil(formatRecoverUntil(pendingRecovery.recoverUntil, locale));
         } else {
           setStatus("none");
           setRecoverUntilRaw(null);
@@ -216,8 +221,8 @@ export default function RestoreAccountPage() {
   const finishSelfRecoverySuccess = () => {
     clearAccountDeletionSessionMeta();
     clearPendingDoctorRecoveryLogin();
-    toast("تم استعادة حسابك بنجاح. يمكنك تسجيل الدخول الآن.", {
-      title: "مرحباً بعودتك",
+    toast(t("accountDeletion.toast.restored.body"), {
+      title: t("accountDeletion.toast.restored.title"),
       variant: "success",
     });
     if (accessToken) {
@@ -232,13 +237,10 @@ export default function RestoreAccountPage() {
   const finishRestoreRequestSuccess = () => {
     clearAccountDeletionSessionMeta();
     clearPendingDoctorRecoveryLogin();
-    toast(
-      "تم إرسال طلب الاستعادة. ستراجع الإدارة طلبك وستتواصل معك عند الموافقة.",
-      {
-        title: "طلب قيد المراجعة",
-        variant: "success",
-      },
-    );
+    toast(t("accountDeletion.toast.restoreRequested.body"), {
+      title: t("accountDeletion.toast.restoreRequested.title"),
+      variant: "success",
+    });
     navigate("/login", { replace: true });
   };
 
@@ -249,7 +251,12 @@ export default function RestoreAccountPage() {
       await accountDeletionApi.cancel(scope);
       finishSelfRecoverySuccess();
     } catch (cause) {
-      setError(mapAccountDeletionGenericError(cause, "تعذّر إلغاء طلب الحذف."));
+      setError(
+        mapAccountDeletionGenericError(
+          cause,
+          t("accountDeletion.restorePage.cancelDeletionFallback"),
+        ),
+      );
     } finally {
       setBusy(false);
     }
@@ -275,10 +282,10 @@ export default function RestoreAccountPage() {
       setView("otp");
       toast(
         isRestoreRequestMode
-          ? "أُرسل رمز التحقق. أدخله لتقديم طلب الاستعادة."
-          : "أُرسل رمز التحقق. أدخله لإتمام استعادة حسابك.",
+          ? t("accountDeletion.toast.checkCode.restoreRequest")
+          : t("accountDeletion.toast.checkCode.restore"),
         {
-          title: "تحقق من الرمز",
+          title: t("accountDeletion.toast.checkCode.title"),
           variant: "info",
         },
       );
@@ -287,8 +294,8 @@ export default function RestoreAccountPage() {
         mapAccountDeletionGenericError(
           cause,
           isRestoreRequestMode
-            ? "تعذّر إرسال رمز طلب الاستعادة."
-            : "تعذّر إرسال رمز الاسترجاع.",
+            ? t("accountDeletion.error.sendRestoreRequestOtp")
+            : t("accountDeletion.error.sendRecoveryOtp"),
         ),
       );
     } finally {
@@ -319,7 +326,7 @@ export default function RestoreAccountPage() {
         if (response.restoreRequestedAt) {
           setStatus(response.status ?? "requested");
           setRecoverUntilRaw(null);
-          setRecoverUntil(formatRecoverUntil(response.restoreRequestedAt));
+          setRecoverUntil(formatRecoverUntil(response.restoreRequestedAt, locale));
         }
         setOtpConfirmOpen(false);
         setPendingOtp(null);
@@ -344,8 +351,8 @@ export default function RestoreAccountPage() {
           mapAccountDeletionGenericError(
             cause,
             isRestoreRequestMode
-              ? "تعذّر إرسال طلب الاستعادة."
-              : "تعذّر التحقق من رمز الاسترجاع.",
+              ? t("accountDeletion.error.restoreRequest")
+              : t("accountDeletion.error.verifyRecoveryOtp"),
           ),
         );
       }
@@ -364,13 +371,13 @@ export default function RestoreAccountPage() {
     setError(null);
     try {
       await dispatchDoctorOtp(otpChannel);
-      toast("أُعيد إرسال رمز التحقق.", {
-        title: "تم الإرسال",
+      toast(t("accountDeletion.toast.otpResent.body"), {
+        title: t("accountDeletion.toast.otpResent.title"),
         variant: "success",
       });
     } catch (cause) {
       setError(
-        mapAccountDeletionGenericError(cause, "تعذّر إعادة إرسال الرمز."),
+        mapAccountDeletionGenericError(cause, t("accountDeletion.error.resendOtp")),
       );
     } finally {
       setResendBusy(false);
@@ -385,13 +392,13 @@ export default function RestoreAccountPage() {
     setError(null);
     try {
       await dispatchDoctorOtp(next);
-      toast("تم إرسال الرمز عبر القناة الجديدة.", {
-        title: "تم التحديث",
+      toast(t("accountDeletion.toast.channelChanged.body"), {
+        title: t("accountDeletion.toast.channelChanged.title"),
         variant: "success",
       });
     } catch (cause) {
       setError(
-        mapAccountDeletionGenericError(cause, "تعذّر تغيير قناة التحقق."),
+        mapAccountDeletionGenericError(cause, t("accountDeletion.error.changeChannel")),
       );
     } finally {
       setResendBusy(false);
@@ -416,25 +423,25 @@ export default function RestoreAccountPage() {
     : otpConfirmOpen;
   const confirmDescription = isDoctorOtpFlow
     ? isRestoreRequestMode
-      ? "بعد التحقق من الرمز سيُرسل طلب الاستعادة للمراجعة الإدارية. هل تريد المتابعة؟"
-      : "بعد التحقق من الرمز سيتم إلغاء طلب الحذف واستعادة حسابك. هل تريد المتابعة؟"
-    : "هل تريد إلغاء طلب حذف الحساب واستعادته؟ سيتم إرسال طلب الإلغاء إلى الخادم فور التأكيد.";
+      ? t("accountDeletion.confirm.restoreRequest.description")
+      : t("accountDeletion.confirm.restore.description")
+    : t("accountDeletion.restorePage.confirmDialog.patientDescription");
   const confirmHandler = isDoctorOtpFlow
     ? executeOtpVerify
     : executePatientRestoreConfirm;
 
   const infoSubtitle = isRestoreRequestMode
-    ? "انتهت فترة الاسترجاع التلقائي (7 أيام). يمكنك تقديم طلب استعادة للمراجعة من الإدارة."
-    : "يمكنك إلغاء طلب الحذف واستعادة حسابك خلال فترة الاسترجاع (7 أيام)";
+    ? t("accountDeletion.restorePage.infoSubtitle.restoreRequest")
+    : t("accountDeletion.restorePage.infoSubtitle.restore");
 
   const restoreButtonLabel = isRestoreRequestMode
-    ? "تقديم طلب الاستعادة"
-    : "إلغاء طلب الحذف واستعادة الحساب";
+    ? t("accountDeletion.restorePage.restoreButton.restoreRequest")
+    : t("accountDeletion.restorePage.restoreButton.restore");
 
   return (
     <>
       <Helmet>
-        <title>استعادة الحساب • LMJ Health</title>
+        <title>{t("accountDeletion.restorePage.title")} • LMJ Health</title>
       </Helmet>
 
       <DeleteAccountShell step={1}>
@@ -445,15 +452,19 @@ export default function RestoreAccountPage() {
             resendBusy={resendBusy}
             error={error}
             title={
-              isRestoreRequestMode ? "طلب استعادة الحساب" : "استعادة الحساب"
+              isRestoreRequestMode
+                ? t("accountDeletion.subtitle.restoreRequest")
+                : t("accountDeletion.subtitle.restore")
             }
             subtitle={
               isRestoreRequestMode
-                ? "أدخل رمز التحقق لتقديم طلب الاستعادة للمراجعة الإدارية"
-                : "أدخل رمز التحقق لإلغاء طلب الحذف واستعادة حسابك"
+                ? t("accountDeletion.otp.restoreRequest.subtitle")
+                : t("accountDeletion.otp.restore.subtitle")
             }
             verifyLabel={
-              isRestoreRequestMode ? "تأكيد طلب الاستعادة" : "تأكيد الاستعادة"
+              isRestoreRequestMode
+                ? t("accountDeletion.otp.restoreRequest.verifyLabel")
+                : t("accountDeletion.otp.restore.verifyLabel")
             }
             onVerify={(value) => {
               setError(null);
@@ -475,7 +486,9 @@ export default function RestoreAccountPage() {
               </div>
 
               <h2 className="font-cairo text-[18px] font-extrabold text-[#111827]">
-                {isRestoreRequestMode ? "طلب استعادة الحساب" : "استعادة الحساب"}
+                {isRestoreRequestMode
+                  ? t("accountDeletion.subtitle.restoreRequest")
+                  : t("accountDeletion.subtitle.restore")}
               </h2>
               <p className="mt-1 font-cairo text-[13px] font-semibold text-[#667085]">
                 {infoSubtitle}
@@ -484,14 +497,14 @@ export default function RestoreAccountPage() {
               {guestRecoveryMode ? (
                 <p className="mt-3 rounded-[10px] bg-[#EFF6FF] px-4 py-3 font-cairo text-[12px] font-semibold text-[#1D4ED8]">
                   {isRestoreRequestMode
-                    ? "تم التعرف على حسابك. أكّد هويتك برمز التحقق لتقديم طلب الاستعادة."
-                    : "تم التعرف على حسابك في فترة الاسترجاع. أكّد هويتك برمز التحقق لإتمام الاستعادة."}
+                    ? t("accountDeletion.restorePage.guestBanner.restoreRequest")
+                    : t("accountDeletion.restorePage.guestBanner.restore")}
                 </p>
               ) : null}
 
               {loading ? (
                 <p className="mt-6 font-cairo text-[13px] font-semibold text-[#667085]">
-                  جارٍ التحقق من حالة الحساب…
+                  {t("accountDeletion.restorePage.checkingStatus")}
                 </p>
               ) : null}
 
@@ -499,14 +512,16 @@ export default function RestoreAccountPage() {
                 <>
                   {!isRestoreRequestMode && recoverUntil ? (
                     <p className="mt-4 rounded-[10px] bg-[#FFFBEB] px-4 py-3 font-cairo text-[12px] font-semibold text-[#92400E]">
-                      آخر موعد للاسترجاع: {recoverUntil}
+                      {t("accountDeletion.restorePage.recoverUntil").replace(
+                        "{date}",
+                        recoverUntil ?? "",
+                      )}
                     </p>
                   ) : null}
 
                   {isRestoreRequestMode ? (
                     <p className="mt-4 rounded-[10px] bg-[#EFF6FF] px-4 py-3 font-cairo text-[12px] font-semibold text-[#1D4ED8]">
-                      بعد التحقق سيُراجع فريق الإدارة طلبك ويعيد تفعيل حسابك عند
-                      الموافقة.
+                      {t("accountDeletion.restorePage.restoreRequestNotice")}
                     </p>
                   ) : null}
 
@@ -534,21 +549,20 @@ export default function RestoreAccountPage() {
               {!loading && status === "none" && !guestRecoveryMode ? (
                 <div className="mt-6 space-y-4">
                   <p className="font-cairo text-[13px] font-semibold text-[#667085]">
-                    لا يوجد طلب حذف نشط على حسابك.
+                    {t("accountDeletion.restorePage.noActiveRequest")}
                   </p>
                   <Link
                     to={getRoleRoot(role === "patient" ? "patient" : "doctor")}
                     className="inline-flex h-[44px] items-center justify-center rounded-[10px] bg-primary px-6 font-cairo text-[13px] font-extrabold text-white"
                   >
-                    الذهاب إلى لوحة التحكم
+                    {t("accountDeletion.restorePage.goToDashboard")}
                   </Link>
                 </div>
               ) : null}
 
               {!loading && !canRestore && resolvedDeletionStatus !== "none" ? (
                 <p className="mt-6 font-cairo text-[13px] font-semibold text-[#DC2626]">
-                  لا يمكن استعادة هذا الحساب حالياً. تواصل مع الدعم إذا كنت
-                  تعتقد أن هذا خطأ.
+                  {t("accountDeletion.restorePage.cannotRestore")}
                 </p>
               ) : null}
 
@@ -557,8 +571,8 @@ export default function RestoreAccountPage() {
                 className="mt-5 inline-block font-cairo text-[13px] font-extrabold text-[#667085] transition hover:text-[#111827]"
               >
                 {authUser
-                  ? "الرجوع إلى الملف الشخصي ←"
-                  : "العودة لتسجيل الدخول ←"}
+                  ? t("accountDeletion.restorePage.backToProfile")
+                  : t("accountDeletion.restorePage.backToLogin")}
               </Link>
             </>
           </div>
@@ -574,11 +588,15 @@ export default function RestoreAccountPage() {
           }
         }}
         title={
-          isRestoreRequestMode ? "تأكيد طلب الاستعادة" : "تأكيد استعادة الحساب"
+          isRestoreRequestMode
+            ? t("accountDeletion.confirm.restoreRequest.title")
+            : t("accountDeletion.confirm.restore.title")
         }
         description={confirmDescription}
         confirmLabel={
-          isRestoreRequestMode ? "نعم، إرسال الطلب" : "نعم، استعادة الحساب"
+          isRestoreRequestMode
+            ? t("accountDeletion.confirm.restoreRequest.confirmLabel")
+            : t("accountDeletion.confirm.restore.confirmLabel")
         }
         busy={busy}
         onConfirm={confirmHandler}

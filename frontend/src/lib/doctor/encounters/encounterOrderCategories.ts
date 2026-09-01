@@ -1,5 +1,6 @@
 import type { EncounterOrder } from '@/lib/doctor/encounters/encounterClinicalTypes';
 import { resolveOrderStatusLabel } from '@/lib/doctor/orders/orderStatusLabels';
+import type { AppLocale } from '@/i18n/runtime';
 
 function readEncounterUpdatedAt(order: EncounterOrder): string | undefined {
   const record: unknown = order;
@@ -120,7 +121,10 @@ export function resolveEncounterOrderStatusLabel(
   return resolveOrderStatusLabel(order.statusCode, order.status, locale);
 }
 
-export function resolveEncounterOrderTitle(order: EncounterOrder): string {
+export function resolveEncounterOrderTitle(
+  order: EncounterOrder,
+  locale: AppLocale = 'ar',
+): string {
   const itemTitle =
     order.items?.[0]?.title ??
     order.items?.[0]?.name ??
@@ -133,6 +137,6 @@ export function resolveEncounterOrderTitle(order: EncounterOrder): string {
     order.clinicalReason?.trim() ??
     order.reason?.trim() ??
     order.specialty?.trim() ??
-    'طلب طبي'
+    (locale === 'en' ? 'Medical order' : 'طلب طبي')
   );
 }
