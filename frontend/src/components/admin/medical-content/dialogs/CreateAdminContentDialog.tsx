@@ -779,10 +779,10 @@ export default function CreateAdminContentDialog({
       });
 
       toast(
-        t(
-          "createContentDialog.toast.created.message",
-          `أُضيفت مسودة «${v.title.trim()}» إلى المحتوى الطبي.`,
-        ).replace("{title}", v.title.trim()),
+        t("createContentDialog.toast.created.message").replace(
+          "{title}",
+          v.title.trim(),
+        ),
         {
           title: t("createContentDialog.toast.created.title"),
           variant: "success",
