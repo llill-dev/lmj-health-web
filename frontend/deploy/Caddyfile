@@ -10,15 +10,20 @@
 		Permissions-Policy "camera=(), microphone=(), geolocation=()"
 	}
 
-	@health path /healthz
-	respond @health "ok" 200
-
 	@immutable path /assets/*
 	header @immutable Cache-Control "public, max-age=31536000, immutable"
 
 	@index path /index.html
 	header @index Cache-Control "no-cache, no-store, must-revalidate"
 
-	try_files {path} {path}/ /index.html
-	file_server
+	# route{} forces these to run in the order written below — Caddy otherwise
+	# reorders directives by its own fixed precedence, where try_files/file_server
+	# run before respond, so /healthz would always fall through to the SPA shell.
+	route {
+		@health path /healthz
+		respond @health "ok" 200
+
+		try_files {path} {path}/ /index.html
+		file_server
+	}
 }
