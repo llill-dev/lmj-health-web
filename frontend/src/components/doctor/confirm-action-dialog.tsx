@@ -114,7 +114,7 @@ export default function ConfirmActionDialog({
                 <Dialog.Close asChild>
                   <button
                     type="button"
-                    className="absolute left-5 top-4 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]"
+                    className="absolute start-5 top-4 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]"
                     aria-label={t("common.close")}
                   >
                     <X className="h-5 w-5" />

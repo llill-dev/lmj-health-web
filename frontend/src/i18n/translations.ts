@@ -4146,6 +4146,25 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "viewContentDialog.field.coverImage": "صورة الغلاف",
     "viewContentDialog.rejectionReason": "سبب الرفض",
     "viewContentDialog.section.patientPreview": "المعاينة كما ستظهر للمريض",
+    "medicalContentPreview.badge": "معاينة موجهة للمريض",
+    "medicalContentPreview.titleFallback": "عنوان المحتوى",
+    "medicalContentPreview.sourceLabel": "المصدر:",
+    "medicalContentPreview.publishedAtLabel": "تاريخ النشر:",
+    "medicalContentPreview.warningsTitle": "تنبيهات جودة المعاينة",
+    "medicalContentPreview.warningsBody":
+      "قد لا تعكس هذه المسودة الشكل النهائي بعد النشر قبل استكمال البنود التالية.",
+    "medicalContentPreview.medicalNoticeTitle": "تنبيه طبي",
+    "medicalContentPreview.medicalNoticePrefix": "هذا المحتوى يعرض نسخة التنبيه:",
+    "medicalContentPreview.safetyTitle": "توجيه السلامة",
+    "medicalContentPreview.seekHelpRequired":
+      "يجب إبراز كتلة اطلب المساعدة الطبية داخل التجربة النهائية.",
+    "medicalContentPreview.seekHelpNotRequired":
+      "لا توجد كتلة seek help مطلوبة حاليًا.",
+    "medicalContentPreview.sourcesTitle": "المصادر",
+    "medicalContentPreview.sourceFallback": "مصدر",
+    "medicalContentPreview.blockFallback": "—",
+    "medicalContentPreview.blockTypeFallback": "غير معروف",
+    "medicalContentPreview.noDetailsFallback": "لا يوجد محتوى تفصيلي بعد.",
     "viewContentDialog.section.templateInfo": "معلومات القالب",
     "viewContentDialog.field.templateName": "اسم القالب",
     "viewContentDialog.field.templateType": "نوع القالب",
@@ -4398,6 +4417,18 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminServiceProviderDialog.validation.countryRequired": "البلد مطلوب",
     "adminServiceProviderDialog.validation.jsonInvalid": "صيغة JSON غير صالحة",
     "adminServiceProviderDialog.section.dataFor": "بيانات {name}",
+    "adminServiceProviderDialog.dynamicField.noFields":
+      "لا توجد حقول إضافية معرّفة لهذا النوع.",
+    "adminServiceProviderDialog.dynamicField.hint.allowed": "القيم المسموحة: {values}",
+    "adminServiceProviderDialog.dynamicField.hint.range": "المدى: {min} إلى {max}",
+    "adminServiceProviderDialog.dynamicField.hint.pattern": "النمط: {pattern}",
+    "adminServiceProviderDialog.dynamicField.selectPlaceholder": "اختر قيمة",
+    "adminServiceProviderDialog.dynamicField.array.removeItem": "حذف العنصر",
+    "adminServiceProviderDialog.dynamicField.array.addItem": "إضافة عنصر",
+    "adminServiceProviderDialog.dynamicField.object.keyPlaceholder": "المفتاح",
+    "adminServiceProviderDialog.dynamicField.object.valuePlaceholder": "القيمة",
+    "adminServiceProviderDialog.dynamicField.object.removeEntry": "حذف الحقل",
+    "adminServiceProviderDialog.dynamicField.object.addProperty": "إضافة خاصية",
     "adminServiceProviderDialog.inactiveTypeWarning.create":
       "هذا النوع غير مُفعّل حاليًا. يمكنك إنشاء مزودين، لكن لن يظهروا للمستخدمين حتى يُفعَّل النوع.",
     "adminServiceProviderDialog.inactiveTypeWarning.edit":
@@ -15200,6 +15231,27 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "viewContentDialog.rejectionReason": "Rejection reason",
     "viewContentDialog.section.patientPreview":
       "Preview as shown to the patient",
+    "medicalContentPreview.badge": "Patient-facing Preview",
+    "medicalContentPreview.titleFallback": "Content title",
+    "medicalContentPreview.sourceLabel": "Source:",
+    "medicalContentPreview.publishedAtLabel": "Published:",
+    "medicalContentPreview.warningsTitle": "Preview validation warnings",
+    "medicalContentPreview.warningsBody":
+      "This draft may differ from final published output until these gaps are resolved.",
+    "medicalContentPreview.medicalNoticeTitle": "Medical notice",
+    "medicalContentPreview.medicalNoticePrefix":
+      "This content uses disclaimer version:",
+    "medicalContentPreview.safetyTitle": "Safety guidance",
+    "medicalContentPreview.seekHelpRequired":
+      "A Seek Help block should be emphasized in the final patient experience.",
+    "medicalContentPreview.seekHelpNotRequired":
+      "No Seek Help block is currently required.",
+    "medicalContentPreview.sourcesTitle": "Sources",
+    "medicalContentPreview.sourceFallback": "Source",
+    "medicalContentPreview.blockFallback": "—",
+    "medicalContentPreview.blockTypeFallback": "unknown",
+    "medicalContentPreview.noDetailsFallback":
+      "No detailed content has been authored yet.",
     "viewContentDialog.section.templateInfo": "Template information",
     "viewContentDialog.field.templateName": "Template name",
     "viewContentDialog.field.templateType": "Template type",
@@ -15475,6 +15527,18 @@ export const translations: Record<AppLocale, TranslationTree> = {
       "Country is required",
     "adminServiceProviderDialog.validation.jsonInvalid": "Invalid JSON format",
     "adminServiceProviderDialog.section.dataFor": "{name} data",
+    "adminServiceProviderDialog.dynamicField.noFields":
+      "No additional fields are defined for this type.",
+    "adminServiceProviderDialog.dynamicField.hint.allowed": "Allowed: {values}",
+    "adminServiceProviderDialog.dynamicField.hint.range": "Range: {min} to {max}",
+    "adminServiceProviderDialog.dynamicField.hint.pattern": "Pattern: {pattern}",
+    "adminServiceProviderDialog.dynamicField.selectPlaceholder": "Select a value",
+    "adminServiceProviderDialog.dynamicField.array.removeItem": "Remove item",
+    "adminServiceProviderDialog.dynamicField.array.addItem": "Add item",
+    "adminServiceProviderDialog.dynamicField.object.keyPlaceholder": "Key",
+    "adminServiceProviderDialog.dynamicField.object.valuePlaceholder": "Value",
+    "adminServiceProviderDialog.dynamicField.object.removeEntry": "Remove entry",
+    "adminServiceProviderDialog.dynamicField.object.addProperty": "Add property",
     "adminServiceProviderDialog.inactiveTypeWarning.create":
       "This type is not currently active. You can create providers, but they won't be visible to users until the type is activated.",
     "adminServiceProviderDialog.inactiveTypeWarning.edit":

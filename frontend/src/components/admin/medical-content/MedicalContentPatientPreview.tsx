@@ -2,6 +2,7 @@
 
 import { AlertTriangle, ExternalLink, ShieldAlert } from "lucide-react";
 import type { AdminContentBlock } from "@/lib/admin/types";
+import { useI18n } from "@/i18n/provider";
 import { formatDate } from "./dialogs/medicalContentDialogHelpers";
 
 type SourceItem = {
@@ -55,46 +56,24 @@ function getSafeExternalUrl(value: unknown): string | null {
   }
 }
 
-function getPreviewCopy(language: "ar" | "en") {
-  if (language === "en") {
-    return {
-      previewBadge: "Patient-facing Preview",
-      titleFallback: "Content title",
-      sourceLabel: "Source:",
-      publishedAtLabel: "Published:",
-      warningsTitle: "Preview validation warnings",
-      warningsBody:
-        "This draft may differ from final published output until these gaps are resolved.",
-      medicalNoticeTitle: "Medical notice",
-      medicalNoticePrefix: "This content uses disclaimer version:",
-      safetyTitle: "Safety guidance",
-      seekHelpRequired:
-        "A Seek Help block should be emphasized in the final patient experience.",
-      seekHelpNotRequired: "No Seek Help block is currently required.",
-      sourcesTitle: "Sources",
-      sourceFallback: "Source",
-      blockFallback: "—",
-      noDetailsFallback: "No detailed content has been authored yet.",
-    };
-  }
-
+function getPreviewCopy(t: (key: string) => string) {
   return {
-    previewBadge: "معاينة موجهة للمريض",
-    titleFallback: "عنوان المحتوى",
-    sourceLabel: "المصدر:",
-    publishedAtLabel: "تاريخ النشر:",
-    warningsTitle: "تنبيهات جودة المعاينة",
-    warningsBody:
-      "قد لا تعكس هذه المسودة الشكل النهائي بعد النشر قبل استكمال البنود التالية.",
-    medicalNoticeTitle: "تنبيه طبي",
-    medicalNoticePrefix: "هذا المحتوى يعرض نسخة التنبيه:",
-    safetyTitle: "توجيه السلامة",
-    seekHelpRequired: "يجب إبراز كتلة اطلب المساعدة الطبية داخل التجربة النهائية.",
-    seekHelpNotRequired: "لا توجد كتلة seek help مطلوبة حاليًا.",
-    sourcesTitle: "المصادر",
-    sourceFallback: "مصدر",
-    blockFallback: "—",
-    noDetailsFallback: "لا يوجد محتوى تفصيلي بعد.",
+    previewBadge: t("medicalContentPreview.badge"),
+    titleFallback: t("medicalContentPreview.titleFallback"),
+    sourceLabel: t("medicalContentPreview.sourceLabel"),
+    publishedAtLabel: t("medicalContentPreview.publishedAtLabel"),
+    warningsTitle: t("medicalContentPreview.warningsTitle"),
+    warningsBody: t("medicalContentPreview.warningsBody"),
+    medicalNoticeTitle: t("medicalContentPreview.medicalNoticeTitle"),
+    medicalNoticePrefix: t("medicalContentPreview.medicalNoticePrefix"),
+    safetyTitle: t("medicalContentPreview.safetyTitle"),
+    seekHelpRequired: t("medicalContentPreview.seekHelpRequired"),
+    seekHelpNotRequired: t("medicalContentPreview.seekHelpNotRequired"),
+    sourcesTitle: t("medicalContentPreview.sourcesTitle"),
+    sourceFallback: t("medicalContentPreview.sourceFallback"),
+    blockFallback: t("medicalContentPreview.blockFallback"),
+    blockTypeFallback: t("medicalContentPreview.blockTypeFallback"),
+    noDetailsFallback: t("medicalContentPreview.noDetailsFallback"),
   };
 }
 
@@ -262,7 +241,7 @@ function renderContentBlock(
       key={`preview-block-${index}`}
       className="rounded-[12px] border border-dashed border-[#D0D5DD] bg-[#FCFCFD] px-3 py-2 font-cairo text-[12px] text-[#667085]"
     >
-      {type || "unknown"}
+      {type || copy.blockTypeFallback}
     </div>
   );
 }
@@ -282,7 +261,8 @@ export default function MedicalContentPatientPreview({
   newsPublishedAt,
   previewWarnings = [],
 }: Props) {
-  const copy = getPreviewCopy(language);
+  const { t } = useI18n();
+  const copy = getPreviewCopy(t);
   const normalizedTitle = toLocalizedText(title, language);
   const normalizedSummary = toLocalizedText(summary, language);
   const normalizedCoverImage = toLocalizedText(coverImage, language);

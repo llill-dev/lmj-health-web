@@ -38,7 +38,7 @@ export default function EditServiceProviderDialog({
   onSuccess,
   allowAdvancedJson = true,
 }: EditServiceProviderDialogProps) {
-  const { dir, t } = useI18n();
+  const { dir, locale, t } = useI18n();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -253,13 +253,13 @@ export default function EditServiceProviderDialog({
                 {t("adminServiceProviderDialog.edit.loadError")}
               </div>
             ) : (
-              <form dir="rtl" onSubmit={handleSubmit}>
+              <form dir={dir} onSubmit={handleSubmit}>
                 <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
                   <div className="space-y-5">
                     <AdminFormField label={t("adminServiceProviderDialog.field.serviceType.placeholder")} hint={t("adminServiceProviderDialog.edit.serviceType.hint")}>
                       <input
                         type="text"
-                        value={resolveLabel(serviceType?.name, "ar") || serviceType?.slug || ""}
+                        value={resolveLabel(serviceType?.name, locale) || serviceType?.slug || ""}
                         disabled
                         className="w-full h-[48px] rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 text-start font-cairo text-[13px] font-bold text-[#667085] outline-none cursor-not-allowed"
                       />
@@ -349,14 +349,14 @@ export default function EditServiceProviderDialog({
                     {serviceType ? (
                       <div>
                         <h3 className="mb-3 text-start font-cairo text-[14px] font-extrabold text-[#111827]">
-                          {t("adminServiceProviderDialog.section.dataFor").replace("{name}", resolveLabel(serviceType.name, "ar"))}
+                          {t("adminServiceProviderDialog.section.dataFor").replace("{name}", resolveLabel(serviceType.name, locale))}
                         </h3>
                         <DynamicProviderFieldRenderer
                           fields={serviceType.fields ?? []}
                           value={dynamicData}
                           onChange={setDynamicData}
                           errors={errors}
-                          locale="ar"
+                          locale={locale}
                           disabled={showAdvancedJson}
                         />
                       </div>

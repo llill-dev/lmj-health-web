@@ -2,6 +2,7 @@
 import { Plus, X } from "lucide-react";
 import type { ServiceTypeField } from "@/lib/admin/types";
 import { resolveLabel } from "@/lib/admin/types";
+import { useI18n } from "@/i18n/provider";
 import {
   AdminFormField,
   adminFieldClass,
@@ -9,6 +10,8 @@ import {
 } from "@/components/admin/form-field";
 import StyledSelect from "@/components/ui/styled-select";
 import { cn } from "@/lib/utils/utils";
+
+type Translate = (key: string, params?: Record<string, unknown>) => string;
 
 /**
  * Renders form controls from a ServiceType's `fields` definition (the real backend
@@ -35,24 +38,30 @@ function fieldLabel(field: ServiceTypeField, locale: "ar" | "en"): string {
   return resolveLabel(field.label, locale) || field.key;
 }
 
-function fieldHint(field: ServiceTypeField, locale: "ar" | "en"): string | undefined {
+function fieldHint(field: ServiceTypeField, locale: "ar" | "en", t: Translate): string | undefined {
   const parts: string[] = [];
+  const sep = locale === "ar" ? "، " : ", ";
   if (field.enum && field.enum.length > 0) {
     parts.push(
-      locale === "ar"
-        ? `القيم المسموحة: ${field.enum.join("، ")}`
-        : `Allowed: ${field.enum.join(", ")}`,
+      t("adminServiceProviderDialog.dynamicField.hint.allowed", {
+        values: field.enum.join(sep),
+      }),
     );
   }
   if (field.min !== undefined || field.max !== undefined) {
     parts.push(
-      locale === "ar"
-        ? `المدى: ${field.min ?? "—"} إلى ${field.max ?? "—"}`
-        : `Range: ${field.min ?? "—"} to ${field.max ?? "—"}`,
+      t("adminServiceProviderDialog.dynamicField.hint.range", {
+        min: field.min ?? "—",
+        max: field.max ?? "—",
+      }),
     );
   }
   if (field.regex) {
-    parts.push(locale === "ar" ? `النمط: ${field.regex}` : `Pattern: ${field.regex}`);
+    parts.push(
+      t("adminServiceProviderDialog.dynamicField.hint.pattern", {
+        pattern: field.regex,
+      }),
+    );
   }
   return parts.length > 0 ? parts.join(" · ") : undefined;
 }
@@ -73,12 +82,11 @@ export default function DynamicProviderFieldRenderer({
   locale = "ar",
   disabled = false,
 }: Props) {
+  const { t } = useI18n();
   if (!fields.length) {
     return (
       <p className="font-cairo text-[12px] font-semibold text-[#98A2B3]">
-        {locale === "ar"
-          ? "لا توجد حقول إضافية معرّفة لهذا النوع."
-          : "No additional fields are defined for this type."}
+        {t("adminServiceProviderDialog.dynamicField.noFields")}
       </p>
     );
   }
@@ -89,7 +97,7 @@ export default function DynamicProviderFieldRenderer({
         const raw = value[field.key];
         const error = errors[field.key];
         const label = fieldLabel(field, locale);
-        const hint = fieldHint(field, locale);
+        const hint = fieldHint(field, locale, t);
         const inputId = `provider-field-${field.key}`;
 
         if (field.type === "boolean") {
@@ -148,7 +156,7 @@ export default function DynamicProviderFieldRenderer({
                   value: String(option),
                   label: String(option),
                 }))}
-                placeholder={locale === "ar" ? "اختر قيمة" : "Select a value"}
+                placeholder={t("adminServiceProviderDialog.dynamicField.selectPlaceholder")}
                 listboxAriaLabel={label}
               />
             </AdminFormField>
@@ -225,13 +233,13 @@ function ArrayFieldEditor({
   items,
   onChange,
   disabled,
-  locale,
 }: {
   items: string[];
   onChange: (next: string[]) => void;
   disabled?: boolean;
   locale: "ar" | "en";
 }) {
+  const { t } = useI18n();
   return (
     <div className="space-y-2">
       {items.map((item, index) => (
@@ -251,7 +259,7 @@ function ArrayFieldEditor({
             type="button"
             disabled={disabled}
             onClick={() => onChange(items.filter((_, i) => i !== index))}
-            aria-label={locale === "ar" ? "حذف العنصر" : "Remove item"}
+            aria-label={t("adminServiceProviderDialog.dynamicField.array.removeItem")}
             className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] border border-[#FECACA] text-[#B42318] disabled:opacity-50"
           >
             <X className="h-4 w-4" />
@@ -265,7 +273,7 @@ function ArrayFieldEditor({
         className="inline-flex items-center gap-1.5 rounded-[8px] border border-primary/30 bg-[#E7FBFA] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-primary disabled:opacity-50"
       >
         <Plus className="h-3.5 w-3.5" />
-        {locale === "ar" ? "إضافة عنصر" : "Add item"}
+        {t("adminServiceProviderDialog.dynamicField.array.addItem")}
       </button>
     </div>
   );
@@ -275,13 +283,13 @@ function ObjectFieldEditor({
   entries,
   onChange,
   disabled,
-  locale,
 }: {
   entries: [string, string][];
   onChange: (next: [string, string][]) => void;
   disabled?: boolean;
   locale: "ar" | "en";
 }) {
+  const { t } = useI18n();
   return (
     <div className="space-y-2">
       {entries.map(([key, val], index) => (
@@ -290,7 +298,7 @@ function ObjectFieldEditor({
             type="text"
             value={key}
             disabled={disabled}
-            placeholder={locale === "ar" ? "المفتاح" : "Key"}
+            placeholder={t("adminServiceProviderDialog.dynamicField.object.keyPlaceholder")}
             onChange={(e) => {
               const next: [string, string][] = [...entries];
               next[index] = [e.target.value, val];
@@ -303,7 +311,7 @@ function ObjectFieldEditor({
             type="text"
             value={val}
             disabled={disabled}
-            placeholder={locale === "ar" ? "القيمة" : "Value"}
+            placeholder={t("adminServiceProviderDialog.dynamicField.object.valuePlaceholder")}
             onChange={(e) => {
               const next: [string, string][] = [...entries];
               next[index] = [key, e.target.value];
@@ -315,7 +323,7 @@ function ObjectFieldEditor({
             type="button"
             disabled={disabled}
             onClick={() => onChange(entries.filter((_, i) => i !== index))}
-            aria-label={locale === "ar" ? "حذف الحقل" : "Remove entry"}
+            aria-label={t("adminServiceProviderDialog.dynamicField.object.removeEntry")}
             className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] border border-[#FECACA] text-[#B42318] disabled:opacity-50"
           >
             <X className="h-4 w-4" />
@@ -329,7 +337,7 @@ function ObjectFieldEditor({
         className="inline-flex items-center gap-1.5 rounded-[8px] border border-primary/30 bg-[#E7FBFA] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-primary disabled:opacity-50"
       >
         <Plus className="h-3.5 w-3.5" />
-        {locale === "ar" ? "إضافة خاصية" : "Add property"}
+        {t("adminServiceProviderDialog.dynamicField.object.addProperty")}
       </button>
     </div>
   );
