@@ -44,7 +44,7 @@ function normalizeGeneralSettings(
 }
 
 export default function AdminSettingsPage() {
-  const { t, locale, dir } = useI18n();
+  const { t, locale, dir, setLocale } = useI18n();
 
   const { settings, setSettings } = useAdminAppSettings();
   const [confirmGeneralOpen, setConfirmGeneralOpen] = useState(false);
@@ -63,17 +63,18 @@ export default function AdminSettingsPage() {
     return { from: from.toISOString(), to: to.toISOString() };
   }, []);
 
-  // Load general settings from localStorage on mount
+  // Load general settings from localStorage on mount; the language field
+  // always reflects the app's actual active locale, not a stale copy.
   const loadGeneralSettingsFromStorage = (): AdminGeneralSettingsForm => {
     try {
       const stored = localStorage.getItem("admin_general_settings");
       if (stored) {
-        return normalizeGeneralSettings(JSON.parse(stored));
+        return { ...normalizeGeneralSettings(JSON.parse(stored)), lang: locale };
       }
     } catch (e) {
       console.error("Failed to load general settings from localStorage", e);
     }
-    return normalizeGeneralSettings();
+    return { ...normalizeGeneralSettings(), lang: locale };
   };
 
   const [draftGeneral, setDraftGeneral] = useState<AdminGeneralSettingsForm>(
@@ -118,7 +119,7 @@ export default function AdminSettingsPage() {
     retry: 1,
   });
 
-  // Save general settings to localStorage
+  // Save general settings to localStorage and apply the selected language.
   const saveGeneralSettings = (settings: AdminGeneralSettingsForm) => {
     try {
       localStorage.setItem("admin_general_settings", JSON.stringify(settings));
@@ -126,6 +127,7 @@ export default function AdminSettingsPage() {
     } catch (e) {
       console.error("Failed to save general settings to localStorage", e);
     }
+    setLocale(settings.lang);
   };
 
   const unreadCount =
