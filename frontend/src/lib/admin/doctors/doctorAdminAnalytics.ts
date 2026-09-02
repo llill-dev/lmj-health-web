@@ -65,22 +65,24 @@ function asRecordArray(value: unknown): AdminDoctorAnalyticsRecord[] | null {
 export function formatPeriodStartLabel(
   periodStartIso: string,
   range: AdminDoctorAnalyticsRange | undefined,
+  locale: 'ar' | 'en' = 'ar',
 ): string {
   const d = new Date(periodStartIso);
   if (Number.isNaN(d.getTime())) return '—';
+  const intlLocale = locale === 'en' ? 'en-US' : 'ar-SY';
   if (range === 'day' || !range) {
-    return d.toLocaleDateString('ar-SY', { weekday: 'short', day: 'numeric', month: 'short' });
+    return d.toLocaleDateString(intlLocale, { weekday: 'short', day: 'numeric', month: 'short' });
   }
   if (range === 'week') {
-    return d.toLocaleDateString('ar-SY', { day: 'numeric', month: 'short', year: 'numeric' });
+    return d.toLocaleDateString(intlLocale, { day: 'numeric', month: 'short', year: 'numeric' });
   }
   if (range === 'month') {
-    return d.toLocaleDateString('ar-SY', { month: 'long', year: 'numeric' });
+    return d.toLocaleDateString(intlLocale, { month: 'long', year: 'numeric' });
   }
   if (range === 'year') {
-    return d.toLocaleDateString('ar-SY', { year: 'numeric' });
+    return d.toLocaleDateString(intlLocale, { year: 'numeric' });
   }
-  return d.toLocaleDateString('ar-SY', { day: 'numeric', month: 'short' });
+  return d.toLocaleDateString(intlLocale, { day: 'numeric', month: 'short' });
 }
 
 function isDiagnosisTimeSeries(
@@ -100,6 +102,7 @@ function isDiagnosisTimeSeries(
 export function parseDiagnosisAnalytics(
   raw: unknown,
   requestRange: AdminDoctorAnalyticsRange | undefined,
+  locale: 'ar' | 'en' = 'ar',
 ): DiagnosisChartItem[] {
   const root = asRecord(raw) ?? {};
   const inner =
@@ -120,6 +123,7 @@ export function parseDiagnosisAnalytics(
         label: formatPeriodStartLabel(
           p.periodStart,
           isAdminDoctorAnalyticsRange(range) ? range : requestRange,
+          locale,
         ),
         value: num(p.count),
       }));

@@ -48,12 +48,15 @@ function labelForField(key: string, locale: AppLocale) {
   return labelKey ? tt(locale, labelKey) : key;
 }
 
-function formatAnyValue(value: unknown): string {
+function formatAnyValue(value: unknown, locale: AppLocale = 'ar'): string {
   if (value === null || value === undefined || value === '') return '—';
   if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
     return String(value);
   }
-  if (Array.isArray(value)) return value.map((v) => formatAnyValue(v)).join('، ');
+  if (Array.isArray(value)) {
+    const separator = locale === 'ar' ? '، ' : ', ';
+    return value.map((v) => formatAnyValue(v, locale)).join(separator);
+  }
   try {
     return JSON.stringify(value);
   } catch {
@@ -111,8 +114,8 @@ export function buildChangeRows(
         rows.push({
           key,
           label: labelForField(key, locale),
-          before: formatAnyValue(rawObject.before),
-          after: formatAnyValue(rawObject.after),
+          before: formatAnyValue(rawObject.before, locale),
+          after: formatAnyValue(rawObject.after, locale),
         });
         return;
       }
@@ -120,8 +123,8 @@ export function buildChangeRows(
       rows.push({
         key,
         label: labelForField(key, locale),
-        before: formatAnyValue(doctorSource[key]),
-        after: formatAnyValue(raw),
+        before: formatAnyValue(doctorSource[key], locale),
+        after: formatAnyValue(raw, locale),
       });
     });
   }
@@ -130,14 +133,14 @@ export function buildChangeRows(
     rows.push({
       key: 'education',
       label: tt(locale, 'adminDoctorProfileChangeRequests.field.education'),
-      before: formatAnyValue(doctorSource.education ?? request.doctor?.specialization),
-      after: formatAnyValue(doctorSource.education ?? request.doctor?.specialization),
+      before: formatAnyValue(doctorSource.education ?? request.doctor?.specialization, locale),
+      after: formatAnyValue(doctorSource.education ?? request.doctor?.specialization, locale),
     });
     rows.push({
       key: 'medicalLicenseNumber',
       label: tt(locale, 'adminVerificationRequests.field.licenseNumber'),
-      before: formatAnyValue(request.doctor?.medicalLicenseNumber),
-      after: formatAnyValue(request.doctor?.medicalLicenseNumber),
+      before: formatAnyValue(request.doctor?.medicalLicenseNumber, locale),
+      after: formatAnyValue(request.doctor?.medicalLicenseNumber, locale),
     });
   }
 

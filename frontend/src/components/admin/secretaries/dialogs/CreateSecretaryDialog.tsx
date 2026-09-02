@@ -1,7 +1,7 @@
 "use client";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Save, TriangleAlert } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   ADMIN_SECRETARY_BLOCKER_MESSAGE,
   ADMIN_SECRETARY_BLOCKER_TITLE,
@@ -13,7 +13,7 @@ import StyledSelect from "@/components/ui/styled-select";
 import { AppCheckbox } from "@/components/ui";
 import {
   ASSIGNABLE_SECRETARY_PERMISSIONS,
-  SECRETARY_PERMISSION_LABELS,
+  secretaryPermissionLabel,
 } from "@/lib/doctor/secretaries/permissionsUi";
 import {
   AdminFormField,
@@ -21,11 +21,6 @@ import {
   adminInputClass,
 } from "@/components/admin/form-field";
 import { cn } from "@/lib/utils/utils";
-
-const PERMISSION_OPTIONS = ASSIGNABLE_SECRETARY_PERMISSIONS.map((value) => ({
-  value,
-  label: SECRETARY_PERMISSION_LABELS[value] ?? value,
-}));
 
 interface CreateSecretaryDialogProps {
   open: boolean;
@@ -39,6 +34,15 @@ export default function CreateSecretaryDialog({
   onSuccess,
 }: CreateSecretaryDialogProps) {
   const { dir, locale, t } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const PERMISSION_OPTIONS = useMemo(
+    () =>
+      ASSIGNABLE_SECRETARY_PERMISSIONS.map((value) => ({
+        value,
+        label: secretaryPermissionLabel(value, tr),
+      })),
+    [locale],
+  );
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const writeBlocked = !ADMIN_SECRETARY_WRITE_SUPPORTED;

@@ -12,8 +12,7 @@ export function DeleteAccountShell({
   subtitle?: string;
   children: ReactNode;
 }) {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
   return (
     <div
       dir={dir}
@@ -28,7 +27,7 @@ export function DeleteAccountShell({
             </div>
           </div>
           <h1 className="font-cairo text-[24px] font-black text-[#111827]">
-            {tr("حذف الحساب", "Delete account")}
+            {t("accountDeletion.feedback.delete")}
           </h1>
           {subtitle ? (
             <p className="mt-1 font-cairo text-[13px] font-semibold text-[#667085]">

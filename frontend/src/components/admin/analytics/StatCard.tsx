@@ -1,4 +1,5 @@
 import type { ElementType } from 'react';
+import { useI18n } from '@/i18n/provider';
 
 type StatCardProps = {
   title: string;
@@ -23,6 +24,7 @@ export default function StatCard({
   subColor = 'text-[#667085]',
   loading,
 }: StatCardProps) {
+  const { locale } = useI18n();
   return (
     <div
       className={`h-[147px] rounded-[12px] border px-6 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)] ${border} ${bg}`}
@@ -36,7 +38,9 @@ export default function StatCard({
             <div className='mt-2 h-7 w-20 animate-pulse rounded bg-[#EEF2F6]' />
           ) : (
             <div className='mt-2 font-cairo text-[26px] font-black leading-[30px] text-[#111827]'>
-              {typeof value === 'number' ? value.toLocaleString('ar-EG') : value}
+              {typeof value === 'number'
+                ? value.toLocaleString(locale === 'en' ? 'en-US' : 'ar-EG')
+                : value}
             </div>
           )}
           {sub && (

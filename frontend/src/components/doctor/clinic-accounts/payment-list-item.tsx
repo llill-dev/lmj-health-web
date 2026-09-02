@@ -35,7 +35,7 @@ export function PaymentListItem({
   index: number;
   currency?: string;
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const hasRefund = (payment.refundedAmount ?? 0) > 0;
 
   return (
@@ -68,7 +68,7 @@ export function PaymentListItem({
         </p>
         <p className="mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]">
           {paymentMethodLabel(payment.method, t)} ·{" "}
-          {formatBillingDate(payment.paidAt)}
+          {formatBillingDate(payment.paidAt, locale)}
         </p>
       </div>
       <span className="font-cairo text-[22px] font-black text-primary">

@@ -54,7 +54,7 @@ function readInvoiceItems(value: ApiBillingInvoice['items']): NonNullable<ApiBil
 }
 
 function formatIsoDate(value?: string | null): string {
-  return formatBillingDate(value);
+  return formatBillingDate(value, getCurrentLocale());
 }
 
 function formatRelativeTime(value?: string): string {

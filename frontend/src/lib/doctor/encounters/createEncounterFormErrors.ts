@@ -109,7 +109,9 @@ function collectStructuredFieldTexts(
       else if (Array.isArray(value)) {
         push(
           key,
-          value.filter((entry) => typeof entry === 'string').join('، '),
+          value
+            .filter((entry) => typeof entry === 'string')
+            .join(getCurrentLocale() === 'ar' ? '، ' : ', '),
         );
       }
     }

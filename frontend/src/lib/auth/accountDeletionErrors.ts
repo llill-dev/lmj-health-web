@@ -1,10 +1,11 @@
 import { ApiError } from '@/lib/api';
 import { getCurrentLocale } from '@/i18n/runtime';
+import { getTranslationValue } from '@/i18n/translations';
 
 type SupportedLocale = 'ar' | 'en';
 
-function tr(locale: SupportedLocale, ar: string, en: string): string {
-  return locale === 'en' ? en : ar;
+function tr(locale: SupportedLocale, key: string, fallback: string): string {
+  return getTranslationValue(locale, key) ?? fallback;
 }
 
 const PASSWORD_MESSAGE_KEYS = new Set([
@@ -56,8 +57,8 @@ export function mapAccountDeletionPasswordError(
     if (isAccountDeletionPasswordError(error)) {
       return tr(
         locale,
+        'accountDeletion.error.incorrectPassword',
         'كلمة المرور غير صحيحة. حاول مرة أخرى.',
-        'Incorrect password. Try again.',
       );
     }
     return error.message;
@@ -65,8 +66,8 @@ export function mapAccountDeletionPasswordError(
   if (error instanceof Error && error.message.trim()) return error.message;
   return tr(
     locale,
+    'accountDeletion.error.passwordVerifyFailed',
     'تعذّر التحقق من كلمة المرور.',
-    'Could not verify the password.',
   );
 }
 
@@ -78,15 +79,15 @@ export function mapAccountDeletionOtpError(
     if (error.messageKey === 'errors.auth.otpExpired') {
       return tr(
         locale,
+        'accountDeletion.error.otpExpired',
         'انتهت صلاحية رمز التحقق. أعد إرسال رمز جديد.',
-        'The verification code has expired. Resend a new code.',
       );
     }
     if (isAccountDeletionOtpError(error)) {
       return tr(
         locale,
+        'accountDeletion.error.otpIncorrect',
         'رمز التحقق غير صحيح. تحقق من الرمز وأعد المحاولة.',
-        'The verification code is incorrect. Check the code and try again.',
       );
     }
     return error.message;
@@ -94,8 +95,8 @@ export function mapAccountDeletionOtpError(
   if (error instanceof Error && error.message.trim()) return error.message;
   return tr(
     locale,
+    'accountDeletion.error.otpVerifyFailed',
     'تعذّر التحقق من رمز التحقق.',
-    'Could not verify the code.',
   );
 }
 
@@ -108,15 +109,15 @@ export function mapAccountDeletionGenericError(
     if (error.messageKey === 'errors.routeNotFound' || error.status === 404) {
       return tr(
         locale,
+        'accountDeletion.error.recoveryRouteUnavailable',
         'تعذّر إتمام الاسترجاع. مسار إلغاء الحذف غير متاح على الخادم حالياً.',
-        'Could not complete the recovery. The cancel-deletion route is not available on the server right now.',
       );
     }
     if (error.status === 401) {
       return tr(
         locale,
+        'accountDeletion.error.recoveryNoSession',
         'تعذّر إتمام الاسترجاع. لا توجد جلسة مصادقة نشطة — أعد تسجيل الدخول إن أمكن ثم حاول مرة أخرى.',
-        'Could not complete the recovery. There is no active session — sign in again if possible and try again.',
       );
     }
     return error.message || fallback;

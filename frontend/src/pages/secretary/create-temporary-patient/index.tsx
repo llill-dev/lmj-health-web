@@ -7,8 +7,7 @@ import { useI18n } from "@/i18n/provider";
 import { getCreateTemporaryPatientErrorMessage } from "@/lib/doctor/writeFlowErrors";
 
 export default function SecretaryCreateTemporaryPatientPage() {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { hasPermission } = useSecretaryPermissions();
@@ -25,14 +24,14 @@ export default function SecretaryCreateTemporaryPatientPage() {
         phone: values.phone.trim(),
         email: values.email.trim(),
       });
-      toast(tr("تم إنشاء المريض المؤقت بنجاح.", "Temporary patient created successfully."), {
-        title: tr("تم الحفظ", "Saved"),
+      toast(t("secretary.temporaryPatient.createSuccess"), {
+        title: t("secretary.temporaryPatient.saved"),
         variant: "success",
       });
       navigate("/secretary/patients");
     } catch (error) {
       toast(getCreateTemporaryPatientErrorMessage(error, locale), {
-        title: tr("فشل الحفظ", "Save failed"),
+        title: t("secretary.temporaryPatient.saveFailed"),
         variant: "error",
       });
     }
@@ -49,20 +48,17 @@ export default function SecretaryCreateTemporaryPatientPage() {
       ) : (
         <div className="rounded-2xl border border-dashed border-[#d0d5dd] bg-white px-6 py-10 text-center shadow-sm">
           <h1 className="font-cairo text-lg font-bold text-[#0f172a]">
-            {tr("هذه الصفحة غير متاحة", "This page is unavailable")}
+            {t("secretary.temporaryPatient.pageUnavailable")}
           </h1>
           <p className="mt-2 font-cairo text-sm font-semibold text-[#64748b]">
-            {tr(
-              "لا تملك صلاحية إنشاء مرضى مؤقتين من حساب السكرتيرة هذا.",
-              "This secretary account cannot create temporary patients.",
-            )}
+            {t("secretary.temporaryPatient.noPermission")}
           </p>
           <button
             type="button"
             onClick={() => navigate("/secretary/patients")}
             className="mt-5 rounded-xl border border-[#d0d5dd] bg-white px-4 py-2 font-cairo text-sm font-bold text-[#0f172a] transition hover:bg-[#f8fafc]"
           >
-            {tr("العودة إلى المرضى", "Back to patients")}
+            {t("doctor.patientDetails.backToPatients")}
           </button>
         </div>
       )}

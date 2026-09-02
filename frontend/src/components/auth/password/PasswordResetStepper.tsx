@@ -8,24 +8,20 @@ export default function PasswordResetStepper({
 }: {
   step: PasswordResetStep;
 }) {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const { t, dir } = useI18n();
 
   const STEPS = [
-    { id: 1 as const, label: tr('البريد', 'Email'), Icon: Mail },
-    { id: 2 as const, label: tr('التحقق', 'Verify'), Icon: Shield },
-    { id: 3 as const, label: tr('كلمة المرور', 'Password'), Icon: Lock },
-    { id: 4 as const, label: tr('تم', 'Done'), Icon: Check },
+    { id: 1 as const, label: t('signup.step1.channel.email'), Icon: Mail },
+    { id: 2 as const, label: t('auth.resetPassword.stepper.verify'), Icon: Shield },
+    { id: 3 as const, label: t('auth.password'), Icon: Lock },
+    { id: 4 as const, label: t('auth.resetPassword.stepper.done'), Icon: Check },
   ];
 
   return (
     <div
       className='mt-6'
       dir={dir}
-      aria-label={tr(
-        'مراحل إعادة تعيين كلمة المرور',
-        'Password reset steps',
-      )}
+      aria-label={t('auth.resetPassword.stepper.ariaLabel')}
     >
       <div className='flex items-start justify-between gap-1'>
         {STEPS.map(({ id, label, Icon }, index) => {

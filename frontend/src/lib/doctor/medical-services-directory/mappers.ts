@@ -228,6 +228,7 @@ export function mapServiceProviderToDirectoryItem(
   provider: ServiceProvider,
   options?: {
     serviceTypeLabel?: string;
+    locale?: 'ar' | 'en';
   },
 ): MedicalServiceFacility | null {
   const id = provider.id?.trim() || provider._id?.trim();
@@ -256,7 +257,10 @@ export function mapServiceProviderToDirectoryItem(
       'summary',
       'bio',
       'details',
-    ]) || 'مزود خدمة صحي منشور ضمن دليل LMJ Health.';
+    ]) ||
+    (options?.locale === 'en'
+      ? 'A published healthcare provider in the LMJ Health directory.'
+      : 'مزود خدمة صحي منشور ضمن دليل LMJ Health.');
 
   const services = [
     ...readStringArray(data.services),
@@ -319,6 +323,7 @@ export function mergeServiceProviders(
   options?: {
     search?: string;
     serviceTypeLabelsBySlug?: Record<string, string>;
+    locale?: 'ar' | 'en';
   },
 ): MedicalServiceFacility[] {
   const merged = new Map<string, MedicalServiceFacility>();
@@ -332,6 +337,7 @@ export function mergeServiceProviders(
           : provider.serviceType?.slug || '';
       const mapped = mapServiceProviderToDirectoryItem(provider, {
         serviceTypeLabel: options?.serviceTypeLabelsBySlug?.[slug],
+        locale: options?.locale,
       });
       if (!mapped) continue;
       if (!matchesDirectorySearch(mapped, options?.search)) continue;

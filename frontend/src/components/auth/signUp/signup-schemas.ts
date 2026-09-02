@@ -234,53 +234,57 @@ const signupStringTrim = z.string().trim();
 
 const SIGNUP_PASSWORD_COMPLEXITY_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/;
 
-export const signupPasswordSchema = z
-  .string()
-  .min(8, "كلمة المرور يجب أن تكون 8 أحرف على الأقل.")
-  .max(256, "كلمة المرور طويلة جداً.")
-  .regex(
-    SIGNUP_PASSWORD_COMPLEXITY_REGEX,
-    "كلمة المرور يجب أن تحتوي على حرف كبير وحرف صغير ورقم واحد على الأقل.",
-  );
+export const signupPasswordSchema = (locale: Locale = "ar") =>
+  z
+    .string()
+    .min(8, getSignupValidationMessage("passwordMinLength", locale))
+    .max(256, getSignupValidationMessage("passwordMaxLength", locale))
+    .regex(
+      SIGNUP_PASSWORD_COMPLEXITY_REGEX,
+      getSignupValidationMessage("passwordComplexity", locale),
+    );
 
 /** Matches POST /auth/signup `dateOfBirth`: ISO date only, no time (API-3). */
-const isoDateOnlySchema = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "اختر التاريخ من التقويم")
-  .refine((s) => {
-    const [y, m, d] = s.split("-").map(Number);
-    const dt = new Date(y, m - 1, d);
-    return (
-      dt.getFullYear() === y && dt.getMonth() === m - 1 && dt.getDate() === d
+const isoDateOnlySchema = (locale: Locale = "ar") =>
+  z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, getSignupValidationMessage("dateRequired", locale))
+    .refine((s) => {
+      const [y, m, d] = s.split("-").map(Number);
+      const dt = new Date(y, m - 1, d);
+      return (
+        dt.getFullYear() === y && dt.getMonth() === m - 1 && dt.getDate() === d
+      );
+    }, getSignupValidationMessage("dateInvalid", locale))
+    .refine((s) => {
+      const [y, m, d] = s.split("-").map(Number);
+      const picked = new Date(y, m - 1, d);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      picked.setHours(0, 0, 0, 0);
+      return picked <= today;
+    }, getSignupValidationMessage("dateFuture", locale))
+    .refine((s) => {
+      const [y, m, d] = s.split("-").map(Number);
+      const picked = new Date(y, m - 1, d);
+      const min = new Date(1900, 0, 1);
+      picked.setHours(0, 0, 0, 0);
+      min.setHours(0, 0, 0, 0);
+      return picked >= min;
+    }, getSignupValidationMessage("dateUnreasonable", locale));
+
+const phoneLocalPartSchema = (locale: Locale = "ar") =>
+  z
+    .string()
+    .regex(/^\d*$/, getSignupValidationMessage("phoneLocalDigitsOnly", locale));
+
+export const signupE164PhoneSchema = (locale: Locale = "ar") =>
+  z
+    .string()
+    .regex(
+      /^\+[1-9]\d{7,14}$/,
+      getSignupValidationMessage("phoneE164Format", locale),
     );
-  }, "تاريخ غير صالح")
-  .refine((s) => {
-    const [y, m, d] = s.split("-").map(Number);
-    const picked = new Date(y, m - 1, d);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    picked.setHours(0, 0, 0, 0);
-    return picked <= today;
-  }, "لا يمكن أن يكون تاريخ الميلاد في المستقبل")
-  .refine((s) => {
-    const [y, m, d] = s.split("-").map(Number);
-    const picked = new Date(y, m - 1, d);
-    const min = new Date(1900, 0, 1);
-    picked.setHours(0, 0, 0, 0);
-    min.setHours(0, 0, 0, 0);
-    return picked >= min;
-  }, "تاريخ الميلاد غير معقول");
-
-const phoneLocalPartSchema = z
-  .string()
-  .regex(/^\d*$/, "أرقام فقط، بدون مسافات أو رمز الدولة");
-
-export const signupE164PhoneSchema = z
-  .string()
-  .regex(
-    /^\+[1-9]\d{7,14}$/,
-    "أدخل رقم الهاتف بصيغة دولية صحيحة مثل +963912345678",
-  );
 
 /**
  * National number length (digits after dial code, leading zeros stripped) per prefix.
@@ -356,7 +360,7 @@ export function validatePhoneByDialCode(
   }
 
   const full = `${dial}${local}`;
-  if (!signupE164PhoneSchema.safeParse(full).success) {
+  if (!signupE164PhoneSchema(locale).safeParse(full).success) {
     return getSignupValidationMessage("phoneE164Invalid", locale);
   }
 
@@ -377,12 +381,12 @@ export const step1AccountSchema = (locale: Locale = "ar") =>
         .trim()
         .min(1, getSignupValidationMessage("emailRequired", locale))
         .email(getSignupValidationMessage("emailInvalid", locale)),
-      password: signupPasswordSchema,
+      password: signupPasswordSchema(locale),
       confirmPassword: z
         .string()
         .min(1, getSignupValidationMessage("confirmPasswordRequired", locale)),
       phoneDialCode: signupPhoneDialCodeSchema(locale),
-      phoneLocal: phoneLocalPartSchema,
+      phoneLocal: phoneLocalPartSchema(locale),
       channel: verificationChannelSchema(locale),
     })
     .superRefine((data, ctx) => {
@@ -437,7 +441,7 @@ export const step1AccountSchema = (locale: Locale = "ar") =>
 export const step2PersonalSchema = (locale: Locale = "ar") =>
   z.object({
     gender: genderSchema(locale),
-    birthDate: isoDateOnlySchema,
+    birthDate: isoDateOnlySchema(locale),
     address: signupStringTrim.pipe(
       z
         .string()
@@ -529,11 +533,11 @@ export const signUpSchema = (locale: Locale = "ar") =>
         .trim()
         .min(1, getSignupValidationMessage("emailRequired", locale))
         .email(getSignupValidationMessage("emailInvalid", locale)),
-      password: signupPasswordSchema,
-      phone: signupE164PhoneSchema,
+      password: signupPasswordSchema(locale),
+      phone: signupE164PhoneSchema(locale),
       channel: verificationChannelSchema(locale),
       gender: genderSchema(locale),
-      birthDate: isoDateOnlySchema,
+      birthDate: isoDateOnlySchema(locale),
       address: signupStringTrim.pipe(
         z
           .string()

@@ -1,9 +1,26 @@
 import { z } from "zod";
+import { getCurrentLocale } from "@/i18n/runtime";
+import { getTranslationValue } from "@/i18n/translations";
 
 export const LATIN_SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
+/** @deprecated Arabic-only — use latinSlugMessage() for locale-aware messages. */
 export const LATIN_SLUG_MESSAGE =
   "المعرّف يجب أن يحتوي على أحرف لاتينية صغيرة وأرقام وشرطات فقط";
+
+function latinSlugMessage(): string {
+  return (
+    getTranslationValue(getCurrentLocale(), "forms.slug.invalidFormat") ??
+    LATIN_SLUG_MESSAGE
+  );
+}
+
+function requiredSlugMessage(): string {
+  return (
+    getTranslationValue(getCurrentLocale(), "forms.slug.required") ??
+    "المعرّف مطلوب"
+  );
+}
 
 export function isValidLatinSlug(value: string): boolean {
   return LATIN_SLUG_REGEX.test(value.trim());
@@ -14,17 +31,17 @@ export function optionalLatinSlugSchema() {
     .string()
     .optional()
     .refine((value) => !value?.trim() || isValidLatinSlug(value), {
-      message: LATIN_SLUG_MESSAGE,
+      message: latinSlugMessage(),
     });
 }
 
-export function requiredLatinSlugSchema(message = "المعرّف مطلوب") {
+export function requiredLatinSlugSchema(message = requiredSlugMessage()) {
   return z
     .string()
     .trim()
     .min(1, message)
     .refine((value) => isValidLatinSlug(value), {
-      message: LATIN_SLUG_MESSAGE,
+      message: latinSlugMessage(),
     });
 }
 

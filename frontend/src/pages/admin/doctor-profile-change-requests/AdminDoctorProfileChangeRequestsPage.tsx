@@ -214,9 +214,8 @@ export default function AdminDoctorProfileChangeRequestsPage() {
                     "admin.doctorProfileChangeRequests.noRequestsStatus",
                   ).replace(
                     "{status}",
-                    (activeStatusLabel ?? locale === "ar")
-                      ? "المحددة"
-                      : "selected",
+                    activeStatusLabel ??
+                      t("admin.doctorProfileChangeRequests.selectedStatusFallback"),
                   )
                 : t("admin.doctorProfileChangeRequests.noRequests")}
             </div>

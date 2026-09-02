@@ -5,8 +5,10 @@ import { resolveAccountDeletionScope } from '@/lib/auth/accountDeletionClient';
 import { resolveRestorePath } from '@/lib/auth/accountDeletionSession';
 import { getRoleRoot } from '@/routes/ProtectedRoute';
 import { readAuthUser } from '@/lib/cookies';
+import { useI18n } from '@/i18n/provider';
 
 export default function DeleteAccountPage() {
+  const { t } = useI18n();
   const authUser = readAuthUser();
   const scope = resolveAccountDeletionScope(authUser?.role);
 
@@ -20,7 +22,7 @@ export default function DeleteAccountPage() {
   return (
     <>
       <Helmet>
-        <title>حذف الحساب • LMJ Health</title>
+        <title>{t('accountDeletion.feedback.delete')} • LMJ Health</title>
       </Helmet>
       <DeleteAccountFlow
         scope={scope}

@@ -19,21 +19,38 @@ export type BookAppointmentValues = {
   notes?: string;
 };
 
-const bookAppointmentSchema = z.object({
-  patientId: z.string().min(1, "يرجى اختيار المريض."),
-  date: z
-    .string()
-    .min(1, "يرجى اختيار تاريخ الموعد.")
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "صيغة التاريخ غير صحيحة."),
-  time: z
-    .string()
-    .min(1, "يرجى اختيار وقت الموعد.")
-    .regex(/^\d{2}:\d{2}$/, "صيغة الوقت غير صحيحة."),
-  appointmentTypeId: z.string().optional(),
-  notes: z.string().max(500, "الحد الأقصى للملاحظات هو 500 حرف.").optional(),
-});
+type TFn = (key: string, fallback?: string) => string;
 
-type BookAppointmentFormValues = z.infer<typeof bookAppointmentSchema>;
+function buildBookAppointmentSchema(t: TFn) {
+  return z.object({
+    patientId: z
+      .string()
+      .min(1, t("secretary.appointments.book.validation.patientRequired")),
+    date: z
+      .string()
+      .min(1, t("secretary.appointments.book.validation.dateRequired"))
+      .regex(
+        /^\d{4}-\d{2}-\d{2}$/,
+        t("secretary.appointments.book.validation.invalidDateFormat"),
+      ),
+    time: z
+      .string()
+      .min(1, t("secretary.appointments.book.validation.timeRequired"))
+      .regex(
+        /^\d{2}:\d{2}$/,
+        t("secretary.appointments.book.validation.invalidTimeFormat"),
+      ),
+    appointmentTypeId: z.string().optional(),
+    notes: z
+      .string()
+      .max(500, t("secretary.appointments.book.validation.notesTooLong"))
+      .optional(),
+  });
+}
+
+type BookAppointmentFormValues = z.infer<
+  ReturnType<typeof buildBookAppointmentSchema>
+>;
 
 function formatLocalDate(date: Date) {
   const year = date.getFullYear();
@@ -69,6 +86,10 @@ export default function BookAppointmentPanel({
   const { t, dir, locale } = useI18n();
   const selectOutletRef = useRef<HTMLDivElement>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const bookAppointmentSchema = useMemo(
+    () => buildBookAppointmentSchema(t),
+    [locale],
+  );
   const {
     register,
     control,

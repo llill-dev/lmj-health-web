@@ -91,7 +91,7 @@ function formatActivityDateParts(
       day: 'numeric',
       month: 'long',
     }),
-    timeLabel: date.toLocaleTimeString('en-US', {
+    timeLabel: date.toLocaleTimeString(locale === 'en' ? 'en-US' : 'ar-SY', {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true,

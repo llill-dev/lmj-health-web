@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { useI18n } from '@/i18n/provider';
 import { get } from '@/lib/api';
 import { parseDiagnosisAnalytics } from '@/lib/admin/doctors/doctorAdminAnalytics';
 import type { AdminDoctorAnalyticsRange } from '@/lib/admin/types';
@@ -10,6 +11,7 @@ import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 export function useDoctorDiagnosisAnalytics(
   range: AdminDoctorAnalyticsRange = 'week',
 ) {
+  const { locale } = useI18n();
   const query = useQuery({
     queryKey: ['doctor', 'analytics', 'diagnosis', range],
     queryFn: () =>
@@ -20,7 +22,7 @@ export function useDoctorDiagnosisAnalytics(
     staleTime: 1000 * 60 * 5,
   });
 
-  const series = parseDiagnosisAnalytics(query.data, range);
+  const series = parseDiagnosisAnalytics(query.data, range, locale);
   const total =
     typeof query.data?.total === 'number'
       ? query.data.total

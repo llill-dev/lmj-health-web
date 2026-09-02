@@ -98,10 +98,10 @@ export function FacilityDirectoryCard({
   expanded: boolean;
   onToggle: () => void;
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const detailsQuery = useQuery({
-    queryKey: ['medical-services-directory', 'details', facility.id] as const,
-    queryFn: () => fetchMedicalServiceDetails(facility.id),
+    queryKey: ['medical-services-directory', 'details', facility.id, locale] as const,
+    queryFn: () => fetchMedicalServiceDetails(facility.id, locale),
     enabled: expanded,
     staleTime: 1000 * 60 * 5,
   });

@@ -23,6 +23,23 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "signup.step4.previous": "السابق",
     "signup.step4.next": "التالي",
     "platform.faq.title": "الأسئلة الشائعة",
+    "platform.footer.about": "عن المنصة",
+    "platform.footer.legal": "القسم القانوني",
+    "platform.footer.terms": "الشروط والأحكام",
+    "platform.footer.privacy": "سياسة الخصوصية",
+    "platform.footer.usage": "سياسة الاستخدام",
+    "platform.footer.supportHelp": "الدعم والمساعدة",
+    "platform.footer.faq": "الأسئلة الشائعة",
+    "platform.footer.medicalLibrary": "المكتبة الطبية",
+    "platform.footer.contactUs": "تواصل معنا",
+    "platform.footer.contactAriaLabel": "تواصل",
+    "platform.footer.ourServices": "خدماتنا",
+    "platform.footer.bookAppointment": "احجز موعد",
+    "platform.footer.doctors": "الأطباء",
+    "onboarding.placeholderBody": "سيتم استكمال إعدادات الحساب هنا حسب الدور.",
+    "forms.slug.invalidFormat":
+      "المعرّف يجب أن يحتوي على أحرف لاتينية صغيرة وأرقام وشرطات فقط",
+    "forms.slug.required": "المعرّف مطلوب",
     "platform.faq.searchLibraryTitle": "ابحث في المكتبة الطبية",
     "platform.faq.searchLibraryHint":
       "إذا لم تجد إجابتك هنا، قد تجد شرحاً أوسع ضمن المقالات والنصائح الطبية المنشورة.",
@@ -141,6 +158,7 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "admin.secretaryAppointmentsManagement.cards.actionValue": "إدارة جدول الطبيب",
     "admin.secretaryAppointmentsManagement.cards.doctor": "الطبيب المرتبط",
     "admin.secretaryAppointmentsManagement.cards.notSet": "غير محدد",
+    "admin.secretary.doctorFallbackWithId": "طبيب ({id})",
     "admin.secretaryAppointmentsManagement.cards.scope": "نطاق الصفحة",
     "admin.secretaryAppointmentsManagement.cards.scopeValue": "إجراءات المواعيد التشغيلية",
     "admin.secretaryAppointmentsManagement.info.description":
@@ -197,6 +215,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.appointments.book.completePrerequisites": "أكمل المتطلبات أولاً",
     "doctor.appointments.book.confirmBooking": "تأكيد الحجز",
     "doctor.appointments.book.creating": "جارٍ إنشاء الموعد...",
+    "doctor.appointments.book.nearestAvailable": "أقرب موعد متاح",
+    "doctor.appointments.book.searching": "جارٍ البحث...",
     "doctor.appointments.book.date": "التاريخ",
     "doctor.appointments.book.loadTimesError":
       "تعذّر تحميل الأوقات المتاحة لهذا التاريخ.",
@@ -206,6 +226,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.appointments.book.noPatientsAvailable": "لا يوجد مرضى متاحون للاختيار.",
     "doctor.appointments.book.noTimesAvailable":
       "لا توجد أوقات متاحة في هذا التاريخ. اختر تاريخاً آخر.",
+    "doctor.appointments.book.noDatesFound":
+      "لم يُعثر على موعد متاح خلال {days} يومًا القادمة.",
     "doctor.appointments.book.noTypeSelected": "لم يُحدَّد نوع",
     "doctor.appointments.book.notSpecified": "غير محدد",
     "doctor.appointments.book.notes": "ملاحظات",
@@ -233,6 +255,16 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.appointments.book.validation.notesTooLong": "الحد الأقصى للملاحظات 500 حرف.",
     "doctor.appointments.book.validation.patientRequired": "يرجى اختيار مريض.",
     "doctor.appointments.book.validation.timeRequired": "يرجى اختيار وقت.",
+    "doctor.appointments.cancel.title": "إنهاء الموعد",
+    "doctor.appointments.cancel.fieldLabel": "الملاحظات الطبية",
+    "doctor.appointments.cancel.placeholder":
+      "اكتب التشخيص والملاحظات الطبية هنا...",
+    "doctor.appointments.cancel.confirmLabel": "حفظ وإنهاء",
+    "doctor.appointments.cancel.maxLength": "الحد الأقصى {max} حرف",
+    "doctor.appointments.cancel.close": "إغلاق",
+    "doctor.appointments.cancel.description": "تأكيد إلغاء الموعد المحدد.",
+    "doctor.appointments.cancel.patient": "المريض",
+    "doctor.appointments.cancel.cancel": "إلغاء",
     "language.ar": "العربية",
     "language.en": "English",
     "language.switch.aria": "تبديل لغة الواجهة",
@@ -246,6 +278,11 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "auth.resetPassword.verificationFailed": "تعذّر التحقق",
     "auth.resetPassword.verifyCode": "تحقق من الرمز",
     "auth.resetPassword.changeChannel": "تغيير قناة التحقق",
+    "auth.resetPassword.stepper.verify": "التحقق",
+    "auth.resetPassword.stepper.done": "تم",
+    "auth.resetPassword.stepper.ariaLabel": "مراحل إعادة تعيين كلمة المرور",
+    "auth.resetPassword.shell.title": "إعادة تعيين كلمة المرور",
+    "auth.resetPassword.shell.subtitle": "استعد الوصول إلى حسابك بخطوات بسيطة",
     "auth.claim.didntReceiveCode": "لم تستلم الرمز؟",
     "auth.verifying": "جارٍ التحقق…",
     "auth.claim.title": "تفعيل حسابك",
@@ -268,6 +305,7 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "common.closeMenu": "إغلاق القائمة",
     "secretary.sidebar.portal": "بوابة السكرتير",
     "common.close": "إغلاق",
+    "common.closeNotification": "إغلاق الإشعار",
     "common.cancel": "إلغاء",
     "common.logout": "تسجيل الخروج",
     "common.connected": "متصل",
@@ -283,12 +321,15 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "common.back": "رجوع",
     "common.all": "الكل",
     "common.active": "نشط",
+    "doctor.encounters.stats.active": "نشطة",
+    "doctor.encounters.stats.closed": "مغلقة",
     "common.disabled": "معطّل",
     "common.refresh": "تحديث",
     "common.loadMore": "تحميل المزيد",
     "common.save": "حفظ",
     "common.saving": "جارٍ الحفظ...",
     "common.confirm": "تأكيد",
+    "common.executing": "جارِ التنفيذ...",
     "common.send": "إرسال",
     "common.sending": "جارٍ الإرسال...",
     "common.delete": "حذف",
@@ -655,6 +696,17 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "accountDeletion.subtitle.restore": "استعادة الحساب",
     "accountDeletion.subtitle.irreversible": "عملية لا يمكن التراجع عنها",
     "accountDeletion.error.passwordVerifyFailed": "تعذر التحقق من كلمة المرور.",
+    "accountDeletion.error.incorrectPassword":
+      "كلمة المرور غير صحيحة. حاول مرة أخرى.",
+    "accountDeletion.error.otpExpired":
+      "انتهت صلاحية رمز التحقق. أعد إرسال رمز جديد.",
+    "accountDeletion.error.otpIncorrect":
+      "رمز التحقق غير صحيح. تحقق من الرمز وأعد المحاولة.",
+    "accountDeletion.error.otpVerifyFailed": "تعذّر التحقق من رمز التحقق.",
+    "accountDeletion.error.recoveryRouteUnavailable":
+      "تعذّر إتمام الاسترجاع. مسار إلغاء الحذف غير متاح على الخادم حالياً.",
+    "accountDeletion.error.recoveryNoSession":
+      "تعذّر إتمام الاسترجاع. لا توجد جلسة مصادقة نشطة — أعد تسجيل الدخول إن أمكن ثم حاول مرة أخرى.",
     "accountDeletion.error.otpSendFailed": "تعذر إرسال رمز التحقق.",
     "accountDeletion.error.restoreRequestFailed": "تعذر إرسال طلب الاستعادة.",
     "accountDeletion.error.restoreOtpVerifyFailed": "تعذر التحقق من رمز الاسترجاع.",
@@ -664,6 +716,20 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "accountDeletion.error.restoreFailed": "تعذر استعادة الحساب.",
     "accountDeletion.error.restoreRequestOtpFailed": "تعذر إرسال رمز طلب الاستعادة.",
     "accountDeletion.error.restoreOtpFailed": "تعذر إرسال رمز الاسترجاع.",
+    "accountDeletion.error.identityVerifyFailed":
+      "تعذّر التحقق من الهوية. أعد تسجيل الدخول ثم حاول مرة أخرى.",
+    "accountDeletion.error.cancelNotSupported":
+      "استخدم مسار استرجاع الحساب عبر رمز التحقق للطبيب.",
+    "accountDeletion.recovery.yourPhone": "هاتفك",
+    "accountDeletion.recovery.yourEmail": "بريدك الإلكتروني",
+    "accountDeletion.recovery.emailRequired":
+      "البريد الإلكتروني مطلوب لإرسال رمز الاسترجاع.",
+    "accountDeletion.recovery.phoneRequired":
+      "رقم الهاتف مطلوب لإرسال رمز الاسترجاع.",
+    "accountDeletion.restoreRequest.emailRequired":
+      "البريد الإلكتروني مطلوب لإرسال رمز طلب الاستعادة.",
+    "accountDeletion.restoreRequest.phoneRequired":
+      "رقم الهاتف مطلوب لإرسال رمز طلب الاستعادة.",
     "accountDeletion.toast.restoreRequestSentBody":
       "تم إرسال طلب الاستعادة بنجاح. ستراجع الإدارة الطلب وتتواصل معك عند الموافقة.",
     "accountDeletion.toast.restoreRequestSentTitle": "طلب قيد المراجعة",
@@ -712,6 +778,9 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "accountDeletion.otp.enterCode": "أدخل رمز التحقق",
     "accountDeletion.otp.sentTo": "أرسلنا رمزاً مكوناً من 6 أرقام إلى",
     "accountDeletion.otp.invalidCode": "رمز التحقق غير صالح",
+    "accountDeletion.otp.codeLengthRequired":
+      "أدخل رمز التحقق المكوّن من 6 أرقام",
+    "accountDeletion.otp.codeDigitsOnly": "رمز التحقق يجب أن يتكوّن من أرقام فقط",
     "accountDeletion.otp.digitAriaLabel": "رقم {index} من رمز التحقق",
     "accountDeletion.otp.verifying": "جارٍ التحقق…",
     "accountDeletion.otp.verifyDefault": "تحقق من الرمز",
@@ -762,6 +831,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
       "تُنشأ الوصفة من داخل زيارة المريض — سننقلك إلى قائمة الزيارات لاختيار الزيارة أولاً.",
     "doctor.prescription.defaultTitle": "الوصفة الطبية",
     "doctor.prescription.defaultStatus": "مسودة",
+    "doctor.prescription.subtitle.forPatient":
+      "الوصفة الطبية الخاصة بالمريض {name}",
     "common.fileNumberLabel": "رقم الملف:",
     "doctor.radiology.defaultTitle": "طلبات الأشعة",
     "doctor.medicalRequests.table.systemId": "الرقم النظامي",
@@ -831,6 +902,7 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.medicalRecords.table.viewDetails": "عرض التفاصيل",
     "doctor.medicalRecords.searchLabel": "بحث عن مريض",
     "doctor.medicalRecords.searchPlaceholder": "ابحث عن مريض...",
+    "doctor.prescription.hub.searchPatientAria": "ابحث عن مريض",
     "doctor.clinicalLibrary.table.title": "العنوان",
     "doctor.clinicalLibrary.table.type": "النوع",
     "doctor.clinicalLibrary.table.favorite": "مفضّل",
@@ -912,6 +984,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.waitlist.table.publicId": "الرقم العام",
     "doctor.waitlist.table.patientName": "اسم المريض",
     "doctor.waitlist.table.priority": "الأولوية",
+    "doctor.waitlist.urgencyFilterAria": "الأولوية",
+    "doctor.waitlist.allUrgencies": "كل الأولويات",
     "doctor.waitlist.table.preferredPeriod": "الفترة المفضلة",
     "doctor.waitlist.table.status": "الحالة",
     "doctor.waitlist.table.actions": "الإجراءات",
@@ -1916,6 +1990,7 @@ export const translations: Record<AppLocale, TranslationTree> = {
       "لا توجد طلبات بالحالة {status}.",
     "admin.doctorProfileChangeRequests.noRequests":
       "لا توجد طلبات تغيير بيانات حالياً.",
+    "admin.doctorProfileChangeRequests.selectedStatusFallback": "المحددة",
     "admin.doctorProfileChangeRequests.doctorProfileChange":
       "طلب تغيير بيانات الطبيب",
     "admin.doctorProfileChangeRequests.requestedBy": "طلب بواسطة:",
@@ -1945,6 +2020,7 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "admin.doctorProfileChangeRequests.field.clinicLat": "خط عرض العيادة",
     "admin.doctorProfileChangeRequests.field.clinicLng": "خط طول العيادة",
     "admin.doctorRestoreRequests.page.title": "طلبات استعادة حساب الأطباء",
+    "admin.doctorRestoreRequests.unknownDoctor": "طبيب غير معروف",
     "admin.doctorRestoreRequests.subtitle":
       "مراجعة طلبات الأطباء الذين انتهت فترة الاسترجاع التلقائي لحساباتهم",
     "admin.doctorRestoreRequests.disclaimer":
@@ -2478,6 +2554,11 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "admin.notifications.markAllDialog.successMessage":
       "تُعامل جميع إشعاراتك كمقروءة.",
     "admin.doctorSpecializations.export.key": "المفتاح",
+    "admin.doctorSpecializationReview.status.catalog": "مرتبط بالقائمة المعتمدة",
+    "admin.doctorSpecializationReview.status.customPending":
+      "إدخال يدوي — بانتظار الربط",
+    "admin.doctorSpecializationReview.status.unknown":
+      "غير محدّد — يحتاج مراجعة",
     "admin.doctorSpecializations.export.order": "الترتيب",
     "admin.doctorSpecializations.export.status": "الحالة",
     "admin.doctorSpecializations.export.arabicName": "الاسم بالعربية",
@@ -3422,6 +3503,18 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "secretary.appointments.book.completePrerequisites": "أكمل المتطلبات أولاً",
     "secretary.appointments.book.creatingAppointment": "جارٍ إنشاء الموعد...",
     "secretary.appointments.book.confirmBooking": "تأكيد الحجز",
+    "secretary.appointments.book.validation.patientRequired":
+      "يرجى اختيار المريض.",
+    "secretary.appointments.book.validation.dateRequired":
+      "يرجى اختيار تاريخ الموعد.",
+    "secretary.appointments.book.validation.invalidDateFormat":
+      "صيغة التاريخ غير صحيحة.",
+    "secretary.appointments.book.validation.timeRequired":
+      "يرجى اختيار وقت الموعد.",
+    "secretary.appointments.book.validation.invalidTimeFormat":
+      "صيغة الوقت غير صحيحة.",
+    "secretary.appointments.book.validation.notesTooLong":
+      "الحد الأقصى للملاحظات هو 500 حرف.",
     "doctor.consultations.dismiss.title": "رفض الاستشارة",
     "doctor.consultations.dismiss.subtitle":
       "هذا الإجراء للطبيب فقط. يجب ذكر سبب الرفض ولن يتمكن المريض من إرسال رسائل جديدة بعد ذلك.",
@@ -3511,6 +3604,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "auth.resetPassword.fieldRequired": "هذا الحقل مطلوب",
     "auth.resetPassword.invalidPhone":
       "أدخل رقم هاتف صحيح بصيغة دولية مثل +963912345678 أو 009639912345678",
+    "auth.resetPassword.emailInvalid":
+      "البريد غير صالح. يُرجى إدخال بريد إلكتروني صالح.",
     "auth.resetPassword.phoneMethod": "رقم الهاتف",
     "auth.resetPassword.emailMethod": "البريد الإلكتروني",
     "auth.resetPassword.enterPhone": "أدخل رقم هاتفك",
@@ -4102,6 +4197,13 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminSecretaryDialog.offboard.reason.placeholder":
       "اكتب سبب إيقاف الحساب...",
     "adminNotifications.card.markRead": "تعليم كمقروء",
+    "adminNotifications.relativeTime.now": "الآن",
+    "adminNotifications.relativeTime.minuteAgo": "منذ دقيقة",
+    "adminNotifications.relativeTime.minutesAgo": "منذ {minutes} دقائق",
+    "adminNotifications.relativeTime.hourAgo": "منذ ساعة",
+    "adminNotifications.relativeTime.hoursAgo": "منذ {hours} ساعات",
+    "adminNotifications.relativeTime.yesterday": "أمس",
+    "adminNotifications.relativeTime.daysAgo": "منذ {days} أيام",
     "adminNotifications.heading": "الإشعارات",
     "adminNotifications.empty.ariaLabel": "لا توجد إشعارات",
     "adminNotifications.empty.alt": "لا يوجد إشعارات",
@@ -5173,6 +5275,12 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "secretary.temporaryPatient.internationalFormatNote":
       "يُرسل للخادم بصيغة دولية مثل",
     "secretary.temporaryPatient.saveButton": "حفظ وربط بالعيادة",
+    "secretary.temporaryPatient.createSuccess": "تم إنشاء المريض المؤقت بنجاح.",
+    "secretary.temporaryPatient.saved": "تم الحفظ",
+    "secretary.temporaryPatient.saveFailed": "فشل الحفظ",
+    "secretary.temporaryPatient.pageUnavailable": "هذه الصفحة غير متاحة",
+    "secretary.temporaryPatient.noPermission":
+      "لا تملك صلاحية إنشاء مرضى مؤقتين من حساب السكرتيرة هذا.",
     "secretary.bookAppointment.validation.patientRequired": "يرجى اختيار مريض.",
     "secretary.bookAppointment.validation.dateRequired":
       "يرجى اختيار تاريخ الموعد.",
@@ -6199,6 +6307,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.directory.subtitle": "تصفح وابحث عن الأطباء المعتمدين",
     "doctor.directory.consultation.online": "أونلاين",
     "doctor.directory.consultation.inPerson": "حضوري",
+    "doctor.directory.card.fallbackName": "طبيب",
+    "doctor.directory.card.citySeparator": "، ",
     "doctor.directory.error.loadFailed": "تعذّر تحميل دليل الأطباء",
     "doctor.directory.error.loadFailedBrief": "حدث خطأ أثناء تحميل القائمة.",
     "doctor.directory.searchPlaceholder":
@@ -6547,6 +6657,9 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.medicationDialog.frequencyRequired": "التكرار مطلوب",
     "doctor.medicationDialog.durationRequired": "المدة مطلوبة",
     "doctor.medicationDialog.closeAria": "إغلاق",
+    "doctor.securityFormDialog.reviewFields":
+      "يرجى مراجعة الحقول المعلّمة قبل المتابعة.",
+    "doctor.securityFormDialog.invalidDataTitle": "بيانات ناقصة أو غير صحيحة",
     "doctor.medicationDialog.nameLabel": "اسم الدواء",
     "doctor.prescriptionPreviewActions.finalize": "اعتماد نهائي",
     "doctor.prescriptionPreviewActions.editPrescription": "تعديل الوصفة",
@@ -7111,6 +7224,10 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.prescriptionPreview.pageTitle": "معاينة الوصفة الطبية",
     "doctor.prescriptionPreview.pageTitleWithPatient":
       "معاينة وصفة {patientName}",
+    "doctor.prescriptionPreview.loadingPatientData":
+      "جارٍ تحميل بيانات المريض...",
+    "doctor.prescriptionPreview.confirmBeforeSending":
+      "تأكد من المعلومات قبل الإرسال",
     "doctor.prescriptionPreview.loadFailed": "تعذّر تحميل معاينة الوصفة",
     "doctor.prescriptionPreview.createPdfError": "تعذّر إنشاء PDF",
     "doctor.prescriptionPreview.finalizeTitle": "اعتماد نهائي",
@@ -8062,6 +8179,7 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "secretary.appointmentSuggestions.errorEn": "Error",
     "publicLibrary.pageTitle": "المكتبة الطبية • LMJ Health",
     "publicLibrary.heading": "المكتبة الطبية",
+    "platform.legalDocument.contentUnavailable": "المحتوى غير متوفر حالياً.",
     "publicLibrary.subheading": "تصفح الأخبار الطبية والنصائح العامة والمحتوى الصحي المنشور ضمن المنصة.",
     "publicLibrary.searchPlaceholder": "ابحث في المحتوى الطبي...",
     "publicLibrary.type.all": "الكل",
@@ -8152,6 +8270,11 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "contactUs.beforeSending": "قبل إرسال الطلب",
     "contactUs.beforeSendingHint": "قد تجد إجابة سريعة ضمن المقالات والنصائح الطبية المنشورة في المكتبة الطبية.",
     "contactUs.browseLibrary": "تصفح المكتبة الطبية",
+    "welcome.heading": "مرحبًا بك في عالم الصحة",
+    "welcome.subtitleLine1": "ابدأ رحلتك في البحث عن طبيبك المناسب",
+    "welcome.subtitleLine2": "واحصل على رعاية صحية متكاملة ومتطورة",
+    "welcome.tagline": "رعاية شاملة ... متابعة مستمرة ... أدوية منظمة",
+    "welcome.getStarted": "ابدأ الآن",
     "contactUs.meta.name": "الاسم: {value}",
     "contactUs.meta.email": "البريد: {value}",
     "contactUs.meta.phone": "الهاتف: {value}",
@@ -8353,6 +8476,23 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "signup.step4.previous": "Previous",
     "signup.step4.next": "Next",
     "platform.faq.title": "Frequently asked questions",
+    "platform.footer.about": "About the platform",
+    "platform.footer.legal": "Legal",
+    "platform.footer.terms": "Terms & conditions",
+    "platform.footer.privacy": "Privacy policy",
+    "platform.footer.usage": "Usage policy",
+    "platform.footer.supportHelp": "Support & help",
+    "platform.footer.faq": "FAQ",
+    "platform.footer.medicalLibrary": "Medical library",
+    "platform.footer.contactUs": "Contact us",
+    "platform.footer.contactAriaLabel": "Contact",
+    "platform.footer.ourServices": "Our services",
+    "platform.footer.bookAppointment": "Book an appointment",
+    "platform.footer.doctors": "Doctors",
+    "onboarding.placeholderBody": "Account settings will be completed here based on your role.",
+    "forms.slug.invalidFormat":
+      "The identifier may only contain lowercase Latin letters, digits, and hyphens",
+    "forms.slug.required": "The identifier is required",
     "platform.faq.searchLibraryTitle": "Search the medical library",
     "platform.faq.searchLibraryHint":
       "If you didn't find your answer here, you may find a broader explanation among the published medical articles and tips.",
@@ -8414,6 +8554,11 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "auth.hidePassword": "Hide password",
     "auth.password": "Password",
     "auth.resetPassword.changeChannel": "Change verification channel",
+    "auth.resetPassword.stepper.verify": "Verify",
+    "auth.resetPassword.stepper.done": "Done",
+    "auth.resetPassword.stepper.ariaLabel": "Password reset steps",
+    "auth.resetPassword.shell.title": "Reset password",
+    "auth.resetPassword.shell.subtitle": "Regain access to your account in a few simple steps",
     "auth.resetPassword.codeSentTo": "We sent a 6-digit code to",
     "auth.resetPassword.enterVerificationCode": "Enter the verification code",
     "auth.resetPassword.verificationFailed": "Verification failed",
@@ -8807,6 +8952,17 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "accountDeletion.subtitle.irreversible": "This action cannot be undone",
     "accountDeletion.error.passwordVerifyFailed":
       "Could not verify your password.",
+    "accountDeletion.error.incorrectPassword":
+      "Incorrect password. Try again.",
+    "accountDeletion.error.otpExpired":
+      "The verification code has expired. Resend a new code.",
+    "accountDeletion.error.otpIncorrect":
+      "The verification code is incorrect. Check the code and try again.",
+    "accountDeletion.error.otpVerifyFailed": "Could not verify the code.",
+    "accountDeletion.error.recoveryRouteUnavailable":
+      "Could not complete the recovery. The cancel-deletion route is not available on the server right now.",
+    "accountDeletion.error.recoveryNoSession":
+      "Could not complete the recovery. There is no active session — sign in again if possible and try again.",
     "accountDeletion.error.otpSendFailed":
       "Could not send the verification code.",
     "accountDeletion.error.restoreRequestFailed":
@@ -8823,6 +8979,20 @@ export const translations: Record<AppLocale, TranslationTree> = {
       "Could not send the restore request code.",
     "accountDeletion.error.restoreOtpFailed":
       "Could not send the recovery code.",
+    "accountDeletion.error.identityVerifyFailed":
+      "Could not verify your identity. Sign in again and try again.",
+    "accountDeletion.error.cancelNotSupported":
+      "Use the doctor account recovery flow via verification code.",
+    "accountDeletion.recovery.yourPhone": "your phone",
+    "accountDeletion.recovery.yourEmail": "your email",
+    "accountDeletion.recovery.emailRequired":
+      "Email is required to send the recovery code.",
+    "accountDeletion.recovery.phoneRequired":
+      "Phone number is required to send the recovery code.",
+    "accountDeletion.restoreRequest.emailRequired":
+      "Email is required to send the restore-request code.",
+    "accountDeletion.restoreRequest.phoneRequired":
+      "Phone number is required to send the restore-request code.",
     "accountDeletion.toast.restoreRequestSentBody":
       "Your restore request has been sent successfully. Admin will review it and contact you once approved.",
     "accountDeletion.toast.restoreRequestSentTitle": "Request under review",
@@ -8877,6 +9047,10 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "accountDeletion.otp.enterCode": "Enter the verification code",
     "accountDeletion.otp.sentTo": "We sent a 6-digit code to",
     "accountDeletion.otp.invalidCode": "Invalid verification code",
+    "accountDeletion.otp.codeLengthRequired":
+      "Enter the 6-digit verification code",
+    "accountDeletion.otp.codeDigitsOnly":
+      "The verification code must contain digits only",
     "accountDeletion.otp.digitAriaLabel": "Digit {index} of the verification code",
     "accountDeletion.otp.verifying": "Verifying…",
     "accountDeletion.otp.verifyDefault": "Verify code",
@@ -8931,12 +9105,14 @@ export const translations: Record<AppLocale, TranslationTree> = {
       "Prescriptions are created from within a patient visit — you'll be taken to the encounters list to pick one first.",
     "doctor.prescription.defaultTitle": "Prescription",
     "doctor.prescription.defaultStatus": "Draft",
+    "doctor.prescription.subtitle.forPatient": "Prescription for patient {name}",
     "common.fileNumberLabel": "File number:",
     "common.back": "Back",
     "common.fileNumber": "File number",
     "common.refreshingEllipsis": "Refreshing...",
     "common.closeMenu": "Close menu",
     "common.close": "Close",
+    "common.closeNotification": "Close notification",
     "common.cancel": "Cancel",
     "common.logout": "Logout",
     "common.connected": "Connected",
@@ -8951,12 +9127,15 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "common.clearSearch": "Clear search",
     "common.all": "All",
     "common.active": "Active",
+    "doctor.encounters.stats.active": "Active",
+    "doctor.encounters.stats.closed": "Closed",
     "common.disabled": "Disabled",
     "common.refresh": "Refresh",
     "common.loadMore": "Load more",
     "common.save": "Save",
     "common.saving": "Saving...",
     "common.confirm": "Confirm",
+    "common.executing": "Executing...",
     "common.send": "Send",
     "common.sending": "Sending...",
     "common.delete": "Delete",
@@ -9254,6 +9433,9 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.medicationDialog.frequencyRequired": "Frequency is required",
     "doctor.medicationDialog.durationRequired": "Duration is required",
     "doctor.medicationDialog.closeAria": "Close",
+    "doctor.securityFormDialog.reviewFields":
+      "Please review the highlighted fields before continuing.",
+    "doctor.securityFormDialog.invalidDataTitle": "Missing or invalid data",
     "doctor.medicationDialog.nameLabel": "Medication name",
     "doctor.prescriptionPreviewActions.finalize": "Finalize",
     "doctor.prescriptionPreviewActions.editPrescription": "Edit prescription",
@@ -9735,6 +9917,7 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.medicalRequests.statusLabel": "Status",
     "doctor.medicalRecords.searchLabel": "Search patient",
     "doctor.medicalRecords.searchPlaceholder": "Search patient...",
+    "doctor.prescription.hub.searchPatientAria": "Search patient",
     "doctor.medicalRecords.table.systemId": "System ID",
     "doctor.medicalRecords.table.patientName": "Patient name",
     "doctor.medicalRecords.table.diagnosis": "Diagnosis",
@@ -9841,6 +10024,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.waitlist.table.publicId": "Public ID",
     "doctor.waitlist.table.patientName": "Patient name",
     "doctor.waitlist.table.priority": "Priority",
+    "doctor.waitlist.urgencyFilterAria": "Urgency",
+    "doctor.waitlist.allUrgencies": "All urgencies",
     "doctor.waitlist.table.preferredPeriod": "Preferred period",
     "doctor.waitlist.table.status": "Status",
     "doctor.waitlist.table.actions": "Actions",
@@ -11011,6 +11196,7 @@ export const translations: Record<AppLocale, TranslationTree> = {
       "No profile change requests with status {status}.",
     "admin.doctorProfileChangeRequests.noRequests":
       "No profile change requests right now.",
+    "admin.doctorProfileChangeRequests.selectedStatusFallback": "selected",
     "admin.doctorProfileChangeRequests.doctorProfileChange":
       "Doctor profile change",
     "admin.doctorProfileChangeRequests.requestedBy": "Requested by:",
@@ -11041,6 +11227,7 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "admin.doctorProfileChangeRequests.field.clinicLat": "Clinic latitude",
     "admin.doctorProfileChangeRequests.field.clinicLng": "Clinic longitude",
     "admin.doctorRestoreRequests.page.title": "Doctor account restore requests",
+    "admin.doctorRestoreRequests.unknownDoctor": "Unknown doctor",
     "admin.doctorRestoreRequests.subtitle":
       "Review requests from doctors whose automatic restore window has ended",
     "admin.doctorRestoreRequests.disclaimer":
@@ -11644,6 +11831,7 @@ export const translations: Record<AppLocale, TranslationTree> = {
       "Use this route only when the admin needs to perform direct operational actions on the doctor appointments linked to the secretary.",
     "admin.secretaryAppointmentsManagement.cards.doctor": "Linked doctor",
     "admin.secretaryAppointmentsManagement.cards.notSet": "Not set",
+    "admin.secretary.doctorFallbackWithId": "Doctor ({id})",
     "admin.secretaryAppointmentsManagement.cards.scope": "Page scope",
     "admin.secretaryAppointmentsManagement.cards.scopeValue":
       "Operational appointment actions",
@@ -12718,6 +12906,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.directory.subtitle": "Browse and search approved doctors",
     "doctor.directory.consultation.online": "Online",
     "doctor.directory.consultation.inPerson": "In-person",
+    "doctor.directory.card.fallbackName": "Doctor",
+    "doctor.directory.card.citySeparator": ", ",
     "doctor.directory.error.loadFailed": "Failed to load doctors directory",
     "doctor.directory.error.loadFailedBrief":
       "An error occurred while loading the list.",
@@ -12920,6 +13110,10 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.prescriptionPreview.pageTitle": "Prescription preview",
     "doctor.prescriptionPreview.pageTitleWithPatient":
       "Prescription preview — {patientName}",
+    "doctor.prescriptionPreview.loadingPatientData":
+      "Loading patient's data...",
+    "doctor.prescriptionPreview.confirmBeforeSending":
+      "Confirm the information before sending",
     "doctor.prescriptionPreview.loadFailed":
       "Failed to load the prescription preview",
     "doctor.prescriptionPreview.createPdfError": "Could not create PDF",
@@ -13250,6 +13444,11 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "admin.notifications.markAllDialog.successMessage":
       "All your notifications are marked as read.",
     "admin.doctorSpecializations.export.key": "Key",
+    "admin.doctorSpecializationReview.status.catalog": "Linked to approved list",
+    "admin.doctorSpecializationReview.status.customPending":
+      "Manual entry — pending linking",
+    "admin.doctorSpecializationReview.status.unknown":
+      "Undetermined — needs review",
     "admin.doctorSpecializations.export.order": "Order",
     "admin.doctorSpecializations.export.status": "Status",
     "admin.doctorSpecializations.export.arabicName": "Arabic name",
@@ -13834,6 +14033,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.appointments.book.noPatientsAvailable":
       "No patients available to select.",
     "doctor.appointments.book.date": "Date",
+    "doctor.appointments.book.nearestAvailable": "Nearest available",
+    "doctor.appointments.book.searching": "Searching...",
     "doctor.appointments.book.availableTime": "Available time",
     "doctor.appointments.book.loadingSlots": "Loading slots...",
     "doctor.appointments.book.availableSlots": "available slots",
@@ -13844,6 +14045,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
       "Could not load available times for this date.",
     "doctor.appointments.book.noTimesAvailable":
       "No available times on this date. Choose another date.",
+    "doctor.appointments.book.noDatesFound":
+      "No available date found in the next {days} days.",
     "doctor.appointments.book.selectAvailableTime":
       "Select an available time...",
     "doctor.appointments.book.availableTimes": "Available times",
@@ -13881,6 +14084,17 @@ export const translations: Record<AppLocale, TranslationTree> = {
       "Invalid time format.",
     "doctor.appointments.book.validation.notesTooLong":
       "Maximum 500 characters for notes.",
+    "doctor.appointments.cancel.title": "Complete appointment",
+    "doctor.appointments.cancel.fieldLabel": "Medical notes",
+    "doctor.appointments.cancel.placeholder":
+      "Enter diagnosis and medical notes here...",
+    "doctor.appointments.cancel.confirmLabel": "Save and complete",
+    "doctor.appointments.cancel.maxLength": "Maximum {max} characters",
+    "doctor.appointments.cancel.close": "Close",
+    "doctor.appointments.cancel.description":
+      "Confirm cancelling the selected appointment.",
+    "doctor.appointments.cancel.patient": "Patient",
+    "doctor.appointments.cancel.cancel": "Cancel",
     "doctor.appointments.reschedule.title": "Reschedule appointment",
     "doctor.appointments.reschedule.subtitle":
       "Choose a new date and time for the appointment.",
@@ -14317,6 +14531,18 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "secretary.appointments.book.creatingAppointment":
       "Creating appointment...",
     "secretary.appointments.book.confirmBooking": "Confirm booking",
+    "secretary.appointments.book.validation.patientRequired":
+      "Please select a patient.",
+    "secretary.appointments.book.validation.dateRequired":
+      "Please select an appointment date.",
+    "secretary.appointments.book.validation.invalidDateFormat":
+      "Invalid date format.",
+    "secretary.appointments.book.validation.timeRequired":
+      "Please select an appointment time.",
+    "secretary.appointments.book.validation.invalidTimeFormat":
+      "Invalid time format.",
+    "secretary.appointments.book.validation.notesTooLong":
+      "Maximum 500 characters for notes.",
     "doctor.consultations.dismiss.title": "Dismiss consultation",
     "doctor.consultations.dismiss.subtitle":
       "This action is for the doctor only. You must state the reason for dismissal, and the patient will not be able to send new messages afterward.",
@@ -14413,6 +14639,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "auth.resetPassword.fieldRequired": "This field is required",
     "auth.resetPassword.invalidPhone":
       "Enter a valid phone number in international format like +963912345678 or 009639912345678",
+    "auth.resetPassword.emailInvalid":
+      "Invalid email. Please enter a valid email address.",
     "auth.resetPassword.phoneMethod": "Phone number",
     "auth.resetPassword.emailMethod": "Email",
     "auth.resetPassword.enterPhone": "Enter your phone number",
@@ -15034,6 +15262,13 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminSecretaryDialog.offboard.reason.placeholder":
       "Write the reason for deactivating the account...",
     "adminNotifications.card.markRead": "Mark as read",
+    "adminNotifications.relativeTime.now": "Now",
+    "adminNotifications.relativeTime.minuteAgo": "A minute ago",
+    "adminNotifications.relativeTime.minutesAgo": "{minutes} minutes ago",
+    "adminNotifications.relativeTime.hourAgo": "An hour ago",
+    "adminNotifications.relativeTime.hoursAgo": "{hours} hours ago",
+    "adminNotifications.relativeTime.yesterday": "Yesterday",
+    "adminNotifications.relativeTime.daysAgo": "{days} days ago",
     "adminNotifications.heading": "Notifications",
     "adminNotifications.empty.ariaLabel": "No notifications",
     "adminNotifications.empty.alt": "No notifications",
@@ -16156,6 +16391,13 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "secretary.temporaryPatient.internationalFormatNote":
       "Sent to the server in international format like",
     "secretary.temporaryPatient.saveButton": "Save and link to clinic",
+    "secretary.temporaryPatient.createSuccess":
+      "Temporary patient created successfully.",
+    "secretary.temporaryPatient.saved": "Saved",
+    "secretary.temporaryPatient.saveFailed": "Save failed",
+    "secretary.temporaryPatient.pageUnavailable": "This page is unavailable",
+    "secretary.temporaryPatient.noPermission":
+      "This secretary account cannot create temporary patients.",
     "secretary.bookAppointment.validation.patientRequired":
       "Please select a patient.",
     "secretary.bookAppointment.validation.dateRequired":
@@ -16168,6 +16410,7 @@ export const translations: Record<AppLocale, TranslationTree> = {
       "Maximum notes length is 500 characters.",
     "publicLibrary.pageTitle": "Medical Library • LMJ Health",
     "publicLibrary.heading": "Medical Library",
+    "platform.legalDocument.contentUnavailable": "Content is not available right now.",
     "publicLibrary.subheading": "Browse medical news, general advice, and health content published on the platform.",
     "publicLibrary.searchPlaceholder": "Search medical content...",
     "publicLibrary.type.all": "All",
@@ -16258,6 +16501,11 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "contactUs.beforeSending": "Before sending your request",
     "contactUs.beforeSendingHint": "You may find a quick answer in the articles and medical tips published in the medical library.",
     "contactUs.browseLibrary": "Browse the medical library",
+    "welcome.heading": "Welcome to the world of health",
+    "welcome.subtitleLine1": "Start your journey to find the right doctor for you",
+    "welcome.subtitleLine2": "and get integrated, advanced healthcare",
+    "welcome.tagline": "Comprehensive care ... ongoing follow-up ... organized medications",
+    "welcome.getStarted": "Get started",
     "contactUs.meta.name": "Name: {value}",
     "contactUs.meta.email": "Email: {value}",
     "contactUs.meta.phone": "Phone: {value}",

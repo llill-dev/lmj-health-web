@@ -85,8 +85,7 @@ export default function DoctorSecurityFormDialog<T extends FieldValues>({
   onValidatedSubmit: (values: T) => void | Promise<void>;
   busy?: boolean;
 }) {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const { t, locale, dir } = useI18n();
   const { toast } = useToast();
   const {
     register,
@@ -188,7 +187,7 @@ export default function DoctorSecurityFormDialog<T extends FieldValues>({
                   <button
                     type="button"
                     className="absolute start-5 top-5 flex h-10 w-10 items-center justify-center rounded-xl border border-[#E4E7EC] bg-white/90 text-[#667085] shadow-sm transition-colors hover:bg-[#F9FAFB] hover:text-[#344054]"
-                    aria-label={tr('إغلاق', 'Close')}
+                    aria-label={t('common.close')}
                   >
                     <X className="h-5 w-5" strokeWidth={2.25} />
                   </button>
@@ -213,15 +212,9 @@ export default function DoctorSecurityFormDialog<T extends FieldValues>({
                 className="space-y-4 px-6 py-5 sm:px-7 sm:pb-6"
                 onSubmit={handleSubmit(onValidatedSubmit, () => {
                   toast(
-                    tr(
-                      'يرجى مراجعة الحقول المعلّمة قبل المتابعة.',
-                      'Please review the highlighted fields before continuing.',
-                    ),
+                    t('doctor.securityFormDialog.reviewFields'),
                     {
-                      title: tr(
-                        'بيانات ناقصة أو غير صحيحة',
-                        'Missing or invalid data',
-                      ),
+                      title: t('doctor.securityFormDialog.invalidDataTitle'),
                       variant: 'warning',
                       durationMs: 4200,
                     },
@@ -288,8 +281,8 @@ export default function DoctorSecurityFormDialog<T extends FieldValues>({
                             className="absolute start-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-[#667085] transition hover:bg-[#F2F4F7]"
                             aria-label={
                               visible
-                                ? tr('إخفاء كلمة المرور', 'Hide password')
-                                : tr('إظهار كلمة المرور', 'Show password')
+                                ? t('auth.hidePassword')
+                                : t('auth.showPassword')
                             }
                           >
                             {visible ? (
@@ -311,7 +304,7 @@ export default function DoctorSecurityFormDialog<T extends FieldValues>({
                       disabled={submitting}
                       className="inline-flex h-11 items-center justify-center rounded-[12px] border border-[#F04438] bg-white px-6 font-cairo text-[13px] font-extrabold text-[#F04438] transition hover:bg-[#FFF5F5] disabled:opacity-60"
                     >
-                      {tr('إلغاء', 'Cancel')}
+                      {t('common.cancel')}
                     </button>
                   </Dialog.Close>
                   <button

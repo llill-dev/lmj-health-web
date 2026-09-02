@@ -50,14 +50,14 @@ export default function DoctorMedicalServiceDetailsPage() {
   const params = useParams<{ serviceId: string }>();
   const serviceId = params.serviceId ?? "";
   const detailsQuery = useQuery({
-    queryKey: ["doctor", "medical-service-details", serviceId],
-    queryFn: () => fetchMedicalServiceDetails(serviceId),
+    queryKey: ["doctor", "medical-service-details", serviceId, locale],
+    queryFn: () => fetchMedicalServiceDetails(serviceId, locale),
     enabled: Boolean(serviceId),
     staleTime: 1000 * 60 * 5,
   });
   const relatedQuery = useQuery({
-    queryKey: ["doctor", "medical-service-related", serviceId],
-    queryFn: () => fetchMedicalServicesCatalog(),
+    queryKey: ["doctor", "medical-service-related", serviceId, locale],
+    queryFn: () => fetchMedicalServicesCatalog(undefined, locale),
     enabled: Boolean(serviceId),
     staleTime: 1000 * 60 * 5,
   });

@@ -44,7 +44,9 @@ export default function MedicalOrderCatalogDetailsDialog({
           },
           {
             label: "Synonyms",
-            value: item.synonyms?.length ? item.synonyms.join("، ") : undefined,
+            value: item.synonyms?.length
+              ? item.synonyms.join(locale === "ar" ? "، " : ", ")
+              : undefined,
           },
         ].filter((row) => Boolean(row.value?.trim?.() ?? row.value));
 

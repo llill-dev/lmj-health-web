@@ -107,7 +107,10 @@ export default function AdminVerificationRequestDetailsPage() {
       requestType: t("admin.verificationRequestDetails.doctorVerification"),
       doctor: doctorName,
       specialty: request.doctor?.specialization || "—",
-      address: addressParts.length > 0 ? addressParts.join("، ") : "—",
+      address:
+        addressParts.length > 0
+          ? addressParts.join(locale === "ar" ? "، " : ", ")
+          : "—",
       requestedAt: formatRequestedAt(request.createdAt, locale),
       adminNote: request.adminNote?.trim() || "—",
       requestedBy: request.requestedBy?.fullName || "—",
@@ -140,8 +143,9 @@ export default function AdminVerificationRequestDetailsPage() {
       resolveDoctorSpecializationReviewState(
         requestQuery.data?.doctor,
         lookupsQuery.data?.lookups,
+        t,
       ),
-    [requestQuery.data?.doctor, lookupsQuery.data?.lookups],
+    [requestQuery.data?.doctor, lookupsQuery.data?.lookups, t],
   );
   const isPendingRequest = cardData.statusKey === "pending";
 

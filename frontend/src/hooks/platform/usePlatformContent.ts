@@ -130,8 +130,8 @@ export function usePlatformLegalContent(
 
   const document = useMemo(() => {
     if (!data) return fallback;
-    return mapContentToLegalDocument(data);
-  }, [data, fallback]);
+    return mapContentToLegalDocument(data, undefined, language);
+  }, [data, fallback, language]);
 
   return { data, isAwaitingData, document };
 }
@@ -147,7 +147,7 @@ export function usePlatformTermsContent(language: PlatformContentLanguage = 'ar'
       contentBlocks: [{ type: 'paragraph', text: TERMS_OF_USE.body }],
       pageVersion: null,
       publishedAt: TERMS_OF_USE.lastUpdated,
-    }),
+    }, undefined, language),
     language,
   );
 }
@@ -163,7 +163,7 @@ export function usePlatformPrivacyContent(language: PlatformContentLanguage = 'a
       contentBlocks: [{ type: 'paragraph', text: PRIVACY_POLICY.body }],
       pageVersion: null,
       publishedAt: PRIVACY_POLICY.lastUpdated,
-    }),
+    }, undefined, language),
     language,
   );
 }
@@ -179,7 +179,7 @@ export function usePlatformUsageContent(language: PlatformContentLanguage = 'ar'
       contentBlocks: [{ type: 'paragraph', text: USAGE_POLICY.body }],
       pageVersion: null,
       publishedAt: USAGE_POLICY.lastUpdated,
-    }),
+    }, undefined, language),
     language,
   );
 }
@@ -210,8 +210,8 @@ export function usePlatformContactContent(language: PlatformContentLanguage = 'a
 
   const channels = useMemo(() => {
     if (!data?.contentBlocks?.length) return [];
-    return extractContactChannelsFromBlocks(data.contentBlocks);
-  }, [data]);
+    return extractContactChannelsFromBlocks(data.contentBlocks, language);
+  }, [data, language]);
 
   return { data, isAwaitingData, channels };
 }

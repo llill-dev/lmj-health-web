@@ -1,23 +1,31 @@
 import { z } from 'zod';
 
-export const deleteAccountPasswordSchema = z.object({
-  currentPassword: z
-    .string()
-    .trim()
-    .min(1, 'كلمة المرور الحالية مطلوبة')
-    .min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
-});
+type TFn = (key: string, fallback?: string) => string;
+
+export function buildDeleteAccountPasswordSchema(t: TFn) {
+  return z.object({
+    currentPassword: z
+      .string()
+      .trim()
+      .min(1, t('doctor.profileSettings.security.currentPasswordRequired'))
+      .min(6, t('auth.validation.passwordMin6')),
+  });
+}
 
 export type DeleteAccountPasswordValues = z.infer<
-  typeof deleteAccountPasswordSchema
+  ReturnType<typeof buildDeleteAccountPasswordSchema>
 >;
 
-export const deleteAccountOtpSchema = z.object({
-  otp: z
-    .string()
-    .trim()
-    .length(6, 'أدخل رمز التحقق المكوّن من 6 أرقام')
-    .regex(/^\d{6}$/, 'رمز التحقق يجب أن يتكوّن من أرقام فقط'),
-});
+export function buildDeleteAccountOtpSchema(t: TFn) {
+  return z.object({
+    otp: z
+      .string()
+      .trim()
+      .length(6, t('accountDeletion.otp.codeLengthRequired'))
+      .regex(/^\d{6}$/, t('accountDeletion.otp.codeDigitsOnly')),
+  });
+}
 
-export type DeleteAccountOtpValues = z.infer<typeof deleteAccountOtpSchema>;
+export type DeleteAccountOtpValues = z.infer<
+  ReturnType<typeof buildDeleteAccountOtpSchema>
+>;

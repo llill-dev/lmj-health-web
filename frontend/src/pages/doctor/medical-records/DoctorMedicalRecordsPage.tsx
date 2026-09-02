@@ -44,11 +44,12 @@ import { useI18n } from "@/i18n/provider";
 function formatLocaleDate(
   value: string | null | undefined,
   t: (key: string) => string,
+  locale: "ar" | "en" = "ar",
 ) {
   if (!value) return t("doctor.medicalRecords.notSet");
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString("ar-SA");
+  return date.toLocaleDateString(locale === "en" ? "en-US" : "ar-SA");
 }
 
 function mapRecordToDetails(
@@ -60,7 +61,7 @@ function mapRecordToDetails(
   return {
     id: record._id,
     patientName,
-    date: formatLocaleDate(record.date || record.createdAt, t),
+    date: formatLocaleDate(record.date || record.createdAt, t, locale),
     diagnosisSubtitle:
       record.diagnosis ||
       record.title ||

@@ -25,7 +25,8 @@ export type AdminLocalSettings = {
 export const DEFAULT_ADMIN_LOCAL_SETTINGS: AdminLocalSettings = {
   general: {
     appName: 'LMJ HEALTH',
-    appDescription: 'منصة طبية متكاملة',
+    /** Left empty so the sidebar's own localized fallback (sidebar.brand.adminPortal) is used until the admin sets a custom description. */
+    appDescription: '',
   },
   logo: {
     initials: 'LMJ',

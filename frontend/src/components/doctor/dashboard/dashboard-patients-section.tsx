@@ -293,8 +293,8 @@ export function DashboardPatientsSearchCard({
   setSearchInput,
   patientsQuery,
 }: DashboardPatientsSearchState) {
-  const { t } = useI18n();
-  const { chart, appointmentsQuery } = useDashboardPatientsWeeklyActivity();
+  const { t, locale } = useI18n();
+  const { chart, appointmentsQuery } = useDashboardPatientsWeeklyActivity(locale);
   const chartAwaitingData =
     isAwaitingInitialQueryData(
       appointmentsQuery.data,

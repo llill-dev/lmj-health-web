@@ -44,7 +44,7 @@ function uid() {
 }
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
-  const { locale, dir } = useI18n();
+  const { t: translate, locale, dir } = useI18n();
   const [items, setItems] = useState<ToastItem[]>([]);
   const timersRef = useRef<Record<string, number>>({});
 
@@ -171,7 +171,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                   type="button"
                   onClick={() => remove(t.id)}
                   className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] text-[#667085] transition hover:bg-[#F2F4F7] hover:text-[#101828]"
-                  aria-label="إغلاق الإشعار"
+                  aria-label={translate("common.closeNotification")}
                 >
                   <X className="h-4 w-4" />
                 </button>

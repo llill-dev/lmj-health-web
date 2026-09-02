@@ -27,8 +27,8 @@ export default function ConfirmDialog({
   onConfirm,
   title,
   description,
-  confirmText = 'تأكيد',
-  cancelText = 'إلغاء',
+  confirmText,
+  cancelText,
   variant = 'danger',
   isLoading = false,
   icon: Icon,
@@ -36,7 +36,9 @@ export default function ConfirmDialog({
   customActions,
   maxWidth = '520px',
 }: ConfirmDialogProps) {
-  const { locale, dir } = useI18n();
+  const { t, locale, dir } = useI18n();
+  const resolvedConfirmText = confirmText ?? t('common.confirm');
+  const resolvedCancelText = cancelText ?? t('common.cancel');
   useEffect(() => {
     if (!open) return;
 
@@ -162,7 +164,7 @@ export default function ConfirmDialog({
                   <button
                     type='button'
                     className='absolute start-4 top-4 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7] sm:start-5 sm:top-5 lg:start-6 lg:top-6'
-                    aria-label='إغلاق'
+                    aria-label={t('common.close')}
                   >
                     <X className='h-5 w-5' />
                   </button>
@@ -207,7 +209,7 @@ export default function ConfirmDialog({
                       type='button'
                       className='h-[46px] w-full rounded-[10px] border border-[#D0D5DD] bg-[#F9FAFB] font-cairo text-[14px] font-extrabold text-[#344054] transition-colors hover:bg-[#F2F4F7]'
                     >
-                      {cancelText}
+                      {resolvedCancelText}
                     </button>
                   </Dialog.Close>
 
@@ -222,7 +224,7 @@ export default function ConfirmDialog({
                     disabled={isLoading}
                     className={`h-[46px] w-full rounded-[10px] ${styles.confirmBg} font-cairo text-[14px] font-extrabold text-white ${styles.confirmShadow} transition-opacity disabled:opacity-50`}
                   >
-                    {isLoading ? 'جارِ التنفيذ...' : confirmText}
+                    {isLoading ? t('common.executing') : resolvedConfirmText}
                   </button>
                 </div>
               )}

@@ -1,6 +1,17 @@
 import type { NotificationItem } from '@/lib/notifications/client';
 import { notificationItemId } from '@/lib/notifications/client';
 import type { AdminNotificationKind, AdminNotificationRow } from './types';
+import { getCurrentLocale } from '@/i18n/runtime';
+import { getTranslationValue } from '@/i18n/translations';
+
+function tr(key: string, params?: Record<string, unknown>): string {
+  const locale = getCurrentLocale();
+  const raw = getTranslationValue(locale, key) ?? key;
+  if (!params) return raw;
+  return raw.replace(/\{(\w+)\}/g, (m, name) =>
+    params[name] != null ? String(params[name]) : m,
+  );
+}
 
 /**
  * يحدد إن كان الإشعار مقروءاً وفقاً لما قد يرسله الخادم (camelCase أو snake_case).
@@ -71,24 +82,29 @@ function inferKind(item: NotificationItem): AdminNotificationKind {
   return 'appointment';
 }
 
-function formatRelativeTimeAr(iso: string | undefined): string {
+function formatRelativeTime(iso: string | undefined): string {
   if (!iso || typeof iso !== 'string') return '—';
   const t = Date.parse(iso);
   if (Number.isNaN(t)) return '—';
   const sec = Math.max(0, Math.floor((Date.now() - t) / 1000));
-  if (sec < 45) return 'الآن';
+  if (sec < 45) return tr('adminNotifications.relativeTime.now');
   if (sec < 3600) {
     const m = Math.floor(sec / 60);
-    return m <= 1 ? 'منذ دقيقة' : `منذ ${m} دقائق`;
+    return m <= 1
+      ? tr('adminNotifications.relativeTime.minuteAgo')
+      : tr('adminNotifications.relativeTime.minutesAgo', { minutes: m });
   }
   if (sec < 86400) {
     const h = Math.floor(sec / 3600);
-    return h <= 1 ? 'منذ ساعة' : `منذ ${h} ساعات`;
+    return h <= 1
+      ? tr('adminNotifications.relativeTime.hourAgo')
+      : tr('adminNotifications.relativeTime.hoursAgo', { hours: h });
   }
   const d = Math.floor(sec / 86400);
-  if (d === 1) return 'أمس';
-  if (d < 7) return `منذ ${d} أيام`;
-  return new Date(t).toLocaleDateString('ar-SY', {
+  if (d === 1) return tr('adminNotifications.relativeTime.yesterday');
+  if (d < 7) return tr('adminNotifications.relativeTime.daysAgo', { days: d });
+  const locale = getCurrentLocale();
+  return new Date(t).toLocaleDateString(locale === 'ar' ? 'ar-SY' : 'en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -112,7 +128,7 @@ export function mapNotificationItemToAdminRow(
     kind: inferKind(item),
     title: (item.title ?? '').trim() || '—',
     description: (item.body ?? '').trim() || '—',
-    timeLabel: formatRelativeTimeAr(item.createdAt ?? item.updatedAt),
+    timeLabel: formatRelativeTime(item.createdAt ?? item.updatedAt),
     isUnread,
     /** الـ PDF لا يفرّق «جديد» عن «غير مقروء»؛ نعرض الشارة للغير مقروء. */
     isNew: isUnread,

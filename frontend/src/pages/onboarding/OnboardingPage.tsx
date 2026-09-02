@@ -2,7 +2,7 @@ import { Helmet } from 'react-helmet-async';
 import { useI18n } from '@/i18n/provider';
 
 export default function OnboardingPage() {
-  const { locale, dir } = useI18n();
+  const { t, locale, dir } = useI18n();
   return (
     <main dir={dir} lang={locale} className='w-full'>
       <Helmet>
@@ -14,7 +14,7 @@ export default function OnboardingPage() {
           Onboarding
         </h1>
         <p className='mt-2 font-cairo text-[14px] font-semibold text-[#667085]'>
-          سيتم استكمال إعدادات الحساب هنا حسب الدور.
+          {t('onboarding.placeholderBody')}
         </p>
       </div>
     </main>

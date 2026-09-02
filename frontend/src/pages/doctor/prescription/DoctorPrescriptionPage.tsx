@@ -69,7 +69,7 @@ export default function DoctorPrescriptionPage() {
 
   const statusLabel = resolvePrescriptionStatusLabel(
     workspace.prescription?.status,
-    (ar: string, en: string) => (locale === "ar" ? ar : en),
+    t,
   );
 
   const editable = isPrescriptionEditable(

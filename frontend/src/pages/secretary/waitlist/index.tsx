@@ -450,11 +450,11 @@ export default function SecretaryWaitlistPage() {
               ],
               [
                 t("secretary.waitlist.preferredDateFrom"),
-                formatBillingDate(detailTarget.preferredDateFrom),
+                formatBillingDate(detailTarget.preferredDateFrom, locale),
               ],
               [
                 t("secretary.waitlist.preferredDateTo"),
-                formatBillingDate(detailTarget.preferredDateTo),
+                formatBillingDate(detailTarget.preferredDateTo, locale),
               ],
               [
                 t("secretary.waitlist.preferredContactMethod"),
@@ -474,12 +474,12 @@ export default function SecretaryWaitlistPage() {
               [
                 t("secretary.waitlist.lastContacted"),
                 detailTarget.lastContactedAt
-                  ? formatBillingDate(detailTarget.lastContactedAt)
+                  ? formatBillingDate(detailTarget.lastContactedAt, locale)
                   : "—",
               ],
               [
                 t("secretary.waitlist.createdAt"),
-                formatBillingDate(detailTarget.createdAt),
+                formatBillingDate(detailTarget.createdAt, locale),
               ],
             ].map(([label, value]) => (
               <div

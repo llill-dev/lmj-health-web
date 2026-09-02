@@ -1,9 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff, Lock } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import {
-  deleteAccountPasswordSchema,
+  buildDeleteAccountPasswordSchema,
   type DeleteAccountPasswordValues,
 } from '@/lib/auth/accountDeletionSchemas';
 import { useI18n } from '@/i18n/provider';
@@ -19,8 +19,12 @@ export function DeleteAccountPasswordStep({
   onContinue: (password: string) => void | Promise<void>;
   onBack: () => void;
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [visible, setVisible] = useState(false);
+  const deleteAccountPasswordSchema = useMemo(
+    () => buildDeleteAccountPasswordSchema(t),
+    [locale],
+  );
   const {
     register,
     handleSubmit,

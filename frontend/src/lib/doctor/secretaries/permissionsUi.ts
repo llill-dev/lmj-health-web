@@ -104,7 +104,7 @@ export function secretaryPermissionLabel(
   );
 }
 
-/** Primary rows shown on secretary cards (API-supported permissions only). */
+/** @deprecated Arabic-only — use getSecretaryCardPermissionRows(tr) for locale-aware rendering. */
 export const SECRETARY_CARD_PERMISSION_ROWS: Array<{
   id: string;
   label: string;
@@ -116,6 +116,19 @@ export const SECRETARY_CARD_PERMISSION_ROWS: Array<{
   { id: 'records-view', label: 'عرض السجلات الطبية', apiKey: 'patients:files:view' },
   { id: 'records-edit', label: 'تعديل السجلات الطبية', apiKey: 'patients:files:upload' },
 ];
+
+/** Primary rows shown on secretary cards (API-supported permissions only), locale-aware. */
+export function getSecretaryCardPermissionRows(
+  tr: (ar: string, en: string) => string,
+): Array<{ id: string; label: string; apiKey: AssignableSecretaryPermission }> {
+  return [
+    { id: 'patients-view', label: tr('عرض المرضى', 'View patients'), apiKey: 'patients:view' },
+    { id: 'appointments-view', label: tr('عرض المواعيد', 'View appointments'), apiKey: 'appointments:view' },
+    { id: 'appointments-edit', label: tr('تعديل المواعيد', 'Edit appointments'), apiKey: 'appointments:edit' },
+    { id: 'records-view', label: tr('عرض السجلات الطبية', 'View medical records'), apiKey: 'patients:files:view' },
+    { id: 'records-edit', label: tr('تعديل السجلات الطبية', 'Edit medical records'), apiKey: 'patients:files:upload' },
+  ];
+}
 
 export function countGrantedCardPermissions(permissions: string[] = []) {
   const granted = SECRETARY_CARD_PERMISSION_ROWS.filter((row) =>

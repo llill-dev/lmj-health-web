@@ -1,5 +1,6 @@
 import { ApiError, getUserFacingRequestErrorMessage } from "@/lib/api";
 import { getCreateTemporaryPatientErrorMessage } from "@/lib/doctor/writeFlowErrors";
+import { getCurrentLocale } from "@/i18n/runtime";
 
 export type TemporaryPatientFormField =
   | "fullName"
@@ -92,7 +93,13 @@ function collectStructuredFieldTexts(
   if (typeof errs === "object") {
     for (const [k, v] of Object.entries(errs)) {
       if (typeof v === "string") push(k, v);
-      else if (Array.isArray(v)) push(k, v.filter((x) => typeof x === "string").join("، "));
+      else if (Array.isArray(v))
+        push(
+          k,
+          v
+            .filter((x) => typeof x === "string")
+            .join(getCurrentLocale() === "ar" ? "، " : ", "),
+        );
     }
   }
 

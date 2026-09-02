@@ -1,10 +1,11 @@
 import { get, post } from '@/lib/api';
 import { ApiError } from '@/lib/api';
 import { getCurrentLocale } from '@/i18n/runtime';
+import { getTranslationValue } from '@/i18n/translations';
 import { authApi } from '@/lib/auth/client';
 
-function tr(ar: string, en: string): string {
-  return getCurrentLocale() === 'en' ? en : ar;
+function tr(key: string, fallback: string): string {
+  return getTranslationValue(getCurrentLocale(), key) ?? fallback;
 }
 import { getAccountDeletionCapabilities } from '@/lib/auth/accountDeletionCapabilities';
 import {
@@ -194,8 +195,8 @@ async function verifyPasswordViaLogin(currentPassword: string): Promise<void> {
       'errors.validation.missingIdentity',
       {},
       tr(
+        'accountDeletion.error.identityVerifyFailed',
         'تعذّر التحقق من الهوية. أعد تسجيل الدخول ثم حاول مرة أخرى.',
-        'Could not verify your identity. Sign in again and try again.',
       ),
     );
   }
@@ -258,9 +259,9 @@ export const accountDeletionApi = {
         'errors.routeNotFound',
         {},
         tr(
-        'استخدم مسار استرجاع الحساب عبر رمز التحقق للطبيب.',
-        'Use the doctor account recovery flow via verification code.',
-      ),
+          'accountDeletion.error.cancelNotSupported',
+          'استخدم مسار استرجاع الحساب عبر رمز التحقق للطبيب.',
+        ),
       );
     }
 
@@ -369,7 +370,7 @@ export async function sendDeletionOtp(
       error instanceof ApiError ? error.body : {},
       mapAccountDeletionGenericError(
         error,
-        tr('تعذّر إرسال رمز التحقق.', 'Could not send the verification code.'),
+        tr('accountDeletion.error.otpSendFailed', 'تعذّر إرسال رمز التحقق.'),
       ),
     );
   }
@@ -537,8 +538,8 @@ export function resolveDoctorRecoveryDestination(
 ): string {
   if (response?.destination?.trim()) return response.destination.trim();
   return identity.channel === 'whatsapp'
-    ? identity.phone || tr('هاتفك', 'your phone')
-    : identity.email || tr('بريدك الإلكتروني', 'your email');
+    ? identity.phone || tr('accountDeletion.recovery.yourPhone', 'هاتفك')
+    : identity.email || tr('accountDeletion.recovery.yourEmail', 'بريدك الإلكتروني');
 }
 
 export const doctorAccountRecoveryApi = {
@@ -558,8 +559,8 @@ export const doctorAccountRecoveryApi = {
         mapAccountDeletionGenericError(
           error,
           tr(
+            'accountDeletion.error.restoreOtpFailed',
             'تعذّر إرسال رمز استرجاع الحساب.',
-            'Could not send the account recovery code.',
           ),
         ),
       );
@@ -590,8 +591,8 @@ export const doctorAccountRecoveryApi = {
         mapAccountDeletionGenericError(
           error,
           tr(
+            'accountDeletion.error.restoreOtpVerifyFailed',
             'تعذّر التحقق من رمز الاسترجاع.',
-            'Could not verify the recovery code.',
           ),
         ),
       );
@@ -616,8 +617,8 @@ export const doctorRestoreRequestApi = {
         mapAccountDeletionGenericError(
           error,
           tr(
+            'accountDeletion.error.restoreRequestOtpFailed',
             'تعذّر إرسال رمز طلب الاستعادة.',
-            'Could not send the restore-request code.',
           ),
         ),
       );
@@ -647,7 +648,7 @@ export const doctorRestoreRequestApi = {
         error instanceof ApiError ? error.body : {},
         mapAccountDeletionGenericError(
         error,
-        tr('تعذّر إرسال طلب الاستعادة.', 'Could not send the restore request.'),
+        tr('accountDeletion.error.restoreRequestFailed', 'تعذّر إرسال طلب الاستعادة.'),
       ),
       );
     }
@@ -669,8 +670,8 @@ export async function startDoctorAccountRecoveryOtp(
       'errors.validation.missingEmail',
       {},
       tr(
+        'accountDeletion.recovery.emailRequired',
         'البريد الإلكتروني مطلوب لإرسال رمز الاسترجاع.',
-        'Email is required to send the recovery code.',
       ),
     );
   }
@@ -680,8 +681,8 @@ export async function startDoctorAccountRecoveryOtp(
       'errors.validation.missingPhone',
       {},
       tr(
+        'accountDeletion.recovery.phoneRequired',
         'رقم الهاتف مطلوب لإرسال رمز الاسترجاع.',
-        'Phone number is required to send the recovery code.',
       ),
     );
   }
@@ -720,9 +721,9 @@ export async function startDoctorAccountRestoreRequestOtp(
       'errors.validation.missingEmail',
       {},
       tr(
-      'البريد الإلكتروني مطلوب لإرسال رمز طلب الاستعادة.',
-      'Email is required to send the restore-request code.',
-    ),
+        'accountDeletion.restoreRequest.emailRequired',
+        'البريد الإلكتروني مطلوب لإرسال رمز طلب الاستعادة.',
+      ),
     );
   }
   if (identity.channel === 'whatsapp' && !identity.phone) {
@@ -731,9 +732,9 @@ export async function startDoctorAccountRestoreRequestOtp(
       'errors.validation.missingPhone',
       {},
       tr(
-      'رقم الهاتف مطلوب لإرسال رمز طلب الاستعادة.',
-      'Phone number is required to send the restore-request code.',
-    ),
+        'accountDeletion.restoreRequest.phoneRequired',
+        'رقم الهاتف مطلوب لإرسال رمز طلب الاستعادة.',
+      ),
     );
   }
 

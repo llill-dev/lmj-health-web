@@ -198,8 +198,9 @@ export default function AdminDoctorDetailsPage() {
       resolveDoctorSpecializationReviewState(
         doctor,
         lookupsQuery.data?.lookups,
+        t,
       ),
-    [doctor, lookupsQuery.data?.lookups],
+    [doctor, lookupsQuery.data?.lookups, t],
   );
 
   const handleReviewed = async () => {
@@ -258,8 +259,8 @@ export default function AdminDoctorDetailsPage() {
   const summaryError = summaryQuery.isError;
 
   const diagnosisItems = useMemo(
-    () => parseDiagnosisAnalytics(diagnosisRaw, analyticsRange),
-    [diagnosisRaw, analyticsRange],
+    () => parseDiagnosisAnalytics(diagnosisRaw, analyticsRange, locale),
+    [diagnosisRaw, analyticsRange, locale],
   );
   const summaryStats = useMemo(
     () =>

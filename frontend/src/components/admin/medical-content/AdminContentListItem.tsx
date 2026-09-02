@@ -229,7 +229,7 @@ export function AdminContentListItem({
               )}
             >
               <AlertTriangle className="h-3.5 w-3.5" />
-              {t(readinessSignal.ar, readinessSignal.en)}
+              {locale === "ar" ? readinessSignal.ar : readinessSignal.en}
             </div>
             <div className="inline-flex items-center gap-1.5 rounded-full border border-[#E4E7EC] bg-white px-2.5 py-1 font-cairo text-[10.5px] font-bold text-[#475467]">
               {acceptanceChip}

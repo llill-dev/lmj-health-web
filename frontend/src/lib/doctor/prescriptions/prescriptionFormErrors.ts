@@ -100,7 +100,7 @@ function collectStructuredFieldTexts(
           value
             .map((entry) => readPrescriptionValidationString(entry))
             .filter((entry): entry is string => Boolean(entry))
-            .join('، '),
+            .join(getCurrentLocale() === 'ar' ? '، ' : ', '),
         );
       }
     }

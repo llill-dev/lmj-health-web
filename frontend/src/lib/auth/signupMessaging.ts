@@ -108,8 +108,9 @@ function formatValidationDetails(
     .map((issue) => {
       const messages = dedupeMessages(issue.messages);
       if (!messages.length) return null;
-      if (!issue.key) return `• ${messages.join("، ")}`;
-      return `• ${validationFieldLabel(issue.key, locale)}: ${messages.join("، ")}`;
+      const separator = locale === "ar" ? "، " : ", ";
+      if (!issue.key) return `• ${messages.join(separator)}`;
+      return `• ${validationFieldLabel(issue.key, locale)}: ${messages.join(separator)}`;
     })
     .filter((s): s is string => Boolean(s))
     .join("\n");

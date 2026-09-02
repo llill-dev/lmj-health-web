@@ -27,6 +27,7 @@ import type {
 } from "@/lib/auth/types";
 import { AUTH_ERROR_MESSAGES } from "@/lib/auth/types";
 import type { SignupFieldConflictMessages } from "@/lib/auth/signupMessaging";
+import { getCurrentLocale } from "@/i18n/runtime";
 
 function readAuthBodyString(
   body: Record<string, unknown>,
@@ -111,9 +112,10 @@ const handleAuthError = (error: unknown): AuthError => {
         code = "UNKNOWN";
     }
 
+    const locale = getCurrentLocale();
     return {
       code,
-      message: backendMessage || AUTH_ERROR_MESSAGES[code].ar,
+      message: backendMessage || AUTH_ERROR_MESSAGES[code][locale],
       details: body,
     };
   }
@@ -125,7 +127,7 @@ const handleAuthError = (error: unknown): AuthError => {
 
   return {
     code: "UNKNOWN",
-    message: AUTH_ERROR_MESSAGES["UNKNOWN"].ar,
+    message: AUTH_ERROR_MESSAGES["UNKNOWN"][getCurrentLocale()],
   };
 };
 

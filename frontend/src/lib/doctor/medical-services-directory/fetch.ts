@@ -199,7 +199,10 @@ async function fetchDirectoryServiceTypes() {
   return { grouped, labelsBySlug };
 }
 
-export async function fetchMedicalServicesCatalog(search?: string) {
+export async function fetchMedicalServicesCatalog(
+  search?: string,
+  locale: 'ar' | 'en' = 'ar',
+) {
   const { grouped, labelsBySlug } = await fetchDirectoryServiceTypes();
   const typeSlugs = Array.from(
     new Set(Object.values(grouped).flat().filter(Boolean)),
@@ -227,12 +230,14 @@ export async function fetchMedicalServicesCatalog(search?: string) {
   return mergeServiceProviders(batches, {
     search,
     serviceTypeLabelsBySlug: labelsBySlug,
+    locale,
   });
 }
 
 export async function fetchMedicalServicesByCategory(
   category: MedicalServiceCategory,
   search?: string,
+  locale: 'ar' | 'en' = 'ar',
 ) {
   const { grouped, labelsBySlug } = await fetchDirectoryServiceTypes();
   const typeSlugs = grouped[category] ?? [];
@@ -256,6 +261,7 @@ export async function fetchMedicalServicesByCategory(
   return mergeServiceProviders(batches, {
     search,
     serviceTypeLabelsBySlug: labelsBySlug,
+    locale,
   }).filter((facility) => facility.category === category);
 }
 
@@ -271,8 +277,9 @@ export async function fetchMedicalServiceProviderDetails(
 
 export async function fetchMedicalServiceDetails(
   id: string,
+  locale: 'ar' | 'en' = 'ar',
 ): Promise<MedicalServiceFacility | null> {
   const provider = await fetchMedicalServiceProviderDetails(id);
   if (!provider) return null;
-  return mergeServiceProviders([[provider]])[0] ?? null;
+  return mergeServiceProviders([[provider]], { locale })[0] ?? null;
 }

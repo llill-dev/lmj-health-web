@@ -35,30 +35,25 @@ export default function CancelAppointmentDialog({
   confirmLabel?: string;
   maxLength?: number;
 }) {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
-  const title = titleProp ?? tr('إنهاء الموعد', 'Complete appointment');
-  const fieldLabel = fieldLabelProp ?? tr('الملاحظات الطبية', 'Medical notes');
+  const { t, locale, dir } = useI18n();
+  const title = titleProp ?? t('doctor.appointments.cancel.title');
+  const fieldLabel = fieldLabelProp ?? t('doctor.appointments.cancel.fieldLabel');
   const placeholder =
-    placeholderProp ??
-    tr(
-      'اكتب التشخيص والملاحظات الطبية هنا...',
-      'Enter diagnosis and medical notes here...',
-    );
+    placeholderProp ?? t('doctor.appointments.cancel.placeholder');
   const confirmLabel =
-    confirmLabelProp ?? tr('حفظ وإنهاء', 'Save and complete');
+    confirmLabelProp ?? t('doctor.appointments.cancel.confirmLabel');
   const notesSchema = useMemo(
     () =>
       z.object({
         medicalNotes: z.string().max(
           maxLength,
-          tr(
-            `الحد الأقصى ${maxLength} حرف`,
-            `Maximum ${maxLength} characters`,
+          t('doctor.appointments.cancel.maxLength').replace(
+            '{max}',
+            String(maxLength),
           ),
         ),
       }),
-    [maxLength, tr],
+    [maxLength, t],
   );
 
   const {
@@ -172,7 +167,7 @@ export default function CancelAppointmentDialog({
                     type='button'
                     disabled={isSubmitting}
                     className='absolute start-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7] disabled:cursor-not-allowed disabled:opacity-60'
-                    aria-label={tr('إغلاق', 'Close')}
+                    aria-label={t('doctor.appointments.cancel.close')}
                   >
                     <X className='h-5 w-5' />
                   </button>
@@ -182,15 +177,12 @@ export default function CancelAppointmentDialog({
                   {title}
                 </Dialog.Title>
                 <Dialog.Description className='sr-only'>
-                  {tr(
-                    'تأكيد إلغاء الموعد المحدد.',
-                    'Confirm cancelling the selected appointment.',
-                  )}
+                  {t('doctor.appointments.cancel.description')}
                 </Dialog.Description>
 
                 <div className='mt-10 text-start'>
                   <div className='font-cairo text-[14px] font-bold text-[#101828]'>
-                    {tr('المريض', 'Patient')}
+                    {t('doctor.appointments.cancel.patient')}
                   </div>
                   <div className='mt-1 font-cairo text-[16px] font-extrabold text-[#101828]'>
                     {patientName}
@@ -222,7 +214,7 @@ export default function CancelAppointmentDialog({
                       disabled={isSubmitting}
                       className='h-[46px] w-full rounded-[10px] border border-[#F04438] bg-white font-cairo text-[14px] font-extrabold text-[#F04438] disabled:cursor-not-allowed disabled:opacity-60'
                     >
-                      {tr('إلغاء', 'Cancel')}
+                      {t('doctor.appointments.cancel.cancel')}
                     </button>
                   </Dialog.Close>
 

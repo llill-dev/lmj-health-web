@@ -2,13 +2,15 @@ import { Helmet } from 'react-helmet-async';
 import { Activity, BookOpen, Heart, Pill, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import AuthBackground from '@/components/auth/AuthBackground';
+import { useI18n } from '@/i18n/provider';
 
 export default function WelcomePage() {
+  const { t, locale, dir } = useI18n();
   const navigate = useNavigate();
 
   return (
     <AuthBackground>
-      <section className='relative flex min-h-screen w-full justify-center sm:py-16'>
+      <section dir={dir} lang={locale} className='relative flex min-h-screen w-full justify-center sm:py-16'>
         <Helmet>
           <title>Welcome • LMJ Health</title>
         </Helmet>
@@ -75,17 +77,17 @@ export default function WelcomePage() {
 
           <div className='flex h-[300px] w-[345px] flex-col items-center justify-center rounded-[6px] border-[1.82px] border-white border-t-[1.82px] bg-[#FFFFFFCC] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]'>
             <h1 className='bg-[#101828] bg-clip-text text-center text-[24px] font-bold leading-[32px] text-transparent'>
-              مرحبًا بك في عالم الصحة
+              {t('welcome.heading')}
             </h1>
 
             <p className='mt-4 text-center text-[14px] font-bold leading-[24.8px] text-[#4A5565]'>
-              ابدأ رحلتك في البحث عن طبيبك المناسب
+              {t('welcome.subtitleLine1')}
               <br />
-              واحصل على رعاية صحية متكاملة ومتطورة
+              {t('welcome.subtitleLine2')}
               <br />
             </p>
             <p className='mt-2 text-center text-[12px] leading-[16px] text-[#364153]'>
-              رعاية شاملة ... متابعة مستمرة ... أدوية منظمة
+              {t('welcome.tagline')}
             </p>
 
             <div className='mt-5 flex flex-col items-center justify-center gap-3'>
@@ -94,7 +96,7 @@ export default function WelcomePage() {
                 type='button'
                 onClick={() => navigate('/login')}
               >
-                ابدأ الآن
+                {t('welcome.getStarted')}
               </button>
               <button
                 className='inline-flex h-[48px] w-[297px] items-center justify-center gap-2 rounded-[6px] border border-[#B8E6E0] bg-white/80 text-[14px] font-bold text-primary shadow-[0px_18px_40px_-20px_rgba(0,0,0,0.25)] transition-colors duration-200 hover:bg-[#F0FDFA]'
@@ -102,7 +104,7 @@ export default function WelcomePage() {
                 onClick={() => navigate('/medical-library')}
               >
                 <BookOpen size={18} />
-                تصفح المكتبة الطبية
+                {t('contactUs.browseLibrary')}
               </button>
             </div>
           </div>

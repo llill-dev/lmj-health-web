@@ -8,7 +8,9 @@ import {
   getLastSevenDaysRange,
 } from "@/lib/doctor/dashboard/buildPatientWeeklyActivityChart";
 
-export function useDashboardPatientsWeeklyActivity() {
+export function useDashboardPatientsWeeklyActivity(
+  locale: "ar" | "en" = "ar",
+) {
   const range = useMemo(() => getLastSevenDaysRange(), []);
 
   const appointmentsQuery = useDoctorAppointmentsApi({
@@ -19,8 +21,13 @@ export function useDashboardPatientsWeeklyActivity() {
   });
 
   const chart = useMemo(
-    () => buildPatientWeeklyActivityChart(appointmentsQuery.appointments),
-    [appointmentsQuery.appointments],
+    () =>
+      buildPatientWeeklyActivityChart(
+        appointmentsQuery.appointments,
+        undefined,
+        locale,
+      ),
+    [appointmentsQuery.appointments, locale],
   );
 
   return {

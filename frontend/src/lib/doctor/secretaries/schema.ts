@@ -93,7 +93,7 @@ export function buildDoctorSecretaryCreateFormSchema(t: TFn = defaultT) {
       .trim()
       .min(1, SIGNUP_EMAIL_REQUIRED_MESSAGE_AR)
       .email(SIGNUP_EMAIL_INVALID_MESSAGE_AR),
-    password: signupPasswordSchema,
+    password: signupPasswordSchema(getCurrentLocale()),
     phone: buildPhoneSchema(t),
     gender: buildSecretaryGenderSchema(t),
     permissions: buildPermissionsSchema(t),

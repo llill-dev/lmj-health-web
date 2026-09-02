@@ -301,12 +301,17 @@ export function isEncounterOrderCreateValidationError(error: unknown): boolean {
 export function mapClinicalFormToOrderPatch(
   category: EncounterOrderCategoryKey,
   clinical: RadiologyClinicalForm,
+  locale: 'ar' | 'en' = 'ar',
 ): UpdateEncounterOrderBody {
   const urgency = mapClinicalUrgencyTextToApi(clinical.urgency);
 
   if (category === 'lab') {
     const labParts = [
-      clinical.requiresFasting ? 'يتطلب الصيام' : '',
+      clinical.requiresFasting
+        ? locale === 'en'
+          ? 'Requires fasting'
+          : 'يتطلب الصيام'
+        : '',
       clinical.imagingCenterInstructions.trim(),
     ].filter(Boolean);
     return {

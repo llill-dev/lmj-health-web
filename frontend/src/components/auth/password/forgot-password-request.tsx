@@ -7,7 +7,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import PasswordResetShell from "@/components/auth/password/PasswordResetShell";
-import { SIGNUP_EMAIL_INVALID_MESSAGE_AR } from "@/components/auth/signUp/signup-schemas";
 import { isValidAuthPhoneIdentifier } from "@/lib/phone/normalizeAuthPhone";
 import { useI18n } from "@/i18n/provider";
 
@@ -25,7 +24,7 @@ const requestSchema = z
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["identifier"],
-          message: SIGNUP_EMAIL_INVALID_MESSAGE_AR,
+          message: "auth.resetPassword.emailInvalid",
         });
       }
     }

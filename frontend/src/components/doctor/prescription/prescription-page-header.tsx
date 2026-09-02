@@ -18,9 +18,8 @@ export function PrescriptionPageHeader({
   backTo?: string;
 }) {
   const { dir, locale, t } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const subtitle =
-    buildPrescriptionPatientSubtitle(patientName ?? patientLabel, tr) ||
+    buildPrescriptionPatientSubtitle(patientName ?? patientLabel, t) ||
     t("doctor.prescription.defaultTitle");
   const resolvedStatusLabel =
     statusLabel ?? t("doctor.prescription.defaultStatus");

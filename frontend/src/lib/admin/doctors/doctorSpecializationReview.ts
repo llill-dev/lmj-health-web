@@ -81,10 +81,14 @@ function readPendingFlag(raw: DoctorSpecializationReviewRecord): boolean {
   );
 }
 
+type TFn = (key: string, fallback?: string) => string;
+const defaultT: TFn = (key) => key;
+
 /** يستنتج حالة التخصص من كائن الطبيب/طلب التحقق (حقول API-3 + بدائل شائعة). */
 export function resolveDoctorSpecializationReviewState(
   source: DoctorSpecializationReviewSource,
   lookups?: AdminLookupRecord[],
+  t: TFn = defaultT,
 ): DoctorSpecializationReviewState {
   const raw = asDoctorSpecializationReviewRecord(source);
   const specializationKey = readString(
@@ -131,7 +135,7 @@ export function resolveDoctorSpecializationReviewState(
       specializationKey,
       customSpecializationText,
       needsAdminResolve: false,
-      statusLabel: "مرتبط بالقائمة المعتمدة",
+      statusLabel: t("admin.doctorSpecializationReview.status.catalog"),
       statusTone: "success",
     };
   }
@@ -143,7 +147,7 @@ export function resolveDoctorSpecializationReviewState(
       specializationKey,
       customSpecializationText,
       needsAdminResolve: true,
-      statusLabel: "إدخال يدوي — بانتظار الربط",
+      statusLabel: t("admin.doctorSpecializationReview.status.customPending"),
       statusTone: "warning",
     };
   }
@@ -154,7 +158,7 @@ export function resolveDoctorSpecializationReviewState(
     specializationKey,
     customSpecializationText,
     needsAdminResolve: true,
-    statusLabel: "غير محدّد — يحتاج مراجعة",
+    statusLabel: t("admin.doctorSpecializationReview.status.unknown"),
     statusTone: "neutral",
   };
 }

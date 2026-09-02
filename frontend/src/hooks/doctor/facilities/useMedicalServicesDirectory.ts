@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useI18n } from '@/i18n/provider';
 import { isAwaitingInitialQueryDataWithPlaceholder } from '@/lib/query/queryUi';
 import { fetchMedicalServicesCatalog } from '@/lib/doctor/medical-services-directory/fetch';
 import type {
@@ -43,9 +44,10 @@ function matchesSearch(
 }
 
 export function useMedicalServicesDirectory(search: string) {
+  const { locale } = useI18n();
   const query = useQuery({
-    queryKey: ['medical-services-directory', 'catalog'] as const,
-    queryFn: () => fetchMedicalServicesCatalog(),
+    queryKey: ['medical-services-directory', 'catalog', locale] as const,
+    queryFn: () => fetchMedicalServicesCatalog(undefined, locale),
     staleTime: 1000 * 60,
     placeholderData: (previous) => previous,
   });

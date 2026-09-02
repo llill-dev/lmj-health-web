@@ -21,16 +21,10 @@ export default function PasswordResetShell({
   title,
   subtitle,
 }: Props) {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
-  const resolvedTitle =
-    title ?? tr('إعادة تعيين كلمة المرور', 'Reset password');
+  const { t, locale, dir } = useI18n();
+  const resolvedTitle = title ?? t('auth.resetPassword.shell.title');
   const resolvedSubtitle =
-    subtitle ??
-    tr(
-      'استعد الوصول إلى حسابك بخطوات بسيطة',
-      'Regain access to your account in a few simple steps',
-    );
+    subtitle ?? t('auth.resetPassword.shell.subtitle');
 
   return (
     <PasswordResetBackground>

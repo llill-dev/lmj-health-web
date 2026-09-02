@@ -92,8 +92,9 @@ export default function ReviewVerificationRequestDialog({
       resolveDoctorSpecializationReviewState(
         doctorProfile,
         lookupsQuery.data?.lookups,
+        t,
       ),
-    [doctorProfile, lookupsQuery.data?.lookups],
+    [doctorProfile, lookupsQuery.data?.lookups, t],
   );
 
   const lookupOptions = useMemo(
@@ -380,7 +381,7 @@ export default function ReviewVerificationRequestDialog({
                             doctorProfile?.locationCountry,
                           ]
                             .filter(Boolean)
-                            .join("، ") || "—"}
+                            .join(locale === "ar" ? "، " : ", ") || "—"}
                         </div>
                       </div>
                     ) : null}

@@ -31,12 +31,17 @@ export function formatBillingAmount(value: number, currency = 'USD'): string {
   return `${symbol}${formatted}`;
 }
 
-/** Dates keep Arabic calendar labels but use Latin digits (e.g. 11/6/2026). */
-export function formatBillingDate(value?: string | null): string {
+/** Dates always use Latin digits (e.g. 11/6/2026), day/month order follows locale. */
+export function formatBillingDate(
+  value?: string | null,
+  locale: 'ar' | 'en' = 'ar',
+): string {
   if (!value) return '—';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString('ar-SY', { numberingSystem: 'latn' });
+  return date.toLocaleDateString(locale === 'en' ? 'en-US' : 'ar-SY', {
+    numberingSystem: 'latn',
+  });
 }
 
 /** @deprecated use formatBillingAmount — kept for gradual migration */

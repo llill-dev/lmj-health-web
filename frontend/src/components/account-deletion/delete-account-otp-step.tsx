@@ -1,7 +1,7 @@
-import { deleteAccountOtpSchema } from '@/lib/auth/accountDeletionSchemas';
+import { buildDeleteAccountOtpSchema } from '@/lib/auth/accountDeletionSchemas';
 import { ArrowLeft } from 'lucide-react';
 import type { ClipboardEvent, KeyboardEvent } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useI18n } from '@/i18n/provider';
 
 export function DeleteAccountOtpStep({
@@ -29,7 +29,11 @@ export function DeleteAccountOtpStep({
   subtitle?: string;
   verifyLabel?: string;
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const deleteAccountOtpSchema = useMemo(
+    () => buildDeleteAccountOtpSchema(t),
+    [locale],
+  );
   const resolvedTitle = title ?? t('accountDeletion.otp.defaultTitle');
   const resolvedSubtitle = subtitle ?? t('accountDeletion.otp.defaultSubtitle');
   const [digits, setDigits] = useState<string[]>(

@@ -14,8 +14,7 @@ export function EncountersStatsRow({
   active,
   closed,
 }: EncountersStatsRowProps) {
-  const { locale } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t } = useI18n();
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -23,19 +22,19 @@ export function EncountersStatsRow({
         variant="primary"
         icon={<ClipboardList className="h-5 w-5" aria-hidden />}
         value={total}
-        label={tr("الكل", "All")}
+        label={t("common.all")}
       />
       <StatCard
         variant="active"
         icon={<Activity className="h-5 w-5" aria-hidden />}
         value={active}
-        label={tr("نشطة", "Active")}
+        label={t("doctor.encounters.stats.active")}
       />
       <StatCard
         variant="closed"
         icon={<CheckCircle2 className="h-5 w-5" aria-hidden />}
         value={closed}
-        label={tr("مغلقة", "Closed")}
+        label={t("doctor.encounters.stats.closed")}
       />
     </div>
   );

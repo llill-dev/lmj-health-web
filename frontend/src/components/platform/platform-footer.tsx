@@ -44,7 +44,7 @@ function socialIconForUrl(url: string) {
 }
 
 export function PlatformFooter() {
-  const { locale, dir, setLocale } = useI18n();
+  const { t, locale, dir, setLocale } = useI18n();
   const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const { openModal } = usePlatformSupport();
   const aboutQuery = usePlatformAboutContent(locale);
@@ -83,7 +83,7 @@ export function PlatformFooter() {
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <section className="text-start">
             <h3 className="mb-4 font-cairo text-[18px] font-extrabold">
-              {tr('عن المنصة', 'About the platform')}
+              {t('platform.footer.about')}
             </h3>
             <p className="font-cairo text-[13px] font-semibold leading-[24px] text-white/90">
               {aboutQuery.summary}
@@ -104,12 +104,12 @@ export function PlatformFooter() {
           </section>
 
           <section className="text-start">
-            <h3 className="mb-4 font-cairo text-[18px] font-extrabold">{tr('القسم القانوني', 'Legal')}</h3>
+            <h3 className="mb-4 font-cairo text-[18px] font-extrabold">{t('platform.footer.legal')}</h3>
             <ul className="space-y-3">
               {[
-                { label: tr('الشروط والأحكام', 'Terms & conditions'), modal: 'terms' as const },
-                { label: tr('سياسة الخصوصية', 'Privacy policy'), modal: 'privacy' as const },
-                { label: tr('سياسة الاستخدام', 'Usage policy'), modal: 'usage' as const },
+                { label: t('platform.footer.terms'), modal: 'terms' as const },
+                { label: t('platform.footer.privacy'), modal: 'privacy' as const },
+                { label: t('platform.footer.usage'), modal: 'usage' as const },
               ].map((item) => (
                 <li key={item.modal}>
                   <button
@@ -126,7 +126,7 @@ export function PlatformFooter() {
           </section>
 
           <section className="text-start">
-            <h3 className="mb-4 font-cairo text-[18px] font-extrabold">{tr('الدعم والمساعدة', 'Support & help')}</h3>
+            <h3 className="mb-4 font-cairo text-[18px] font-extrabold">{t('platform.footer.supportHelp')}</h3>
             <ul className="mb-5 space-y-3">
               <li>
                 <button
@@ -134,7 +134,7 @@ export function PlatformFooter() {
                   onClick={() => openModal('faq')}
                   className="font-cairo text-[13px] font-semibold text-white/90 transition hover:text-white"
                 >
-                  {tr('الأسئلة الشائعة', 'FAQ')}
+                  {t('platform.footer.faq')}
                 </button>
               </li>
               <li>
@@ -142,7 +142,7 @@ export function PlatformFooter() {
                   to="/medical-library"
                   className="font-cairo text-[13px] font-semibold text-white/90 transition hover:text-white"
                 >
-                  {tr('المكتبة الطبية', 'Medical library')}
+                  {t('platform.footer.medicalLibrary')}
                 </Link>
               </li>
               <li>
@@ -151,7 +151,7 @@ export function PlatformFooter() {
                   onClick={() => openModal('contact')}
                   className="font-cairo text-[13px] font-semibold text-white/90 transition hover:text-white"
                 >
-                  {tr('تواصل معنا', 'Contact us')}
+                  {t('platform.footer.contactUs')}
                 </button>
               </li>
             </ul>
@@ -162,7 +162,7 @@ export function PlatformFooter() {
                   type="button"
                   onClick={() => openModal('contact')}
                   className="flex h-9 w-9 items-center justify-center rounded-full border border-white/40 text-white transition hover:bg-white/10"
-                  aria-label={tr('تواصل', 'Contact')}
+                  aria-label={t('platform.footer.contactAriaLabel')}
                 >
                   <Icon className="h-4 w-4" />
                 </button>
@@ -171,14 +171,14 @@ export function PlatformFooter() {
           </section>
 
           <section className="text-start">
-            <h3 className="mb-4 font-cairo text-[18px] font-extrabold">{tr('خدماتنا', 'Our services')}</h3>
+            <h3 className="mb-4 font-cairo text-[18px] font-extrabold">{t('platform.footer.ourServices')}</h3>
             <ul className="space-y-3">
               <li>
                 <Link
                   to="/doctor/appointments"
                   className="font-cairo text-[13px] font-semibold text-white/90 transition hover:text-white"
                 >
-                  {tr('احجز موعد', 'Book an appointment')}
+                  {t('platform.footer.bookAppointment')}
                 </Link>
               </li>
               <li>
@@ -186,7 +186,7 @@ export function PlatformFooter() {
                   to="/doctor/doctors-directory"
                   className="font-cairo text-[13px] font-semibold text-white/90 transition hover:text-white"
                 >
-                  {tr('الأطباء', 'Doctors')}
+                  {t('platform.footer.doctors')}
                 </Link>
               </li>
               {services.map((service) => (

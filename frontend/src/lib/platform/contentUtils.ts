@@ -1,4 +1,5 @@
 import type { AdminContentBlock } from '@/lib/admin/types';
+import { getTranslationValue } from '@/i18n/translations';
 import type {
   PlatformContactChannel,
   PlatformContentApiRecord,
@@ -400,13 +401,18 @@ export function extractFaqItemsFromBlocks(
 
 export function extractContactChannelsFromBlocks(
   blocks: AdminContentBlock[],
+  language: PlatformContentLanguage = 'ar',
 ): PlatformContactChannel[] {
   const channels: PlatformContactChannel[] = [];
+  const contactFallback =
+    getTranslationValue(language, 'platform.footer.contactAriaLabel') ?? 'تواصل';
+  const emailLabel =
+    getTranslationValue(language, 'contactUs.email') ?? 'البريد الإلكتروني';
 
   for (const block of blocks) {
     if (block.type === 'linkCard') {
       const url = String(block.url ?? '').trim();
-      const title = String(block.title ?? block.description ?? 'تواصل').trim();
+      const title = String(block.title ?? block.description ?? contactFallback).trim();
       if (!url) continue;
 
       channels.push({
@@ -424,7 +430,7 @@ export function extractContactChannelsFromBlocks(
       if (emailMatch) {
         channels.push({
           id: `email-${channels.length + 1}`,
-          label: 'البريد الإلكتروني',
+          label: emailLabel,
           url: `mailto:${emailMatch[0]}`,
           kind: 'email',
         });
@@ -455,16 +461,17 @@ function classifyContactUrl(url: string): PlatformContactChannel['kind'] {
 export function mapContentToLegalDocument(
   content: PlatformContentDetails,
   fallbackSectionTitle?: string,
+  language: PlatformContentLanguage = 'ar',
 ): PlatformLegalDocument {
   const bodyText = contentBlocksToPlainText(content.contentBlocks);
   const body =
-    readFirstNonEmptyString([
-      bodyText,
-      content.summary,
-    ]) ?? 'المحتوى غير متوفر حالياً.';
+    readFirstNonEmptyString([bodyText, content.summary]) ??
+    getTranslationValue(language, 'platform.legalDocument.contentUnavailable') ??
+    'المحتوى غير متوفر حالياً.';
 
   const lastUpdated = formatContentDate(
     content.lastReviewedAt ?? content.publishedAt,
+    language,
   );
 
   return {
@@ -477,11 +484,14 @@ export function mapContentToLegalDocument(
   };
 }
 
-function formatContentDate(value?: string | null): string {
+function formatContentDate(
+  value?: string | null,
+  language: PlatformContentLanguage = 'ar',
+): string {
   if (!value) return '—';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString('ar-SY', {
+  return date.toLocaleDateString(language === 'en' ? 'en-US' : 'ar-SY', {
     year: 'numeric',
     month: 'long',
   });

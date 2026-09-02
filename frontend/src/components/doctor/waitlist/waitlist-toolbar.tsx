@@ -29,8 +29,7 @@ export function WaitlistToolbar({
   dateTo?: string;
   onDateToChange?: (value: string) => void;
 }) {
-  const { t, locale } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t } = useI18n();
   const showExtraFilters = Boolean(onUrgencyChange || onDateFromChange || onDateToChange);
 
   return (
@@ -55,10 +54,10 @@ export function WaitlistToolbar({
               onChange={(event) =>
                 onUrgencyChange(event.target.value as "" | WaitlistUrgency)
               }
-              aria-label={tr("الأولوية", "Urgency")}
+              aria-label={t("doctor.waitlist.urgencyFilterAria")}
               className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white px-3 font-cairo text-[13px] font-bold text-[#111827] outline-none focus:border-primary sm:w-[160px]"
             >
-              <option value="">{tr("كل الأولويات", "All urgencies")}</option>
+              <option value="">{t("doctor.waitlist.allUrgencies")}</option>
               <option value="low">{waitlistUrgencyLabel("low", t)}</option>
               <option value="medium">{waitlistUrgencyLabel("medium", t)}</option>
               <option value="high">{waitlistUrgencyLabel("high", t)}</option>
@@ -69,7 +68,7 @@ export function WaitlistToolbar({
               type="date"
               value={dateFrom ?? ""}
               onChange={(event) => onDateFromChange(event.target.value)}
-              aria-label={tr("من تاريخ", "From date")}
+              aria-label={t("doctor.patientsFiltersSection.fromDate")}
               className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white px-3 font-cairo text-[13px] font-bold text-[#111827] outline-none focus:border-primary sm:w-[160px]"
             />
           ) : null}
@@ -78,7 +77,7 @@ export function WaitlistToolbar({
               type="date"
               value={dateTo ?? ""}
               onChange={(event) => onDateToChange(event.target.value)}
-              aria-label={tr("إلى تاريخ", "To date")}
+              aria-label={t("doctor.patientsFiltersSection.toDate")}
               className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white px-3 font-cairo text-[13px] font-bold text-[#111827] outline-none focus:border-primary sm:w-[160px]"
             />
           ) : null}

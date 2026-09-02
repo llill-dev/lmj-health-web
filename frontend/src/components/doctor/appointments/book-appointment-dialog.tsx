@@ -86,7 +86,6 @@ export default function BookAppointmentDialog({
   submitDisabledReason?: string | null;
 }) {
   const { t, locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const bookSelectOutletRef = useRef<HTMLDivElement>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isFindingNearestDate, setIsFindingNearestDate] = useState(false);
@@ -422,8 +421,8 @@ export default function BookAppointmentDialog({
                         >
                           <CalendarSearch className="h-3.5 w-3.5" aria-hidden />
                           {isFindingNearestDate
-                            ? tr("جارٍ البحث...", "Searching...")
-                            : tr("أقرب موعد متاح", "Nearest available")}
+                            ? t("doctor.appointments.book.searching")
+                            : t("doctor.appointments.book.nearestAvailable")}
                         </button>
                       </div>
                       <input
@@ -440,9 +439,9 @@ export default function BookAppointmentDialog({
                         </div>
                       ) : nearestDateNotFound ? (
                         <div className="mt-2 text-start font-cairo text-[11px] font-semibold text-[#98A2B3]">
-                          {tr(
-                            `لم يُعثر على موعد متاح خلال ${NEAREST_AVAILABLE_SEARCH_DAYS} يومًا القادمة.`,
-                            `No available date found in the next ${NEAREST_AVAILABLE_SEARCH_DAYS} days.`,
+                          {t("doctor.appointments.book.noDatesFound").replace(
+                            "{days}",
+                            String(NEAREST_AVAILABLE_SEARCH_DAYS),
                           )}
                         </div>
                       ) : null}
@@ -471,10 +470,7 @@ export default function BookAppointmentDialog({
                           } bg-white p-3`}
                         >
                           <div className="rounded-[12px] bg-[#F9FAFB] px-4 py-4 text-start font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                            {tr(
-                              "اختر التاريخ أولاً حتى تظهر لك المواعيد المتاحة فقط.",
-                              "Select a date first to see available appointments only.",
-                            )}
+                            {t("doctor.appointments.book.selectDateFirst")}
                           </div>
                         </div>
                       ) : isAwaitingSlots ? (
@@ -498,10 +494,7 @@ export default function BookAppointmentDialog({
                           } bg-white p-3`}
                         >
                           <div className="rounded-[12px] bg-[#FEF2F2] px-4 py-4 text-start font-cairo text-[12px] font-semibold text-[#B42318]">
-                            {tr(
-                              "تعذر تحميل الأوقات المتاحة لهذا التاريخ.",
-                              "Could not load available times for this date.",
-                            )}
+                            {t("doctor.appointments.book.loadTimesError")}
                           </div>
                         </div>
                       ) : availableTimes.length === 0 ? (
@@ -531,9 +524,8 @@ export default function BookAppointmentDialog({
                               value={field.value}
                               onChange={field.onChange}
                               onBlur={field.onBlur}
-                              placeholder={tr(
-                                "اختر وقتاً متاحاً...",
-                                "Select an available time...",
+                              placeholder={t(
+                                "doctor.appointments.book.selectAvailableTime",
                               )}
                               error={Boolean(
                                 errors.time || !isSelectedTimeAvailable,
@@ -568,10 +560,7 @@ export default function BookAppointmentDialog({
                         </div>
                       ) : (
                         <div className="mt-2 text-start font-cairo text-[11px] font-semibold text-[#98A2B3]">
-                          {tr(
-                            "تظهر لك فقط الأوقات المتاحة حسب جدول الطبيب.",
-                            "Only available times from the doctor's schedule are shown.",
-                          )}
+                          {t("doctor.appointments.book.onlyAvailableShown")}
                         </div>
                       )}
                     </div>
@@ -611,9 +600,8 @@ export default function BookAppointmentDialog({
                             placeholder={t(
                               "doctor.appointments.book.noTypeSelected",
                             )}
-                            listboxAriaLabel={tr(
-                              "نوع الموعد",
-                              "Appointment type",
+                            listboxAriaLabel={t(
+                              "doctor.appointments.book.appointmentType",
                             )}
                           />
                         )}

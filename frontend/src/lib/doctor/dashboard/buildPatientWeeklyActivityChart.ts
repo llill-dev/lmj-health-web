@@ -46,10 +46,12 @@ function resolvePatientId(appointment: AppointmentLike): string | null {
   return patient._id ?? null;
 }
 
-function formatArabicWeekday(isoDate: string): string {
+function formatWeekday(isoDate: string, locale: 'ar' | 'en' = 'ar'): string {
   const date = new Date(`${isoDate}T12:00:00`);
   if (Number.isNaN(date.getTime())) return isoDate;
-  return date.toLocaleDateString('ar-SA', { weekday: 'long' });
+  return date.toLocaleDateString(locale === 'en' ? 'en-US' : 'ar-SA', {
+    weekday: 'long',
+  });
 }
 
 export function getLastSevenDaysRange(referenceDate = new Date()): {
@@ -70,6 +72,7 @@ export function getLastSevenDaysRange(referenceDate = new Date()): {
 export function buildPatientWeeklyActivityChart(
   appointments: ReadonlyArray<AppointmentLike>,
   referenceDate = new Date(),
+  locale: 'ar' | 'en' = 'ar',
 ): PatientWeeklyActivityChart {
   const { dateFrom, dateTo } = getLastSevenDaysRange(referenceDate);
   const dayKeys: string[] = [];
@@ -109,7 +112,7 @@ export function buildPatientWeeklyActivityChart(
 
     return {
       isoDate,
-      dayLabel: formatArabicWeekday(isoDate),
+      dayLabel: formatWeekday(isoDate, locale),
       patientCount,
       appointmentCount,
       value: appointmentCount,

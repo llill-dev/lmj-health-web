@@ -10,12 +10,12 @@ import {
   Trash2,
   UserRound,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   countGrantedCardPermissions,
   isSecretaryActive,
   secretaryPermissionLabel,
-  SECRETARY_CARD_PERMISSION_ROWS,
+  getSecretaryCardPermissionRows,
 } from '@/lib/doctor/secretaries/permissionsUi';
 import type { DoctorSecretary } from '@/lib/doctor/secretaries/types';
 import { cn } from '@/lib/utils/utils';
@@ -32,6 +32,10 @@ export function DoctorSecretaryCard({
 }) {
   const { t, locale } = useI18n();
   const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const cardPermissionRows = useMemo(
+    () => getSecretaryCardPermissionRows(tr),
+    [locale],
+  );
   const [expanded, setExpanded] = useState(true);
   const permissions = secretary.permissions ?? [];
   const { granted, total } = countGrantedCardPermissions(permissions);
@@ -127,7 +131,7 @@ export function DoctorSecretaryCard({
 
         {expanded ? (
           <ul className="mt-4 space-y-3">
-            {SECRETARY_CARD_PERMISSION_ROWS.map((row) => {
+            {cardPermissionRows.map((row) => {
               const grantedRow = permissions.includes(row.apiKey);
               return (
                 <li

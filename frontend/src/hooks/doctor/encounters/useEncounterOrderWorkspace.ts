@@ -235,13 +235,14 @@ export function useEncounterOrderWorkspace(
       patientId,
       encounterId,
       orderId,
-      mapClinicalFormToOrderPatch(category, clinical),
+      mapClinicalFormToOrderPatch(category, clinical, locale),
     );
   }, [
     category,
     clinical,
     doctorId,
     encounterId,
+    locale,
     patientId,
     resolveOrderId,
   ]);

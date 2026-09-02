@@ -93,7 +93,10 @@ export default function AdminVerificationRequestsPage() {
         request.doctor?.locationCity,
         request.doctor?.locationCountry,
       ].filter(Boolean);
-      const address = addressParts.length > 0 ? addressParts.join("، ") : "—";
+      const address =
+        addressParts.length > 0
+          ? addressParts.join(locale === "ar" ? "، " : ", ")
+          : "—";
 
       return {
         id: request._id,
@@ -117,7 +120,7 @@ export default function AdminVerificationRequestsPage() {
         > | null,
       };
     });
-  }, [verificationQuery.data?.requests, t]);
+  }, [verificationQuery.data?.requests, t, locale]);
 
   const total = verificationQuery.data?.total ?? 0;
   const currentPage = verificationQuery.data?.page ?? page;

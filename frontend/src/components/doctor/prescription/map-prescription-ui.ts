@@ -27,13 +27,15 @@ export function mapUiItemToApiBody(values: PrescriptionDraftForm) {
   };
 }
 
+type TFn = (key: string, fallback?: string) => string;
+
 export function resolvePrescriptionStatusLabel(
   status?: string,
-  tr: (ar: string, en: string) => string = (ar) => ar,
+  t: TFn = (key) => key,
 ) {
   const normalized = status?.toLowerCase() ?? '';
-  if (normalized.includes('final')) return tr('معتمدة', 'Finalized');
-  return tr('مسودة', 'Draft');
+  if (normalized.includes('final')) return t('doctor.prescriptionStatus.finalized');
+  return t('doctor.prescription.defaultStatus');
 }
 
 export function isPrescriptionEditable(
@@ -58,16 +60,13 @@ export function resolvePatientPrescriptionName(
 
 export function buildPrescriptionPatientSubtitle(
   patientName?: string,
-  tr: (ar: string, en: string) => string = (ar) => ar,
+  t: TFn = (key) => key,
 ) {
   const name = patientName?.trim();
   if (!name || name === '—') {
-    return tr('الوصفة الطبية', 'Prescription');
+    return t('doctor.prescription.defaultTitle');
   }
-  return tr(
-    `الوصفة الطبية الخاصة بالمريض ${name}`,
-    `Prescription for patient ${name}`,
-  );
+  return t('doctor.prescription.subtitle.forPatient').replace('{name}', name);
 }
 
 export function buildPatientPrescriptionLabel(

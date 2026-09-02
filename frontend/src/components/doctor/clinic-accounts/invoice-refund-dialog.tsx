@@ -100,10 +100,9 @@ export function InvoiceRefundDialog({
 
     if (parsedAmount > maxRefundable) {
       const amountStr = formatBillingAmount(maxRefundable, currency);
-      const message =
-        locale === "ar"
-          ? `المبلغ يتجاوز القابل للاسترداد (${amountStr}).`
-          : `Amount exceeds refundable balance (${amountStr}).`;
+      const message = t(
+        "doctor.clinicAccounts.invoiceRefund.amountExceeds",
+      ).replace("{amount}", amountStr);
       toast(message, {
         title: t("doctor.clinicAccounts.invoiceRefund.amountTooHigh"),
         variant: "error",

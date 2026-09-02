@@ -188,7 +188,7 @@ const PatientTableRow = memo<{
             </div>
             <div className="font-cairo text-[14px] font-bold text-[#243044]">
               {patient.allergies.length
-                ? patient.allergies.join("، ")
+                ? patient.allergies.join(locale === "ar" ? "، " : ", ")
                 : t("secretary.patients.none")}
             </div>
           </div>
@@ -198,7 +198,7 @@ const PatientTableRow = memo<{
             </div>
             <div className="font-cairo text-[14px] font-bold text-[#243044]">
               {patient.medicalConditions.length
-                ? patient.medicalConditions.join("، ")
+                ? patient.medicalConditions.join(locale === "ar" ? "، " : ", ")
                 : t("secretary.patients.none")}
             </div>
           </div>

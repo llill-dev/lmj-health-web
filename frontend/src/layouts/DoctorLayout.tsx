@@ -31,9 +31,9 @@ export default function DoctorLayout() {
   const authUser = readAuthUser();
   const doctorName = useMemo(() => {
     const fullName = authUser?.fullName?.trim();
-    if (!fullName) return "الطبيب";
-    return /^د\.?\s/u.test(fullName) ? fullName : `د. ${fullName}`;
-  }, [authUser?.fullName]);
+    if (!fullName) return t("doctor.dashboard.guest");
+    return /^د\.?\s/u.test(fullName) ? fullName : `${t("doctor.badge")} ${fullName}`;
+  }, [authUser?.fullName, t]);
   const doctorEmail = authUser?.email?.trim() || "";
 
   const performLogout = useCallback(async (scope: LogoutScope) => {

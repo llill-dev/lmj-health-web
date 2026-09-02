@@ -12,6 +12,7 @@ import {
   adminTextareaClass,
 } from "@/components/admin/form-field";
 import { useI18n } from "@/i18n/provider";
+import { getCurrentLocale } from "@/i18n/runtime";
 
 interface ReviewProfileChangeDialogProps {
   open: boolean;
@@ -30,15 +31,19 @@ function renderValue(value: unknown): string {
     return String(value);
   }
   if (Array.isArray(value)) {
-    return value.map((item) => renderValue(item)).join("، ");
+    const separator = getCurrentLocale() === "ar" ? "، " : ", ";
+    return value.map((item) => renderValue(item)).join(separator);
   }
   if (typeof value === "object") {
     const localized = value as { ar?: unknown; en?: unknown; label?: unknown };
-    if (typeof localized.ar === "string" && localized.ar.trim()) {
-      return localized.ar;
+    const locale = getCurrentLocale();
+    const primary = locale === "ar" ? localized.ar : localized.en;
+    const secondary = locale === "ar" ? localized.en : localized.ar;
+    if (typeof primary === "string" && primary.trim()) {
+      return primary;
     }
-    if (typeof localized.en === "string" && localized.en.trim()) {
-      return localized.en;
+    if (typeof secondary === "string" && secondary.trim()) {
+      return secondary;
     }
     if (typeof localized.label === "string" && localized.label.trim()) {
       return localized.label;
