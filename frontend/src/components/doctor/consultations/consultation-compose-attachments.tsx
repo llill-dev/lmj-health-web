@@ -20,7 +20,7 @@ export default function ConsultationComposeAttachments({
   pendingAttachments: PendingConsultationAttachment[];
   onPendingChange: (next: PendingConsultationAttachment[]) => void;
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -56,7 +56,7 @@ export default function ConsultationComposeAttachments({
         variant: 'success',
       });
     } catch (error) {
-      toast(getPatientFileMutationErrorMessage(error, 'upload'), {
+      toast(getPatientFileMutationErrorMessage(error, 'upload', locale), {
         title: t('doctor.consultations.compose.uploadFailedTitle'),
         variant: 'error',
       });

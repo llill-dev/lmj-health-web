@@ -26,7 +26,7 @@ export default function ConsultationAttachmentList({
   title?: string;
   variant?: 'chips' | 'cards';
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const resolvedTitle = title ?? t('doctor.consultations.attachment.defaultTitle');
   const { toast } = useToast();
   const [loadingRef, setLoadingRef] = useState<string | null>(null);
@@ -49,7 +49,7 @@ export default function ConsultationAttachmentList({
         mode,
       );
     } catch (error) {
-      toast(getPatientFileAccessErrorMessage(error, mode), {
+      toast(getPatientFileAccessErrorMessage(error, mode, locale), {
         title:
           mode === 'download'
             ? t('doctor.consultations.attachment.downloadFailed')
