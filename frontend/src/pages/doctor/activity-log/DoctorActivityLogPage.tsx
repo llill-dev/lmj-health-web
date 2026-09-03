@@ -91,9 +91,7 @@ export default function DoctorActivityLogPage() {
   return (
     <>
       <Helmet>
-        <title>
-          <title>{t("doctor.activityLog.page.title")}</title>
-        </title>
+        <title>{t("doctor.activityLog.page.title")}</title>
       </Helmet>
 
       <div dir={dir} lang={locale}>
