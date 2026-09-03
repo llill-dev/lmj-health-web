@@ -99,7 +99,7 @@ export default function MedicalOrderCatalogDetailsDialog({
       <Dialog.Portal>
         <Dialog.Overlay className='fixed inset-0 z-[9998] bg-black/45 backdrop-blur-[2px]' />
         <Dialog.Content
-          className='fixed start-1/2 top-1/2 z-[9999] w-[460px] max-w-[calc(100vw-24px)] -translate-x-1/2 -translate-y-1/2 rounded-[16px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.22)] outline-none'
+          className='fixed left-1/2 top-1/2 z-[9999] w-[460px] max-w-[calc(100vw-24px)] -translate-x-1/2 -translate-y-1/2 rounded-[16px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.22)] outline-none'
           dir={dir}
           lang={locale}
         >

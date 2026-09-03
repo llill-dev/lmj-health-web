@@ -135,7 +135,7 @@ export default function ConfirmDialog({
                 transitionEnd: { visibility: 'hidden' },
               },
             }}
-            className='fixed start-1/2 top-1/2 z-[10000] max-h-[calc(100dvh-24px)] max-w-[calc(100vw-24px)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none'
+            className='fixed left-1/2 top-1/2 z-[10000] max-h-[calc(100dvh-24px)] max-w-[calc(100vw-24px)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none'
             style={{ width: maxWidth }}
             dir={dir}
             lang={locale}

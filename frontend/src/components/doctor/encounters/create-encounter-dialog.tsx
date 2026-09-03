@@ -305,7 +305,7 @@ export function CreateEncounterDialog({
         <Dialog.Content
           dir={dir}
           lang={locale}
-          className="fixed start-1/2 top-1/2 z-[121] flex w-[min(760px,calc(100vw-24px))] max-h-[calc(100vh-28px)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-[26px] border border-[#D0D5DD] bg-white shadow-[0_30px_80px_rgba(15,23,42,0.22)]"
+          className="fixed left-1/2 top-1/2 z-[121] flex w-[min(760px,calc(100vw-24px))] max-h-[calc(100vh-28px)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-[26px] border border-[#D0D5DD] bg-white shadow-[0_30px_80px_rgba(15,23,42,0.22)]"
         >
           <div
             ref={selectListboxOutletRef}

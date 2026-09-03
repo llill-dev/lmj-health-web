@@ -153,7 +153,7 @@ export function FacilityFormDialog({
                 type="button"
                 onClick={onClose}
                 disabled={submitting}
-                className="absolute start-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
+                className="absolute end-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
                 aria-label={t('common.close')}
               >
                 <X className="w-5 h-5" aria-hidden />

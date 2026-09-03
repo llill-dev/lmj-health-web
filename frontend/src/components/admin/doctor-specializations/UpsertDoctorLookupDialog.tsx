@@ -175,6 +175,11 @@ export default function UpsertDoctorLookupDialog({
             onMouseDown={(e) => e.stopPropagation()}
           >
             <div className="flex gap-3 justify-between items-start border-b border-[#F2F4F7] px-5 py-4">
+              <div className="text-start">
+                <h3 className="font-cairo text-[16px] font-black text-[#111827]">
+                  {isEdit ? t("adminDoctorLookup.editTitle") : t("adminDoctorLookup.createTitle")}
+                </h3>
+              </div>
               <button
                 type="button"
                 onClick={() => onOpenChange(false)}
@@ -183,11 +188,6 @@ export default function UpsertDoctorLookupDialog({
               >
                 <X className="w-5 h-5" />
               </button>
-              <div className="text-start">
-                <h3 className="font-cairo text-[16px] font-black text-[#111827]">
-                  {isEdit ? t("adminDoctorLookup.editTitle") : t("adminDoctorLookup.createTitle")}
-                </h3>
-              </div>
             </div>
 
             <form

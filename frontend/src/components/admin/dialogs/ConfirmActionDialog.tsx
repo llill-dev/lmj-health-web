@@ -95,13 +95,13 @@ export default function ConfirmActionDialog({
               <button
                 type="button"
                 onClick={() => onOpenChange(false)}
-                className="absolute start-5 top-4 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] transition-colors hover:bg-[#F2F4F7]"
+                className="absolute end-5 top-4 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] transition-colors hover:bg-[#F2F4F7]"
                 aria-label={t("common.close")}
               >
                 <X className="w-5 h-5" />
               </button>
 
-              <div className="flex gap-4 items-start pe-1">
+              <div className="flex gap-4 items-start pe-10">
                 {icon ? (
                   <div
                     className={
