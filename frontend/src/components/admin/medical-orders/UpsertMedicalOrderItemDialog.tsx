@@ -226,7 +226,7 @@ export default function UpsertMedicalOrderItemDialog({
                 transitionEnd: { visibility: 'hidden' as const },
               },
             }}
-            className='fixed start-1/2 top-1/2 z-[10000] w-[760px] max-h-[85vh] max-w-[calc(100vw-24px)] overflow-y-auto rounded-[16px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.22)] outline-none'
+            className='fixed left-1/2 top-1/2 z-[10000] w-[760px] max-h-[85vh] max-w-[calc(100vw-24px)] overflow-y-auto rounded-[16px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.22)] outline-none'
             dir={dir}
             lang={locale}
           >

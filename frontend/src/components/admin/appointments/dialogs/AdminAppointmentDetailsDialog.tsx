@@ -116,7 +116,7 @@ export default function AdminAppointmentDetailsDialog({
               <button
                 type="button"
                 onClick={() => onOpenChange(false)}
-                className="absolute start-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]"
+                className="absolute end-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]"
                 aria-label={t("common.close")}
               >
                 <X className="h-5 w-5" />

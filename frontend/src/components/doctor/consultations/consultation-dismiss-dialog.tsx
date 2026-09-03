@@ -29,7 +29,7 @@ export default function ConsultationDismissDialog({
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-[9999] bg-black/45 backdrop-blur-[2px]" />
         <Dialog.Content
-          className="fixed start-1/2 top-1/2 z-[10000] w-[min(92vw,440px)] -translate-x-1/2 -translate-y-1/2 rounded-[14px] border border-[#E5E7EB] bg-white p-6 shadow-[0_24px_48px_rgba(0,0,0,0.18)] outline-none"
+          className="fixed left-1/2 top-1/2 z-[10000] w-[min(92vw,440px)] -translate-x-1/2 -translate-y-1/2 rounded-[14px] border border-[#E5E7EB] bg-white p-6 shadow-[0_24px_48px_rgba(0,0,0,0.18)] outline-none"
           dir={dir}
           lang={locale}
         >

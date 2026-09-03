@@ -196,7 +196,7 @@ export default function BroadcastNotificationDialog({
                   if (!isSubmitting) onOpenChange(false);
                 }}
                 disabled={isSubmitting}
-                className="absolute start-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7] disabled:cursor-not-allowed disabled:opacity-50"
+                className="absolute end-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7] disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label={t("common.close")}
               >
                 <X className="h-5 w-5" />

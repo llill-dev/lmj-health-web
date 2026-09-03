@@ -82,7 +82,7 @@ export default function LogoutConfirmDialog({
               <Dialog.Close asChild>
                 <button
                   type="button"
-                  className="absolute start-5 top-4 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]"
+                  className="absolute end-5 top-4 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]"
                   aria-label={t("common.close")}
                 >
                   <X className="w-5 h-5" />

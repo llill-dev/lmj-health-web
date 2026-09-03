@@ -27,8 +27,8 @@ export default function SignupSuccess({
       <div className='relative w-full'>
         <div className='pointer-events-none absolute end-[500px] -top-[20px] -z-10'>
           <div className='relative h-44 w-44'>
-            <div className='absolute start-1/2 top-1/2 h-14 w-44 -z-10 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-3xl bg-teal-600/90 shadow-[0_25px_70px_rgba(0,0,0,0.18)]' />
-            <div className='absolute start-1/2 top-1/2 h-14 w-44 z-10 -translate-x-1/2 -translate-y-1/2 -rotate-45 rounded-3xl bg-teal-600/90 shadow-[0_25px_70px_rgba(0,0,0,0.18)]' />
+            <div className='absolute left-1/2 top-1/2 h-14 w-44 -z-10 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-3xl bg-teal-600/90 shadow-[0_25px_70px_rgba(0,0,0,0.18)]' />
+            <div className='absolute left-1/2 top-1/2 h-14 w-44 z-10 -translate-x-1/2 -translate-y-1/2 -rotate-45 rounded-3xl bg-teal-600/90 shadow-[0_25px_70px_rgba(0,0,0,0.18)]' />
           </div>
         </div>
 

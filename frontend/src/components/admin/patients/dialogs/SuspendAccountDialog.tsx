@@ -130,7 +130,7 @@ export default function SuspendAccountDialog({
                 transitionEnd: { visibility: "hidden" },
               },
             }}
-            className="fixed start-1/2 top-1/2 z-[10000] w-[560px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none"
+            className="fixed left-1/2 top-1/2 z-[10000] w-[560px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none"
             dir={dir}
             lang={locale}
           >
@@ -138,7 +138,7 @@ export default function SuspendAccountDialog({
               <Dialog.Close asChild>
                 <button
                   type="button"
-                  className="absolute start-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]"
+                  className="absolute end-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]"
                   aria-label={t("common.close")}
                 >
                   <X className="h-5 w-5" />

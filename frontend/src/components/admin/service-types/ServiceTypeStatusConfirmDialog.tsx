@@ -94,7 +94,7 @@ export default function ServiceTypeStatusConfirmDialog({
         <Dialog.Content
           forceMount
           onOpenAutoFocus={(e) => e.preventDefault()}
-          className='fixed start-1/2 top-1/2 z-[10060] w-[min(100vw-1.5rem,420px)] -translate-x-1/2 -translate-y-1/2 border-0 bg-transparent p-0 shadow-none outline-none'
+          className='fixed left-1/2 top-1/2 z-[10060] w-[min(100vw-1.5rem,420px)] -translate-x-1/2 -translate-y-1/2 border-0 bg-transparent p-0 shadow-none outline-none'
           dir={dir}
           lang={locale}
         >

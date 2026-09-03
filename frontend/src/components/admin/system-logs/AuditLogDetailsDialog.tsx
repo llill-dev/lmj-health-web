@@ -49,7 +49,7 @@ export function AuditLogDetailsDialog({
       <Dialog.Portal>
         <Dialog.Overlay className='fixed inset-0 z-[9998] bg-black/50 backdrop-blur-[2px]' />
         <Dialog.Content
-          className='fixed start-1/2 top-1/2 z-[9999] w-[min(100vw-24px,520px)] max-h-[min(90vh,640px)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[16px] border border-[#EAECF0] bg-white shadow-[0_30px_80px_rgba(16,24,40,0.35)] outline-none'
+          className='fixed left-1/2 top-1/2 z-[9999] w-[min(100vw-24px,520px)] max-h-[min(90vh,640px)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[16px] border border-[#EAECF0] bg-white shadow-[0_30px_80px_rgba(16,24,40,0.35)] outline-none'
           dir={dir}
           lang={locale}
         >
