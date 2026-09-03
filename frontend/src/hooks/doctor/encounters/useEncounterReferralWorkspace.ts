@@ -91,7 +91,7 @@ export function useEncounterReferralWorkspace(
   enabled = true,
 ) {
   const queryClient = useQueryClient();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const isEnabled =
     enabled && Boolean(doctorId) && Boolean(patientId) && Boolean(encounterId);
 
@@ -262,7 +262,7 @@ export function useEncounterReferralWorkspace(
     clearAppliedTemplateDraftName,
     templateDraftNotice,
     clearTemplateDraftNotice,
-    statusLabel: orderQuery.data ? resolveEncounterOrderStatusLabel(orderQuery.data) : '',
+    statusLabel: orderQuery.data ? resolveEncounterOrderStatusLabel(orderQuery.data, locale) : '',
     isAwaitingData,
     isError: encounterQuery.isError || orderQuery.isError,
     error: encounterQuery.error ?? orderQuery.error,

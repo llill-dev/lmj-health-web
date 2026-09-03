@@ -124,7 +124,7 @@ const DoctorPatientExpandableCard = memo(function DoctorPatientExpandableCard({
   pendingRequestId,
   hasActiveEncounter,
 }: DoctorPatientExpandableCardProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const digits = patient.phone.replace(/\D/g, "");
   const phoneDisplay =
     digits.startsWith("966") && digits.length >= 12
@@ -146,9 +146,9 @@ const DoctorPatientExpandableCard = memo(function DoctorPatientExpandableCard({
       })
     : patient.relationshipState;
 
-  const stateInfo = getPatientStateInfo(relationshipState);
-  const stateMessage = getStateMessage(relationshipState, pendingRequestId);
-  const stateActions = getStateActions(relationshipState);
+  const stateInfo = getPatientStateInfo(relationshipState, locale);
+  const stateMessage = getStateMessage(relationshipState, pendingRequestId, locale);
+  const stateActions = getStateActions(relationshipState, locale);
 
   const statusTone =
     patient.accountStatusKey === "temporary"
