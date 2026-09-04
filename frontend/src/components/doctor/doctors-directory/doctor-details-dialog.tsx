@@ -91,7 +91,7 @@ export default function DoctorDetailsDialog({
             <button
               type="button"
               onClick={onClose}
-              className="absolute start-4 top-4 text-[#667085]"
+              className="absolute end-4 top-4 text-[#667085]"
               aria-label={t('doctor.directory.details.close')}
             >
               <X className="h-4 w-4" />

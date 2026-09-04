@@ -132,7 +132,7 @@ export default function CreateMedicalRecordForm({
         <button
           type='button'
           onClick={onCancel}
-          className='absolute start-6 top-1/2 -translate-y-1/2 flex h-[36px] w-[36px] items-center justify-center rounded-[6px] border border-[#EEF2F6] bg-white text-[#667085]'
+          className='absolute end-6 top-1/2 -translate-y-1/2 flex h-[36px] w-[36px] items-center justify-center rounded-[6px] border border-[#EEF2F6] bg-white text-[#667085]'
           aria-label={t('common.close')}
         >
           <X className='w-4 h-4' />

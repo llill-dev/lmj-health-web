@@ -259,7 +259,7 @@ export default function RescheduleAppointmentDialog({
                   <button
                     type="button"
                     disabled={isSubmitting}
-                    className="absolute start-4 top-4 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7] disabled:cursor-not-allowed disabled:opacity-60 sm:start-5 sm:top-5 lg:start-6 lg:top-6"
+                    className="absolute end-4 top-4 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7] disabled:cursor-not-allowed disabled:opacity-60 sm:end-5 sm:top-5 lg:end-6 lg:top-6"
                     aria-label={t("doctor.appointments.reschedule.close")}
                   >
                     <X className="h-5 w-5" />

@@ -80,12 +80,12 @@ export default function QuickActionsSection() {
         className="mb-[22px]"
       />
 
-      <div className="grid grid-cols-2 justify-items-center gap-5 sm:grid-cols-4 lg:grid-cols-7">
+      <div className="grid grid-cols-2 items-stretch justify-items-center gap-5 sm:grid-cols-4 lg:grid-cols-7">
         {quickActions.map((action) => (
           <Link
             key={action.id}
             to={action.href}
-            className="flex max-h-[160px] w-full flex-col items-center rounded-[10px] border-[0.5px] border-[#078F8D] bg-[#E6F6F6] px-4 py-4 text-center shadow-[0_8px_18px_rgba(15,23,42,0.04)] transition hover:border-primary hover:shadow-[0_12px_24px_rgba(15,143,139,0.12)]"
+            className="flex h-full min-h-[160px] w-full flex-col items-center rounded-[10px] border-[0.5px] border-[#078F8D] bg-[#E6F6F6] px-4 py-4 text-center shadow-[0_8px_18px_rgba(15,23,42,0.04)] transition hover:border-primary hover:shadow-[0_12px_24px_rgba(15,143,139,0.12)]"
           >
             <div className="flex h-[40px] w-[43px] items-center justify-center rounded-[10px] bg-primary px-[8px] py-[5px] text-white shadow-[0_14px_28px_rgba(15,143,139,0.28)]">
               <action.icon className="h-full w-full" aria-hidden />
@@ -95,7 +95,7 @@ export default function QuickActionsSection() {
               {action.title}
             </h3>
 
-            <p className="mt-3 font-cairo text-[14px] font-medium leading-[16px] text-[#4A5565]">
+            <p className="mt-3 break-words font-cairo text-[14px] font-medium leading-[18px] text-[#4A5565]">
               {action.description}
             </p>
           </Link>

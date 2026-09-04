@@ -319,7 +319,7 @@ export default function DoctorClinicLocationPage() {
                 }
               }}
               placeholder={t("doctor.clinicLocation.searchPlaceholder")}
-              className="h-[44px] w-full rounded-[6px] border border-[#E5E7EB] bg-white ps-4 pe-10 font-cairo text-[13px] font-semibold text-[#111827] outline-none transition focus:border-primary placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3]"
+              className="h-[44px] w-full rounded-[6px] border border-[#E5E7EB] bg-white ps-10 pe-10 font-cairo text-[13px] font-semibold text-[#111827] outline-none transition focus:border-primary placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3]"
             />
           </div>
 

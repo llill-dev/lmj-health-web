@@ -186,7 +186,7 @@ export default function DoctorSecurityFormDialog<T extends FieldValues>({
                 <Dialog.Close asChild>
                   <button
                     type="button"
-                    className="absolute start-5 top-5 flex h-10 w-10 items-center justify-center rounded-xl border border-[#E4E7EC] bg-white/90 text-[#667085] shadow-sm transition-colors hover:bg-[#F9FAFB] hover:text-[#344054]"
+                    className="absolute end-5 top-5 flex h-10 w-10 items-center justify-center rounded-xl border border-[#E4E7EC] bg-white/90 text-[#667085] shadow-sm transition-colors hover:bg-[#F9FAFB] hover:text-[#344054]"
                     aria-label={t('common.close')}
                   >
                     <X className="h-5 w-5" strokeWidth={2.25} />

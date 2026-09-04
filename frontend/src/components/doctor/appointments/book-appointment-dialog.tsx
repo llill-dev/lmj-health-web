@@ -305,7 +305,7 @@ export default function BookAppointmentDialog({
                   <button
                     type="button"
                     disabled={isSubmitting}
-                    className="flex absolute top-5 start-5 z-10 justify-center items-center w-10 h-10 text-white rounded-full border transition border-white/20 bg-white/12 hover:bg-white/20 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="flex absolute top-5 end-5 z-10 justify-center items-center w-10 h-10 text-white rounded-full border transition border-white/20 bg-white/12 hover:bg-white/20 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60"
                     aria-label={t("doctor.appointments.book.close")}
                   >
                     <X className="w-5 h-5" />

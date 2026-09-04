@@ -85,7 +85,7 @@ export function ClinicAccountsModalShell({
               <button
                 type="button"
                 onClick={onClose}
-                className="absolute start-4 top-4 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] sm:start-5 sm:top-5 lg:start-6 lg:top-6"
+                className="absolute end-4 top-4 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] sm:end-5 sm:top-5 lg:end-6 lg:top-6"
                 aria-label={t("doctor.clinicAccounts.modal.close")}
               >
                 <X className="h-5 w-5" aria-hidden />

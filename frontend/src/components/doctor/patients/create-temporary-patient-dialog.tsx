@@ -179,7 +179,7 @@ export default function CreateTemporaryPatientDialog({
                   <Dialog.Close asChild>
                     <button
                       type="button"
-                      className="absolute start-5 top-5 flex h-10 w-10 items-center justify-center rounded-xl border border-[#E4E7EC] bg-white/90 text-[#667085] shadow-sm transition-colors hover:bg-[#F9FAFB] hover:text-[#344054]"
+                      className="absolute end-5 top-5 flex h-10 w-10 items-center justify-center rounded-xl border border-[#E4E7EC] bg-white/90 text-[#667085] shadow-sm transition-colors hover:bg-[#F9FAFB] hover:text-[#344054]"
                       aria-label={t("common.close")}
                     >
                       <X className="w-5 h-5" strokeWidth={2.25} />
@@ -301,7 +301,7 @@ export default function CreateTemporaryPatientDialog({
                           {t("doctor.temporaryPatient.step2Contact")}
                         </p>
 
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-4">
+                        <div>
                           <div>
                             <label
                               htmlFor="temp-patient-email"
@@ -376,7 +376,7 @@ export default function CreateTemporaryPatientDialog({
                                     )}
                                   />
                                 </div>
-                                <div className="relative flex min-h-[50px] items-stretch">
+                                <div className="relative flex items-center min-h-[50px] ">
                                   <Phone
                                     className="pointer-events-none absolute start-3 top-1/2 h-[17px] w-[17px] z-[1] -translate-y-1/2 text-primary/55"
                                     aria-hidden
@@ -385,7 +385,6 @@ export default function CreateTemporaryPatientDialog({
                                     id="temp-patient-phone-local"
                                     {...register("phoneLocal")}
                                     inputMode="numeric"
-                                    dir="ltr"
                                     placeholder="912345678"
                                     className={cn(
                                       "h-[50px] min-h-[50px] w-full flex-1 border-0 bg-transparent px-4 ps-11 pe-4 font-mono text-[14px] font-semibold tracking-wide text-[#101828]",

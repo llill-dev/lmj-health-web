@@ -161,7 +161,7 @@ export default function DoctorAccessRequestsPage() {
               <motion.button
                 type='button'
                 onClick={() => setMode('list')}
-                className='absolute start-4 top-4 flex h-[40px] w-[40px] items-center justify-center rounded-[6px] bg-white shadow-[0_14px_24px_rgba(0,0,0,0.16)] sm:start-[16px] sm:top-[16px]'
+                className='absolute end-4 top-4 flex h-[40px] w-[40px] items-center justify-center rounded-[6px] bg-white shadow-[0_14px_24px_rgba(0,0,0,0.16)] sm:end-[16px] sm:top-[16px]'
                 aria-label={t('doctor.accessRequests.close')}
               >
                 <X className='h-5 w-5 text-[#0F8F8B]' />

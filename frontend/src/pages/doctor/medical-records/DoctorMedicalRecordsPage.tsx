@@ -262,7 +262,7 @@ export default function DoctorMedicalRecordsPage() {
               <motion.button
                 type="button"
                 onClick={() => setMode("list")}
-                className="absolute start-4 top-4 flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-white shadow-[0_14px_24px_rgba(0,0,0,0.16)] sm:start-[24px] sm:top-[24px]"
+                className="absolute end-4 top-4 flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-white shadow-[0_14px_24px_rgba(0,0,0,0.16)] sm:end-[24px] sm:top-[24px]"
                 aria-label={t("doctor.medicalRecords.close")}
               >
                 <X className="h-5 w-5 text-[#0F8F8B]" />
