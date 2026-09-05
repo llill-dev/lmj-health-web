@@ -37,7 +37,7 @@ function StatusBadge({
   const { t } = useI18n();
   if (offboarded) {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#7F1D1D] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-white">
+      <span className="inline-flex items-center gap-1.5 rounded-[8px] border border-[#FECACA] bg-[#FEF2F2] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-[#B91C1C]">
         <UserX className="h-3.5 w-3.5 shrink-0" />
         {t("adminDoctors.status.suspended")}
       </span>
@@ -46,7 +46,7 @@ function StatusBadge({
 
   if (status === "approved") {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#28A745] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-white">
+      <span className="inline-flex items-center gap-1.5 rounded-[8px] border border-[#BBF7D0] bg-[#F0FDF4] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-[#16A34A]">
         <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
         {t("adminApproval.approved")}
       </span>
@@ -55,7 +55,7 @@ function StatusBadge({
 
   if (status === "rejected") {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#DC3545] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-white">
+      <span className="inline-flex items-center gap-1.5 rounded-[8px] border border-[#FECACA] bg-[#FEF2F2] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-[#B91C1C]">
         <Ban className="h-3.5 w-3.5 shrink-0" />
         {t("adminApproval.rejected")}
       </span>
@@ -63,7 +63,7 @@ function StatusBadge({
   }
 
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#343A40] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-white">
+    <span className="inline-flex items-center gap-1.5 rounded-[8px] border border-[#E5E7EB] bg-[#F9FAFB] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-[#4B5563]">
       <Clock className="h-3.5 w-3.5 shrink-0" />
       {t("adminDoctors.status.pendingApproval")}
     </span>
@@ -104,9 +104,9 @@ export default function DoctorListCard({
   const canSuspend = !offboarded;
 
   return (
-    <div className="rounded-[10px] border border-[#E8ECEF] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-      <div className="flex flex-col gap-4 px-3 py-4 sm:px-4 lg:grid lg:grid-cols-[minmax(0,16rem)_17.5rem_minmax(0,1fr)_auto] lg:items-stretch lg:gap-x-6 lg:gap-y-0 xl:grid-cols-[minmax(0,18rem)_17.5rem_minmax(0,1fr)_auto]">
-        <div className="flex min-w-0 items-start gap-3 lg:min-w-0 lg:max-w-[16rem] xl:max-w-[18rem]">
+    <div className="rounded-[10px] border border-[#EEF1F4] bg-white shadow-[0_1px_2px_rgba(16,139,139,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(16,139,139,0.08)]">
+      <div className="flex flex-col gap-4 px-3 py-4 sm:px-4 md:flex-row md:flex-wrap md:items-start md:gap-x-6 md:gap-y-4">
+        <div className="flex min-w-[14rem] flex-1 basis-56 items-start gap-3">
           <div
             className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[10px] text-[22px] font-black text-white"
             style={{ backgroundColor: TEAL }}
@@ -123,7 +123,7 @@ export default function DoctorListCard({
           </div>
         </div>
 
-        <div className="grid w-full shrink-0 grid-cols-3 gap-2 lg:w-[17.5rem] lg:justify-self-start">
+        <div className="grid w-full shrink-0 grid-cols-3 gap-2 md:w-[17.5rem]">
           {[
             { label: t("adminDoctors.card.appointments"), value: fmt(appt) },
             { label: t("adminDoctors.card.completed"), value: fmt(done) },
@@ -150,7 +150,7 @@ export default function DoctorListCard({
           ))}
         </div>
 
-        <div className="flex w-full min-w-0 flex-col gap-2 text-start lg:min-w-0">
+        <div className="flex min-w-[16rem] flex-1 basis-64 flex-col gap-2 text-start">
           <div className="flex items-start gap-2">
             <Award
               className="mt-0.5 h-4 w-4 shrink-0"
@@ -194,14 +194,14 @@ export default function DoctorListCard({
           </div>
         </div>
 
-        <div className="flex w-full shrink-0 flex-col items-stretch gap-3 border-t border-[#F3F4F6] pt-4 sm:border-t-0 sm:pt-0 lg:w-auto lg:items-end lg:justify-self-end">
+        <div className="flex w-full shrink-0 flex-col items-stretch gap-3 border-t border-[#F3F4F6] pt-4 sm:border-t-0 sm:pt-0 md:w-auto md:items-end">
           <div className="flex justify-end">
             <StatusBadge status={d.approvalStatus} offboarded={offboarded} />
           </div>
           <button
             type="button"
             onClick={onDetails}
-            className="inline-flex h-[44px] w-full items-center justify-center gap-2 rounded-[8px] px-4 font-cairo text-[13px] font-extrabold text-white transition hover:opacity-92 lg:w-auto lg:min-w-[8.5rem]"
+            className="inline-flex h-[44px] w-full items-center justify-center gap-2 rounded-[8px] px-4 font-cairo text-[13px] font-extrabold text-white transition hover:opacity-92 md:w-auto md:min-w-[8.5rem]"
             style={{ backgroundColor: TEAL }}
           >
             <span>{t("adminAppointments.panel.detailsButton")}</span>
@@ -222,7 +222,7 @@ export default function DoctorListCard({
               }
               disabled={!canSuspend}
               aria-disabled={!canSuspend}
-              className={`inline-flex h-[40px] w-full items-center justify-center gap-2 rounded-[8px] border px-4 font-cairo text-[12px] font-extrabold transition lg:w-auto lg:min-w-[8.5rem] ${
+              className={`inline-flex h-[40px] w-full items-center justify-center gap-2 rounded-[8px] border px-4 font-cairo text-[12px] font-extrabold transition md:w-auto md:min-w-[8.5rem] ${
                 canSuspend
                   ? "border-[#FECACA] bg-[#FEF2F2] text-[#B91C1C] hover:bg-[#FEE2E2]"
                   : "cursor-not-allowed border-[#E5E7EB] bg-[#F9FAFB] text-[#98A2B3] opacity-70"
@@ -247,7 +247,7 @@ export default function DoctorListCard({
               }
               disabled={!canActivate}
               aria-disabled={!canActivate}
-              className={`inline-flex h-[40px] w-full items-center justify-center gap-2 rounded-[8px] border px-4 font-cairo text-[12px] font-extrabold transition lg:w-auto lg:min-w-[8.5rem] ${
+              className={`inline-flex h-[40px] w-full items-center justify-center gap-2 rounded-[8px] border px-4 font-cairo text-[12px] font-extrabold transition md:w-auto md:min-w-[8.5rem] ${
                 canActivate
                   ? "border-[#BBF7D0] bg-[#F0FDF4] text-[#16A34A] hover:bg-[#DCFCE7]"
                   : "cursor-not-allowed border-[#E5E7EB] bg-[#F9FAFB] text-[#98A2B3] opacity-70"

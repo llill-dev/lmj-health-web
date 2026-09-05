@@ -27,6 +27,7 @@ import { SkeletonList } from "@/components/admin/skeletons/SkeletonList";
 import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
 import { useToast } from "@/components/ui/ToastProvider";
 import { Pagination } from "@/components/admin/services/Pagination";
+import StyledSelect from "@/components/ui/styled-select";
 import { useI18n } from "@/i18n/provider";
 
 type ServiceTypeStatusFilter = "all" | "active" | "inactive";
@@ -193,22 +194,26 @@ export default function AdminServiceTypesPage() {
               <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
             </div>
 
-            <select
+            <StyledSelect
               value={statusFilter}
-              onChange={(event) => {
-                setStatusFilter(event.target.value as ServiceTypeStatusFilter);
+              onChange={(value) => {
+                setStatusFilter(value as ServiceTypeStatusFilter);
                 setPage(1);
               }}
-              className="h-[44px] rounded-[10px] border border-[#E5E7EB] bg-white px-3 text-start font-cairo text-[12px] font-bold text-[#111827] outline-none transition focus:border-primary"
-            >
-              <option value="all">{t("admin.serviceTypes.filter.all")}</option>
-              <option value="active">
-                {t("admin.serviceTypes.filter.active")}
-              </option>
-              <option value="inactive">
-                {t("admin.serviceTypes.filter.inactive")}
-              </option>
-            </select>
+              tone="muted"
+              options={[
+                { value: "all", label: t("admin.serviceTypes.filter.all") },
+                {
+                  value: "active",
+                  label: t("admin.serviceTypes.filter.active"),
+                },
+                {
+                  value: "inactive",
+                  label: t("admin.serviceTypes.filter.inactive"),
+                },
+              ]}
+              listboxAriaLabel={t("admin.serviceTypes.filter.all")}
+            />
 
             <button
               type="button"

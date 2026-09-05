@@ -93,13 +93,13 @@ export default function AdminHeader({
     <header
       dir={dir}
       lang={locale}
-      className='flex min-h-[90px] w-full flex-nowrap items-center justify-between gap-2 border-b border-gray-200 bg-white px-4 py-4 sm:gap-4 sm:px-6'
+      className='flex min-h-[90px] w-full flex-nowrap items-center justify-between gap-2 border-b border-gray-100 bg-white px-4 py-4 shadow-[0_1px_2px_rgba(16,24,40,0.04)] sm:gap-4 sm:px-6'
     >
       <section className='flex min-w-0 flex-1 items-center gap-3'>
         <button
           type='button'
           onClick={onMenuClick}
-          className='flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition-colors hover:bg-gray-50 sm:h-10 sm:w-10 lg:hidden'
+          className='flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-100 bg-white text-gray-700 transition-colors hover:bg-gray-50 sm:h-10 sm:w-10 lg:hidden'
           aria-label={t('common.openSidebar')}
         >
           <Menu className='h-4 w-4 sm:h-5 sm:w-5' aria-hidden />
@@ -127,7 +127,7 @@ export default function AdminHeader({
         {/* Support: reachable from the sidebar drawer on mobile, so it only takes header space from sm up */}
         <Link
           to='/admin/complaints'
-          className='hidden h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white transition-colors hover:bg-gray-50 sm:flex'
+          className='hidden h-10 w-10 items-center justify-center rounded-lg border border-gray-100 bg-white transition-colors hover:bg-gray-50 sm:flex'
           aria-label={t('header.adminSupport')}
           title={t('header.adminSupport')}
         >
@@ -141,7 +141,7 @@ export default function AdminHeader({
             `relative flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-colors sm:h-10 sm:w-10 ${
               isActive
                 ? 'border-primary bg-primary/10 text-primary'
-                : 'border-gray-200 bg-white hover:bg-gray-50'
+                : 'border-gray-100 bg-white hover:bg-gray-50'
             }`
           }
           aria-label={t('header.notifications')}
@@ -165,7 +165,7 @@ export default function AdminHeader({
         {/* Settings: also a sidebar nav item, so drop it from the mobile header */}
         <Link
           to='/admin/settings'
-          className='hidden h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white transition-colors hover:bg-gray-50 sm:flex'
+          className='hidden h-10 w-10 items-center justify-center rounded-lg border border-gray-100 bg-white transition-colors hover:bg-gray-50 sm:flex'
           aria-label={t('header.settings')}
           title={t('header.settings')}
         >
@@ -195,7 +195,7 @@ export default function AdminHeader({
           type='button'
           disabled={loggingOut}
           onClick={onLogoutClick}
-          className='hidden h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-60 sm:flex'
+          className='hidden h-10 w-10 items-center justify-center rounded-lg border border-gray-100 bg-white transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-60 sm:flex'
           aria-label={t('common.logout')}
           title={t('common.logout')}
         >

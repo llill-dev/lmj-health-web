@@ -86,13 +86,13 @@ export default function AdminSearchFiltersBar({
 
   const rowClass =
     order === 'filters-first'
-      ? 'flex flex-col gap-4 xl:flex-row-reverse xl:items-center xl:justify-between xl:gap-4'
-      : 'flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between xl:gap-4';
+      ? 'flex flex-col gap-4 xl:flex-row-reverse xl:flex-wrap xl:items-center xl:justify-between xl:gap-4'
+      : 'flex flex-col gap-4 xl:flex-row xl:flex-wrap xl:items-center xl:justify-between xl:gap-4';
 
   return (
     <section className='mt-5 rounded-[12px] border border-[#EEF2F6] bg-white px-3 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)] sm:px-5'>
       <div className={rowClass}>
-        <div className='relative w-full min-w-0 xl:max-w-xl xl:flex-1'>
+        <div className='relative w-full min-w-0 xl:min-w-[280px] xl:max-w-xl xl:flex-1'>
           <input
             placeholder={queryPlaceholder}
             value={values.query ?? ''}
@@ -113,7 +113,7 @@ export default function AdminSearchFiltersBar({
         </div>
 
         {hasFilters ? (
-          <div className='flex w-full min-w-0 flex-wrap items-stretch gap-2 sm:gap-3 xl:w-auto xl:flex-nowrap'>
+          <div className='flex w-full min-w-0 flex-wrap items-stretch gap-2 sm:gap-3 xl:w-auto'>
             {filtersLeading}
             {hasSpecialty ? (
               <div className='min-w-0 flex-1 sm:flex-none sm:min-w-[140px] sm:w-[160px]'>

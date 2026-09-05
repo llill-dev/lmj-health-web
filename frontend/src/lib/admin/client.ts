@@ -1589,38 +1589,40 @@ function normalizeDoctorProfileChangeRequestReviewResponse(
 }
 
 function readPagedNumbers(
-  response: AdminApiRecord,
+  response: AdminApiRecord | undefined,
   fallbackLength: number,
 ): Pick<
   AdminDoctorsListResponse,
   "page" | "limit" | "total" | "results"
 > {
-  const nested = readAdminNestedEnvelope(response);
+  const safeResponse = response ?? {};
+  const nested = readAdminNestedEnvelope(safeResponse);
 
   return {
-    page: readAdminNumber(response.page) ?? readAdminNumber(nested?.page) ?? 1,
+    page:
+      readAdminNumber(safeResponse.page) ?? readAdminNumber(nested?.page) ?? 1,
     limit:
-      readAdminNumber(response.limit) ??
+      readAdminNumber(safeResponse.limit) ??
       readAdminNumber(nested?.limit) ??
       fallbackLength,
     total:
-      readAdminNumber(response.total) ??
+      readAdminNumber(safeResponse.total) ??
       readAdminNumber(nested?.total) ??
       fallbackLength,
     results:
-      readAdminNumber(response.results) ??
+      readAdminNumber(safeResponse.results) ??
       readAdminNumber(nested?.results) ??
       fallbackLength,
   };
 }
 
 function withAdminPaging<TResponse extends AdminApiRecord>(
-  response: TResponse,
+  response: TResponse | undefined,
   fallbackLength: number,
 ): TResponse &
   Pick<AdminDoctorsListResponse, "page" | "limit" | "total" | "results"> {
   return {
-    ...response,
+    ...(response ?? ({} as TResponse)),
     ...readPagedNumbers(response, fallbackLength),
   };
 }

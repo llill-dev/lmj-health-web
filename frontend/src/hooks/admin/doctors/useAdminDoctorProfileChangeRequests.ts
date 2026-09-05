@@ -36,9 +36,9 @@ export function useAdminDoctorProfileChangeRequests(
     queryKey: ["admin-doctor-profile-change-requests", params],
     queryFn: async () => {
       const response = await adminApi.doctorProfileChangeRequests.list(params);
-      const source = Array.isArray(response.requests)
+      const source = Array.isArray(response?.requests)
         ? response.requests
-        : Array.isArray(response.results)
+        : Array.isArray(response?.results)
           ? response.results
           : [];
       return source
