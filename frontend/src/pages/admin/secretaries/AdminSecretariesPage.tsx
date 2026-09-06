@@ -157,20 +157,6 @@ export default function AdminSecretariesPage() {
           ) : null}
         </div>
 
-        <div className="mt-5 rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-5 py-4">
-          <div className="flex items-start gap-3">
-            <Lock className="mt-0.5 h-4 w-4 shrink-0 text-[#B42318]" />
-            <div>
-              <div className="font-cairo text-[12px] font-extrabold text-[#991B1B]">
-                {t("admin.secretaries.readOnly.title")}
-              </div>
-              <div className="mt-1 font-cairo text-[11px] font-bold leading-6 text-[#B42318]">
-                {t("admin.secretaries.readOnly.message")}
-              </div>
-            </div>
-          </div>
-        </div>
-
         <section className="mt-5 space-y-4">
           {isAwaitingData ? (
             <>
