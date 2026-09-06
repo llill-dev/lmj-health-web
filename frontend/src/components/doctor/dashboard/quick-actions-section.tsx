@@ -71,7 +71,7 @@ export default function QuickActionsSection() {
         href: "/doctor/facilities",
       },
     ],
-    [],
+    [t],
   );
   return (
     <section className="mt-6">

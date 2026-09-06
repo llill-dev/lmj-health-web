@@ -2643,9 +2643,14 @@ export const adminApi = {
     // Fixed, read-only blood-type enum plus active allergy/condition
     // lookups. This is the only correct source for Blood Type — it has no
     // admin CRUD and must never be queried through /admin/lookups.
+    //
+    // NOTE: `includeAllLangs` is not a documented parameter for this endpoint
+    // (openapi.json only lists the shared XLang header) and the live backend
+    // returns a 500 when it's present — confirmed live 2026-09-06. Do not
+    // re-add it; the endpoint returns the full bilingual payload without it.
     getHealthProfileOptions: () =>
       get<HealthProfileOptionsResponse>(
-        `${adminEndpoints.meta.healthProfileOptions}?includeAllLangs=true`,
+        adminEndpoints.meta.healthProfileOptions,
         { locale: "ar" },
       ),
   },

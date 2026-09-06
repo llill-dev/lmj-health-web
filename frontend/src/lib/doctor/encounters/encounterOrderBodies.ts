@@ -75,7 +75,16 @@ function draftPlaceholderItem(
   }
 }
 
-/** بند يدوي بسيط لإنشاء مسودة عندما لا يتوفر عنصر كتالوج صالح */
+/**
+ * بند يدوي بسيط لإنشاء مسودة عندما لا يتوفر عنصر كتالوج صالح.
+ *
+ * يرسل `manualItems` فقط — تأكدنا حياً (2026-09-06) أن إرسال `manualItems`
+ * و`items` معاً بنفس البند يجعل الباك إند يخزّنهما كبندين منفصلين (تكرار
+ * حرفي في orderName مثل "مسودة أشعة, مسودة أشعة" وفي مصفوفة items). لا تُعِد
+ * دمجهما في نفس الجسم؛ مرشّح `items` وحده متوفر بشكل منفصل ضمن
+ * buildEncounterOrderCreateCandidates/buildStandaloneOrderCreateCandidates
+ * كبديل لاحق إذا فشل `manualItems`.
+ */
 export function draftManualPlaceholderBody(
   category: EncounterOrderCategoryKey,
   patientId: string,
@@ -86,7 +95,6 @@ export function draftManualPlaceholderBody(
   return {
     patientId: pid,
     manualItems: [item],
-    items: [item],
   };
 }
 

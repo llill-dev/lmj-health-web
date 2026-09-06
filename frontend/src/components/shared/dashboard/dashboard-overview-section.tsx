@@ -36,7 +36,7 @@ export default function DashboardOverviewSection({
 
   return (
     <section className={`relative ${sectionClassName}`}>
-      {overlay ? overlay : null}
+      {overlay ? <div className='relative z-20'>{overlay}</div> : null}
       <div className='relative z-10 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between'>
         <div className='min-w-0'>{headerLeft}</div>
         {headerRight ? <div className='shrink-0'>{headerRight}</div> : null}

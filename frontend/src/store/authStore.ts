@@ -283,6 +283,13 @@ let state: AuthState = {
 
     const { data } = result;
 
+    if (!data) {
+      throw new AuthFlowError({
+        code: "UNKNOWN",
+        message: "حدث خطأ غير متوقع، حاول مجدداً",
+      });
+    }
+
     const deletionSession = buildDeletionSessionFromLogin({
       accountDeletionStatus: data.accountDeletionStatus,
       requestedAt: data.requestedAt ?? null,

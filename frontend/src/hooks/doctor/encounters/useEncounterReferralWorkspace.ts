@@ -65,11 +65,22 @@ function mapOrderToForm(order?: {
     clinicalSummary: order.clinicalSummary?.trim() ?? '',
     questionsToColleague: order.questionsToColleague?.trim() ?? '',
     notes: order.notes?.trim() ?? '',
+    // `priority` is the field confirmed live to actually hold the value
+    // (`urgency` is frequently null); prefer it, falling back to `urgency`
+    // only for older records that may not have `priority` set.
     priority: mapReferralPriorityFromApi(order.priority ?? order.urgency),
   };
 }
 
 function mapFormToApiBody(form: ReferralFormState) {
+  // Confirmed live 2026-09-06 against real referral orders: the backend
+  // actually persists this as `priority` (observed value "ROUTINE"), while
+  // `urgency` is either null or holds inconsistent legacy values ("ROUTINE",
+  // "LOW") — evidence the true enum casing/values aren't yet pinned down.
+  // Send both field names so whichever one the backend reads is populated;
+  // do not drop either until the real contract is confirmed with the
+  // backend team.
+  const apiUrgency = mapReferralPriorityToApiUrgency(form.priority);
   return {
     referralType: form.referralType.trim() || undefined,
     specialty: form.specialty.trim() || undefined,
@@ -79,8 +90,8 @@ function mapFormToApiBody(form: ReferralFormState) {
     clinicalSummary: form.clinicalSummary.trim() || undefined,
     questionsToColleague: form.questionsToColleague.trim() || undefined,
     notes: form.notes.trim() || undefined,
-    /** الباك إند يتوقع low | medium | high — لا normal/urgent/emergency */
-    urgency: mapReferralPriorityToApiUrgency(form.priority),
+    priority: apiUrgency,
+    urgency: apiUrgency,
   };
 }
 
