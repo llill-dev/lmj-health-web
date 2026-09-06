@@ -47,32 +47,13 @@ interface AuthState {
   refreshExpiresAt: string | null;
   isAuthenticated: boolean;
   pendingVerification: PendingVerification | null;
-  // Platform / general settings
-  platformName: string;
-  primaryEmail: string;
-  phone: string;
-  region: string;
-  lang: "ar" | "en";
   // Actions
-  loadGeneralSettings: () => Promise<void>;
-  saveGeneralSettings: (payload: {
-    platformName: string;
-    primaryEmail: string;
-    phone: string;
-    region: string;
-    lang?: "ar" | "en";
-  }) => Promise<void>;
   login: (
     identifier: string,
     password: string,
     clientType?: "web" | "patient_mobile" | "doctor_mobile",
   ) => Promise<LoginResponse>;
   applySession: (pair: AuthTokenPair, user: AuthSessionUser) => void;
-  register: (
-    email: string,
-    password: string,
-    role: "jobseeker" | "company" | "doctor",
-  ) => Promise<void>;
   setPendingVerification: (df: PendingVerification | null) => void;
   logout: (options?: {
     skipRemoteRevoke?: boolean;
@@ -107,41 +88,6 @@ function safeJsonParse<T>(raw: string | null): T | null {
   }
 }
 
-function readPersistedGeneralSettings(): Partial<AuthState> | null {
-  try {
-    const saved = safeJsonParse<{
-      platformName?: string;
-      primaryEmail?: string;
-      phone?: string;
-      region?: string;
-      lang?: "ar" | "en";
-    }>(localStorage.getItem("generalSettings"));
-
-    if (!saved) return null;
-    return {
-      platformName: saved.platformName ?? "LMJ Health",
-      primaryEmail: saved.primaryEmail ?? "",
-      phone: saved.phone ?? "",
-      region: saved.region ?? "",
-      lang: saved.lang ?? "ar",
-    } as Partial<AuthState>;
-  } catch {
-    return null;
-  }
-}
-
-function writePersistedGeneralSettings(payload: {
-  platformName: string;
-  primaryEmail: string;
-  phone: string;
-  region: string;
-  lang?: "ar" | "en";
-}) {
-  try {
-    localStorage.setItem("generalSettings", JSON.stringify(payload));
-  } catch {}
-}
-
 function readPendingVerification(): PendingVerification | null {
   if (typeof window === "undefined") return null;
   let parsed: PendingVerification | null = null;
@@ -174,6 +120,15 @@ function writePendingVerification(payload: PendingVerification | null): void {
       return;
     }
     sessionStorage.setItem(PENDING_VERIFICATION_KEY, JSON.stringify(payload));
+  } catch {}
+}
+
+/** Clears auth artifacts left over from the pre-cookie (localStorage token) session model. */
+function clearLegacyAuthStorage(): void {
+  try {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userData");
+    localStorage.removeItem("userRole");
   } catch {}
 }
 
@@ -217,27 +172,6 @@ let state: AuthState = {
   refreshExpiresAt: null,
   isAuthenticated: false,
   pendingVerification: null,
-  platformName: "LMJ Health",
-  primaryEmail: "",
-  phone: "",
-  region: "",
-  lang: "ar",
-
-  loadGeneralSettings: async () => {
-    const persisted = readPersistedGeneralSettings();
-    if (persisted) {
-      setState(persisted);
-      return;
-    }
-  },
-
-  saveGeneralSettings: async (payload) => {
-    setState({
-      platformName: payload.platformName,
-      lang: payload.lang || "ar",
-    });
-    writePersistedGeneralSettings(payload);
-  },
 
   applySession: (pair, sessionUser) => {
     const mappedUser = buildUserFromSession(
@@ -256,12 +190,7 @@ let state: AuthState = {
       pendingVerification: null,
     });
     writePendingVerification(null);
-
-    try {
-      localStorage.removeItem("token");
-      localStorage.removeItem("userData");
-      localStorage.removeItem("userRole");
-    } catch {}
+    clearLegacyAuthStorage();
   },
 
   login: async (
@@ -319,8 +248,6 @@ let state: AuthState = {
 
     return data;
   },
-
-  register: async () => {},
 
   setPendingVerification: (payload) => {
     writePendingVerification(payload);
@@ -387,11 +314,8 @@ let state: AuthState = {
     });
 
     clearAuthSession();
-
+    clearLegacyAuthStorage();
     try {
-      localStorage.removeItem("token");
-      localStorage.removeItem("userData");
-      localStorage.removeItem("userRole");
       sessionStorage.removeItem(PENDING_VERIFICATION_KEY);
     } catch {}
   },
@@ -413,7 +337,6 @@ function initFromCookies() {
 
   const stored = readStoredAuthSession();
   const user = buildUserFromCookie();
-  const settings = readPersistedGeneralSettings();
   const pendingVerification = readPendingVerification();
 
   const hasAnyStoredSessionFragment = Boolean(
@@ -439,10 +362,6 @@ function initFromCookies() {
       isAuthenticated: true,
       user,
     };
-  }
-
-  if (settings) {
-    state = { ...state, ...settings };
   }
 
   if (pendingVerification && !hasCompleteStoredSession) {

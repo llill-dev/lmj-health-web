@@ -280,17 +280,3 @@ export function useDeleteScheduleException() {
     isSuccess: mutation.isSuccess,
   };
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Legacy aliases (for backward compatibility)
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * @deprecated Use useSchedule() instead
- */
-export const useWorkSchedule = useSchedule;
-
-/**
- * @deprecated Use useUpdateSchedule() instead
- */
-export const useUpdateWorkSchedule = useUpdateSchedule;
